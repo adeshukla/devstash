@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevStash — Brand Guidelines 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0B0F19;
+  --surface:#111827;
+  --surface2:#161f2e;
+  --accent:#3B82F6;
+  --accent2:#8B5CF6;
+  --text:#F3F4F6;
+  --text-muted:#9CA3AF;
+  --border:#1F2937;
+  --border-light:#2a3649;
+  --success:#10B981;
+  --warning:#F59E0B;
+  --error:#EF4444;
+  --font-head:'DM Sans',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --max:1200px;
+  --r:16px;
+  --r-sm:8px;
+}
+
+html{scroll-behavior:smooth}
+body{font-family:var(--font-head);background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+nav{
+  position:sticky;top:0;z-index:999;
+  background:rgba(11,15,25,0.88);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:0 clamp(20px,5vw,60px);
+  display:flex;align-items:center;justify-content:space-between;
+  height:58px;
+}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo svg{width:28px;height:28px}
+.nav-wordmark{font-size:15px;font-weight:600;letter-spacing:-0.02em;color:var(--text)}
+.nav-wordmark span{color:var(--accent)}
+.nav-links{display:flex;gap:clamp(16px,3vw,32px);list-style:none}
+.nav-links a{font-size:13px;color:var(--text-muted);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+
+/* ── MOBILE NAVIGATION ── */
+.mobile-menu-btn{
+  display:none;
+  width:42px;
+  height:42px;
+  border:none;
+  outline:none;
+  cursor:pointer;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);
+  border-radius:10px;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:5px;
+  transition:all .2s ease;
+}
+
+.mobile-menu-btn:hover{
+  background:rgba(255,255,255,0.05);
+}
+
+.mobile-menu-btn span{
+  width:18px;
+  height:2px;
+  border-radius:10px;
+  background:var(--text);
+  transition:all .2s ease;
+}
+
+.mobile-nav{
+  position:absolute;
+  top:70px;
+  left:20px;
+  right:20px;
+  background:rgba(11,15,25,0.98);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:14px;
+  display:none;
+  flex-direction:column;
+  gap:4px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.45);
+}
+
+.mobile-nav.active{
+  display:flex;
+}
+
+.mobile-nav a{
+  color:var(--text-muted);
+  text-decoration:none;
+  font-size:14px;
+  font-weight:500;
+  padding:12px 14px;
+  border-radius:10px;
+  transition:all .2s ease;
+}
+
+.mobile-nav a:hover{
+  background:rgba(255,255,255,0.04);
+  color:var(--text);
+}
+
+@media(max-width:900px){
+  .nav-links{
+    display:none;
+  }
+
+  .mobile-menu-btn{
+    display:flex;
+  }
+}
+/* Navigation Ends */
+
+@media(max-width:600px){.nav-links{display:none}}
+
+/* ── SHARED ── */
+.wrap{max-width:var(--max);margin:0 auto;padding:0 clamp(20px,5vw,60px)}
+section{padding:clamp(60px,8vw,110px) 0}
+.section-label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+.section-title{font-size:clamp(26px,4vw,40px);font-weight:700;letter-spacing:-0.03em;line-height:1.15;margin-bottom:16px}
+.section-sub{font-size:16px;color:var(--text-muted);max-width:560px;line-height:1.7}
+.divider{border:none;border-top:1px solid var(--border);margin:0}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:100px;background:rgba(59,130,246,.12);color:var(--accent);border:1px solid rgba(59,130,246,.25)}
+
+/* ── HERO ── */
+.hero{
+  min-height:88vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;
+  position:relative;overflow:hidden;
+  padding:100px clamp(20px,5vw,60px);
+}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(59,130,246,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,.04) 1px, transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 50%, black 0%, transparent 75%);
+}
+.hero-glow{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:600px;height:600px;
+  background:radial-gradient(ellipse, rgba(59,130,246,.07) 0%, transparent 65%);
+  pointer-events:none;
+}
+.hero-mark{margin-bottom:36px;position:relative;z-index:1}
+.hero-title{
+  font-size:clamp(40px,7vw,80px);font-weight:700;
+  letter-spacing:-0.04em;line-height:1.05;
+  margin-bottom:20px;position:relative;z-index:1;
+}
+.hero-title .blue{color:var(--accent)}
+.hero-title .purple{color:var(--accent2)}
+.hero-sub{font-size:clamp(15px,2vw,18px);color:var(--text-muted);margin-bottom:40px;position:relative;z-index:1}
+.hero-meta{
+  display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+  position:relative;z-index:1;
+}
+.hero-meta span{
+  font-size:12px;font-family:var(--font-mono);
+  color:var(--text-muted);background:var(--surface);
+  border:1px solid var(--border);padding:6px 14px;border-radius:100px;
+}
+
+/* ── LOGO SYSTEM GRID ── */
+.logo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:48px}
+.logo-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;
+}
+.logo-card-preview{
+  padding:48px 32px;
+  display:flex;align-items:center;justify-content:center;
+  border-bottom:1px solid var(--border);
+  min-height:160px;
+}
+.logo-card-preview.light-bg{background:#F8FAFC}
+.logo-card-preview.mid-bg{background:#1e293b}
+.logo-card-info{padding:16px 20px}
+.logo-card-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.logo-card-desc{font-size:12px;color:var(--text-muted)}
+
+/* ── SIZE SHOWCASE ── */
+.size-row{
+  display:flex;align-items:center;gap:clamp(16px,4vw,40px);
+  flex-wrap:wrap;margin-top:48px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:32px;
+}
+.size-item{display:flex;flex-direction:column;align-items:center;gap:12px}
+.size-label{font-size:11px;font-family:var(--font-mono);color:var(--text-muted)}
+
+/* ── THEME PANELS ── */
+.theme-split{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:48px}
+@media(max-width:700px){.theme-split{grid-template-columns:1fr}}
+.theme-panel{border-radius:var(--r);overflow:hidden}
+.theme-panel-dark{background:var(--bg);border:1px solid var(--border)}
+.theme-panel-light{background:#ffffff;border:1px solid #e2e8f0}
+.theme-panel-header{
+  padding:20px 24px;
+  border-bottom-width:1px;border-bottom-style:solid;
+}
+.theme-panel-dark .theme-panel-header{border-color:var(--border)}
+.theme-panel-light .theme-panel-header{border-color:#e2e8f0}
+.theme-badge{
+  font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 10px;border-radius:100px;display:inline-block;
+}
+.dark-badge{background:rgba(255,255,255,.08);color:rgba(255,255,255,.5)}
+.light-badge{background:rgba(0,0,0,.06);color:rgba(0,0,0,.4)}
+.theme-body{
+  padding:40px;
+  display:flex;align-items:center;justify-content:center;
+  min-height:200px;
+}
+
+/* ── COLOR SYSTEM ── */
+.color-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:48px}
+.color-card{border-radius:var(--r-sm);overflow:hidden}
+.swatch{height:80px;display:flex;align-items:flex-end;padding:10px 14px}
+.swatch-label{font-size:10px;font-family:var(--font-mono);font-weight:500}
+.color-meta{background:var(--surface);border:1px solid var(--border);border-top:none;padding:12px 14px}
+.color-meta-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.color-meta-hex{font-size:11px;font-family:var(--font-mono);color:var(--text-muted)}
+.color-meta-use{font-size:11px;color:var(--text-muted);margin-top:4px}
+
+/* ── TYPOGRAPHY ── */
+.type-section{margin-top:48px}
+.font-family-showcase{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:40px;margin-bottom:20px;
+}
+.font-family-label{
+  font-size:11px;font-family:var(--font-mono);color:var(--accent);
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:24px;
+}
+.type-scale{display:flex;flex-direction:column;gap:24px}
+.type-row{display:grid;grid-template-columns:80px 1fr;gap:24px;align-items:baseline;border-bottom:1px solid var(--border);padding-bottom:20px}
+.type-row:last-child{border-bottom:none;padding-bottom:0}
+.type-spec{font-size:11px;font-family:var(--font-mono);color:var(--text-muted);align-self:center}
+.mono-specimen{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:32px;
+  font-family:var(--font-mono);
+}
+.mono-comment{color:var(--text-muted)}
+.mono-key{color:var(--accent2)}
+.mono-val{color:var(--accent)}
+.mono-str{color:var(--success)}
+.mono-num{color:var(--warning)}
+
+/* ── RESPONSIVE PREVIEW ── */
+.device-showcase{display:flex;gap:32px;align-items:flex-end;flex-wrap:wrap;margin-top:48px;justify-content:center}
+.device{display:flex;flex-direction:column;align-items:center;gap:16px}
+.device-label{font-size:12px;font-family:var(--font-mono);color:var(--text-muted)}
+.device-frame{
+  border-radius:12px;background:var(--bg);
+  border:1.5px solid var(--border-light);
+  overflow:hidden;position:relative;
+}
+.device-nav{
+  background:rgba(11,15,25,0.95);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;
+}
+.device-nav-links{display:flex;gap:8px}
+.device-nav-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--border-light);
+}
+.device-hero{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--bg);
+  position:relative;overflow:hidden;
+}
+.device-hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(59,130,246,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(59,130,246,.05) 1px,transparent 1px);
+  background-size:20px 20px;
+}
+.device-hero-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:8px}
+.device-cards{
+  background:var(--surface);
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:8px;padding:12px;
+}
+.device-card{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:6px;padding:10px;
+}
+.device-card-bar{height:6px;border-radius:3px;margin-bottom:6px}
+.device-card-line{height:4px;border-radius:2px;background:var(--border-light);margin-bottom:4px}
+
+/* Desktop 1440px preview */
+.device-desktop .device-frame{width:640px}
+.device-desktop .device-nav{height:36px}
+.device-desktop .device-hero{height:180px}
+.device-desktop .device-cards{grid-template-columns:repeat(4,1fr)}
+
+/* Tablet 768px preview */
+.device-tablet .device-frame{width:380px}
+.device-tablet .device-nav{height:32px}
+.device-tablet .device-hero{height:140px}
+.device-tablet .device-cards{grid-template-columns:repeat(2,1fr)}
+
+/* Mobile 375px preview */
+.device-mobile .device-frame{width:200px;border-radius:16px}
+.device-mobile .device-nav{height:28px}
+.device-mobile .device-hero{height:110px}
+.device-mobile .device-cards{grid-template-columns:1fr}
+
+/* ── USAGE RULES ── */
+.rules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:48px}
+.rule-card{border-radius:var(--r);overflow:hidden}
+.rule-card-preview{
+  padding:40px 32px;min-height:140px;
+  display:flex;align-items:center;justify-content:center;
+  border-bottom:1px solid transparent;
+}
+.rule-card.do .rule-card-preview{
+  background:rgba(16,185,129,.05);
+  border-color:rgba(16,185,129,.15);
+}
+.rule-card.dont .rule-card-preview{
+  background:rgba(239,68,68,.05);
+  border-color:rgba(239,68,68,.15);
+}
+.rule-card-body{padding:16px 20px}
+.rule-card.do .rule-card-body{background:rgba(16,185,129,.04);border:1px solid rgba(16,185,129,.12);border-top:none;border-radius:0 0 var(--r) var(--r)}
+.rule-card.dont .rule-card-body{background:rgba(239,68,68,.04);border:1px solid rgba(239,68,68,.12);border-top:none;border-radius:0 0 var(--r) var(--r)}
+.rule-badge{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;display:block}
+.rule-card.do .rule-badge{color:var(--success)}
+.rule-card.dont .rule-badge{color:var(--error)}
+.rule-text{font-size:13px;color:var(--text-muted)}
+
+/* ── LOGO ON BACKGROUNDS ── */
+.bg-showcase{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:48px}
+.bg-card{border-radius:var(--r);padding:48px 32px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.bg-card-label{font-size:11px;font-family:var(--font-mono);text-align:center}
+
+/* ── CLEAR SPACE ── */
+.clearspace-demo{
+  margin-top:48px;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--r);
+  padding:60px;display:flex;align-items:center;justify-content:center;
+}
+.clearspace-inner{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;
+}
+.clearspace-box{
+  position:absolute;inset:-20px;
+  border:1.5px dashed rgba(59,130,246,.35);
+  border-radius:4px;
+}
+.clearspace-dims{
+  position:absolute;bottom:-36px;left:50%;transform:translateX(-50%);
+  font-size:11px;font-family:var(--font-mono);color:var(--accent);white-space:nowrap;
+}
+.clearspace-dims-side{
+  position:absolute;left:-44px;top:50%;transform:translateY(-50%) rotate(-90deg);
+  font-size:11px;font-family:var(--font-mono);color:var(--accent);white-space:nowrap;
+}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);
+  padding:40px clamp(20px,5vw,60px);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:16px;
+}
+.footer-left{display:flex;align-items:center;gap:12px}
+.footer-right{font-size:12px;font-family:var(--font-mono);color:var(--text-muted)}
+
+/* ── LOGO SVG COMPONENTS ── */
+/* Used inline throughout */
+
+</style>
+</head>
+<body>
+
+<!-- ════════════════════ NAVIGATION ════════════════════ -->
+<nav>
+  <a class="nav-logo" href="#hero">
+    <!-- Nav logo mark (24px) -->
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+      <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+      <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+    </svg>
+    <span class="nav-wordmark"><span>Dev</span>Stash</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#logo-system">Logo</a></li>
+    <li><a href="#themes">Themes</a></li>
+    <li><a href="#colors">Colors</a></li>
+    <li><a href="#typography">Type</a></li>
+    <li><a href="#responsive">Responsive</a></li>
+    <li><a href="#usage">Usage</a></li>
+  </ul>
+
+  <!-- Mobile Navigation Toggle -->
+  <button class="mobile-menu-btn" aria-label="Toggle Navigation">
+    <div style="display:flex;flex-direction:column;gap:2.5px">
+        <div style="width:14px;height:1.5px;background:#9CA3AF;border-radius:1px"></div>
+        <div style="width:10px;height:1.5px;background:#9CA3AF;border-radius:1px"></div>
+        <div style="width:14px;height:1.5px;background:#9CA3AF;border-radius:1px"></div>
+    </div>
+  </button>
+
+  <!-- Mobile Navigation Menu -->
+  <div class="mobile-nav">
+    <a href="#logo-system">Logo</a>
+    <a href="#themes">Themes</a>
+    <a href="#colors">Colors</a>
+    <a href="#typography">Type</a>
+    <a href="#responsive">Responsive</a>
+    <a href="#usage">Usage</a>
+  </div>
+
+
+</nav>
+
+<!-- ════════════════════ HERO ════════════════════ -->
+<section class="hero" id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+
+  <div class="hero-mark">
+    <!-- Primary logo mark — large hero size (120px) -->
+    <svg width="120" height="120" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 40px rgba(59,130,246,0.2))">
+      <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+      <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="1.5"/>
+      <!-- Subtle inner glow -->
+      <rect x="2" y="2" width="96" height="96" rx="20" fill="none" stroke="rgba(59,130,246,0.08)" stroke-width="1"/>
+      <!-- > chevron — accent blue -->
+      <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- _ cursor — secondary accent purple -->
+      <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+    </svg>
+  </div>
+
+  <h1 class="hero-title">
+    <span class="blue">Dev</span><span>Stash</span><br>
+    <span style="font-weight:300;color:var(--text-muted);font-size:0.55em;letter-spacing:-0.01em">Brand Guidelines</span>
+  </h1>
+
+  <p class="hero-sub">Logo system · Color tokens · Typography · Dark &amp; Light themes<br>Responsive usage from 1440px to 320px</p>
+
+  <div class="hero-meta">
+    <span>v1.0.0</span>
+    <span>devstash.me</span>
+    <span>2026</span>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- ════════════════════ LOGO SYSTEM ════════════════════ -->
+<section id="logo-system">
+  <div class="wrap">
+    <p class="section-label">01 — Logo System</p>
+    <h2 class="section-title">Mark, wordmark &amp; lockups</h2>
+    <p class="section-sub">The terminal prompt <code style="font-family:var(--font-mono);font-size:14px;color:var(--accent);background:rgba(59,130,246,.1);padding:2px 6px;border-radius:4px">&gt;_</code> is the core mark. Recognizable at 16px, expressive at 256px. Use the appropriate lockup for each context.</p>
+
+    <div class="logo-grid">
+
+      <!-- 1: Icon mark — Dark bg -->
+      <div class="logo-card">
+        <div class="logo-card-preview" style="background:#0B0F19">
+          <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+            <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+            <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+            <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+          </svg>
+        </div>
+        <div class="logo-card-info">
+          <div class="logo-card-name">Icon mark — Dark</div>
+          <div class="logo-card-desc">App icons, favicons, social avatars, dark surfaces</div>
+        </div>
+      </div>
+
+      <!-- 2: Icon mark — Light bg -->
+      <div class="logo-card">
+        <div class="logo-card-preview light-bg">
+          <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+            <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+            <rect width="100" height="100" rx="22" stroke="#e2e8f0" stroke-width="1.5"/>
+            <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+          </svg>
+        </div>
+        <div class="logo-card-info">
+          <div class="logo-card-name">Icon mark — Light</div>
+          <div class="logo-card-desc">Light backgrounds, document headers, print contexts</div>
+        </div>
+      </div>
+
+      <!-- 3: Horizontal full lockup — Dark -->
+      <div class="logo-card">
+        <div class="logo-card-preview" style="background:#0B0F19">
+          <div style="display:flex;align-items:center;gap:14px">
+            <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+              <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+              <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+              <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+            </svg>
+            <div>
+              <div style="font-family:'DM Sans',sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.04em;color:#F3F4F6;line-height:1"><span style="color:#3B82F6">Dev</span>Stash</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#9CA3AF;letter-spacing:.06em;margin-top:3px">devstash.me</div>
+            </div>
+          </div>
+        </div>
+        <div class="logo-card-info">
+          <div class="logo-card-name">Horizontal lockup — Dark</div>
+          <div class="logo-card-desc">Navigation bars, headers, presentations</div>
+        </div>
+      </div>
+
+      <!-- 4: Horizontal lockup — Light -->
+      <div class="logo-card">
+        <div class="logo-card-preview light-bg">
+          <div style="display:flex;align-items:center;gap:14px">
+            <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+              <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+              <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+            </svg>
+            <div>
+              <div style="font-family:'DM Sans',sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.04em;color:#0B0F19;line-height:1"><span style="color:#2563EB">Dev</span>Stash</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#64748B;letter-spacing:.06em;margin-top:3px">devstash.me</div>
+            </div>
+          </div>
+        </div>
+        <div class="logo-card-info">
+          <div class="logo-card-name">Horizontal lockup — Light</div>
+          <div class="logo-card-desc">Light UIs, emails, white-background documents</div>
+        </div>
+      </div>
+
+      <!-- 5: Stacked lockup — Dark -->
+      <div class="logo-card">
+        <div class="logo-card-preview" style="background:#0B0F19">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+            <svg width="56" height="56" viewBox="0 0 100 100" fill="none">
+              <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+              <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+              <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+            </svg>
+            <div style="text-align:center">
+              <div style="font-family:'DM Sans',sans-serif;font-size:20px;font-weight:700;letter-spacing:-0.04em;color:#F3F4F6"><span style="color:#3B82F6">Dev</span>Stash</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#9CA3AF;letter-spacing:.08em;margin-top:4px;text-transform:uppercase">Developer Ecosystem</div>
+            </div>
+          </div>
+        </div>
+        <div class="logo-card-info">
+          <div class="logo-card-name">Stacked lockup — Dark</div>
+          <div class="logo-card-desc">OG images, social banners, square-format placements</div>
+        </div>
+      </div>
+
+      <!-- 6: Wordmark only -->
+      <div class="logo-card">
+        <div class="logo-card-preview" style="background:#111827">
+          <div style="font-family:'DM Sans',sans-serif;font-size:32px;font-weight:700;letter-spacing:-0.05em;color:#F3F4F6"><span style="color:#3B82F6">Dev</span>Stash</div>
+        </div>
+        <div class="logo-card-info">
+          <div class="logo-card-name">Wordmark only</div>
+          <div class="logo-card-desc">When the mark is already established in context</div>
+        </div>
+      </div>
+
+      <!-- 7: Monochrome — white -->
+      <div class="logo-card">
+        <div class="logo-card-preview" style="background:#0B0F19">
+          <div style="display:flex;align-items:center;gap:12px">
+            <svg width="44" height="44" viewBox="0 0 100 100" fill="none">
+              <rect width="100" height="100" rx="22" fill="rgba(255,255,255,0.08)"/>
+              <path d="M23 34L46 50L23 66" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="53" y="57" width="26" height="7" rx="3.5" fill="rgba(255,255,255,0.6)"/>
+            </svg>
+            <div style="font-family:'DM Sans',sans-serif;font-size:20px;font-weight:700;letter-spacing:-0.04em;color:#FFFFFF">DevStash</div>
+          </div>
+        </div>
+        <div class="logo-card-info">
+          <div class="logo-card-name">Monochrome — White</div>
+          <div class="logo-card-desc">Single-color contexts: embroidery, stamps, overlays</div>
+        </div>
+      </div>
+
+      <!-- 8: Monochrome — dark -->
+      <div class="logo-card">
+        <div class="logo-card-preview light-bg">
+          <div style="display:flex;align-items:center;gap:12px">
+            <svg width="44" height="44" viewBox="0 0 100 100" fill="none">
+              <rect width="100" height="100" rx="22" fill="rgba(0,0,0,0.08)"/>
+              <path d="M23 34L46 50L23 66" stroke="#0B0F19" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="53" y="57" width="26" height="7" rx="3.5" fill="rgba(0,0,0,0.5)"/>
+            </svg>
+            <div style="font-family:'DM Sans',sans-serif;font-size:20px;font-weight:700;letter-spacing:-0.04em;color:#0B0F19">DevStash</div>
+          </div>
+        </div>
+        <div class="logo-card-info">
+          <div class="logo-card-name">Monochrome — Dark</div>
+          <div class="logo-card-desc">Light single-color contexts, letterheads, print</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Size scale -->
+    <div style="margin-top:48px">
+      <p class="section-label" style="margin-bottom:0">Icon size scale</p>
+      <div class="size-row">
+        <div class="size-item">
+          <svg width="16" height="16" viewBox="0 0 100 100" fill="none">
+            <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+            <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+            <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+          </svg>
+          <span class="size-label">16px<br>favicon</span>
+        </div>
+        <div class="size-item">
+          <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+            <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+            <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+            <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+          </svg>
+          <span class="size-label">24px<br>inline</span>
+        </div>
+        <div class="size-item">
+          <svg width="32" height="32" viewBox="0 0 100 100" fill="none">
+            <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+            <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+            <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+          </svg>
+          <span class="size-label">32px<br>nav</span>
+        </div>
+        <div class="size-item">
+          <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+            <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+            <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+            <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+          </svg>
+          <span class="size-label">48px<br>card</span>
+        </div>
+        <div class="size-item">
+          <svg width="64" height="64" viewBox="0 0 100 100" fill="none">
+            <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+            <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+            <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+          </svg>
+          <span class="size-label">64px<br>hero</span>
+        </div>
+        <div class="size-item">
+          <svg width="96" height="96" viewBox="0 0 100 100" fill="none">
+            <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+            <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+            <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+          </svg>
+          <span class="size-label">96px<br>feature</span>
+        </div>
+        <div class="size-item">
+          <svg width="128" height="128" viewBox="0 0 100 100" fill="none">
+            <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+            <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+            <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+          </svg>
+          <span class="size-label">128px<br>app icon</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clear space -->
+    <div style="margin-top:56px">
+      <p class="section-label" style="margin-bottom:0">Clear space rule</p>
+      <p style="color:var(--text-muted);font-size:14px;margin:12px 0 0;max-width:500px">Always maintain a minimum clear space equal to <strong style="color:var(--text)">½ the width</strong> of the mark on all sides. Never place other elements inside this zone.</p>
+      <div class="clearspace-demo">
+        <div class="clearspace-inner">
+          <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+            <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+            <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+            <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+          </svg>
+          <div class="clearspace-box"></div>
+          <div class="clearspace-dims">½ × mark width</div>
+          <div class="clearspace-dims-side">½ × mark width</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- ════════════════════ DARK / LIGHT THEMES ════════════════════ -->
+<section id="themes">
+  <div class="wrap">
+    <p class="section-label">02 — Theme Variants</p>
+    <h2 class="section-title">Dark &amp; light mode</h2>
+    <p class="section-sub">DevStash is dark-first. The light theme is fully supported for contexts where a light surface is required. Both themes use the same logo mark.</p>
+
+    <div class="theme-split">
+      <!-- Dark panel -->
+      <div class="theme-panel theme-panel-dark">
+        <div class="theme-panel-header">
+          <span class="theme-badge dark-badge">Dark — Primary</span>
+        </div>
+        <div class="theme-body" style="flex-direction:column;gap:28px;padding:48px 40px">
+          <!-- Full lockup dark -->
+          <div style="display:flex;align-items:center;gap:14px">
+            <svg width="52" height="52" viewBox="0 0 100 100" fill="none">
+              <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+              <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+              <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+            </svg>
+            <div>
+              <div style="font-family:'DM Sans',sans-serif;font-size:24px;font-weight:700;letter-spacing:-0.04em;color:#F3F4F6"><span style="color:#3B82F6">Dev</span>Stash</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#9CA3AF;letter-spacing:.06em;margin-top:2px">devstash.me</div>
+            </div>
+          </div>
+          <!-- Nav simulation dark -->
+          <div style="width:100%;background:#111827;border:1px solid #1F2937;border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:8px">
+              <svg width="22" height="22" viewBox="0 0 100 100" fill="none">
+                <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+                <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+              </svg>
+              <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#F3F4F6"><span style="color:#3B82F6">Dev</span>Stash</span>
+            </div>
+            <div style="display:flex;gap:16px">
+              <span style="font-size:12px;color:#9CA3AF">Projects</span>
+              <span style="font-size:12px;color:#9CA3AF">Blog</span>
+              <span style="font-size:12px;color:#9CA3AF">Resources</span>
+            </div>
+          </div>
+          <!-- Hex values -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
+            <div style="background:#111827;border:1px solid #1F2937;border-radius:8px;padding:10px 12px">
+              <div style="font-size:10px;color:#9CA3AF;font-family:'JetBrains Mono',monospace;margin-bottom:4px">bg</div>
+              <div style="font-size:13px;color:#F3F4F6;font-family:'JetBrains Mono',monospace">#0B0F19</div>
+            </div>
+            <div style="background:#111827;border:1px solid #1F2937;border-radius:8px;padding:10px 12px">
+              <div style="font-size:10px;color:#9CA3AF;font-family:'JetBrains Mono',monospace;margin-bottom:4px">surface</div>
+              <div style="font-size:13px;color:#F3F4F6;font-family:'JetBrains Mono',monospace">#111827</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Light panel -->
+      <div class="theme-panel theme-panel-light">
+        <div class="theme-panel-header" style="background:#f8fafc">
+          <span class="theme-badge light-badge">Light — Supported</span>
+        </div>
+        <div class="theme-body" style="flex-direction:column;gap:28px;padding:48px 40px;background:#ffffff">
+          <!-- Full lockup light -->
+          <div style="display:flex;align-items:center;gap:14px">
+            <svg width="52" height="52" viewBox="0 0 100 100" fill="none">
+              <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+              <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+            </svg>
+            <div>
+              <div style="font-family:'DM Sans',sans-serif;font-size:24px;font-weight:700;letter-spacing:-0.04em;color:#0B0F19"><span style="color:#2563EB">Dev</span>Stash</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#64748B;letter-spacing:.06em;margin-top:2px">devstash.me</div>
+            </div>
+          </div>
+          <!-- Nav simulation light -->
+          <div style="width:100%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:8px">
+              <svg width="22" height="22" viewBox="0 0 100 100" fill="none">
+                <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+                <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+              </svg>
+              <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#0B0F19"><span style="color:#2563EB">Dev</span>Stash</span>
+            </div>
+            <div style="display:flex;gap:16px">
+              <span style="font-size:12px;color:#64748B">Projects</span>
+              <span style="font-size:12px;color:#64748B">Blog</span>
+              <span style="font-size:12px;color:#64748B">Resources</span>
+            </div>
+          </div>
+          <!-- Hex values -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
+            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px">
+              <div style="font-size:10px;color:#64748B;font-family:'JetBrains Mono',monospace;margin-bottom:4px">bg</div>
+              <div style="font-size:13px;color:#0B0F19;font-family:'JetBrains Mono',monospace">#FFFFFF</div>
+            </div>
+            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px">
+              <div style="font-size:10px;color:#64748B;font-family:'JetBrains Mono',monospace;margin-bottom:4px">surface</div>
+              <div style="font-size:13px;color:#0B0F19;font-family:'JetBrains Mono',monospace">#F8FAFC</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logo on different backgrounds -->
+    <div style="margin-top:56px">
+      <p class="section-label" style="margin-bottom:16px">Logo on background contexts</p>
+      <div class="bg-showcase">
+        <div class="bg-card" style="background:#0B0F19;border:1px solid #1F2937">
+          <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+            <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+            <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+            <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+          </svg>
+          <div style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.04em;color:#F3F4F6"><span style="color:#3B82F6">Dev</span>Stash</div>
+          <span class="bg-card-label" style="color:#9CA3AF;font-family:'JetBrains Mono',monospace;font-size:10px">#0B0F19 — Primary bg</span>
+        </div>
+        <div class="bg-card" style="background:#111827;border:1px solid #1F2937">
+          <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+            <rect width="100" height="100" rx="22" fill="#161f2e"/>
+            <rect width="100" height="100" rx="22" stroke="#2a3649" stroke-width="2"/>
+            <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+          </svg>
+          <div style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.04em;color:#F3F4F6"><span style="color:#3B82F6">Dev</span>Stash</div>
+          <span class="bg-card-label" style="color:#9CA3AF;font-family:'JetBrains Mono',monospace;font-size:10px">#111827 — Surface</span>
+        </div>
+        <div class="bg-card" style="background:#ffffff">
+          <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+            <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+            <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+          </svg>
+          <div style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.04em;color:#0B0F19"><span style="color:#2563EB">Dev</span>Stash</div>
+          <span class="bg-card-label" style="color:#64748B;font-family:'JetBrains Mono',monospace;font-size:10px">#FFFFFF — White</span>
+        </div>
+        <div class="bg-card" style="background:linear-gradient(135deg,#1e3a5f,#0f1f3a)">
+          <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+            <rect width="100" height="100" rx="22" fill="rgba(255,255,255,0.06)"/>
+            <rect width="100" height="100" rx="22" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+            <path d="M23 34L46 50L23 66" stroke="#60A5FA" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#A78BFA"/>
+          </svg>
+          <div style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.04em;color:#F3F4F6"><span style="color:#60A5FA">Dev</span>Stash</div>
+          <span class="bg-card-label" style="color:rgba(255,255,255,0.5);font-family:'JetBrains Mono',monospace;font-size:10px">Colored dark bg</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- ════════════════════ COLOR SYSTEM ════════════════════ -->
+<section id="colors">
+  <div class="wrap">
+    <p class="section-label">03 — Color System</p>
+    <h2 class="section-title">Brand color tokens</h2>
+    <p class="section-sub">All colors are defined as design tokens. Never use off-token colors in the interface. These values apply to both dark and light theme implementations.</p>
+
+    <div class="color-grid">
+
+      <div class="color-card">
+        <div class="swatch" style="background:#0B0F19;height:90px">
+          <span class="swatch-label" style="color:rgba(255,255,255,0.3)">bg</span>
+        </div>
+        <div class="color-meta">
+          <div class="color-meta-name">Background</div>
+          <div class="color-meta-hex">#0B0F19</div>
+          <div class="color-meta-use">Page background, deepest layer</div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="swatch" style="background:#111827;height:90px">
+          <span class="swatch-label" style="color:rgba(255,255,255,0.3)">surface</span>
+        </div>
+        <div class="color-meta">
+          <div class="color-meta-name">Surface</div>
+          <div class="color-meta-hex">#111827</div>
+          <div class="color-meta-use">Cards, panels, elevated containers</div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="swatch" style="background:#3B82F6;height:90px">
+          <span class="swatch-label" style="color:rgba(255,255,255,0.7)">accent</span>
+        </div>
+        <div class="color-meta">
+          <div class="color-meta-name">Accent Blue</div>
+          <div class="color-meta-hex">#3B82F6</div>
+          <div class="color-meta-use">CTAs, links, primary interactive</div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="swatch" style="background:#8B5CF6;height:90px">
+          <span class="swatch-label" style="color:rgba(255,255,255,0.7)">accent2</span>
+        </div>
+        <div class="color-meta">
+          <div class="color-meta-name">Accent Purple</div>
+          <div class="color-meta-hex">#8B5CF6</div>
+          <div class="color-meta-use">Highlights, tags, secondary interactive</div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="swatch" style="background:#F3F4F6;height:90px">
+          <span class="swatch-label" style="color:rgba(0,0,0,0.3)">text</span>
+        </div>
+        <div class="color-meta">
+          <div class="color-meta-name">Text Primary</div>
+          <div class="color-meta-hex">#F3F4F6</div>
+          <div class="color-meta-use">Headings, body text, labels</div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="swatch" style="background:#9CA3AF;height:90px">
+          <span class="swatch-label" style="color:rgba(0,0,0,0.3)">muted</span>
+        </div>
+        <div class="color-meta">
+          <div class="color-meta-name">Text Secondary</div>
+          <div class="color-meta-hex">#9CA3AF</div>
+          <div class="color-meta-use">Subtext, metadata, captions</div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="swatch" style="background:#1F2937;height:90px">
+          <span class="swatch-label" style="color:rgba(255,255,255,0.3)">border</span>
+        </div>
+        <div class="color-meta">
+          <div class="color-meta-name">Border</div>
+          <div class="color-meta-hex">#1F2937</div>
+          <div class="color-meta-use">Dividers, card edges, separators</div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="swatch" style="background:#10B981;height:90px">
+          <span class="swatch-label" style="color:rgba(255,255,255,0.7)">success</span>
+        </div>
+        <div class="color-meta">
+          <div class="color-meta-name">Success</div>
+          <div class="color-meta-hex">#10B981</div>
+          <div class="color-meta-use">Completed states, positive indicators</div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="swatch" style="background:#F59E0B;height:90px">
+          <span class="swatch-label" style="color:rgba(255,255,255,0.7)">warning</span>
+        </div>
+        <div class="color-meta">
+          <div class="color-meta-name">Warning</div>
+          <div class="color-meta-hex">#F59E0B</div>
+          <div class="color-meta-use">Alerts, cautions, notices</div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="swatch" style="background:#EF4444;height:90px">
+          <span class="swatch-label" style="color:rgba(255,255,255,0.7)">error</span>
+        </div>
+        <div class="color-meta">
+          <div class="color-meta-name">Error</div>
+          <div class="color-meta-hex">#EF4444</div>
+          <div class="color-meta-use">Error states, destructive actions</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Gradient note -->
+    <div style="margin-top:32px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px 28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <div>
+        <div style="width:140px;height:40px;border-radius:8px;background:linear-gradient(90deg,#3B82F6,#8B5CF6);margin-bottom:8px"></div>
+        <div style="font-size:11px;font-family:var(--font-mono);color:var(--text-muted)">#3B82F6 → #8B5CF6</div>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">Brand gradient</div>
+        <div style="font-size:13px;color:var(--text-muted);max-width:400px">The blue-to-purple gradient is approved for use in hero sections, OG images, and decorative backgrounds. Never use gradients directly on text or the logo mark.</div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- ════════════════════ TYPOGRAPHY ════════════════════ -->
+<section id="typography">
+  <div class="wrap">
+    <p class="section-label">04 — Typography</p>
+    <h2 class="section-title">Font system</h2>
+    <p class="section-sub">Three font roles. DM Sans for headings and UI, Inter for body, JetBrains Mono for all code, slugs, and technical metadata.</p>
+
+    <div class="type-section">
+
+      <!-- DM Sans -->
+      <div class="font-family-showcase">
+        <div class="font-family-label">DM Sans — Headings &amp; UI</div>
+        <div class="type-scale">
+          <div class="type-row">
+            <span class="type-spec">96px / 700</span>
+            <div style="font-family:'DM Sans',sans-serif;font-size:clamp(40px,6vw,72px);font-weight:700;letter-spacing:-0.04em;color:var(--text);line-height:1">DevStash</div>
+          </div>
+          <div class="type-row">
+            <span class="type-spec">48px / 700</span>
+            <div style="font-family:'DM Sans',sans-serif;font-size:clamp(28px,4vw,48px);font-weight:700;letter-spacing:-0.03em;color:var(--text);line-height:1.1">Build in public.</div>
+          </div>
+          <div class="type-row">
+            <span class="type-spec">32px / 600</span>
+            <div style="font-family:'DM Sans',sans-serif;font-size:clamp(22px,3vw,32px);font-weight:600;letter-spacing:-0.02em;color:var(--text)">Frontend Engineering</div>
+          </div>
+          <div class="type-row">
+            <span class="type-spec">20px / 500</span>
+            <div style="font-family:'DM Sans',sans-serif;font-size:20px;font-weight:500;color:var(--text)">Next.js · TypeScript · Tailwind</div>
+          </div>
+          <div class="type-row">
+            <span class="type-spec">16px / 400</span>
+            <div style="font-family:'DM Sans',sans-serif;font-size:16px;font-weight:400;color:var(--text-muted);line-height:1.7;max-width:520px">A modern developer ecosystem showcasing engineering, automation, AI workflows, frontend systems, and developer resources built for the open web.</div>
+          </div>
+          <div class="type-row" style="border:none">
+            <span class="type-spec">13px / 400</span>
+            <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-muted)">Projects · Blog · Resources · Tools · About</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- JetBrains Mono -->
+      <div class="mono-specimen">
+        <div style="font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:20px">JetBrains Mono — Code &amp; Technical</div>
+        <div style="font-size:clamp(13px,2vw,15px);line-height:1.8">
+          <span class="mono-comment">// devstash.me — brand config</span><br>
+          <span class="mono-key">const</span> <span style="color:var(--text)">brand</span> = {<br>
+          &nbsp;&nbsp;<span class="mono-key">name</span>: <span class="mono-str">"DevStash"</span>,<br>
+          &nbsp;&nbsp;<span class="mono-key">domain</span>: <span class="mono-str">"devstash.me"</span>,<br>
+          &nbsp;&nbsp;<span class="mono-key">accent</span>: <span class="mono-str">"#3B82F6"</span>,<br>
+          &nbsp;&nbsp;<span class="mono-key">accentSecondary</span>: <span class="mono-str">"#8B5CF6"</span>,<br>
+          &nbsp;&nbsp;<span class="mono-key">lighthouse</span>: <span class="mono-num">97</span>,<br>
+          &nbsp;&nbsp;<span class="mono-key">stack</span>: [<span class="mono-str">"Next.js"</span>, <span class="mono-str">"TypeScript"</span>, <span class="mono-str">"Tailwind"</span>]<br>
+          }
+        </div>
+      </div>
+
+      <!-- Weight specimen -->
+      <div style="margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:32px">
+        <div class="font-family-label">Weight &amp; style specimens</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:20px">
+          <div>
+            <div style="font-size:11px;font-family:var(--font-mono);color:var(--text-muted);margin-bottom:8px">300 Light</div>
+            <div style="font-family:'DM Sans',sans-serif;font-size:22px;font-weight:300;color:var(--text)">DevStash</div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-family:var(--font-mono);color:var(--text-muted);margin-bottom:8px">400 Regular</div>
+            <div style="font-family:'DM Sans',sans-serif;font-size:22px;font-weight:400;color:var(--text)">DevStash</div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-family:var(--font-mono);color:var(--text-muted);margin-bottom:8px">500 Medium</div>
+            <div style="font-family:'DM Sans',sans-serif;font-size:22px;font-weight:500;color:var(--text)">DevStash</div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-family:var(--font-mono);color:var(--text-muted);margin-bottom:8px">600 SemiBold</div>
+            <div style="font-family:'DM Sans',sans-serif;font-size:22px;font-weight:600;color:var(--text)">DevStash</div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-family:var(--font-mono);color:var(--text-muted);margin-bottom:8px">700 Bold</div>
+            <div style="font-family:'DM Sans',sans-serif;font-size:22px;font-weight:700;color:var(--text)">DevStash</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- ════════════════════ RESPONSIVE PREVIEW ════════════════════ -->
+<section id="responsive" style="overflow:hidden">
+  <div class="wrap">
+    <p class="section-label">05 — Responsive System</p>
+    <h2 class="section-title">From 1440px to 320px</h2>
+    <p class="section-sub">The logo and brand system are tested at all three primary breakpoints. The mark remains crisp at every size; only the lockup format adapts.</p>
+  </div>
+
+  <div style="overflow-x:auto;padding:48px clamp(20px,5vw,60px)">
+    <div style="display:flex;gap:40px;align-items:flex-end;min-width:900px;justify-content:center">
+
+      <!-- Desktop 1440 -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+        <span style="font-size:11px;font-family:var(--font-mono);color:var(--text-muted)">Desktop — 1440px</span>
+        <div style="width:640px;border-radius:12px;background:var(--bg);border:1.5px solid var(--border-light);overflow:hidden">
+          <!-- Nav -->
+          <div style="background:rgba(11,15,25,0.95);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:10px">
+              <svg width="28" height="28" viewBox="0 0 100 100" fill="none">
+                <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+                <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+                <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+              </svg>
+              <span style="font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;letter-spacing:-0.04em;color:#F3F4F6"><span style="color:#3B82F6">Dev</span>Stash</span>
+            </div>
+            <div style="display:flex;gap:20px;align-items:center">
+              <span style="font-size:13px;color:#9CA3AF">Projects</span>
+              <span style="font-size:13px;color:#9CA3AF">Blog</span>
+              <span style="font-size:13px;color:#9CA3AF">Resources</span>
+              <span style="font-size:13px;color:#9CA3AF">Tools</span>
+              <div style="background:#3B82F6;color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:6px">Contact</div>
+            </div>
+          </div>
+          <!-- Hero section -->
+          <div style="padding:48px 40px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;overflow:hidden">
+            <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.04) 1px,transparent 1px);background-size:28px 28px"></div>
+            <svg width="52" height="52" viewBox="0 0 100 100" fill="none" style="position:relative;z-index:1;margin-bottom:16px">
+              <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+              <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+              <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+            </svg>
+            <div style="font-family:'DM Sans',sans-serif;font-size:32px;font-weight:700;letter-spacing:-0.04em;color:#F3F4F6;position:relative;z-index:1;margin-bottom:8px"><span style="color:#3B82F6">Dev</span>Stash</div>
+            <div style="font-size:13px;color:#9CA3AF;position:relative;z-index:1;margin-bottom:20px;max-width:400px">A modern developer ecosystem for engineering, automation, and AI workflows</div>
+            <div style="display:flex;gap:10px;position:relative;z-index:1">
+              <div style="background:#3B82F6;color:#fff;font-size:12px;font-weight:600;padding:8px 18px;border-radius:8px">View Projects</div>
+              <div style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:#F3F4F6;font-size:12px;font-weight:500;padding:8px 18px;border-radius:8px">Read Blog</div>
+            </div>
+          </div>
+          <!-- Project cards row -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 24px 24px">
+            <div style="background:#111827;border:1px solid #1F2937;border-radius:8px;padding:14px">
+              <div style="height:6px;border-radius:3px;background:#3B82F6;width:60%;margin-bottom:8px"></div>
+              <div style="height:4px;border-radius:2px;background:#1F2937;margin-bottom:4px"></div>
+              <div style="height:4px;border-radius:2px;background:#1F2937;width:70%"></div>
+            </div>
+            <div style="background:#111827;border:1px solid #1F2937;border-radius:8px;padding:14px">
+              <div style="height:6px;border-radius:3px;background:#8B5CF6;width:80%;margin-bottom:8px"></div>
+              <div style="height:4px;border-radius:2px;background:#1F2937;margin-bottom:4px"></div>
+              <div style="height:4px;border-radius:2px;background:#1F2937;width:55%"></div>
+            </div>
+            <div style="background:#111827;border:1px solid #1F2937;border-radius:8px;padding:14px">
+              <div style="height:6px;border-radius:3px;background:#10B981;width:70%;margin-bottom:8px"></div>
+              <div style="height:4px;border-radius:2px;background:#1F2937;margin-bottom:4px"></div>
+              <div style="height:4px;border-radius:2px;background:#1F2937;width:85%"></div>
+            </div>
+            <div style="background:#111827;border:1px solid #1F2937;border-radius:8px;padding:14px">
+              <div style="height:6px;border-radius:3px;background:#F59E0B;width:50%;margin-bottom:8px"></div>
+              <div style="height:4px;border-radius:2px;background:#1F2937;margin-bottom:4px"></div>
+              <div style="height:4px;border-radius:2px;background:#1F2937;width:65%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Tablet + Mobile row -->
+  <div style="padding:0 clamp(20px,5vw,60px) 0;overflow-x:auto">
+    <div style="display:flex;gap:32px;align-items:flex-end;min-width:700px;justify-content:center;padding-bottom:8px">
+
+      <!-- Tablet 768 -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+        <span style="font-size:11px;font-family:var(--font-mono);color:var(--text-muted)">Tablet — 768px</span>
+        <div style="width:380px;border-radius:12px;background:var(--bg);border:1.5px solid var(--border-light);overflow:hidden">
+          <div style="background:rgba(11,15,25,0.95);border-bottom:1px solid var(--border);padding:0 16px;height:44px;display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:8px">
+              <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+                <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+                <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+              </svg>
+              <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;letter-spacing:-0.04em;color:#F3F4F6"><span style="color:#3B82F6">Dev</span>Stash</span>
+            </div>
+            <div style="display:flex;gap:14px">
+              <span style="font-size:12px;color:#9CA3AF">Projects</span>
+              <span style="font-size:12px;color:#9CA3AF">Blog</span>
+              <span style="font-size:12px;color:#9CA3AF">Tools</span>
+              <div style="display:flex;flex-direction:column;gap:3px;cursor:pointer">
+                <div style="width:16px;height:1.5px;background:#9CA3AF;border-radius:1px"></div>
+                <div style="width:12px;height:1.5px;background:#9CA3AF;border-radius:1px"></div>
+                <div style="width:16px;height:1.5px;background:#9CA3AF;border-radius:1px"></div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:36px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative">
+            <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.04) 1px,transparent 1px);background-size:24px 24px"></div>
+            <svg width="44" height="44" viewBox="0 0 100 100" fill="none" style="position:relative;z-index:1;margin-bottom:12px">
+              <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+              <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+              <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+            </svg>
+            <div style="font-family:'DM Sans',sans-serif;font-size:24px;font-weight:700;letter-spacing:-0.04em;color:#F3F4F6;position:relative;z-index:1;margin-bottom:6px"><span style="color:#3B82F6">Dev</span>Stash</div>
+            <div style="font-size:12px;color:#9CA3AF;position:relative;z-index:1;margin-bottom:16px">Developer ecosystem · engineering · automation</div>
+            <div style="display:flex;gap:8px;position:relative;z-index:1">
+              <div style="background:#3B82F6;color:#fff;font-size:11px;font-weight:600;padding:7px 14px;border-radius:6px">Projects</div>
+              <div style="background:rgba(255,255,255,.06);border:1px solid var(--border);color:#F3F4F6;font-size:11px;padding:7px 14px;border-radius:6px">Blog</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 16px">
+            <div style="background:#111827;border:1px solid #1F2937;border-radius:8px;padding:12px">
+              <div style="height:5px;border-radius:3px;background:#3B82F6;width:60%;margin-bottom:6px"></div>
+              <div style="height:3px;border-radius:2px;background:#1F2937;margin-bottom:3px"></div>
+              <div style="height:3px;border-radius:2px;background:#1F2937;width:70%"></div>
+            </div>
+            <div style="background:#111827;border:1px solid #1F2937;border-radius:8px;padding:12px">
+              <div style="height:5px;border-radius:3px;background:#8B5CF6;width:80%;margin-bottom:6px"></div>
+              <div style="height:3px;border-radius:2px;background:#1F2937;margin-bottom:3px"></div>
+              <div style="height:3px;border-radius:2px;background:#1F2937;width:55%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile 375 -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+        <span style="font-size:11px;font-family:var(--font-mono);color:var(--text-muted)">Mobile — 375px</span>
+        <div style="width:200px;border-radius:20px;background:var(--bg);border:1.5px solid var(--border-light);overflow:hidden">
+          <div style="background:rgba(11,15,25,0.95);border-bottom:1px solid var(--border);padding:0 12px;height:38px;display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:6px">
+              <svg width="20" height="20" viewBox="0 0 100 100" fill="none">
+                <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+                <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+                <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+              </svg>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#F3F4F6"><span style="color:#3B82F6">Dev</span>Stash</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:2.5px">
+              <div style="width:14px;height:1.5px;background:#9CA3AF;border-radius:1px"></div>
+              <div style="width:10px;height:1.5px;background:#9CA3AF;border-radius:1px"></div>
+              <div style="width:14px;height:1.5px;background:#9CA3AF;border-radius:1px"></div>
+            </div>
+          </div>
+          <div style="padding:28px 16px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative">
+            <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.04) 1px,transparent 1px);background-size:16px 16px"></div>
+            <svg width="36" height="36" viewBox="0 0 100 100" fill="none" style="position:relative;z-index:1;margin-bottom:10px">
+              <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+              <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+              <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+            </svg>
+            <div style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.04em;color:#F3F4F6;position:relative;z-index:1;margin-bottom:4px"><span style="color:#3B82F6">Dev</span>Stash</div>
+            <div style="font-size:10px;color:#9CA3AF;position:relative;z-index:1;margin-bottom:14px;line-height:1.5">Developer ecosystem &amp; engineering resources</div>
+            <div style="position:relative;z-index:1;width:100%">
+              <div style="background:#3B82F6;color:#fff;font-size:10px;font-weight:600;padding:8px;border-radius:6px;text-align:center">View Projects</div>
+            </div>
+          </div>
+          <div style="padding:0 12px 12px;display:flex;flex-direction:column;gap:8px">
+            <div style="background:#111827;border:1px solid #1F2937;border-radius:8px;padding:10px">
+              <div style="height:4px;border-radius:2px;background:#3B82F6;width:60%;margin-bottom:5px"></div>
+              <div style="height:3px;border-radius:2px;background:#1F2937;margin-bottom:3px"></div>
+              <div style="height:3px;border-radius:2px;background:#1F2937;width:70%"></div>
+            </div>
+            <div style="background:#111827;border:1px solid #1F2937;border-radius:8px;padding:10px">
+              <div style="height:4px;border-radius:2px;background:#8B5CF6;width:80%;margin-bottom:5px"></div>
+              <div style="height:3px;border-radius:2px;background:#1F2937;margin-bottom:3px"></div>
+              <div style="height:3px;border-radius:2px;background:#1F2937;width:55%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- ════════════════════ USAGE RULES ════════════════════ -->
+<section id="usage">
+  <div class="wrap">
+    <p class="section-label">06 — Usage Guidelines</p>
+    <h2 class="section-title">Do's &amp; don'ts</h2>
+    <p class="section-sub">These rules protect the integrity of the mark across all placements. When in doubt, refer back to the approved lockup variants.</p>
+
+    <div class="rules-grid">
+
+      <div class="rule-card do">
+        <div class="rule-card-preview">
+          <div style="display:flex;align-items:center;gap:12px">
+            <svg width="44" height="44" viewBox="0 0 100 100" fill="none">
+              <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+              <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+              <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+            </svg>
+            <span style="font-family:'DM Sans',sans-serif;font-size:20px;font-weight:700;color:#F3F4F6;letter-spacing:-0.04em"><span style="color:#3B82F6">Dev</span>Stash</span>
+          </div>
+        </div>
+        <div class="rule-card-body">
+          <span class="rule-badge">✓ Do</span>
+          <div class="rule-text">Use the approved lockup with correct colors and proportions on a dark or light background.</div>
+        </div>
+      </div>
+
+      <div class="rule-card dont">
+        <div class="rule-card-preview">
+          <div style="display:flex;align-items:center;gap:12px;opacity:0.9">
+            <svg width="44" height="44" viewBox="0 0 100 100" fill="none">
+              <rect width="100" height="100" rx="22" fill="#8B5CF6"/>
+              <path d="M23 34L46 50L23 66" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#3B82F6"/>
+            </svg>
+            <span style="font-family:'DM Sans',sans-serif;font-size:20px;font-weight:700;color:#F3F4F6;letter-spacing:-0.04em">DevStash</span>
+          </div>
+        </div>
+        <div class="rule-card-body">
+          <span class="rule-badge">✕ Don't</span>
+          <div class="rule-text">Change the icon background color or swap the accent colors. The mark background is always #0B0F19.</div>
+        </div>
+      </div>
+
+      <div class="rule-card do">
+        <div class="rule-card-preview light-bg" style="background:#f8fafc">
+          <div style="display:flex;align-items:center;gap:12px">
+            <svg width="44" height="44" viewBox="0 0 100 100" fill="none">
+              <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+              <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+            </svg>
+            <span style="font-family:'DM Sans',sans-serif;font-size:20px;font-weight:700;color:#0B0F19;letter-spacing:-0.04em"><span style="color:#2563EB">Dev</span>Stash</span>
+          </div>
+        </div>
+        <div class="rule-card-body">
+          <span class="rule-badge">✓ Do</span>
+          <div class="rule-text">On light backgrounds, use the dark wordmark (#0B0F19). The mark always keeps its dark background.</div>
+        </div>
+      </div>
+
+      <div class="rule-card dont">
+        <div class="rule-card-preview">
+          <div style="transform:rotate(-15deg)">
+            <div style="display:flex;align-items:center;gap:12px">
+              <svg width="44" height="44" viewBox="0 0 100 100" fill="none">
+                <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+                <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+                <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+              </svg>
+              <span style="font-family:'DM Sans',sans-serif;font-size:20px;font-weight:700;color:#F3F4F6;letter-spacing:-0.04em"><span style="color:#3B82F6">Dev</span>Stash</span>
+            </div>
+          </div>
+        </div>
+        <div class="rule-card-body">
+          <span class="rule-badge">✕ Don't</span>
+          <div class="rule-text">Rotate, skew, or otherwise transform the logo. It must always appear at 0° horizontal.</div>
+        </div>
+      </div>
+
+      <div class="rule-card do">
+        <div class="rule-card-preview">
+          <svg width="52" height="52" viewBox="0 0 100 100" fill="none">
+            <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+            <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+            <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+          </svg>
+        </div>
+        <div class="rule-card-body">
+          <span class="rule-badge">✓ Do</span>
+          <div class="rule-text">Use the icon mark alone (without wordmark) for app icons, favicons, and small square placements ≥16px.</div>
+        </div>
+      </div>
+
+      <div class="rule-card dont">
+        <div class="rule-card-preview">
+          <div style="display:flex;align-items:center;gap:12px;opacity:0.85">
+            <svg width="44" height="44" viewBox="0 0 100 100" fill="none">
+              <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+              <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+              <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+            </svg>
+            <span style="font-family:'Comic Sans MS',cursive;font-size:20px;font-weight:700;color:#F3F4F6">DevStash</span>
+          </div>
+        </div>
+        <div class="rule-card-body">
+          <span class="rule-badge">✕ Don't</span>
+          <div class="rule-text">Substitute different fonts for the wordmark. Only use DM Sans 700 for the brand wordmark.</div>
+        </div>
+      </div>
+
+      <div class="rule-card do">
+        <div class="rule-card-preview">
+          <div style="display:flex;align-items:center;gap:14px">
+            <svg width="44" height="44" viewBox="0 0 100 100" fill="none">
+              <rect width="100" height="100" rx="22" fill="rgba(255,255,255,0.08)"/>
+              <path d="M23 34L46 50L23 66" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="53" y="57" width="26" height="7" rx="3.5" fill="rgba(255,255,255,0.5)"/>
+            </svg>
+            <span style="font-family:'DM Sans',sans-serif;font-size:20px;font-weight:700;color:#FFFFFF;letter-spacing:-0.04em">DevStash</span>
+          </div>
+        </div>
+        <div class="rule-card-body">
+          <span class="rule-badge">✓ Do</span>
+          <div class="rule-text">Use the monochrome white version for single-color applications like embroidery, screen printing, or overlays.</div>
+        </div>
+      </div>
+
+      <div class="rule-card dont">
+        <div class="rule-card-preview">
+          <div style="position:relative;display:flex;align-items:center;gap:12px">
+            <svg width="44" height="44" viewBox="0 0 100 100" fill="none" style="opacity:0.2">
+              <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+              <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+            </svg>
+            <span style="font-family:'DM Sans',sans-serif;font-size:20px;font-weight:700;color:rgba(243,244,246,0.15);letter-spacing:-0.04em">DevStash</span>
+          </div>
+        </div>
+        <div class="rule-card-body">
+          <span class="rule-badge">✕ Don't</span>
+          <div class="rule-text">Use the logo at low opacity or over busy backgrounds. Always maintain clear contrast and legibility.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<hr class="divider">
+
+<!-- ════════════════════ FOOTER ════════════════════ -->
+<footer>
+  <div class="footer-left">
+    <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+      <rect width="100" height="100" rx="22" fill="#0B0F19"/>
+      <rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/>
+      <path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/>
+    </svg>
+    <span style="font-size:14px;font-weight:600;color:var(--text-muted)"><span style="color:var(--accent)">Dev</span>Stash Brand Guidelines</span>
+  </div>
+  <div class="footer-right">v1.0.0 · 2026 · devstash.me</div>
+</footer>
+
+<script>
+  const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+  const mobileNav = document.querySelector('.mobile-nav');
+
+  mobileMenuBtn.addEventListener('click', () => {
+    mobileNav.classList.toggle('active');
+  });
+
+  document.querySelectorAll('.mobile-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+      mobileNav.classList.remove('active');
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevStash — Complete Build Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0B0F19;--surface:#111827;--s2:#161f2e;--s3:#1e2d42;
+  --accent:#3B82F6;--purple:#8B5CF6;--green:#10B981;--warn:#F59E0B;--red:#EF4444;
+  --text:#F3F4F6;--muted:#9CA3AF;--border:#1F2937;--border2:#2a3649;
+  --font:'DM Sans',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased;font-size:15px}
+
+/* ── PRINT ── */
+@media print{
+  nav,.no-print{display:none!important}
+  body{background:#fff;color:#000;font-size:12px}
+  .phase-card{break-inside:avoid;border:1px solid #ccc!important}
+  a{color:inherit;text-decoration:none}
+  .phase-header{background:#f0f0f0!important;-webkit-print-color-adjust:exact}
+}
+
+/* ── UTILS ── */
+.wrap{max-width:1100px;margin:0 auto;padding:0 clamp(16px,4vw,56px)}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+.tag-fe{background:rgba(59,130,246,.12);color:#60A5FA;border:1px solid rgba(59,130,246,.2)}
+.tag-be{background:rgba(139,92,246,.12);color:#A78BFA;border:1px solid rgba(139,92,246,.2)}
+.tag-infra{background:rgba(245,158,11,.12);color:#FCD34D;border:1px solid rgba(245,158,11,.2)}
+.tag-seo{background:rgba(16,185,129,.12);color:#34D399;border:1px solid rgba(16,185,129,.2)}
+.tag-3p{background:rgba(239,68,68,.12);color:#F87171;border:1px solid rgba(239,68,68,.2)}
+.tag-auto{background:rgba(156,163,175,.12);color:#D1D5DB;border:1px solid rgba(156,163,175,.2)}
+.divider{border:none;border-top:1px solid var(--border);margin:0}
+code{font-family:var(--mono);font-size:12px;background:rgba(59,130,246,.1);color:#93C5FD;padding:2px 6px;border-radius:4px}
+pre{font-family:var(--mono);font-size:12px;background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:16px 20px;overflow-x:auto;line-height:1.7;margin:8px 0}
+pre .c{color:var(--muted)} pre .k{color:#A78BFA} pre .s{color:#34D399} pre .n{color:#60A5FA} pre .v{color:#FCD34D}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:999;background:rgba(11,15,25,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,56px)}
+.nav-brand{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:var(--text)}
+.nav-brand span{color:var(--accent)}
+.nav-actions{display:flex;align-items:center;gap:12px}
+.btn{font-family:var(--font);font-size:12px;font-weight:600;padding:6px 14px;border-radius:6px;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#2563EB}
+
+/* ── HERO ── */
+.hero{padding:clamp(56px,8vw,96px) 0 clamp(40px,6vw,72px);text-align:center;position:relative;overflow:hidden}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.04) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(ellipse 75% 60% at 50% 50%,black 0%,transparent 75%)}
+.hero h1{font-size:clamp(32px,5vw,56px);font-weight:700;letter-spacing:-0.04em;line-height:1.1;margin-bottom:16px;position:relative;z-index:1}
+.hero h1 .blue{color:var(--accent)}
+.hero h1 .dim{font-weight:300;color:var(--muted);font-size:.55em;letter-spacing:-.01em;display:block;margin-top:6px}
+.hero p{font-size:16px;color:var(--muted);margin-bottom:32px;position:relative;z-index:1;max-width:560px;margin-left:auto;margin-right:auto}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;margin-bottom:40px}
+.hero-chip{font-size:11px;font-family:var(--mono);color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:5px 12px;border-radius:100px}
+
+/* ── PHASE OVERVIEW ── */
+.phase-overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:48px 0}
+.phase-pill{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;text-decoration:none;transition:border-color .2s,transform .15s}
+.phase-pill:hover{border-color:var(--accent);transform:translateY(-2px)}
+.phase-pill-num{font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:6px}
+.phase-pill-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.3}
+.phase-pill-weeks{font-size:11px;color:var(--muted)}
+.phase-pill-bar{height:3px;border-radius:2px;margin-top:10px}
+
+/* ── PHASE CARDS ── */
+.phases{display:flex;flex-direction:column;gap:32px;padding:0 0 80px}
+.phase-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.phase-header{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.phase-header-left{display:flex;align-items:center;gap:16px}
+.phase-num{font-size:11px;font-family:var(--mono);font-weight:700;color:var(--bg);padding:5px 10px;border-radius:6px;min-width:36px;text-align:center}
+.phase-title{font-size:18px;font-weight:700;letter-spacing:-0.02em;color:var(--text)}
+.phase-sub{font-size:13px;color:var(--muted);margin-top:3px}
+.phase-header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.week-badge{font-size:11px;font-family:var(--mono);background:rgba(255,255,255,.05);border:1px solid var(--border2);padding:4px 10px;border-radius:100px;color:var(--muted)}
+.priority-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:100px}
+.p-critical{background:rgba(239,68,68,.15);color:#F87171;border:1px solid rgba(239,68,68,.25)}
+.p-high{background:rgba(245,158,11,.15);color:#FCD34D;border:1px solid rgba(245,158,11,.25)}
+.p-medium{background:rgba(59,130,246,.15);color:#93C5FD;border:1px solid rgba(59,130,246,.25)}
+.p-low{background:rgba(156,163,175,.1);color:var(--muted);border:1px solid var(--border)}
+
+/* ── STEPS ── */
+.phase-body{padding:0}
+.step-group{border-bottom:1px solid var(--border)}
+.step-group:last-child{border-bottom:none}
+.step-group-header{padding:16px 28px;background:rgba(255,255,255,.015);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.step-group-title{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:10px}
+.step-group-tags{display:flex;gap:6px;flex-wrap:wrap}
+.step-count{font-size:11px;font-family:var(--mono);color:var(--muted)}
+.step-group-body{padding:0 28px 20px}
+.steps-list{list-style:none;display:flex;flex-direction:column;gap:0}
+.step{
+  padding:12px 0 12px 0;
+  border-bottom:1px solid rgba(255,255,255,.03);
+  display:grid;
+  grid-template-columns:28px 1fr;
+  gap:12px;
+  align-items:start;
+}
+.step:last-child{border-bottom:none}
+.step-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px}
+.step-icon.fe{background:rgba(59,130,246,.2);color:#60A5FA}
+.step-icon.be{background:rgba(139,92,246,.2);color:#A78BFA}
+.step-icon.infra{background:rgba(245,158,11,.2);color:#FCD34D}
+.step-icon.seo{background:rgba(16,185,129,.2);color:#34D399}
+.step-icon.tp{background:rgba(239,68,68,.2);color:#F87171}
+.step-text{font-size:13px;color:var(--text);line-height:1.6}
+.step-text .detail{display:block;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.6}
+.step-text code{font-size:11px}
+
+/* ── CHECKLIST ── */
+.checklist{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.chk{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:var(--muted);line-height:1.5;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.chk:last-child{border-bottom:none}
+.chk-box{width:16px;height:16px;border:1.5px solid var(--border2);border-radius:3px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center}
+.chk-box.done{background:rgba(16,185,129,.2);border-color:var(--green)}
+.chk-box.done::after{content:'✓';font-size:9px;color:var(--green);font-weight:700}
+.chk-label{flex:1}
+.chk-label strong{color:var(--text);font-weight:600}
+
+/* ── TOOLS SECTION ── */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.tool-card{background:var(--s2);border:1px solid var(--border2);border-radius:12px;padding:20px;transition:border-color .2s}
+.tool-card:hover{border-color:var(--accent)}
+.tool-card-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.tool-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.tool-name{font-size:14px;font-weight:600;color:var(--text)}
+.tool-tier{font-size:10px;font-family:var(--mono);color:var(--muted);margin-top:2px}
+.tool-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px}
+.tool-steps{font-size:12px;color:var(--muted);list-style:none;display:flex;flex-direction:column;gap:4px}
+.tool-steps li::before{content:'→ ';color:var(--accent)}
+.tool-steps li{padding-left:0}
+
+/* ── ENV VARS TABLE ── */
+.env-table{width:100%;border-collapse:collapse;font-size:12px}
+.env-table th{background:var(--s3);padding:10px 14px;text-align:left;font-size:11px;font-family:var(--mono);color:var(--muted);font-weight:500;border-bottom:1px solid var(--border2)}
+.env-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:top}
+.env-table tr:last-child td{border-bottom:none}
+.env-table .var{font-family:var(--mono);color:#93C5FD;font-size:11px}
+.env-table .req{font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px}
+.req-yes{background:rgba(239,68,68,.15);color:#F87171}
+.req-opt{background:rgba(156,163,175,.1);color:var(--muted)}
+
+/* ── ARCHITECTURE CALLOUT ── */
+.callout{border-radius:10px;padding:16px 20px;margin:16px 0;font-size:13px;line-height:1.6;display:flex;gap:12px;align-items:flex-start}
+.callout.info{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:#93C5FD}
+.callout.warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:#FCD34D}
+.callout.success{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:#34D399}
+.callout.red{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#F87171}
+.callout-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.callout-body strong{font-weight:600;display:block;margin-bottom:3px}
+
+/* ── TIMELINE ── */
+.timeline{display:flex;flex-direction:column;gap:0;margin:32px 0;position:relative}
+.timeline::before{content:'';position:absolute;left:18px;top:10px;bottom:10px;width:2px;background:var(--border2)}
+.tl-item{display:flex;gap:20px;align-items:flex-start;padding:0 0 24px;position:relative}
+.tl-dot{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:var(--mono);position:relative;z-index:1;border:2px solid var(--bg)}
+.tl-content{flex:1;padding-top:8px}
+.tl-label{font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:4px}
+.tl-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px}
+.tl-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.tl-deliverables{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tl-del{font-size:11px;font-family:var(--mono);background:var(--surface);border:1px solid var(--border);padding:3px 9px;border-radius:100px;color:var(--muted)}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:32px clamp(16px,4vw,56px);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-left{font-size:13px;color:var(--muted)}
+.footer-left span{color:var(--accent)}
+.footer-right{font-size:11px;font-family:var(--mono);color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ NAV ══════════════ -->
+<nav class="no-print">
+  <div class="nav-brand">
+    <svg width="24" height="24" viewBox="0 0 100 100" fill="none"><rect width="100" height="100" rx="22" fill="#0B0F19"/><rect width="100" height="100" rx="22" stroke="#1F2937" stroke-width="2"/><path d="M23 34L46 50L23 66" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6"/></svg>
+    <span><span>Dev</span>Stash</span> — Build Plan
+  </div>
+  <div class="nav-actions">
+    <a href="#tools" class="btn btn-ghost">Third-Party Tools</a>
+    <a href="#timeline" class="btn btn-ghost">Timeline</a>
+    <button onclick="window.print()" class="btn btn-primary">Print / Export PDF</button>
+  </div>
+</nav>
+
+<!-- ══════════════ HERO ══════════════ -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="wrap">
+    <h1><span class="blue">Dev</span>Stash<span class="dim">Complete Build Plan · Frontend + Backend + Infrastructure</span></h1>
+    <p>Phase-by-phase guide to building devstash.me from zero to production — strictly following the technical architecture, built for scale from day one.</p>
+    <div class="hero-chips">
+      <span class="hero-chip">Next.js App Router</span>
+      <span class="hero-chip">TypeScript</span>
+      <span class="hero-chip">Tailwind CSS</span>
+      <span class="hero-chip">MDX + JSON Content</span>
+      <span class="hero-chip">Vercel Deployment</span>
+      <span class="hero-chip">GitHub Actions CI</span>
+      <span class="hero-chip">9 Phases · ~10 Weeks</span>
+    </div>
+    <!-- Legend -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+      <span class="tag tag-fe">FE Frontend</span>
+      <span class="tag tag-be">BE Backend/Data</span>
+      <span class="tag tag-infra">INFRA Infrastructure</span>
+      <span class="tag tag-seo">SEO</span>
+      <span class="tag tag-3p">3P Third-Party</span>
+      <span class="tag tag-auto">AUTO Automation</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PHASE OVERVIEW PILLS ══════════════ -->
+<div class="wrap">
+  <div class="phase-overview">
+    <a href="#p0" class="phase-pill">
+      <div class="phase-pill-num">Phase 0</div>
+      <div class="phase-pill-title">Foundation & Repo</div>
+      <div class="phase-pill-weeks">Week 1</div>
+      <div class="phase-pill-bar" style="background:#EF4444"></div>
+    </a>
+    <a href="#p1" class="phase-pill">
+      <div class="phase-pill-num">Phase 1</div>
+      <div class="phase-pill-title">Core Infrastructure</div>
+      <div class="phase-pill-weeks">Week 1–2</div>
+      <div class="phase-pill-bar" style="background:#F59E0B"></div>
+    </a>
+    <a href="#p2" class="phase-pill">
+      <div class="phase-pill-num">Phase 2</div>
+      <div class="phase-pill-title">Design System</div>
+      <div class="phase-pill-weeks">Week 2–3</div>
+      <div class="phase-pill-bar" style="background:#3B82F6"></div>
+    </a>
+    <a href="#p3" class="phase-pill">
+      <div class="phase-pill-num">Phase 3</div>
+      <div class="phase-pill-title">Content Layer</div>
+      <div class="phase-pill-weeks">Week 3–4</div>
+      <div class="phase-pill-bar" style="background:#8B5CF6"></div>
+    </a>
+    <a href="#p4" class="phase-pill">
+      <div class="phase-pill-num">Phase 4</div>
+      <div class="phase-pill-title">Core Pages</div>
+      <div class="phase-pill-weeks">Week 4–6</div>
+      <div class="phase-pill-bar" style="background:#3B82F6"></div>
+    </a>
+    <a href="#p5" class="phase-pill">
+      <div class="phase-pill-num">Phase 5</div>
+      <div class="phase-pill-title">Blog System</div>
+      <div class="phase-pill-weeks">Week 5–7</div>
+      <div class="phase-pill-bar" style="background:#8B5CF6"></div>
+    </a>
+    <a href="#p6" class="phase-pill">
+      <div class="phase-pill-num">Phase 6</div>
+      <div class="phase-pill-title">SEO & Schema</div>
+      <div class="phase-pill-weeks">Week 7–8</div>
+      <div class="phase-pill-bar" style="background:#10B981"></div>
+    </a>
+    <a href="#p7" class="phase-pill">
+      <div class="phase-pill-num">Phase 7</div>
+      <div class="phase-pill-title">Automation</div>
+      <div class="phase-pill-weeks">Week 8</div>
+      <div class="phase-pill-bar" style="background:#F59E0B"></div>
+    </a>
+    <a href="#p8" class="phase-pill">
+      <div class="phase-pill-num">Phase 8</div>
+      <div class="phase-pill-title">Analytics & Launch</div>
+      <div class="phase-pill-weeks">Week 9–10</div>
+      <div class="phase-pill-bar" style="background:#10B981"></div>
+    </a>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════ THIRD-PARTY TOOLS ══════════════ -->
+<section id="tools" style="padding:64px 0">
+  <div class="wrap">
+    <p style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-bottom:12px">Configure Before You Write Code</p>
+    <h2 style="font-size:clamp(22px,3vw,32px);font-weight:700;letter-spacing:-0.03em;margin-bottom:12px">Third-Party Tool Setup</h2>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:36px;max-width:580px">Create accounts and gather API keys/IDs for all tools before starting Phase 0. Several are blocking dependencies for environment variable setup.</p>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Do this first, before any code</strong> All tools marked Required below block other phases if not configured. Having keys ready means you configure once and never revisit.</div>
+    </div>
+
+    <div class="tools-grid" style="margin-top:24px">
+
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="background:rgba(0,0,0,0.6);font-size:20px">▲</div>
+          <div>
+            <div class="tool-name">Vercel</div>
+            <div class="tool-tier">Deployment · Free Hobby / Pro $20/mo · <span style="color:var(--red);font-size:10px">REQUIRED</span></div>
+          </div>
+        </div>
+        <div class="tool-desc">Zero-config Next.js hosting with edge CDN, preview deployments per PR, automatic HTTPS, and serverless functions. The only deployment target that works seamlessly with Next.js App Router and <code>@vercel/og</code>.</div>
+        <ul class="tool-steps">
+          <li>Create account at vercel.com</li>
+          <li>Connect GitHub repo via Vercel dashboard</li>
+          <li>Set root directory = <code>.</code> (project root)</li>
+          <li>Add all <code>.env</code> variables in Project Settings → Environment Variables</li>
+          <li>Note: <code>VERCEL_URL</code> auto-injected — use for canonical base URL</li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="background:rgba(66,133,244,.15)">🔍</div>
+          <div>
+            <div class="tool-name">Google Search Console</div>
+            <div class="tool-tier">SEO · Free · <span style="color:var(--red);font-size:10px">REQUIRED</span></div>
+          </div>
+        </div>
+        <div class="tool-desc">Primary SEO health monitor. Tracks indexing coverage, keyword impressions, Core Web Vitals from real users, and crawl errors. Submit sitemap here on first deploy.</div>
+        <ul class="tool-steps">
+          <li>Go to search.google.com/search-console</li>
+          <li>Add property: URL prefix → <code>https://devstash.me</code></li>
+          <li>Verify via HTML meta tag (add to <code>app/layout.tsx</code>)</li>
+          <li>Copy verification token → <code>GOOGLE_SITE_VERIFICATION</code> env var</li>
+          <li>Submit sitemap post-launch: <code>/sitemap.xml</code></li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="background:rgba(234,67,53,.15)">📊</div>
+          <div>
+            <div class="tool-name">Google Analytics 4</div>
+            <div class="tool-tier">Analytics · Free · <span style="color:var(--red);font-size:10px">REQUIRED</span></div>
+          </div>
+        </div>
+        <div class="tool-desc">Tracks user behaviour, traffic sources, and conversion events (CV viewed, contact form submitted, GitHub link clicks). Uses Measurement ID injected via <code>next/script</code> with lazyOnload strategy.</div>
+        <ul class="tool-steps">
+          <li>Create property at analytics.google.com</li>
+          <li>Set up Web data stream → <code>devstash.me</code></li>
+          <li>Copy Measurement ID → <code>NEXT_PUBLIC_GA_ID</code></li>
+          <li>Configure custom events in GA4 dashboard post-launch</li>
+          <li>Link to Search Console in GA4 for unified reporting</li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="background:rgba(0,119,255,.15)">🔷</div>
+          <div>
+            <div class="tool-name">GitHub + GitHub Actions</div>
+            <div class="tool-tier">Version Control + CI/CD · Free · <span style="color:var(--red);font-size:10px">REQUIRED</span></div>
+          </div>
+        </div>
+        <div class="tool-desc">Source control and automated CI pipeline. GitHub Actions runs Lighthouse audits, MDX frontmatter linting, TypeScript type-check, and broken link scans on every PR.</div>
+        <ul class="tool-steps">
+          <li>Create repo: <code>devstash-web</code> (private recommended initially)</li>
+          <li>Set branch protection on <code>main</code> — require CI to pass</li>
+          <li>Create secrets: <code>VERCEL_TOKEN</code>, <code>LHCI_GITHUB_APP_TOKEN</code></li>
+          <li>Install Lighthouse CI GitHub App for PR comments</li>
+          <li>Configure Dependabot for automatic dependency updates</li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="background:rgba(255,102,0,.15)">🦁</div>
+          <div>
+            <div class="tool-name">Bing Webmaster Tools</div>
+            <div class="tool-tier">SEO · Free · <span style="color:var(--warn);font-size:10px">RECOMMENDED</span></div>
+          </div>
+        </div>
+        <div class="tool-desc">Covers Bing + Microsoft Edge search (significant traffic). Can auto-import verified property from Google Search Console — takes 2 minutes after GSC is set up.</div>
+        <ul class="tool-steps">
+          <li>Go to bing.com/webmasters</li>
+          <li>Import from Google Search Console (easiest path)</li>
+          <li>Submit <code>/sitemap.xml</code></li>
+          <li>Copy verification meta tag → <code>BING_SITE_VERIFICATION</code></li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="background:rgba(255,92,0,.15)">🔬</div>
+          <div>
+            <div class="tool-name">Ahrefs Webmaster Tools</div>
+            <div class="tool-tier">SEO · Free (limited) · <span style="color:var(--warn);font-size:10px">RECOMMENDED</span></div>
+          </div>
+        </div>
+        <div class="tool-desc">Backlink monitoring, keyword rank tracking, and site audit. The free tier is sufficient to monitor backlink growth and catch on-page SEO issues at scale.</div>
+        <ul class="tool-steps">
+          <li>Sign up at ahrefs.com/webmaster-tools</li>
+          <li>Add site → verify via DNS TXT or HTML file</li>
+          <li>Run initial site audit after launch</li>
+          <li>Schedule weekly audit in Ahrefs dashboard</li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="background:rgba(0,120,212,.15)">👁️</div>
+          <div>
+            <div class="tool-name">Microsoft Clarity</div>
+            <div class="tool-tier">UX Analytics · Free · <span style="color:var(--muted);font-size:10px">OPTIONAL</span></div>
+          </div>
+        </div>
+        <div class="tool-desc">Session recordings, heatmaps, and scroll depth analysis. Invaluable for understanding mobile UX and CTA placement. Zero performance cost with lazyOnload strategy.</div>
+        <ul class="tool-steps">
+          <li>Sign up at clarity.microsoft.com</li>
+          <li>Create new project → <code>devstash.me</code></li>
+          <li>Copy Project ID → <code>NEXT_PUBLIC_CLARITY_ID</code></li>
+          <li>Add GDPR note in Privacy Policy</li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="background:rgba(255,165,0,.15)">📦</div>
+          <div>
+            <div class="tool-name">npm + pnpm</div>
+            <div class="tool-tier">Package Management · Free · <span style="color:var(--red);font-size:10px">REQUIRED</span></div>
+          </div>
+        </div>
+        <div class="tool-desc">Use <strong>pnpm</strong> over npm for faster installs and deterministic lockfiles. Vercel supports pnpm natively. Enables monorepo-ready architecture for future scaling (e.g. splitting blog into its own package).</div>
+        <ul class="tool-steps">
+          <li><code>npm install -g pnpm</code></li>
+          <li>Create <code>.npmrc</code> with <code>shamefully-hoist=true</code> for Next.js compat</li>
+          <li>Set Vercel install command: <code>pnpm install</code></li>
+          <li>Commit <code>pnpm-lock.yaml</code> to version control</li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="background:rgba(255,69,0,.15)">🤖</div>
+          <div>
+            <div class="tool-name">Lighthouse CI</div>
+            <div class="tool-tier">Performance CI · Free · <span style="color:var(--warn);font-size:10px">RECOMMENDED</span></div>
+          </div>
+        </div>
+        <div class="tool-desc">Automated performance gating in CI. Every PR is scored against the 90+ Lighthouse target. Blocks merges that would regress performance, accessibility, or SEO scores.</div>
+        <ul class="tool-steps">
+          <li>Install Lighthouse CI GitHub App</li>
+          <li>Get token → <code>LHCI_GITHUB_APP_TOKEN</code> GitHub secret</li>
+          <li>Create <code>lighthouserc.cjs</code> in project root</li>
+          <li>Add workflow: <code>.github/workflows/lighthouse.yml</code></li>
+        </ul>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="background:rgba(20,184,166,.15)">🌊</div>
+          <div>
+            <div class="tool-name">Cloudflare (DNS)</div>
+            <div class="tool-tier">DNS · Free · <span style="color:var(--warn);font-size:10px">RECOMMENDED</span></div>
+          </div>
+        </div>
+        <div class="tool-desc">Point <code>devstash.me</code> DNS to Vercel via Cloudflare for faster DNS propagation, DDoS protection, and flexible DNS management. Keep proxy OFF (grey cloud) on the A record for Vercel to handle SSL properly.</div>
+        <ul class="tool-steps">
+          <li>Transfer or add domain to Cloudflare</li>
+          <li>Add A record pointing to Vercel IP (from Vercel dashboard)</li>
+          <li>Keep proxy status: DNS Only (not proxied)</li>
+          <li>Vercel handles SSL/HTTPS automatically</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- ENV VARS TABLE -->
+    <h3 style="font-size:16px;font-weight:600;margin:40px 0 16px;color:var(--text)">Environment Variables Reference</h3>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+      <table class="env-table">
+        <thead>
+          <tr>
+            <th>Variable</th>
+            <th>Where to get it</th>
+            <th>Used in</th>
+            <th>Required</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="var">NEXT_PUBLIC_SITE_URL</td><td style="color:var(--muted);font-size:12px">Manually set: <code>https://devstash.me</code></td><td style="color:var(--muted);font-size:12px">Canonical URLs, OG images, sitemaps</td><td><span class="req req-yes">Yes</span></td></tr>
+          <tr><td class="var">NEXT_PUBLIC_GA_ID</td><td style="color:var(--muted);font-size:12px">Google Analytics 4 → Measurement ID</td><td style="color:var(--muted);font-size:12px">GA4 tracking script</td><td><span class="req req-yes">Yes</span></td></tr>
+          <tr><td class="var">GOOGLE_SITE_VERIFICATION</td><td style="color:var(--muted);font-size:12px">Google Search Console → meta tag value</td><td style="color:var(--muted);font-size:12px"><code>app/layout.tsx</code> metadata</td><td><span class="req req-yes">Yes</span></td></tr>
+          <tr><td class="var">BING_SITE_VERIFICATION</td><td style="color:var(--muted);font-size:12px">Bing Webmaster Tools → meta tag</td><td style="color:var(--muted);font-size:12px"><code>app/layout.tsx</code> metadata</td><td><span class="req req-opt">Optional</span></td></tr>
+          <tr><td class="var">NEXT_PUBLIC_CLARITY_ID</td><td style="color:var(--muted);font-size:12px">Microsoft Clarity → Project ID</td><td style="color:var(--muted);font-size:12px">Clarity tracking script</td><td><span class="req req-opt">Optional</span></td></tr>
+          <tr><td class="var">LHCI_GITHUB_APP_TOKEN</td><td style="color:var(--muted);font-size:12px">Lighthouse CI GitHub App settings</td><td style="color:var(--muted);font-size:12px">GitHub Actions CI only</td><td><span class="req req-opt">CI only</span></td></tr>
+          <tr><td class="var">VERCEL_TOKEN</td><td style="color:var(--muted);font-size:12px">Vercel → Account Settings → Tokens</td><td style="color:var(--muted);font-size:12px">GitHub Actions deploy step</td><td><span class="req req-yes">Yes</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout info" style="margin-top:20px">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body"><strong>Local vs production env files</strong> Use <code>.env.local</code> for local dev (gitignored). Add all the same vars in Vercel's Project Settings → Environment Variables for production and preview deployments.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════ PHASES ══════════════ -->
+<section style="padding:64px 0 0">
+  <div class="wrap">
+    <p style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:12px">Step-by-Step Build Order</p>
+    <h2 style="font-size:clamp(22px,3vw,32px);font-weight:700;letter-spacing:-0.03em;margin-bottom:32px">Build Phases</h2>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="phases">
+
+    <!-- ━━━━━━━━ PHASE 0 ━━━━━━━━ -->
+    <div class="phase-card" id="p0">
+      <div class="phase-header">
+        <div class="phase-header-left">
+          <div class="phase-num" style="background:#EF4444">P0</div>
+          <div>
+            <div class="phase-title">Foundation & Repository Setup</div>
+            <div class="phase-sub">Scaffold the project, configure the repo, and establish the baseline everything else builds on</div>
+          </div>
+        </div>
+        <div class="phase-header-right">
+          <span class="week-badge">Week 1 · Days 1–3</span>
+          <span class="priority-badge p-critical">🔴 Critical — blocking</span>
+        </div>
+      </div>
+      <div class="phase-body">
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">
+              <span>Project Scaffolding</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-infra">INFRA</span></div>
+              <span class="step-count">5 steps</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <ul class="steps-list">
+              <li class="step">
+                <div class="step-icon infra">1</div>
+                <div class="step-text">
+                  Initialize project with <code>create-next-app</code> using App Router + TypeScript
+                  <span class="detail"><code>pnpm create next-app@latest devstash --typescript --tailwind --app --src-dir=false --import-alias="@/*"</code> — set <code>--src-dir=false</code> to keep <code>app/</code> at root as per the architecture doc.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon infra">2</div>
+                <div class="step-text">
+                  Create the full folder structure from the architecture spec
+                  <span class="detail">Manually create: <code>components/ui/</code>, <code>components/seo/</code>, <code>components/blog/</code>, <code>components/layout/</code>, <code>components/sections/</code>, <code>content/projects/</code>, <code>content/blogs/</code>, <code>content/pages/</code>, <code>content/metadata/</code>, <code>lib/seo/</code>, <code>lib/schema/</code>, <code>lib/markdown/</code>, <code>lib/analytics/</code>, <code>lib/automation/</code>, <code>scripts/seo/</code>, <code>scripts/automation/</code>, <code>scripts/indexing/</code>, <code>public/og/</code>, <code>public/logos/</code>, <code>public/favicons/</code>, <code>docs/</code> — add <code>.gitkeep</code> to each empty directory.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon infra">3</div>
+                <div class="step-text">
+                  Initialize Git, create GitHub repo, set up branch protection
+                  <span class="detail">Create <code>main</code> (production) and <code>dev</code> (integration) branches. Set branch protection on <code>main</code>: require PR review + all CI checks passing before merge. Never commit directly to <code>main</code>.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon infra">4</div>
+                <div class="step-text">
+                  Create <code>.env.local</code> and <code>.env.example</code> files
+                  <span class="detail">Add all env variables from the reference table above into <code>.env.example</code> with placeholder values. Gitignore <code>.env.local</code>. Commit <code>.env.example</code> so collaborators know exactly what to fill.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon infra">5</div>
+                <div class="step-text">
+                  Connect GitHub repo to Vercel — configure project settings
+                  <span class="detail">Framework: Next.js. Build command: <code>pnpm build</code>. Install command: <code>pnpm install</code>. Output directory: <code>.next</code>. Add all env vars in Vercel dashboard. Enable Preview Deployments for all branches.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">Code Quality Config</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-infra">INFRA</span></div>
+              <span class="step-count">4 steps</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <ul class="steps-list">
+              <li class="step">
+                <div class="step-icon infra">1</div>
+                <div class="step-text">
+                  Configure ESLint with Next.js recommended rules + custom rules
+                  <span class="detail">Enable: <code>@next/next/no-img-element</code> (force <code>next/image</code>), <code>no-console</code> (warn), <code>@typescript-eslint/no-explicit-any</code> (error). Add <code>eslint-config-next</code>, <code>eslint-plugin-tailwindcss</code> for class ordering.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon infra">2</div>
+                <div class="step-text">
+                  Configure Prettier for consistent code formatting
+                  <span class="detail">Settings: <code>semi: false</code>, <code>singleQuote: true</code>, <code>tabWidth: 2</code>, <code>printWidth: 100</code>. Add <code>prettier-plugin-tailwindcss</code> for automatic Tailwind class sorting.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon infra">3</div>
+                <div class="step-text">
+                  Set up Husky + lint-staged for pre-commit hooks
+                  <span class="detail"><code>pnpm add -D husky lint-staged</code>. Pre-commit: run ESLint + Prettier + TypeScript check on staged files. Pre-push: run <code>pnpm build</code> to catch build errors before push. This prevents broken code from ever reaching the repo.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon infra">4</div>
+                <div class="step-text">
+                  Configure <code>tsconfig.json</code> path aliases matching the architecture
+                  <span class="detail">Add paths: <code>"@/components/*"</code>, <code>"@/lib/*"</code>, <code>"@/content/*"</code>, <code>"@/types/*"</code>. Set <code>strict: true</code>, <code>noUnusedLocals: true</code>, <code>noUnusedParameters: true</code> for maximum type safety.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━ PHASE 1 ━━━━━━━━ -->
+    <div class="phase-card" id="p1">
+      <div class="phase-header">
+        <div class="phase-header-left">
+          <div class="phase-num" style="background:#F59E0B">P1</div>
+          <div>
+            <div class="phase-title">Core Infrastructure</div>
+            <div class="phase-sub">Tailwind design tokens, font system, global layout, and CI/CD pipeline</div>
+          </div>
+        </div>
+        <div class="phase-header-right">
+          <span class="week-badge">Week 1–2</span>
+          <span class="priority-badge p-critical">🔴 Critical — blocking</span>
+        </div>
+      </div>
+      <div class="phase-body">
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">Tailwind Design Token System</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-fe">FE</span><span class="tag tag-infra">INFRA</span></div>
+              <span class="step-count">3 steps</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <ul class="steps-list">
+              <li class="step">
+                <div class="step-icon fe">1</div>
+                <div class="step-text">
+                  Extend <code>tailwind.config.ts</code> with all DevStash brand tokens
+                  <span class="detail">Map all color tokens from the brand spec to Tailwind: <code>bg-ds-bg</code> (#0B0F19), <code>bg-ds-surface</code> (#111827), <code>text-ds-accent</code> (#3B82F6), <code>text-ds-purple</code> (#8B5CF6), etc. Add <code>fontFamily</code> tokens. Set <code>darkMode: 'class'</code> for controlled theme switching.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon fe">2</div>
+                <div class="step-text">
+                  Define CSS custom properties in <code>globals.css</code>
+                  <span class="detail">Define all tokens as CSS variables on <code>:root</code> for use outside Tailwind (e.g. in SVG, inline styles): <code>--color-accent: #3B82F6</code>, <code>--color-bg: #0B0F19</code>, etc. This ensures tokens are accessible in non-Tailwind contexts.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon fe">3</div>
+                <div class="step-text">
+                  Configure spacing scale and typography scale in Tailwind
+                  <span class="detail">Extend spacing with named values: <code>section: '5rem'</code>, <code>section-lg: '8rem'</code>. Add fontSize entries matching the type scale: <code>display: ['4.5rem', { lineHeight: '1.05', fontWeight: '700' }]</code>.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">Font Setup (self-hosted)</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-fe">FE</span></div>
+              <span class="step-count">2 steps</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <ul class="steps-list">
+              <li class="step">
+                <div class="step-icon fe">1</div>
+                <div class="step-text">
+                  Configure fonts via <code>next/font/google</code> in <code>app/layout.tsx</code>
+                  <span class="detail">Load DM Sans (weights 300–700) + JetBrains Mono (weights 400, 500, 700) using <code>next/font/google</code>. Assign as CSS variables: <code>--font-sans</code>, <code>--font-mono</code>. Self-hosting means zero GDPR issues and zero layout shift (no FOUT). Add variable classNames to <code>&lt;html&gt;</code> tag.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon fe">2</div>
+                <div class="step-text">
+                  Apply fonts to Tailwind <code>fontFamily</code> and <code>globals.css</code> base styles
+                  <span class="detail">Set <code>html, body { font-family: var(--font-sans); }</code> in <code>globals.css</code>. Configure Tailwind <code>fontFamily.sans</code> and <code>fontFamily.mono</code> to use CSS variables. This means all Tailwind <code>font-sans</code> and <code>font-mono</code> classes automatically use the DevStash fonts.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">Root Layout & Metadata Defaults</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-fe">FE</span><span class="tag tag-seo">SEO</span></div>
+              <span class="step-count">3 steps</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <ul class="steps-list">
+              <li class="step">
+                <div class="step-icon fe">1</div>
+                <div class="step-text">
+                  Create <code>content/metadata/site.config.ts</code> — global SEO defaults
+                  <span class="detail">Export: <code>siteName</code>, <code>siteUrl</code>, <code>defaultTitle</code>, <code>defaultDescription</code>, <code>defaultOgImage</code>, <code>twitterHandle</code>. This is the single source of truth for all default metadata — never hardcode these values in page files.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon seo">2</div>
+                <div class="step-text">
+                  Configure root <code>app/layout.tsx</code> metadata export with all required tags
+                  <span class="detail">Export <code>metadata</code> object with: <code>title</code> (template), <code>description</code>, <code>metadataBase</code> (from <code>NEXT_PUBLIC_SITE_URL</code>), <code>openGraph</code>, <code>twitter</code>, <code>robots</code>, <code>verification</code> (Google + Bing tokens). Add GA4 and Clarity scripts via <code>next/script</code> with <code>strategy="lazyOnload"</code>.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon fe">3</div>
+                <div class="step-text">
+                  Build <code>lib/seo/buildMetadata.ts</code> — centralized metadata factory
+                  <span class="detail">Takes <code>MetadataOptions</code> type (title, description, canonical, ogImage, type) and returns a fully-typed Next.js <code>Metadata</code> object. All pages call this function instead of manually constructing metadata. Ensures consistency and prevents missing fields.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">GitHub Actions CI Pipeline</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-infra">INFRA</span><span class="tag tag-auto">AUTO</span></div>
+              <span class="step-count">3 steps</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <ul class="steps-list">
+              <li class="step">
+                <div class="step-icon infra">1</div>
+                <div class="step-text">
+                  Create <code>.github/workflows/ci.yml</code> — main CI pipeline
+                  <span class="detail">Triggers on: all PRs and pushes to <code>main</code>. Steps: <code>pnpm install</code> → TypeScript type check (<code>pnpm tsc --noEmit</code>) → ESLint (<code>pnpm lint</code>) → build (<code>pnpm build</code>). Fail fast — abort on first failure to save CI minutes.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon infra">2</div>
+                <div class="step-text">
+                  Create <code>.github/workflows/lighthouse.yml</code> — performance gating
+                  <span class="detail">Runs on: push to <code>main</code> and PRs. Uses <code>@lhci/cli</code>. Test URLs: <code>/</code>, <code>/blog</code>, <code>/projects</code>. Assertions: performance ≥ 90, accessibility ≥ 90, SEO ≥ 90. Posts results as PR comment via Lighthouse CI GitHub App.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon infra">3</div>
+                <div class="step-text">
+                  Create <code>.github/workflows/link-check.yml</code> — weekly broken link scan
+                  <span class="detail">Scheduled: every Monday 09:00 UTC (<code>cron: '0 9 * * 1'</code>). Scans all internal links for 404s. Opens a GitHub Issue automatically if broken links are found. This prevents link rot from accumulating silently.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━ PHASE 2 ━━━━━━━━ -->
+    <div class="phase-card" id="p2">
+      <div class="phase-header">
+        <div class="phase-header-left">
+          <div class="phase-num" style="background:#3B82F6">P2</div>
+          <div>
+            <div class="phase-title">Design System & Component Library</div>
+            <div class="phase-sub">UI primitives, layout components, and SEO component wrappers — the building blocks for every page</div>
+          </div>
+        </div>
+        <div class="phase-header-right">
+          <span class="week-badge">Week 2–3</span>
+          <span class="priority-badge p-critical">🔴 Critical — blocking</span>
+        </div>
+      </div>
+      <div class="phase-body">
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">UI Primitives — <code>components/ui/</code></div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-fe">FE</span></div>
+              <span class="step-count">6 components</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <div class="checklist">
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>Button</strong> — variants: primary, ghost, danger. Sizes: sm, md, lg. Props: <code>as</code> (renders as <code>a</code> or <code>button</code>), loading state, icon slot. Always a Server Component except when <code>onClick</code> needed.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>Card</strong> — base card with surface background, border, and border-radius tokens. Variants: default, hover (cursor pointer, border accent on hover). Used by BlogCard, ProjectCard.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>Badge / Tag</strong> — small label pill. Props: <code>variant</code> (default, blue, purple, green, warn). Used for project tags, blog categories, tech stack labels.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>Input / Textarea</strong> — form inputs styled to design system. Props: <code>label</code>, <code>error</code>, <code>hint</code>. Accessible: label linked to input via <code>htmlFor</code>, error messages via <code>aria-describedby</code>.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>Separator / Divider</strong> — horizontal line using border token. Optional label prop for "or continue with" style dividers.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>SkeletonLoader</strong> — animated loading placeholder matching Card and BlogCard shapes. Used during Suspense boundaries for perceived performance.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">Layout Components — <code>components/layout/</code></div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-fe">FE</span><span class="tag tag-seo">SEO</span></div>
+              <span class="step-count">4 components</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <div class="checklist">
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>Navbar</strong> — sticky, backdrop-blur, keyboard-accessible. Server Component by default. Active route detection via <code>usePathname</code> (Client Component island). Mobile: hamburger button triggers drawer. Desktop: full nav links.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>MobileNav</strong> — drawer/sheet component for mobile navigation. Traps focus when open. Closes on route change (via <code>usePathname</code> effect). Use <code>dialog</code> HTML element for accessibility.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>Footer</strong> — static Server Component. Navigation links, legal links, social links, copyright. <code>address</code> semantic element for contact info.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>Breadcrumb</strong> — renders both visible breadcrumb trail and JSON-LD BreadcrumbList schema. Takes <code>items[]</code> array. Used on all nested routes (project detail, blog post, category archive).</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">SEO Components — <code>components/seo/</code></div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-seo">SEO</span><span class="tag tag-fe">FE</span></div>
+              <span class="step-count">3 components</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <div class="checklist">
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>JsonLd</strong> — generic component that renders a <code>&lt;script type="application/ld+json"&gt;</code> tag. Takes a typed schema object. Used by every page via the <code>lib/schema/builders.ts</code> functions.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>OpenGraphImage</strong> — component for the dynamic OG image route at <code>app/api/og/route.tsx</code>. Uses <code>@vercel/og</code> ImageResponse with DevStash brand colors and typography.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>StructuredData helper components</strong> — thin wrappers for PersonSchema, WebSiteSchema. Rendered once in the root layout. All other schema is page-level via <code>generateMetadata</code>.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">Schema Builders — <code>lib/schema/builders.ts</code></div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-be">BE</span><span class="tag tag-seo">SEO</span></div>
+              <span class="step-count">6 builder functions</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <div class="callout info">
+              <div class="callout-icon">ℹ️</div>
+              <div class="callout-body"><strong>Install schema types</strong> <code>pnpm add schema-dts</code> — provides TypeScript types for all Schema.org types (Person, BlogPosting, SoftwareApplication, etc). Type-safe JSON-LD with zero runtime cost.</div>
+            </div>
+            <div class="checklist" style="margin-top:12px">
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>buildPersonSchema()</strong> — for the About page and root layout. <code>@type: Person</code> with name, jobTitle, url, sameAs links.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>buildWebSiteSchema()</strong> — for the root layout. Includes <code>SearchAction</code> if site search is implemented.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>buildBlogPostingSchema(post: BlogPost)</strong> — maps all MDX frontmatter fields to BlogPosting schema. Called in each blog post's <code>generateMetadata</code>.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>buildProjectSchema(project: Project)</strong> — maps project data to SoftwareApplication or CreativeWork depending on <code>project.type</code>.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>buildBreadcrumbSchema(items: BreadcrumbItem[])</strong> — takes array of <code>{name, url}</code> and returns BreadcrumbList. Called from the Breadcrumb component.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>buildFAQSchema(faqs: FAQItem[])</strong> — for FAQ sections on any page. Renders both visible accordion UI and invisible FAQPage schema.</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━ PHASE 3 ━━━━━━━━ -->
+    <div class="phase-card" id="p3">
+      <div class="phase-header">
+        <div class="phase-header-left">
+          <div class="phase-num" style="background:#8B5CF6">P3</div>
+          <div>
+            <div class="phase-title">Content Layer & Data Architecture</div>
+            <div class="phase-sub">TypeScript types, MDX parsing, all lib/markdown utilities, and content validation — the backend of the frontend</div>
+          </div>
+        </div>
+        <div class="phase-header-right">
+          <span class="week-badge">Week 3–4</span>
+          <span class="priority-badge p-critical">🔴 Critical — blocking</span>
+        </div>
+      </div>
+      <div class="phase-body">
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">TypeScript Type Definitions</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-be">BE</span></div>
+              <span class="step-count">4 type files</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <ul class="steps-list">
+              <li class="step">
+                <div class="step-icon be">1</div>
+                <div class="step-text">
+                  Create <code>types/blog.ts</code> — BlogPost, BlogCategory, BlogTag interfaces
+                  <span class="detail">All fields from the blog frontmatter spec: <code>title</code>, <code>slug</code>, <code>description</code>, <code>author</code>, <code>createdAt</code>, <code>updatedAt</code>, <code>category</code>, <code>tags</code>, <code>featuredImage</code>, <code>readingTime</code>, <code>canonical</code>, <code>draft?</code>, <code>featured?</code>, <code>series?</code>, <code>seriesPart?</code>, <code>content?</code>.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon be">2</div>
+                <div class="step-text">
+                  Create <code>types/project.ts</code> — Project interface
+                  <span class="detail">Fields: <code>title</code>, <code>slug</code>, <code>description</code>, <code>longDescription</code>, <code>tags</code>, <code>githubUrl?</code>, <code>liveUrl?</code>, <code>featuredImage</code>, <code>status</code> (enum: 'completed' | 'in-progress' | 'archived'), <code>createdAt</code>, <code>featured</code>, <code>type</code> (enum: 'web-app' | 'tool' | 'automation' | 'library').</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon be">3</div>
+                <div class="step-text">
+                  Create <code>types/seo.ts</code> — MetadataOptions, OgOptions, BreadcrumbItem, FAQItem
+                  <span class="detail">These types are consumed by all <code>lib/seo/</code> and <code>lib/schema/</code> functions. Centralizing them means a single type change propagates everywhere instead of hunting individual files.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon be">4</div>
+                <div class="step-text">
+                  Create <code>types/content.ts</code> — shared content utility types
+                  <span class="detail">Export: <code>PaginatedResult&lt;T&gt;</code> (for future paginated APIs), <code>SortOrder</code> ('asc' | 'desc'), <code>ContentStatus</code>, <code>FilterOptions</code>. Design these now so future features are consistent.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">MDX Pipeline — <code>lib/markdown/</code></div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-be">BE</span></div>
+              <span class="step-count">5 steps</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <ul class="steps-list">
+              <li class="step">
+                <div class="step-icon be">1</div>
+                <div class="step-text">
+                  Install and configure MDX toolchain
+                  <span class="detail"><code>pnpm add @next/mdx @mdx-js/loader @mdx-js/react</code> + <code>pnpm add -D gray-matter remark remark-gfm rehype-slug rehype-pretty-code</code>. Configure in <code>next.config.ts</code> to enable <code>.mdx</code> files. <code>rehype-pretty-code</code> for syntax highlighting (uses Shiki — zero client JS).</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon be">2</div>
+                <div class="step-text">
+                  Build <code>lib/markdown/blog.ts</code> — blog data fetching layer
+                  <span class="detail">Export: <code>getAllPosts(options?)</code> — reads all <code>.mdx</code> files from <code>content/blogs/</code>, parses frontmatter with <code>gray-matter</code>, filters <code>draft: false</code>, sorts by <code>createdAt</code> desc. <code>getPostBySlug(slug)</code> — returns full post including parsed MDX content. <code>getRelatedPosts(post, limit?)</code> — returns N posts matching same category or tags.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon be">3</div>
+                <div class="step-text">
+                  Build <code>lib/markdown/projects.ts</code> — project data fetching layer
+                  <span class="detail">Export: <code>getAllProjects()</code>, <code>getProjectBySlug(slug)</code>, <code>getFeaturedProjects(limit?)</code>. Reads from <code>content/projects/*.json</code>. For scalability: the function signature is identical to what a future CMS SDK would export — so swapping the data source is a 1-file change.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon be">4</div>
+                <div class="step-text">
+                  Build <code>lib/automation/</code> utilities
+                  <span class="detail"><code>slugify(text)</code> — consistent slug generation. <code>readingTime(content)</code> — calculates estimated reading time at 200 wpm. <code>validateFrontmatter(data)</code> — runtime validation of required fields (for use in the linting script). <code>formatDate(date)</code> — consistent date formatting.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon be">5</div>
+                <div class="step-text">
+                  Configure <code>generateStaticParams</code> in all dynamic routes
+                  <span class="detail">Every dynamic page (<code>[slug]</code>, <code>[category]</code>, <code>[tag]</code>) must export <code>generateStaticParams()</code>. This pre-renders all content pages at build time as static HTML — no server required at runtime, instant loading, perfect for SEO.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">Robots.txt & Sitemap — system routes</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-seo">SEO</span><span class="tag tag-be">BE</span></div>
+              <span class="step-count">2 steps</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <ul class="steps-list">
+              <li class="step">
+                <div class="step-icon seo">1</div>
+                <div class="step-text">
+                  Create <code>app/robots.ts</code> — programmatic robots.txt
+                  <span class="detail">Allow all important routes. Disallow: <code>/api/</code>, <code>/_next/</code>. Sitemap reference: <code>https://devstash.me/sitemap.xml</code>. Never use a static <code>robots.txt</code> file — using the TypeScript route means it can reference env variables and change per environment.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon seo">2</div>
+                <div class="step-text">
+                  Create <code>app/sitemap.ts</code> — auto-generated XML sitemap
+                  <span class="detail">Reads all posts and projects via <code>lib/markdown</code>. Outputs: static routes (priority 1.0/0.8) + all blog posts (priority 0.7, changeFreq weekly) + all project pages (priority 0.6, changeFreq monthly). Submit URL to Search Console after first deploy.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━ PHASE 4 ━━━━━━━━ -->
+    <div class="phase-card" id="p4">
+      <div class="phase-header">
+        <div class="phase-header-left">
+          <div class="phase-num" style="background:#3B82F6">P4</div>
+          <div>
+            <div class="phase-title">Core Marketing & Portfolio Pages</div>
+            <div class="phase-sub">Home, About, Projects (list + detail), Resources, Tools, Contact, Legal</div>
+          </div>
+        </div>
+        <div class="phase-header-right">
+          <span class="week-badge">Week 4–6</span>
+          <span class="priority-badge p-high">🟡 High priority</span>
+        </div>
+      </div>
+      <div class="phase-body">
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">Homepage — <code>app/(marketing)/page.tsx</code></div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-fe">FE</span><span class="tag tag-seo">SEO</span></div>
+              <span class="step-count">5 sections</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <div class="callout info">
+              <div class="callout-icon">ℹ️</div>
+              <div class="callout-body"><strong>Homepage must answer 5 questions above the fold</strong> Who you are · What you build · What stack you use · Why someone should trust you · Where to go next. Every section maps to one of these.</div>
+            </div>
+            <div class="checklist" style="margin-top:12px">
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>HeroSection</strong> — name, one-line positioning, primary CTAs (View Projects + Read Blog). Grid background, subtle animation CSS-only. One <code>&lt;h1&gt;</code> tag — must contain primary keyword naturally.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>TechStackSection</strong> — visual grid of technologies. Server Component, no JS. Icons from <code>public/logos/</code>.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>FeaturedProjectsSection</strong> — calls <code>getFeaturedProjects(3)</code>. Server Component. Links to <code>/projects/[slug]</code>.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>LatestPostsSection</strong> — calls <code>getAllPosts({limit: 3})</code>. Server Component. Shows latest 3 blog posts with category badge.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>CTASection</strong> — contact CTA. Links to <code>/contact</code>. Keep minimal — one headline, one button.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">Projects System</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-fe">FE</span><span class="tag tag-be">BE</span><span class="tag tag-seo">SEO</span></div>
+              <span class="step-count">3 pages</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <ul class="steps-list">
+              <li class="step">
+                <div class="step-icon fe">1</div>
+                <div class="step-text">
+                  Build <code>app/projects/page.tsx</code> — projects list with filtering
+                  <span class="detail">Server Component. Calls <code>getAllProjects()</code>. Client-side filter island (<code>use client</code>) for tag/status filtering — keeps list static while enabling interactivity. URL-based filter state (<code>/projects?tag=next-js</code>) for shareability and SEO.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon fe">2</div>
+                <div class="step-text">
+                  Build <code>app/projects/[slug]/page.tsx</code> — project detail page
+                  <span class="detail">Exports <code>generateStaticParams</code> + <code>generateMetadata</code>. Sections: hero (title, description, links, tags), tech stack badges, detailed breakdown, related blog posts. Injects <code>SoftwareApplication</code> JSON-LD and <code>BreadcrumbList</code> schema.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon fe">3</div>
+                <div class="step-text">
+                  Build <code>components/sections/ProjectCard.tsx</code>
+                  <span class="detail">Props: <code>project: Project</code>. Shows: featured image (next/image), title, description (truncated), tag badges, status indicator, GitHub/Live links. Hover state: border accent color, slight lift. Entire card is a link to <code>/projects/[slug]</code>.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">Contact Page with Form</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-fe">FE</span><span class="tag tag-be">BE</span></div>
+              <span class="step-count">3 steps</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <ul class="steps-list">
+              <li class="step">
+                <div class="step-icon fe">1</div>
+                <div class="step-text">
+                  Build contact form UI — <code>app/contact/page.tsx</code>
+                  <span class="detail">Fields: name, email, subject (dropdown), message. Client Component for form state. Accessibility: all inputs labeled, error messages announced via <code>aria-live</code>, loading state on submit button. Never autofocus on mobile (causes scroll jump).</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon be">2</div>
+                <div class="step-text">
+                  Build form API route — <code>app/api/contact/route.ts</code>
+                  <span class="detail">POST route. Validates request body (zod schema). Rate limiting: max 3 requests per IP per hour (use Vercel KV or a simple in-memory map for now). Send email notification. Return typed JSON response.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon be">3</div>
+                <div class="step-text">
+                  Add email delivery — use Resend (free tier: 3,000 emails/month)
+                  <span class="detail"><code>pnpm add resend</code>. Create Resend account, verify <code>devstash.me</code> domain. Add <code>RESEND_API_KEY</code> env var. Send notification email on form submit. Track <code>contact_form_submitted</code> GA4 event on success.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━ PHASE 5 ━━━━━━━━ -->
+    <div class="phase-card" id="p5">
+      <div class="phase-header">
+        <div class="phase-header-left">
+          <div class="phase-num" style="background:#8B5CF6">P5</div>
+          <div>
+            <div class="phase-title">Blog System</div>
+            <div class="phase-sub">Full blog engine: list, post, category archive, tag archive, TOC, related posts — all under /blog</div>
+          </div>
+        </div>
+        <div class="phase-header-right">
+          <span class="week-badge">Week 5–7</span>
+          <span class="priority-badge p-high">🟡 High priority</span>
+        </div>
+      </div>
+      <div class="phase-body">
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">Blog Routes — all under <code>app/blog/</code></div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-fe">FE</span><span class="tag tag-be">BE</span><span class="tag tag-seo">SEO</span></div>
+              <span class="step-count">4 routes</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <div class="callout warn">
+              <div class="callout-icon">⚠️</div>
+              <div class="callout-body"><strong>Architecture rule — must enforce</strong> Blog code must never import from <code>components/sections/</code> or <code>lib/markdown/projects.ts</code>. Only shared UI primitives (<code>components/ui/</code>) and layout (<code>components/layout/</code>). Keep these modules completely separate.</div>
+            </div>
+            <div class="checklist" style="margin-top:12px">
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>Blog List</strong> <code>app/blog/page.tsx</code> — server component. Calls <code>getAllPosts()</code>. Renders BlogList with filter UI. Client filter island for category/tag/sort filtering. URL params for filterstate.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>Blog Post</strong> <code>app/blog/[slug]/page.tsx</code> — <code>generateStaticParams</code> + <code>generateMetadata</code>. Renders: post header (title, meta, category, tags, reading time, date), MDX content, TableOfContents sidebar, AuthorBio, RelatedPosts. Injects BlogPosting + BreadcrumbList JSON-LD.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>Category Archive</strong> <code>app/blog/category/[category]/page.tsx</code> — filters posts by category. Each category slug must have a <code>generateStaticParams</code> entry. Unique metadata per category (title: "Automation Posts | DevStash Blog").</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>Tag Archive</strong> <code>app/blog/tag/[tag]/page.tsx</code> — same pattern as category. Generates one page per unique tag across all posts.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">Blog Components — <code>components/blog/</code></div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-fe">FE</span></div>
+              <span class="step-count">7 components</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <div class="checklist">
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>BlogCard</strong> — shows: featured image, title, description, category badge, tag pills, reading time, date. Props: <code>post: BlogPost</code>. Entire card is a link. Featured image uses <code>next/image</code> with proper <code>sizes</code> prop.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>BlogList</strong> — grid of BlogCards. Props: <code>posts: BlogPost[]</code>. Uses CSS Grid with <code>auto-fit, minmax(320px, 1fr)</code>. Includes empty state when no posts match filter.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>BlogFilter</strong> — Client Component. Category dropdown + tag multi-select. Updates URL params via <code>useRouter</code> and <code>useSearchParams</code>. Debounced to avoid URL thrashing. Shows active filter count badge.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>TableOfContents</strong> — Client Component. Extracts H2 and H3 headings from post content via <code>rehype-slug</code>. Highlights active section on scroll via <code>IntersectionObserver</code>. Renders as sticky sidebar on desktop, collapsible on mobile.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>AuthorBio</strong> — author name, avatar, one-line bio, social links. Used at the bottom of every post. Server Component.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>RelatedPosts</strong> — calls <code>getRelatedPosts(currentPost, 3)</code>. Shows 3 related posts as compact cards. Renders only if at least 1 related post exists.</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><strong>MDXComponents</strong> — custom render map for MDX elements: styled headings, callout blocks, code blocks with copy button, image captions. Pass to <code>MDXRemote</code> or <code>useMDXComponents</code>.</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━ PHASE 6 ━━━━━━━━ -->
+    <div class="phase-card" id="p6">
+      <div class="phase-header">
+        <div class="phase-header-left">
+          <div class="phase-num" style="background:#10B981">P6</div>
+          <div>
+            <div class="phase-title">SEO, OG Images & Structured Data</div>
+            <div class="phase-sub">Complete on-page SEO, dynamic OG image generation, and all structured data schemas production-ready</div>
+          </div>
+        </div>
+        <div class="phase-header-right">
+          <span class="week-badge">Week 7–8</span>
+          <span class="priority-badge p-high">🟡 High priority</span>
+        </div>
+      </div>
+      <div class="phase-body">
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">Dynamic OG Image System</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-be">BE</span><span class="tag tag-seo">SEO</span></div>
+              <span class="step-count">3 steps</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <ul class="steps-list">
+              <li class="step">
+                <div class="step-icon be">1</div>
+                <div class="step-text">
+                  Build <code>app/api/og/route.tsx</code> — dynamic OG image via <code>@vercel/og</code>
+                  <span class="detail">Takes URL params: <code>title</code>, <code>description</code>, <code>category</code>. Returns 1200×630 image with DevStash brand (dark bg #0B0F19, blue accent, DM Sans font loaded via fetch). Edge runtime: instantaneous, cached by CDN. No Node.js, no puppeteer, no filesystem.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon seo">2</div>
+                <div class="step-text">
+                  Wire OG route into all page metadata
+                  <span class="detail">In <code>lib/seo/buildOgMeta.ts</code>: construct OG image URL as <code>/api/og?title=...&description=...&category=...</code>. All pages that call <code>buildMetadata()</code> automatically get dynamic OG images. Test all images using opengraph.xyz before launch.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon seo">3</div>
+                <div class="step-text">
+                  Verify all Twitter/X card tags render correctly
+                  <span class="detail">Test with Twitter Card Validator. Must use <code>twitter:card = "summary_large_image"</code>. OG image must be accessible publicly (not behind auth). Image ratio must be 1.91:1 (1200×630) or it will be cropped.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">SEO Audit — per page checklist pass</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-seo">SEO</span></div>
+              <span class="step-count">8-point audit per page</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <div class="checklist">
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">Each page has a <strong>unique</strong> <code>&lt;title&gt;</code> (50–60 chars) and <code>&lt;meta description&gt;</code> (130–160 chars)</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">Each page has exactly <strong>one</strong> <code>&lt;h1&gt;</code> with the primary topic keyword appearing naturally</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label"><code>&lt;link rel="canonical"&gt;</code> set to the full <code>https://devstash.me/...</code> URL on every page</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">Open Graph + Twitter Card tags complete and tested via opengraph.xyz</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">Correct JSON-LD schema injected and validated via Google's Rich Results Test</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">All images have descriptive, keyword-relevant <code>alt</code> text (not empty, not filename)</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">At least 2–3 internal links to related pages with descriptive anchor text</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">Page appears in <code>/sitemap.xml</code> and is NOT accidentally blocked by <code>noindex</code></div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━ PHASE 7 ━━━━━━━━ -->
+    <div class="phase-card" id="p7">
+      <div class="phase-header">
+        <div class="phase-header-left">
+          <div class="phase-num" style="background:#F59E0B">P7</div>
+          <div>
+            <div class="phase-title">Automation Scripts</div>
+            <div class="phase-sub">MDX linting, frontmatter validation, link checker — all CI-integrated so quality is enforced, not hoped for</div>
+          </div>
+        </div>
+        <div class="phase-header-right">
+          <span class="week-badge">Week 8</span>
+          <span class="priority-badge p-medium">🔵 Medium</span>
+        </div>
+      </div>
+      <div class="phase-body">
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">Content Validation Scripts — <code>scripts/seo/</code></div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-auto">AUTO</span><span class="tag tag-infra">INFRA</span></div>
+              <span class="step-count">3 scripts</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <ul class="steps-list">
+              <li class="step">
+                <div class="step-icon infra">1</div>
+                <div class="step-text">
+                  Build <code>scripts/seo/check-metadata.ts</code> — MDX frontmatter linter
+                  <span class="detail">Reads all <code>content/blogs/*.mdx</code> files. Validates: all required fields present, slug uniqueness, slug format (kebab-case only), canonical URL format matches slug, readingTime is positive integer, tags array has 2–5 entries, featuredImage path exists. Exits non-zero on any error — CI blocks on failure.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon infra">2</div>
+                <div class="step-text">
+                  Build <code>scripts/automation/check-links.ts</code> — broken link scanner
+                  <span class="detail">Crawls the production or preview URL. Checks all <code>&lt;a href="..."&gt;</code> tags. Reports any that return 404 or 500. Runs weekly in CI via scheduled GitHub Actions. Outputs: markdown report to console + optionally opens GitHub Issue.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon infra">3</div>
+                <div class="step-text">
+                  Add <code>pnpm run lint:content</code> to CI pipeline
+                  <span class="detail">Add to <code>.github/workflows/ci.yml</code> as a separate job: <code>node scripts/seo/check-metadata.ts</code>. Runs on every PR. This means no blog post with missing SEO fields can ever be merged to <code>main</code>.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━ PHASE 8 ━━━━━━━━ -->
+    <div class="phase-card" id="p8">
+      <div class="phase-header">
+        <div class="phase-header-left">
+          <div class="phase-num" style="background:#10B981">P8</div>
+          <div>
+            <div class="phase-title">Analytics, Performance & Launch</div>
+            <div class="phase-sub">Wire all analytics, final performance pass, and the production launch checklist</div>
+          </div>
+        </div>
+        <div class="phase-header-right">
+          <span class="week-badge">Week 9–10</span>
+          <span class="priority-badge p-high">🟡 High priority</span>
+        </div>
+      </div>
+      <div class="phase-body">
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">Analytics Wiring</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-3p">3P</span><span class="tag tag-be">BE</span></div>
+              <span class="step-count">4 steps</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <ul class="steps-list">
+              <li class="step">
+                <div class="step-icon tp">1</div>
+                <div class="step-text">
+                  Build <code>lib/analytics/events.ts</code> — typed event tracking helper
+                  <span class="detail">Export <code>trackEvent(name: EventName, params?)</code>. <code>EventName</code> is a union type: <code>'cv_viewed' | 'contact_form_submitted' | 'github_link_clicked' | 'blog_post_read' | 'resource_clicked'</code>. TypeScript ensures you never fire a mistyped event name.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon tp">2</div>
+                <div class="step-text">
+                  Wire all conversion events to GA4 via <code>trackEvent()</code>
+                  <span class="detail">CV button: <code>trackEvent('cv_viewed')</code>. Contact form success: <code>trackEvent('contact_form_submitted')</code>. GitHub links: <code>trackEvent('github_link_clicked', { project: slug })</code>. Blog scroll-to-end: <code>IntersectionObserver</code> on last paragraph → <code>trackEvent('blog_post_read', { slug })</code>.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon tp">3</div>
+                <div class="step-text">
+                  Configure conversion events as Goals in GA4 dashboard
+                  <span class="detail">In GA4: Admin → Events → Mark as Conversion for: contact_form_submitted, cv_viewed, github_link_clicked. These become the primary KPIs for measuring whether devstash.me is achieving its goals.</span>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-icon tp">4</div>
+                <div class="step-text">
+                  Verify Search Console + Bing Webmaster tracking
+                  <span class="detail">Confirm HTML meta tag verification tokens are live on production domain. Submit <code>/sitemap.xml</code> to both Google Search Console and Bing Webmaster Tools. Request indexing for top-priority pages via URL Inspection tool in GSC.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-group">
+          <div class="step-group-header">
+            <div class="step-group-title">Pre-Launch Checklist</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="step-group-tags"><span class="tag tag-infra">INFRA</span><span class="tag tag-seo">SEO</span></div>
+              <span class="step-count">Final gate</span>
+            </div>
+          </div>
+          <div class="step-group-body">
+            <div class="checklist">
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">Lighthouse score ≥ 90 on mobile and desktop for Home, Blog, Projects pages</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">LCP &lt; 2.5s, CLS &lt; 0.1, INP &lt; 200ms verified on real device via PageSpeed Insights</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">All TypeScript errors resolved — <code>pnpm tsc --noEmit</code> passes clean</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">MDX frontmatter linter passes clean — <code>pnpm run lint:content</code> exits 0</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">robots.txt allows all important routes, blocks <code>/api/</code></div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">sitemap.xml accessible at <code>https://devstash.me/sitemap.xml</code> and lists all pages</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">No broken images, no alt-less images, no missing OG images</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">Contact form tested end-to-end — email notification received</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">All analytics events fire correctly — verified in GA4 DebugView</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">Custom domain (<code>devstash.me</code>) connected and HTTPS active in Vercel</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">www → non-www redirect configured (or vice versa, consistently)</div></div>
+              <div class="chk"><div class="chk-box"></div><div class="chk-label">Sitemap submitted to Google Search Console and Bing Webmaster</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /.phases -->
+</div><!-- /.wrap -->
+
+<hr class="divider">
+
+<!-- ══════════════ TIMELINE ══════════════ -->
+<section id="timeline" style="padding:64px 0">
+  <div class="wrap">
+    <p style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:12px">Week-by-Week</p>
+    <h2 style="font-size:clamp(22px,3vw,32px);font-weight:700;letter-spacing:-0.03em;margin-bottom:8px">Delivery Timeline</h2>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:40px">Based on 1 developer working full-time. Part-time: multiply weeks by ~2.5x.</p>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot" style="background:#EF4444;color:#fff">W1</div>
+        <div class="tl-content">
+          <div class="tl-label">Days 1–7</div>
+          <div class="tl-title">Phase 0 + Phase 1 Start — Foundation & Infrastructure</div>
+          <div class="tl-desc">Repo, folder structure, Vercel, all third-party accounts + API keys, Tailwind tokens, font system, root layout, SEO defaults, CI pipeline.</div>
+          <div class="tl-deliverables">
+            <span class="tl-del">Repo live</span><span class="tl-del">CI green</span><span class="tl-del">All env vars set</span><span class="tl-del">Fonts working</span>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="background:#F59E0B;color:#fff">W2</div>
+        <div class="tl-content">
+          <div class="tl-label">Days 8–14</div>
+          <div class="tl-title">Phase 1 Complete + Phase 2 — CI Done, Design System</div>
+          <div class="tl-desc">GitHub Actions fully wired, Lighthouse CI gating active. All UI primitives, layout components (Navbar, Footer, Breadcrumb), and SEO components built.</div>
+          <div class="tl-deliverables">
+            <span class="tl-del">Lighthouse CI ✓</span><span class="tl-del">Navbar + Footer</span><span class="tl-del">All UI atoms</span><span class="tl-del">Schema builders</span>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="background:#8B5CF6;color:#fff">W3</div>
+        <div class="tl-content">
+          <div class="tl-label">Days 15–21</div>
+          <div class="tl-title">Phase 3 — Content Layer & Data Architecture</div>
+          <div class="tl-desc">All TypeScript types, MDX pipeline, blog + project data fetching layers, robots.txt, sitemap. First real content files added and rendering.</div>
+          <div class="tl-deliverables">
+            <span class="tl-del">MDX parsing ✓</span><span class="tl-del">getAllPosts() ✓</span><span class="tl-del">Sitemap live</span><span class="tl-del">1 test post renders</span>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="background:#3B82F6;color:#fff">W4</div>
+        <div class="tl-content">
+          <div class="tl-label">Days 22–28</div>
+          <div class="tl-title">Phase 4 Start — Homepage + Projects</div>
+          <div class="tl-desc">Homepage all 5 sections complete. Projects list page and ProjectCard component. Contact page UI + API route + Resend email integration.</div>
+          <div class="tl-deliverables">
+            <span class="tl-del">Homepage live</span><span class="tl-del">Projects page</span><span class="tl-del">Contact form ✓</span>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="background:#3B82F6;color:#fff">W5</div>
+        <div class="tl-content">
+          <div class="tl-label">Days 29–35</div>
+          <div class="tl-title">Phase 4 Complete + Phase 5 Start — Portfolio Done, Blog Starts</div>
+          <div class="tl-desc">Project detail pages, About, Resources, Tools, Legal. Blog list page and BlogCard component built.</div>
+          <div class="tl-deliverables">
+            <span class="tl-del">All core pages</span><span class="tl-del">/blog renders</span><span class="tl-del">BlogCard ✓</span>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="background:#8B5CF6;color:#fff">W6</div>
+        <div class="tl-content">
+          <div class="tl-label">Days 36–42</div>
+          <div class="tl-title">Phase 5 — Full Blog System</div>
+          <div class="tl-desc">Blog post page, TableOfContents, AuthorBio, RelatedPosts, Category/Tag archive pages. MDX custom components. First real blog post published.</div>
+          <div class="tl-deliverables">
+            <span class="tl-del">Blog post renders</span><span class="tl-del">TOC working</span><span class="tl-del">Category archive</span><span class="tl-del">Tag archive</span>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="background:#10B981;color:#fff">W7</div>
+        <div class="tl-content">
+          <div class="tl-label">Days 43–49</div>
+          <div class="tl-title">Phase 6 — SEO & OG Images</div>
+          <div class="tl-desc">Dynamic OG image API route live. Full SEO audit pass on every page. All JSON-LD schemas validated. Structured data test for all page types passing.</div>
+          <div class="tl-deliverables">
+            <span class="tl-del">OG images live</span><span class="tl-del">Rich Results ✓</span><span class="tl-del">Sitemap complete</span>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="background:#F59E0B;color:#fff">W8</div>
+        <div class="tl-content">
+          <div class="tl-label">Days 50–56</div>
+          <div class="tl-title">Phase 7 — Automation Scripts</div>
+          <div class="tl-desc">Frontmatter linter in CI. Link checker scheduled job. Bundle analyzer run and optimized. Performance pass — any regressions fixed.</div>
+          <div class="tl-deliverables">
+            <span class="tl-del">Content linter CI</span><span class="tl-del">Link checker cron</span><span class="tl-del">Lighthouse ≥ 90</span>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item" style="padding-bottom:0">
+        <div class="tl-dot" style="background:#10B981;color:#fff">W9</div>
+        <div class="tl-content">
+          <div class="tl-label">Days 57–70</div>
+          <div class="tl-title">Phase 8 — Analytics, QA & Launch 🚀</div>
+          <div class="tl-desc">All GA4 events wired and verified. Search Console + Bing submitted. Pre-launch checklist 100% complete. Custom domain live. Public launch.</div>
+          <div class="tl-deliverables">
+            <span class="tl-del">devstash.me live</span><span class="tl-del">GSC submitted</span><span class="tl-del">GA4 tracking</span><span class="tl-del">Launch ✓</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════ SCALABILITY NOTES ══════════════ -->
+<section style="padding:56px 0">
+  <div class="wrap">
+    <p style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--purple);margin-bottom:12px">Built to Scale</p>
+    <h2 style="font-size:clamp(22px,3vw,32px);font-weight:700;letter-spacing:-0.03em;margin-bottom:24px">Future-Proofing Decisions</h2>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px">
+        <div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px;font-family:var(--mono)">CMS Migration Path</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7">The <code>lib/markdown/blog.ts</code> and <code>lib/markdown/projects.ts</code> data layer has the same exported function signatures as any CMS SDK. When you outgrow file-based content, swap the implementation inside those two files — zero changes to any page or component.</div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px">
+        <div style="font-size:13px;font-weight:600;color:var(--purple);margin-bottom:8px;font-family:var(--mono)">Monorepo Ready</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7">The folder structure and pnpm workspace config means converting to a Turborepo monorepo (e.g. <code>apps/web</code>, <code>packages/ui</code>, <code>packages/content</code>) requires only moving folders, not refactoring logic.</div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px">
+        <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:8px;font-family:var(--mono)">i18n Ready</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7">Using Next.js App Router's <code>app/[locale]/</code> route group pattern means adding internationalisation requires only adding a <code>[locale]</code> segment to the route structure — no page rewrites needed.</div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px">
+        <div style="font-size:13px;font-weight:600;color:var(--warn);margin-bottom:8px;font-family:var(--mono)">API Versioning</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7">All API routes live under <code>app/api/</code>. When you add products (e.g. a developer tool with an API), version from day one: <code>/api/v1/...</code>. The contact form route at <code>/api/contact/route.ts</code> is a template for all future routes.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-left"><span>Dev</span>Stash Complete Build Plan · v1.0.0</div>
+  <div class="footer-right">devstash.me · 9 Phases · ~10 Weeks · Next.js + TypeScript + Tailwind</div>
+</footer>
+
+</body>
+</html>
