@@ -3,16 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 
 // ─── Logo Mark ────────────────────────────────────────────────
-function LogoMark({ size = 48 }: { size?: number }) {
+function LogoMark({ size = 40 }: { size?: number }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" aria-hidden="true">
       <rect width="100" height="100" rx="22" fill="#0B0F19" />
       <rect width="100" height="100" rx="22" stroke="#1F2937" strokeWidth="2" />
       <path
@@ -27,63 +20,54 @@ function LogoMark({ size = 48 }: { size?: number }) {
   )
 }
 
-// ─── Typing Hook ──────────────────────────────────────────────
-function useTyping(words: string[], speed = 65, pause = 2800) {
+// ─── Typing hook ──────────────────────────────────────────────
+function useTyping(words: string[], speed = 70, pause = 3000) {
   const [display, setDisplay] = useState('')
-  const [wordIndex, setWordIndex] = useState(0)
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const [idx, setIdx] = useState(0)
+  const t = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    const word = words[wordIndex % words.length]
+    const word = words[idx % words.length]
     let i = 0
     setDisplay('')
-    const type = () => {
+    const tick = () => {
       if (i < word.length) {
         setDisplay(word.slice(0, ++i))
-        timerRef.current = setTimeout(type, speed)
+        t.current = setTimeout(tick, speed)
       } else {
-        timerRef.current = setTimeout(() => {
-          setWordIndex((w) => w + 1)
-        }, pause)
+        t.current = setTimeout(() => setIdx((n) => n + 1), pause)
       }
     }
-    timerRef.current = setTimeout(type, speed)
+    t.current = setTimeout(tick, speed)
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
+      if (t.current) clearTimeout(t.current)
     }
-  }, [wordIndex]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [idx]) // eslint-disable-line
 
   return display
 }
 
-// ─── Cycling Word Hook ────────────────────────────────────────
-function useCyclingWord(words: string[], interval = 2800) {
-  const [index, setIndex] = useState(0)
-  const [visible, setVisible] = useState(true)
-
+// ─── Cycling word hook ────────────────────────────────────────
+function useCycling(words: string[], ms = 3000) {
+  const [i, setI] = useState(0)
+  const [show, setShow] = useState(true)
   useEffect(() => {
     const timer = setInterval(() => {
-      setVisible(false)
+      setShow(false)
       setTimeout(() => {
-        setIndex((i) => (i + 1) % words.length)
-        setVisible(true)
-      }, 260)
-    }, interval)
+        setI((n) => (n + 1) % words.length)
+        setShow(true)
+      }, 280)
+    }, ms)
     return () => clearInterval(timer)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  return { word: words[index], visible }
+  }, []) // eslint-disable-line
+  return { word: words[i], show }
 }
 
-// ─── Main Page ────────────────────────────────────────────────
+// ─── Page ─────────────────────────────────────────────────────
 export default function ComingSoonPage() {
-  const typedCmd = useTyping(['deploying soon...', 'pnpm run build ✓', 'vercel --prod'], 65, 2800)
-  const { word: cyclingWord, visible: wordVisible } = useCyclingWord([
-    'waiting',
-    'shipping',
-    'building',
-    'crafting',
-  ])
+  const typedCmd = useTyping(['deploying soon...', 'pnpm run build ✓', 'vercel --prod'])
+  const { word, show } = useCycling(['waiting', 'shipping', 'building', 'crafting'])
 
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
@@ -92,17 +76,15 @@ export default function ComingSoonPage() {
     e.preventDefault()
     setStatus('loading')
     try {
-      const res = await fetch('https://formspree.io/f/mbdbqbng', {
+      const res = await fetch('https://formspree.io/f/YOUR_FORM_ID', {
         method: 'POST',
         body: JSON.stringify({ email }),
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       })
+      setStatus(res.ok ? 'success' : 'error')
       if (res.ok) {
         setEmail('')
-        setStatus('success')
         setTimeout(() => setStatus('idle'), 5000)
-      } else {
-        setStatus('error')
       }
     } catch {
       setStatus('error')
@@ -124,133 +106,179 @@ export default function ComingSoonPage() {
     <>
       {/* ── Background ── */}
       <div className="pointer-events-none fixed inset-0" aria-hidden="true">
-        {/* Grid */}
         <div
           className="absolute inset-0"
           style={{
             backgroundImage:
-              'linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px)',
+              'linear-gradient(rgba(59,130,246,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.04) 1px,transparent 1px)',
             backgroundSize: '60px 60px',
           }}
         />
-        {/* Glow */}
         <div
-          className="absolute left-1/2 -translate-x-1/2"
+          className="absolute left-1/2 -translate-x-1/2 -translate-y-1/4"
           style={{
-            top: '-20%',
-            width: 700,
-            height: 700,
-            background: 'radial-gradient(ellipse, rgba(59,130,246,0.07) 0%, transparent 70%)',
+            width: 600,
+            height: 600,
+            background: 'radial-gradient(ellipse,rgba(59,130,246,0.06) 0%,transparent 70%)',
           }}
         />
       </div>
 
-      {/* ── Page ── */}
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-10 sm:px-6">
+      {/* ── Main layout ── */}
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-12 sm:px-6">
         {/* Logo */}
         <div
-          className="mb-14 flex items-center gap-3"
-          style={{ animation: 'fadeDown 0.6s ease both' }}
+          className="mb-10 flex items-center gap-3"
+          style={{ animation: 'fadeDown .6s ease both' }}
         >
-          <LogoMark size={44} />
+          <LogoMark size={40} />
           <span
-            className="text-xl font-medium tracking-tight"
-            style={{ fontFamily: 'var(--font-mono)', color: '#F3F4F6' }}
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 18,
+              fontWeight: 500,
+              color: '#F3F4F6',
+            }}
           >
-            <span style={{ color: '#3B82F6' }}>&lt;</span>
-            <span>devstash</span>
+            <span style={{ color: '#3B82F6' }}>&lt;</span>devstash
             <span style={{ color: '#3B82F6' }}>/&gt;</span>
           </span>
         </div>
 
-        {/* Terminal card */}
+        {/* Card */}
         <main
-          className="w-full max-w-[640px] overflow-hidden rounded-2xl"
+          className="w-full overflow-hidden"
           style={{
+            maxWidth: 600,
             background: '#111827',
-            border: '1px solid rgba(59,130,246,0.25)',
-            boxShadow: '0 0 0 1px rgba(59,130,246,0.05), 0 40px 80px rgba(0,0,0,0.5)',
-            animation: 'fadeUp 0.7s 0.1s ease both',
+            border: '1px solid rgba(59,130,246,0.2)',
+            borderRadius: 16,
+            boxShadow: '0 0 0 1px rgba(59,130,246,0.04), 0 32px 64px rgba(0,0,0,0.5)',
+            animation: 'fadeUp .7s .1s ease both',
           }}
         >
           {/* Title bar */}
           <div
-            className="flex items-center gap-2 border-b px-4 py-3"
-            style={{ background: '#161f2e', borderColor: 'rgba(59,130,246,0.15)' }}
+            style={{
+              background: '#161f2e',
+              borderBottom: '1px solid rgba(59,130,246,0.12)',
+              padding: '10px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
           >
-            <div className="flex gap-[7px]" aria-hidden="true">
-              <div className="h-3 w-3 rounded-full" style={{ background: '#FF5F57' }} />
-              <div className="h-3 w-3 rounded-full" style={{ background: '#FEBC2E' }} />
-              <div className="h-3 w-3 rounded-full" style={{ background: '#28C840' }} />
+            {/* Traffic lights */}
+            <div style={{ display: 'flex', gap: 6 }} aria-hidden="true">
+              {['#FF5F57', '#FEBC2E', '#28C840'].map((c) => (
+                <div
+                  key={c}
+                  style={{ width: 12, height: 12, borderRadius: '50%', background: c }}
+                />
+              ))}
             </div>
             <span
-              className="mx-auto pr-12 text-xs"
-              style={{ fontFamily: 'var(--font-mono)', color: '#9CA3AF' }}
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
+                color: '#9CA3AF',
+                margin: '0 auto',
+                paddingRight: 44,
+              }}
             >
               adesh@devstash:~
             </span>
           </div>
 
           {/* Body */}
-          <div className="px-8 pt-8 pb-10 sm:px-9">
+          <div style={{ padding: 'clamp(24px, 5vw, 40px)' }}>
             {/* Prompt line */}
             <div
-              className="mb-7 flex items-center gap-2 text-[13px]"
-              style={{ fontFamily: 'var(--font-mono)', color: '#9CA3AF' }}
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 12,
+                color: '#9CA3AF',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                marginBottom: 28,
+              }}
               aria-hidden="true"
             >
               <span style={{ color: '#60A5FA' }}>$</span>
               <span style={{ color: '#D1D5DB' }}>git push origin main —</span>
               <span style={{ color: '#D1D5DB' }}>{typedCmd}</span>
               <span
-                className="inline-block h-4 w-[9px] rounded-sm align-middle"
-                style={{ background: '#3B82F6', animation: 'blink 1.1s step-end infinite' }}
+                style={{
+                  display: 'inline-block',
+                  width: 8,
+                  height: 14,
+                  background: '#3B82F6',
+                  borderRadius: 1,
+                  animation: 'blink 1.1s step-end infinite',
+                  flexShrink: 0,
+                }}
               />
             </div>
 
             {/* Headline */}
             <h1
-              className="mb-3 text-[clamp(1.625rem,5vw,3.25rem)] leading-[1.1] font-bold tracking-tight"
-              style={{ color: '#F3F4F6' }}
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 'clamp(2rem, 6vw, 3.25rem)',
+                fontWeight: 700,
+                lineHeight: 1.1,
+                letterSpacing: '-0.03em',
+                color: '#F3F4F6',
+                marginBottom: 16,
+              }}
             >
-              Something
-              <br />
-              worth{' '}
+              Something worth{' '}
               <span
                 style={{
                   color: '#60A5FA',
                   display: 'inline-block',
-                  transition: 'opacity 0.25s, transform 0.25s',
-                  opacity: wordVisible ? 1 : 0,
-                  transform: wordVisible ? 'translateY(0)' : 'translateY(8px)',
+                  transition: 'opacity .25s, transform .25s',
+                  opacity: show ? 1 : 0,
+                  transform: show ? 'translateY(0)' : 'translateY(6px)',
                 }}
               >
-                {cyclingWord}
-              </span>
-              <br />
+                {word}
+              </span>{' '}
               for.
             </h1>
 
             {/* Sub */}
-            <p className="mb-9 max-w-[480px] text-base leading-[1.7]" style={{ color: '#9CA3AF' }}>
+            <p
+              style={{
+                fontSize: 15,
+                lineHeight: 1.75,
+                color: '#9CA3AF',
+                marginBottom: 28,
+                maxWidth: 480,
+              }}
+            >
               <strong style={{ color: '#F3F4F6', fontWeight: 500 }}>Adesh Shukla</strong> — Frontend
               Developer building a developer ecosystem that ships fast, looks sharp, and tells the
-              whole story.
-              <br />
-              React · Next.js · Design-first engineering. Landing soon.
+              whole story. React · Next.js · Design-first engineering. Landing soon.
             </p>
 
-            {/* Stack chips */}
-            <div className="mb-10 flex flex-wrap gap-2" aria-label="Tech stack">
+            {/* Chips */}
+            <div
+              style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 32 }}
+              aria-label="Tech stack"
+            >
               {chips.map((chip) => (
                 <span
                   key={chip}
-                  className="rounded-full px-3 py-[5px] text-[11px]"
                   style={{
                     fontFamily: 'var(--font-mono)',
+                    fontSize: 11,
                     color: '#A5B4FC',
                     background: 'rgba(59,130,246,0.1)',
                     border: '1px solid rgba(59,130,246,0.2)',
+                    padding: '4px 12px',
+                    borderRadius: 100,
                     letterSpacing: '0.02em',
                   }}
                 >
@@ -259,19 +287,24 @@ export default function ComingSoonPage() {
               ))}
             </div>
 
-            {/* Notify form */}
+            {/* Notify label */}
             <p
-              className="mb-2 text-[13px] tracking-widest"
-              style={{ fontFamily: 'var(--font-mono)', color: '#9CA3AF' }}
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 12,
+                color: '#9CA3AF',
+                marginBottom: 10,
+                letterSpacing: '0.05em',
+              }}
             >
               <span style={{ color: '#3B82F6' }}>// </span>
               get notified when it&apos;s live
             </p>
 
+            {/* Form */}
             <form
               onSubmit={handleSubmit}
-              className="flex max-w-[440px]"
-              aria-label="Notify me form"
+              style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 440 }}
             >
               <input
                 type="email"
@@ -281,12 +314,17 @@ export default function ComingSoonPage() {
                 required
                 aria-label="Email address"
                 autoComplete="email"
-                className="h-[46px] flex-1 rounded-l-lg border-y border-l px-4 text-[15px] transition-colors outline-none"
                 style={{
+                  width: '100%',
+                  height: 46,
                   background: '#161f2e',
-                  borderColor: 'rgba(59,130,246,0.3)',
+                  border: '1px solid rgba(59,130,246,0.3)',
+                  borderRadius: 8,
+                  padding: '0 14px',
+                  fontSize: 14,
                   color: '#F3F4F6',
                   fontFamily: 'var(--font-sans)',
+                  outline: 'none',
                 }}
                 onFocus={(e) => (e.target.style.borderColor = '#3B82F6')}
                 onBlur={(e) => (e.target.style.borderColor = 'rgba(59,130,246,0.3)')}
@@ -294,28 +332,46 @@ export default function ComingSoonPage() {
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="h-[46px] rounded-r-lg px-5 text-[15px] font-medium text-white transition-colors disabled:opacity-70"
                 style={{
-                  background: status === 'loading' ? '#2563EB' : '#3B82F6',
+                  width: '100%',
+                  height: 46,
+                  background: '#3B82F6',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: '#fff',
                   fontFamily: 'var(--font-sans)',
-                  whiteSpace: 'nowrap',
+                  cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+                  opacity: status === 'loading' ? 0.7 : 1,
+                  transition: 'background .2s',
                 }}
-                onMouseEnter={(e) => ((e.target as HTMLButtonElement).style.background = '#60A5FA')}
-                onMouseLeave={(e) => ((e.target as HTMLButtonElement).style.background = '#3B82F6')}
+                onMouseEnter={(e) => {
+                  if (status !== 'loading') e.currentTarget.style.background = '#60A5FA'
+                }}
+                onMouseLeave={(e) => {
+                  if (status !== 'loading') e.currentTarget.style.background = '#3B82F6'
+                }}
               >
-                {status === 'loading' ? '...' : 'Notify me'}
+                {status === 'loading' ? 'Sending...' : 'Notify me'}
               </button>
             </form>
 
-            {/* Success / Error messages */}
+            {/* Status messages */}
             {status === 'success' && (
-              <div
-                className="mt-3 flex items-center gap-2 text-[13px]"
-                style={{ fontFamily: 'var(--font-mono)', color: '#4ADE80' }}
+              <p
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 12,
+                  color: '#4ADE80',
+                  marginTop: 10,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
                 role="status"
-                aria-live="polite"
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                   <circle cx="8" cy="8" r="7" stroke="#4ADE80" strokeWidth="1.5" />
                   <path
                     d="M5 8l2 2 4-4"
@@ -326,12 +382,16 @@ export default function ComingSoonPage() {
                   />
                 </svg>
                 you&apos;re on the list. see you soon.
-              </div>
+              </p>
             )}
             {status === 'error' && (
               <p
-                className="mt-3 text-[13px]"
-                style={{ fontFamily: 'var(--font-mono)', color: '#F87171' }}
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 12,
+                  color: '#F87171',
+                  marginTop: 10,
+                }}
                 role="alert"
               >
                 something went wrong — try again.
@@ -340,27 +400,44 @@ export default function ComingSoonPage() {
 
             {/* Divider */}
             <div
-              className="my-9 h-px w-full"
-              style={{ background: 'rgba(59,130,246,0.12)' }}
+              style={{ height: 1, background: 'rgba(59,130,246,0.1)', margin: '28px 0' }}
               aria-hidden="true"
             />
 
             {/* Status row */}
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 12,
+              }}
+            >
               <div
-                className="flex items-center gap-2 text-[12px]"
-                style={{ fontFamily: 'var(--font-mono)', color: '#4ADE80' }}
-                aria-label="Status: building in public"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 7,
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 12,
+                  color: '#4ADE80',
+                }}
               >
                 <span
-                  className="h-2 w-2 rounded-full"
-                  style={{ background: '#4ADE80', animation: 'pulse 2.4s ease infinite' }}
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    background: '#4ADE80',
+                    display: 'inline-block',
+                    animation: 'pulse2 2.4s ease infinite',
+                  }}
                   aria-hidden="true"
                 />
                 building in public
               </div>
-
-              <nav className="flex gap-4" aria-label="Social links">
+              <nav style={{ display: 'flex', gap: 20 }} aria-label="Social links">
                 {[
                   { label: 'github', href: 'https://github.com/adeshukla' },
                   { label: 'linkedin', href: 'https://linkedin.com/in/adeshukla' },
@@ -371,11 +448,12 @@ export default function ComingSoonPage() {
                     href={href}
                     target={href.startsWith('http') ? '_blank' : undefined}
                     rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                    className="text-[12px] transition-colors"
                     style={{
                       fontFamily: 'var(--font-mono)',
+                      fontSize: 12,
                       color: '#9CA3AF',
                       textDecoration: 'none',
+                      transition: 'color .2s',
                     }}
                     onMouseEnter={(e) => ((e.target as HTMLAnchorElement).style.color = '#60A5FA')}
                     onMouseLeave={(e) => ((e.target as HTMLAnchorElement).style.color = '#9CA3AF')}
@@ -390,35 +468,25 @@ export default function ComingSoonPage() {
 
         {/* Footer */}
         <footer
-          className="mt-6 text-center text-[11px] tracking-wide"
           style={{
+            marginTop: 24,
             fontFamily: 'var(--font-mono)',
-            color: '#1F2937',
-            animation: 'fadeUp 0.8s 0.3s ease both',
+            fontSize: 11,
+            color: '#374151',
+            letterSpacing: '0.03em',
+            animation: 'fadeUp .8s .3s ease both',
           }}
         >
           © 2025 devstash.me &nbsp;·&nbsp; crafted with ☕ in Ghaziabad
         </footer>
       </div>
 
-      {/* ── Keyframe animations ── */}
+      {/* Keyframes */}
       <style>{`
-        @keyframes fadeDown {
-          from { opacity: 0; transform: translateY(-16px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes blink {
-          0%, 100% { opacity: 1; }
-          50%       { opacity: 0; }
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50%       { opacity: 0.5; transform: scale(0.85); }
-        }
+        @keyframes fadeDown { from{opacity:0;transform:translateY(-14px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeUp   { from{opacity:0;transform:translateY(16px)}  to{opacity:1;transform:translateY(0)} }
+        @keyframes blink    { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes pulse2   { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.85)} }
       `}</style>
     </>
   )
