@@ -17,10 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: {
-    default: 'DevStash — Coming Soon',
-    template: '%s | DevStash',
-  },
+  title: { default: 'DevStash — Coming Soon', template: '%s | DevStash' },
   description:
     'A modern developer ecosystem showcasing engineering, automation, AI workflows, frontend systems, and developer resources.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),

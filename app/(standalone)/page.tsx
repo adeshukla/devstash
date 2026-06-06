@@ -477,7 +477,7 @@ export default function ComingSoonPage() {
             animation: 'fadeUp .8s .3s ease both',
           }}
         >
-          © 2025 devstash.me &nbsp;·&nbsp; crafted with ☕ in Ghaziabad
+          © 2026 devstash.me &nbsp;·&nbsp; crafted with ☕ in Ghaziabad
         </footer>
       </div>
 

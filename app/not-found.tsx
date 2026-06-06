@@ -353,17 +353,18 @@ export default function NotFound() {
 
             {/* Subtitle */}
             <p className="mb-6 text-sm leading-[1.7]" style={{ color: '#9CA3AF' }}>
-              Lagta hai galat path pe aa gaye —
+              Seems you pick the wrong path —
               <br />
-              ye page hamare stash mein nahi hai.
+              This page isn&apos;t in the stash yet. But don&apos;t worry, you can always head back
+              to the homepage and explore the latest drops.
             </p>
 
             {/* Buttons */}
             <div className="flex flex-wrap gap-3 sm:flex-nowrap">
               <Link
                 href="/"
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg px-5 py-[11px] text-sm font-medium text-white transition-colors"
-                style={{ background: '#3B82F6', fontFamily: 'var(--font-sans)' }}
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg text-sm font-medium text-white transition-colors"
+                style={{ background: '#3B82F6', fontFamily: 'var(--font-sans)', padding: '1rem' }}
                 onMouseEnter={(e) =>
                   ((e.currentTarget as HTMLAnchorElement).style.background = '#60A5FA')
                 }
@@ -397,6 +398,7 @@ export default function NotFound() {
                   color: '#9CA3AF',
                   fontFamily: 'var(--font-mono)',
                   cursor: 'pointer',
+                  padding: '1rem',
                 }}
                 onMouseEnter={(e) => {
                   const btn = e.currentTarget
