@@ -1,0 +1,69 @@
+---
+title: "Building DevStash: My Personal Developer Platform with Next.js 15"
+slug: "building-devstash-with-nextjs"
+description: "How I architected a modern developer platform using Next.js 15, Tailwind v4, TypeScript strict mode, and a file-based content layer — from zero to production."
+author: "Adesh Shukla"
+createdAt: "2025-06-01"
+updatedAt: "2025-06-01"
+category: "frontend"
+tags: ["nextjs", "typescript", "tailwind", "portfolio"]
+featuredImage: "/images/blog/building-devstash.webp"
+readingTime: 6
+canonical: "https://devstash.me/blog/building-devstash-with-nextjs"
+draft: false
+featured: true
+---
+
+Every developer reaches a point where a LinkedIn profile and a PDF resume just aren't enough.
+I'm a designer-turned-developer and I wanted something that actually *showed* my engineering thinking
+— not just listed it.
+
+So I built DevStash.
+
+## What is DevStash?
+
+DevStash is my personal developer platform at [devstash.me](https://devstash.me). It's not just a
+portfolio — it's designed to evolve: from a project showcase, to a content platform, to eventually
+a mini developer ecosystem with tools and resources.
+
+## Tech Stack Decisions
+
+### Next.js 15 with App Router
+
+Next.js 15 gives me SSR, SSG, and ISR all in one framework. The App Router's Server Components mean
+I can fetch data directly in components without `useEffect` — dramatically reducing JavaScript sent to the browser.
+
+### Tailwind CSS v4
+
+Tailwind v4 drops the config file for design tokens and moves everything into `globals.css` using
+the new `@theme` block:
+
+```css
+@theme {
+  --color-ds-accent: #3B82F6;
+  --color-ds-bg: #0B0F19;
+  --color-ds-surface: #111827;
+}
+```
+
+These tokens become Tailwind utility classes automatically: `bg-ds-bg`, `text-ds-accent`, etc.
+
+### File-Based Content Layer
+
+Blog posts are MDX files in `content/blogs/`. Projects are JSON files in `content/projects/`.
+No database, no CMS dependency, version-controlled content. If I ever need a headless CMS,
+I only swap the `lib/markdown/` layer — nothing else changes.
+
+## One Thing I Learned
+
+Turbopack crashes on Windows. Remove `--turbopack` from your dev script immediately.
+I also learned that Tailwind v4 tokens go in `globals.css`, not `tailwind.config.ts`.
+Spent an hour on that one.
+
+## What's Next
+
+Phase 3 (this post is part of it) sets up the content pipeline. Phase 4 builds the visible pages.
+Phase 5 completes the full blog system with table of contents, related posts, and syntax highlighted
+code blocks.
+
+Follow along — I'll be writing about every major decision as I build it.

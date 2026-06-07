@@ -271,12 +271,13 @@ export default function NotFound() {
 
         {/* Terminal card */}
         <div
-          className="w-full max-w-[480px] overflow-hidden rounded-2xl"
+          className="w-full max-w-[480px] overflow-hidden rounded-2xl p-3"
           style={{
             background: '#111827',
             border: '1px solid rgba(59,130,246,0.2)',
             boxShadow: '0 30px 70px rgba(0,0,0,0.5)',
             animation: 'fadeUp 0.7s 0.2s ease both',
+            padding: '1rem',
           }}
           role="main"
         >
