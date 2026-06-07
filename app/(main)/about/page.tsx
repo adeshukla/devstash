@@ -14,7 +14,7 @@ export const metadata: Metadata = buildMetadata({
   description:
     'Frontend developer with 6+ years of experience. Designer-turned-engineer building React apps, Next.js platforms, and n8n automation workflows. Based in Ghaziabad, India.',
   // FIX: was `canonical`, buildMetadata expects `path`
-  path: '/about',
+  canonical: '/about',
 })
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
