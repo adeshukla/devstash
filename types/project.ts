@@ -19,4 +19,7 @@ export interface Project {
   startDate: string
   endDate?: string
   highlights: string[]
+  year?: number
+  demo?: string
+  github?: string
 }

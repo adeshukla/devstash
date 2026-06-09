@@ -85,7 +85,7 @@ interface ProjectSchema {
   title: string
   slug: string
   description: string
-  type: 'web-app' | 'tool' | 'automation' | 'library'
+  type?: 'web-app' | 'tool' | 'automation' | 'library'
   githubUrl?: string
   liveUrl?: string
 }

@@ -1,0 +1,56 @@
+[
+  {
+    "id": "nextjs-docs",
+    "title": "Next.js Documentation",
+    "description": "The official Next.js docs. App Router, RSC, caching — the definitive reference.",
+    "url": "https://nextjs.org/docs",
+    "category": "docs",
+    "tags": ["next.js", "react", "app-router"],
+    "free": true
+  },
+  {
+    "id": "typescript-handbook",
+    "title": "TypeScript Handbook",
+    "description": "The complete TypeScript reference from the team at Microsoft.",
+    "url": "https://www.typescriptlang.org/docs/handbook/",
+    "category": "docs",
+    "tags": ["typescript"],
+    "free": true
+  },
+  {
+    "id": "tailwind-v4-docs",
+    "title": "Tailwind CSS v4 Docs",
+    "description": "New @theme syntax, CSS-first config, and all v4 upgrade guides.",
+    "url": "https://tailwindcss.com/docs",
+    "category": "docs",
+    "tags": ["tailwind", "css"],
+    "free": true
+  },
+  {
+    "id": "n8n-docs",
+    "title": "n8n Documentation",
+    "description": "Self-hosted workflow automation with 400+ integrations.",
+    "url": "https://docs.n8n.io",
+    "category": "docs",
+    "tags": ["automation", "n8n", "no-code"],
+    "free": true
+  },
+  {
+    "id": "web-dev",
+    "title": "web.dev by Google",
+    "description": "Performance, Core Web Vitals, accessibility, and modern web best practices.",
+    "url": "https://web.dev",
+    "category": "article",
+    "tags": ["performance", "cwv", "seo"],
+    "free": true
+  },
+  {
+    "id": "josh-css",
+    "title": "Josh Comeau's CSS Blog",
+    "description": "The best interactive CSS deep-dives on the internet. CSS-in-JS, animations, layout.",
+    "url": "https://www.joshwcomeau.com",
+    "category": "article",
+    "tags": ["css", "animations", "frontend"],
+    "free": true
+  }
+]

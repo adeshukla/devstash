@@ -1,3 +1,5 @@
+// types/blog.ts
+
 export type BlogCategory =
   | 'automation'
   | 'frontend'
@@ -7,9 +9,17 @@ export type BlogCategory =
   | 'tutorials'
   | 'career'
 
-export type BlogTag = string
+export const BLOG_CATEGORIES: { label: string; value: BlogCategory }[] = [
+  { label: 'Automation', value: 'automation' },
+  { label: 'Frontend', value: 'frontend' },
+  { label: 'Performance', value: 'performance' },
+  { label: 'AI Workflows', value: 'ai-workflows' },
+  { label: 'Dev Tools', value: 'devtools' },
+  { label: 'Tutorials', value: 'tutorials' },
+  { label: 'Career', value: 'career' },
+]
 
-export interface BlogFrontmatter {
+export interface BlogPost {
   title: string
   slug: string
   description: string
@@ -17,19 +27,21 @@ export interface BlogFrontmatter {
   createdAt: string
   updatedAt: string
   category: BlogCategory
-  tags: BlogTag[]
+  tags: string[]
   featuredImage: string
   readingTime: number
   canonical: string
   draft: boolean
   featured: boolean
+  content: string // raw MDX string — not in frontmatter, added by parsePost()
 }
 
-/** Full post — includes raw MDX content string */
-export interface BlogPost extends BlogFrontmatter {
-  content: string
-  wordCount: number
-}
+// Frontmatter shape used by lib/automation/utils.ts validateFrontmatter()
+// All the same fields as BlogPost except the runtime-added 'content' string
+export type BlogFrontmatter = Omit<BlogPost, 'content'>
 
-/** Lightweight meta — for listing pages (no content string) */
-export type BlogPostMeta = BlogFrontmatter
+export interface TOCItem {
+  id: string
+  text: string
+  level: 2 | 3
+}

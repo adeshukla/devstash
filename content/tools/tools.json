@@ -1,0 +1,83 @@
+[
+  {
+    "id": "cursor",
+    "name": "Cursor",
+    "description": "AI-powered VS Code fork. My primary daily driver for coding. Best Copilot++ experience available.",
+    "url": "https://cursor.sh",
+    "category": "editor",
+    "tags": ["ai", "editor", "vscode"],
+    "free": false
+  },
+  {
+    "id": "claude",
+    "name": "Claude by Anthropic",
+    "description": "Best LLM for coding, planning, and architecture discussions. Sonnet 4 is the sweet spot.",
+    "url": "https://claude.ai",
+    "category": "ai",
+    "tags": ["ai", "llm", "coding"],
+    "free": false
+  },
+  {
+    "id": "ollama",
+    "name": "Ollama",
+    "description": "Run LLMs locally. I use qwen2.5:7b for offline AI assistance. Zero cost, full privacy.",
+    "url": "https://ollama.ai",
+    "category": "ai",
+    "tags": ["llm", "local", "ai", "offline"],
+    "free": true
+  },
+  {
+    "id": "n8n",
+    "name": "n8n",
+    "description": "Self-hosted workflow automation. Replaced Zapier for everything. 400+ integrations.",
+    "url": "https://n8n.io",
+    "category": "devtools",
+    "tags": ["automation", "no-code", "workflows"],
+    "free": true
+  },
+  {
+    "id": "git-bash",
+    "name": "Git Bash (Windows Terminal)",
+    "description": "Git Bash inside Windows Terminal — best shell setup for Windows devs who want Unix-ish tooling.",
+    "url": "https://git-scm.com",
+    "category": "terminal",
+    "tags": ["shell", "git", "windows"],
+    "free": true
+  },
+  {
+    "id": "figma",
+    "name": "Figma",
+    "description": "Design tool of choice. Coming from a design background, Figma is where I start every project.",
+    "url": "https://figma.com",
+    "category": "design",
+    "tags": ["design", "ui", "ux", "prototyping"],
+    "free": false
+  },
+  {
+    "id": "vercel",
+    "name": "Vercel",
+    "description": "Deploy Next.js apps. Zero config, edge functions, preview deployments. Unbeatable DX.",
+    "url": "https://vercel.com",
+    "category": "devtools",
+    "tags": ["hosting", "deployment", "next.js"],
+    "free": false
+  },
+  {
+    "id": "cloudflare",
+    "name": "Cloudflare",
+    "description": "DNS, domain registration, and DDoS protection. Grey cloud mode with Vercel for full compatibility.",
+    "url": "https://cloudflare.com",
+    "category": "devtools",
+    "tags": ["dns", "security", "cdn"],
+    "free": true
+  },
+  {
+    "id": "pnpm",
+    "name": "pnpm",
+    "description": "Faster, disk-efficient npm alternative. Content-addressable store. Required for Vercel lockfile.",
+    "url": "https://pnpm.io",
+    "category": "devtools",
+    "tags": ["package-manager", "node", "performance"],
+    "free": true
+  }
+]

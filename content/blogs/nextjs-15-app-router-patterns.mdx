@@ -1,0 +1,197 @@
+---
+title: 'Next.js 15 App Router: Patterns I Actually Use'
+slug: 'nextjs-15-app-router-patterns'
+description: 'Practical patterns from building a real Next.js 15 project: async searchParams, MDX with next-mdx-remote/rsc, generateStaticParams on dynamic routes, and why Server Components change the way you think about data fetching.'
+author: 'Adesh Shukla'
+createdAt: '2025-05-20'
+updatedAt: '2025-05-20'
+category: 'frontend'
+tags: ['nextjs', 'react', 'typescript', 'app-router']
+featuredImage: '/images/blog/nextjs-15-patterns.webp'
+readingTime: 6
+canonical: 'https://devstash.me/blog/nextjs-15-app-router-patterns'
+draft: false
+featured: false
+---
+
+I've been building DevStash — this site — on Next.js 15 App Router with TypeScript strict mode. Some patterns I expected from the docs. Others I only found by reading the breaking-change notes carefully, or by hitting confusing runtime errors at 11pm.
+
+Here are the ones worth documenting.
+
+## async searchParams in Page Components
+
+This is the biggest "gotcha" in Next.js 15. `searchParams` (and `params`) are now **Promises** — you have to `await` them before accessing any property.
+
+```tsx
+// ✅ Next.js 15 — correct
+type Props = {
+  searchParams: Promise<{ category?: string; page?: string }>
+}
+
+export default async function BlogPage({ searchParams }: Props) {
+  const { category, page } = await searchParams
+  // ...
+}
+```
+
+```tsx
+// ❌ Next.js 14 pattern — breaks in 15
+export default function BlogPage({ searchParams }) {
+  const category = searchParams.category // undefined, no error — silently broken
+}
+```
+
+The same applies to `params` in dynamic routes:
+
+```tsx
+type Props = { params: Promise<{ slug: string }> }
+
+export default async function PostPage({ params }: Props) {
+  const { slug } = await params
+  const post = getPostBySlug(slug)
+  // ...
+}
+```
+
+If you're migrating from Next.js 14, this is the first thing to audit. TypeScript strict mode will catch it at compile time — another reason to have `"strict": true` in tsconfig.
+
+## generateStaticParams + generateMetadata Together
+
+On dynamic routes, you almost always want both. `generateStaticParams` pre-renders the routes at build time; `generateMetadata` makes each one unique in Google search results.
+
+```tsx
+// Always pair these on dynamic routes
+export async function generateStaticParams() {
+  return getAllPosts().map((p) => ({ slug: p.slug }))
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
+  const post = getPostBySlug(slug)
+  if (!post) return {}
+
+  return buildMetadata({
+    title: `${post.title} — DevStash`,
+    description: post.description,
+    path: `/blog/${post.slug}`,
+    ogType: 'article',
+  })
+}
+```
+
+Note that `generateMetadata` also receives the async `params` — await it the same way.
+
+## MDX with next-mdx-remote/rsc
+
+The App Router page on the Next.js docs pushes `@next/mdx`, but I ran into a Turbopack serialization error when using it (Turbopack is officially disabled in this project due to Windows crashes, but the error appeared regardless).
+
+The fix was switching to `next-mdx-remote`. The RSC variant is specifically built for Server Components and doesn't need `serialize()`:
+
+```tsx
+import { MDXRemote } from 'next-mdx-remote/rsc'
+
+// In your page — this runs on the server, zero client JS
+<MDXRemote
+  source={post.content}
+  components={mdxComponents}
+  options={{
+    mdxOptions: {
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: [rehypeSlug, [rehypePrettyCode, { theme: 'github-dark-dimmed' }]],
+    },
+  }}
+/>
+```
+
+The `source` is the raw MDX string from your content file. No serialization step, no client hydration overhead.
+
+<Callout type="info" title="rehype-pretty-code types">
+In strict TypeScript, the `rehypePlugins` tuple type from `rehype-pretty-code` doesn't always align with unified's `PluggableList`. Adding a `@ts-expect-error` comment on that import is a pragmatic fix until upstream types improve.
+</Callout>
+
+## Server Components by Default — Flip It
+
+The mental model shift from Pages Router: **every component is a Server Component by default**. You opt into the client only when you need it.
+
+What actually needs `'use client'`:
+
+- Anything using `useState`, `useEffect`, `useRef`
+- Event handlers (onClick, onChange, etc.)
+- Browser APIs (localStorage, IntersectionObserver, etc.)
+- Hooks from third-party libraries that require client context
+
+What does NOT need `'use client'` (and is better without it):
+
+- Components that just render HTML from props
+- Components that fetch data via `async/await`
+- Most layout components
+- SEO components (JSON-LD, meta)
+
+For the blog, the TOC is `'use client'` because it uses IntersectionObserver. The BlogFilter is `'use client'` because it calls `useRouter`. Everything else — BlogCard, BlogList, AuthorBio, RelatedPosts — is a pure Server Component.
+
+## useSearchParams Needs Suspense
+
+If a `'use client'` component calls `useSearchParams()`, it must be wrapped in a `<Suspense>` boundary at the parent level. Without it, Next.js 15 throws a build error:
+
+```
+useSearchParams() should be wrapped in a suspense boundary at page "..."
+```
+
+The fix in the blog listing page:
+
+```tsx
+// In the server component (page.tsx)
+import { Suspense } from 'react'
+
+<Suspense>
+  <BlogFilter
+    categories={categories}
+    tags={tags}
+    selectedCategory={category}
+  />
+</Suspense>
+```
+
+The `<Suspense>` wrapper doesn't need a fallback for simple components. But adding a skeleton fallback is good UX if the filter data is async.
+
+## buildMetadata Factory Pattern
+
+Repeating OG tags, canonical URLs, and Twitter card meta on every page is error-prone. The solution is a factory function in `lib/seo/buildMetadata.ts` that takes a few required fields and fills in the rest from `site.config.ts` defaults:
+
+```typescript
+export function buildMetadata({
+  title,
+  description,
+  path,
+  ogType = 'website',
+  ogImage,
+}: MetadataOptions): Metadata {
+  const url = `${SITE_URL}${path}`
+  return {
+    title,
+    description,
+    metadataBase: new URL(SITE_URL),
+    alternates: { canonical: url },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: ogType,
+      images: ogImage ? [ogImage] : [DEFAULT_OG_IMAGE],
+      siteName: 'DevStash',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ogImage ? [ogImage] : [DEFAULT_OG_IMAGE],
+    },
+  }
+}
+```
+
+Every page calls `buildMetadata()` and exports it as `metadata` or returns it from `generateMetadata()`. Consistent, zero duplication.
+
+---
+
+These patterns are baked into the DevStash codebase. The CLAUDE.md in the repo tracks them as hard rules so they don't drift over time — a pattern worth adopting for any long-lived project.

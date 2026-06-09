@@ -1,0 +1,164 @@
+---
+title: 'Automating Job Applications with n8n, Groq, and Google Sheets'
+slug: 'n8n-job-application-automation-groq-google-sheets'
+description: 'How I built a self-hosted n8n workflow that reads HR contacts from Google Sheets, generates personalised cold emails via Groq LLM, attaches my resume PDF, and sends via Gmail — including the tricky parts nobody talks about.'
+author: 'Adesh Shukla'
+createdAt: '2025-06-01'
+updatedAt: '2025-06-01'
+category: 'automation'
+tags: ['n8n', 'groq', 'automation', 'job-search', 'google-sheets']
+featuredImage: '/images/blog/n8n-job-automation.webp'
+readingTime: 8
+canonical: 'https://devstash.me/blog/n8n-job-application-automation-groq-google-sheets'
+draft: false
+featured: true
+---
+
+Job hunting in the Indian tech market is a numbers game. The more companies you reach out to with relevant, personalised messages, the better your odds. But writing 30 cold emails a day by hand — tweaking subject lines, matching the tone to each company — is unsustainable.
+
+So I automated it. Here's exactly how the workflow is built, including the subtle bugs that cost me a full afternoon.
+
+## The Goal
+
+Read a Google Sheet with HR contacts (name, email, company, role), generate a tailored cold email per row using an LLM, attach my resume PDF, and send it via Gmail — all from a self-hosted n8n instance running on `localhost:5678`.
+
+## Why Groq Instead of Ollama
+
+My first attempt used Ollama with `qwen2.5:7b` running locally. On an Acer Aspire with a Ryzen 5 5500U and 16GB RAM, generation took 45–90 seconds per email. With a batch of 20 contacts, that's 15–30 minutes of waiting.
+
+Switching to Groq's `llama-3.1-8b-instant` via API brought this down to under 2 seconds per email. It's free within the rate limits and the output quality for structured email generation is excellent.
+
+<Callout type="tip" title="Groq free tier">
+The Groq free tier allows around 6,000 requests per day on `llama-3.1-8b-instant`. More than enough for a job search workflow.
+</Callout>
+
+## Workflow Architecture
+
+The n8n workflow has five main nodes:
+
+1. **Google Sheets** — read HR contact rows
+2. **LLM Chain** — generate email body per row  
+3. **Code Node** — merge email body back with contact data + load PDF binary
+4. **Gmail** — send with attachment
+
+This sounds simple. It is not simple.
+
+## The LLM Chain JSON Field Problem
+
+This one caught me off-guard. The **LLM Chain node** in n8n is a bit opinionated: it takes your input, passes it to the LLM, and outputs a single `text` field — **stripping every other field from the upstream JSON**.
+
+So your neat `{ name, email, company, role, emailBody }` object coming out of the LLM Chain is actually just `{ text: "Dear Priya,..." }`. The contact fields are gone.
+
+The fix: don't use `$json.name` in the next node. Reference the Google Sheets node directly:
+
+```javascript
+// In a Code node after LLM Chain:
+const contacts = $('Google Sheets').all()
+const generated = $('LLM Chain').all()
+
+return generated.map((item, i) => ({
+  json: {
+    ...contacts[i].json,
+    emailBody: item.json.text,
+  }
+}))
+```
+
+The `$('NodeExactName').all()` API returns the full item array from any upstream node by its **exact display name** — case-sensitive, including spaces.
+
+## Attaching the PDF
+
+Gmail in n8n expects binary data for attachments. You can't just pass a file path — you need to load the PDF bytes and attach them properly.
+
+In a Code node before Gmail:
+
+```javascript
+const fs = require('fs')
+const path = require('path')
+
+const resumePath = path.join('/home/adesh/Documents', 'Adesh_Shukla_Resume.pdf')
+const pdfBuffer  = fs.readFileSync(resumePath)
+
+return items.map(item => ({
+  json: item.json,
+  binary: {
+    data: {
+      data:     pdfBuffer.toString('base64'),
+      mimeType: 'application/pdf',
+      fileName: 'Adesh_Shukla_Resume.pdf',
+    }
+  }
+}))
+```
+
+Then in the **Gmail node**, set:
+- **Attachment Binary Field** → `data` (must match the key inside `binary: {}`)
+- **Attachment Field Name** → this is the label shown in Gmail — I used `Resume`
+
+<Callout type="warning" title="The exact field name matters">
+If the Gmail node shows "No binary data found", double-check that the binary key in your Code node (`data`) exactly matches what's set in the Gmail node's "Attachment Binary Field" input. It's case-sensitive.
+</Callout>
+
+## The LLM Prompt
+
+Getting a consistent, non-hallucinated cold email from an LLM requires a specific system prompt. Here's what works well:
+
+```
+You are a professional email writer helping a frontend developer apply for jobs.
+
+Write a concise cold email (max 120 words body) to an HR contact at a tech company.
+
+Rules:
+- DO NOT invent metrics, years of experience claims, or project names
+- DO NOT use phrases like "I am passionate about" or "synergy"
+- Address the person by first name
+- Mention the specific company name naturally
+- End with a clear CTA: ask for a 15-minute call
+- Output ONLY the email body — no subject line, no sign-off, no JSON
+
+Contact details:
+Name: {{name}}
+Company: {{company}}
+Role applied for: {{role}}
+```
+
+The `{{name}}` etc. are replaced by n8n's expression engine from the upstream JSON fields. The key instruction is "Output ONLY the email body" — without it, Groq tends to add extra explanatory text.
+
+## Google Sheets as the Data Source
+
+The sheet has columns: `name`, `email`, `company`, `role`, `status`, `sentAt`.
+
+After sending, a second Code node updates the `status` column to `sent` and writes the timestamp to `sentAt`, so I don't accidentally email the same person twice.
+
+```javascript
+// Update row status after send
+const rowIndex = item.json.row_number // n8n adds this automatically
+await $helpers.request({
+  method: 'PUT',
+  url: `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!F${rowIndex}:G${rowIndex}`,
+  body: { values: [['sent', new Date().toISOString()]] },
+  // ...auth headers
+})
+```
+
+Actually, using the native **Google Sheets → Update Row** node is cleaner than the raw API call. The `row_number` field n8n injects lets you target the right row.
+
+## Lessons Learned
+
+A few things that cost me time:
+
+The **LLM Chain node strips all upstream JSON** except `text`. Always reference other nodes with `$('NodeName').all()` rather than assuming fields carry through.
+
+**Binary attachments** need to be in a `binary` key with a specific structure. The mimeType and fileName fields are not optional — Gmail silently drops attachments without them.
+
+**Groq rate limits** are per-minute, not just per-day. If you process a large batch quickly, add a **Wait node** (1–2 seconds) between iterations to avoid 429 errors.
+
+## What's Next
+
+The workflow currently runs manually. The next version will trigger daily from a cron node and pull only rows where `status` is empty, making it fully hands-off.
+
+I'm also experimenting with a follow-up sequence — if no reply within 5 days, a second gentler nudge sends automatically. That's a separate workflow with a `createdAt` filter on the sheet.
+
+---
+
+The full workflow JSON is in my [GitHub repo](https://github.com/adeshukla) — look for `n8n-job-automation.json` in the workflows folder.
