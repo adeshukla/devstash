@@ -5,7 +5,7 @@ import { MDXRemote } from 'next-mdx-remote/rsc'
 import remarkGfm from 'remark-gfm'
 import rehypeSlug from 'rehype-slug'
 import rehypePrettyCode from 'rehype-pretty-code'
-
+import type { PluggableList } from 'unified'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildBlogPostingSchema, buildBreadcrumbSchema } from '@/lib/schema/builders'
@@ -47,15 +47,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 // Cast to PluggableList (mutable) to satisfy unified's type expectations.
 // rehype-pretty-code types are not fully compatible with PluggableList yet.
 
-const remarkPlugins = [remarkGfm]
+const remarkPlugins: PluggableList = [remarkGfm]
 
-const rehypePlugins = [
+const rehypePlugins: PluggableList = [
   rehypeSlug,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [
     rehypePrettyCode,
     { theme: 'github-dark-dimmed', keepBackground: true, defaultLang: 'plaintext' },
-  ] as any,
+  ],
 ]
 
 // ─── Page ─────────────────────────────────────────────────────────────────────

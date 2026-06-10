@@ -6,13 +6,19 @@ import { type BlogPost, type BlogCategory } from '@/types/blog'
 
 const BLOGS_DIR = path.join(process.cwd(), 'content/blogs')
 
+/** Returns the path only if the file actually exists in /public. */
+function resolvePublicImage(imagePath: string): string {
+  if (!imagePath) return ''
+  const abs = path.join(process.cwd(), 'public', imagePath.replace(/^\//, ''))
+  return fs.existsSync(abs) ? imagePath : ''
+}
+
 function parsePost(fileName: string): BlogPost | null {
   try {
     const filePath = path.join(BLOGS_DIR, fileName)
     const raw = fs.readFileSync(filePath, 'utf-8')
     const { data, content } = matter(raw)
 
-    // Validate required fields
     if (!data.title || !data.slug || !data.description) return null
 
     const wordCount = content.split(/\s+/).filter(Boolean).length
@@ -27,7 +33,8 @@ function parsePost(fileName: string): BlogPost | null {
       updatedAt: String(data.updatedAt ?? data.createdAt ?? new Date().toISOString().split('T')[0]),
       category: (data.category ?? 'tutorials') as BlogCategory,
       tags: Array.isArray(data.tags) ? (data.tags as string[]) : [],
-      featuredImage: String(data.featuredImage ?? ''),
+      // Only set if file actually exists in /public — falls back to gradient placeholder
+      featuredImage: resolvePublicImage(String(data.featuredImage ?? '')),
       readingTime: typeof data.readingTime === 'number' ? data.readingTime : autoReadingTime,
       canonical: String(data.canonical ?? `https://devstash.me/blog/${data.slug}`),
       draft: Boolean(data.draft ?? false),
@@ -52,8 +59,7 @@ export function getAllPosts(includeDrafts = false): BlogPost[] {
 }
 
 export function getPostBySlug(slug: string): BlogPost | null {
-  const posts = getAllPosts(true)
-  return posts.find((p) => p.slug === slug) ?? null
+  return getAllPosts(true).find((p) => p.slug === slug) ?? null
 }
 
 export function getRelatedPosts(currentSlug: string, limit = 3): BlogPost[] {

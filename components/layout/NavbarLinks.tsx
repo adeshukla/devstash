@@ -38,7 +38,7 @@ export function NavbarLinks({ items }: NavbarLinksProps) {
             {/* Active indicator dot */}
             {isActive && (
               <span
-                className="bg-ds-accent absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full"
+                className="bg-ds-accent absolute bottom-1 left-1/2 h-1 w-2/3 -translate-x-1/2 rounded-full"
                 aria-hidden="true"
               />
             )}
