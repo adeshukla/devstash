@@ -10,7 +10,19 @@ export async function GET(request: NextRequest) {
   const title = searchParams.get('title') ?? 'DevStash'
   const description = searchParams.get('description') ?? 'A modern developer ecosystem'
   const category = searchParams.get('category') ?? ''
-  const date = searchParams.get('date') ?? ''
+
+  // Constrain `type` to the three supported values; fall back to `website`.
+  const typeParam = searchParams.get('type')
+  const type: 'website' | 'article' | 'project' =
+    typeParam === 'article' || typeParam === 'project' ? typeParam : 'website'
+
+  // Parse `readingTime` defensively: treat a missing param or NaN as "not present".
+  const readingTimeRaw = searchParams.get('readingTime')
+  const readingTimeNum = readingTimeRaw !== null ? Number(readingTimeRaw) : NaN
+  const readingTime = Number.isNaN(readingTimeNum) ? undefined : readingTimeNum
+
+  // Length-based title scaling so long titles never overflow the 1200x630 canvas.
+  const titleFontSize = title.length > 70 ? 38 : title.length > 40 ? 44 : 52
 
   return new ImageResponse(
     <div
@@ -50,7 +62,19 @@ export async function GET(request: NextRequest) {
         }}
       />
 
-      {/* Top — Logo */}
+      {/* Top accent bar — full-width blue→purple brand gradient, sits above grid/glow */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 7,
+          background: 'linear-gradient(90deg, #3B82F6, #8B5CF6)',
+        }}
+      />
+
+      {/* Top — Logo + type/category badge */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, position: 'relative' }}>
         {/* Logo mark */}
         <div
@@ -89,11 +113,12 @@ export async function GET(request: NextRequest) {
           <span style={{ color: '#3B82F6' }}>Dev</span>Stash
         </span>
 
-        {/* Category badge */}
-        {category && (
+        {/* Article: category badge (top-right) */}
+        {type === 'article' && category && (
           <div
             style={{
               marginLeft: 'auto',
+              display: 'flex',
               fontSize: 12,
               fontWeight: 600,
               color: '#60A5FA',
@@ -108,13 +133,34 @@ export async function GET(request: NextRequest) {
             {category}
           </div>
         )}
+
+        {/* Project: styled "Project" badge (top-right, purple-tinted) */}
+        {type === 'project' && (
+          <div
+            style={{
+              marginLeft: 'auto',
+              display: 'flex',
+              fontSize: 12,
+              fontWeight: 600,
+              color: '#A78BFA',
+              background: 'rgba(139,92,246,0.12)',
+              border: '1px solid rgba(139,92,246,0.25)',
+              padding: '4px 12px',
+              borderRadius: 100,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+            }}
+          >
+            Project
+          </div>
+        )}
       </div>
 
       {/* Middle — Title + Description */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'relative' }}>
         <div
           style={{
-            fontSize: title.length > 40 ? 44 : 52,
+            fontSize: titleFontSize,
             fontWeight: 700,
             color: '#F3F4F6',
             lineHeight: 1.1,
@@ -138,7 +184,7 @@ export async function GET(request: NextRequest) {
         )}
       </div>
 
-      {/* Bottom — URL + Date */}
+      {/* Bottom — wordmark (bottom-left) + reading-time chip */}
       <div
         style={{
           display: 'flex',
@@ -168,8 +214,26 @@ export async function GET(request: NextRequest) {
         >
           devstash.me
         </span>
-        {date && (
-          <span style={{ fontSize: 13, color: '#6B7280', fontFamily: 'monospace' }}>{date}</span>
+
+        {/* Article: styled reading-time chip (only when readingTime is present) */}
+        {type === 'article' && typeof readingTime === 'number' && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: 13,
+              fontWeight: 600,
+              color: '#A78BFA',
+              background: 'rgba(139,92,246,0.10)',
+              border: '1px solid rgba(139,92,246,0.22)',
+              padding: '6px 14px',
+              borderRadius: 100,
+              fontFamily: 'monospace',
+              letterSpacing: '0.02em',
+            }}
+          >
+            {readingTime} min read
+          </div>
         )}
       </div>
     </div>,

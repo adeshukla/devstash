@@ -64,9 +64,17 @@ export function Navbar() {
         {/* Center/Right — Desktop links (Client island) */}
         <div className="hidden items-center gap-1 md:flex">
           <NavbarLinks items={navItems} />
+          <a
+            href="/resume-adesh-shukla.pdf"
+            download
+            data-analytics-event="cv_viewed"
+            className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent ml-3 inline-flex h-9 items-center rounded-lg border px-3 text-[13px] font-medium transition-colors"
+          >
+            Résumé ↓
+          </a>
           <Link
             href="/contact"
-            className="bg-ds-accent ml-3 inline-flex h-9 items-center rounded-lg px-4 text-[13px] font-semibold text-white transition-colors hover:bg-blue-400"
+            className="bg-ds-accent ml-2 inline-flex h-9 items-center rounded-lg px-4 text-[13px] font-semibold text-white transition-colors hover:bg-blue-400"
           >
             Contact
           </Link>

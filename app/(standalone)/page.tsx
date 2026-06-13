@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { buildWebSiteSchema } from '@/lib/schema/builders'
 
 // ─── Logo Mark ────────────────────────────────────────────────
 function LogoMark({ size = 40 }: { size?: number }) {
@@ -104,6 +106,8 @@ export default function ComingSoonPage() {
 
   return (
     <>
+      <JsonLd data={buildWebSiteSchema()} />
+
       {/* ── Background ── */}
       <div className="pointer-events-none fixed inset-0" aria-hidden="true">
         <div

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
+import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildProjectSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
@@ -27,18 +28,23 @@ export async function generateMetadata({
 
   if (!project) {
     return buildMetadata({
-      title: 'Project not found — DevStash',
+      title: 'Project not found',
       description: 'The project you are looking for does not exist.',
-      canonical: `https://devstash.me/projects/${slug}`,
+      canonical: `/projects/${slug}`,
+      ogImage: buildOgImageUrl({ title: 'Project not found', type: 'website' }),
     })
   }
 
   return buildMetadata({
-    title: `${project.title} — DevStash`,
+    title: project.title,
     description: project.description,
-    canonical: `https://devstash.me/projects/${project.slug}`,
-    type: 'article',
-    // TODO: wire in project.featuredImage → ogImage once images are added
+    canonical: `/projects/${project.slug}`,
+    type: 'website',
+    ogImage: buildOgImageUrl({
+      title: project.title,
+      description: project.description,
+      type: 'project',
+    }),
   })
 }
 

@@ -1,16 +1,21 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
+import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
 import { getAllProjects } from '@/lib/markdown/projects'
 import { ProjectsGrid } from '@/components/sections'
 import { Badge } from '@/components/ui'
 
+const title = 'Projects — Frontend, Automation & Web Apps'
+const description =
+  'Frontend projects built with React, Next.js, and TypeScript, plus automation tooling. A mix of open-source experiments and client work by Adesh Shukla.'
+
 export const metadata: Metadata = buildMetadata({
-  title: 'Projects — DevStash',
-  description:
-    'Frontend projects built with React, Next.js, TypeScript and automation tools. Open source and client work by Adesh Shukla.',
-  canonical: 'https://devstash.me/projects',
+  title,
+  description,
+  canonical: '/projects',
+  ogImage: buildOgImageUrl({ title, description, type: 'website' }),
 })
 
 interface ProjectsPageProps {

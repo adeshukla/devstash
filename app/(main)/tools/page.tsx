@@ -1,15 +1,20 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
+import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
 import { Badge, Card } from '@/components/ui'
 import toolsData from '@/content/tools/tools.json'
 
+const title = 'Tools — The Developer Stack Adesh Uses Daily'
+const description =
+  'The actual tools Adesh runs every day — editor, AI assistants, terminal, design, and deployment picks. No affiliate links and no sponsored placements.'
+
 export const metadata: Metadata = buildMetadata({
-  title: 'Tools — DevStash',
-  description:
-    'The actual tools Adesh uses daily — editor, AI, terminal, design, deployment. No sponsored picks.',
-  canonical: 'https://devstash.me/tools',
+  title,
+  description,
+  canonical: '/tools',
+  ogImage: buildOgImageUrl({ title, description, type: 'website' }),
 })
 
 // ─── Types ────────────────────────────────────────────────────────────────────

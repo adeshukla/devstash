@@ -1,13 +1,18 @@
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
+import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
 import { ContactForm } from '@/components/contact/ContactForm'
 
+const title = 'Contact Adesh Shukla — Frontend Developer'
+const description =
+  'Get in touch with Adesh Shukla about frontend roles, freelance projects, or collaboration. Based in Ghaziabad and open to Noida / Delhi NCR and remote.'
+
 export const metadata: Metadata = buildMetadata({
-  title: 'Contact — DevStash',
-  description:
-    'Get in touch with Adesh Shukla. Open to frontend roles, freelance projects, and collaboration. Based in Ghaziabad / Delhi NCR.',
-  canonical: 'https://devstash.me/contact',
+  title,
+  description,
+  canonical: '/contact',
+  ogImage: buildOgImageUrl({ title, description, type: 'website' }),
 })
 
 // ─── Social links ─────────────────────────────────────────────────────────────

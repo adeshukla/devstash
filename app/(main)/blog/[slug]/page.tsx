@@ -7,13 +7,15 @@ import rehypeSlug from 'rehype-slug'
 import rehypePrettyCode from 'rehype-pretty-code'
 import type { PluggableList } from 'unified'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
+import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
-import { buildBlogPostingSchema, buildBreadcrumbSchema } from '@/lib/schema/builders'
+import { buildBlogPostingSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
 import { Badge } from '@/components/ui'
 import { TOC } from '@/components/blog/TOC'
 import { AuthorBio } from '@/components/blog/AuthorBio'
 import { RelatedPosts } from '@/components/blog/RelatedPosts'
+import { ReadTracker } from '@/components/blog/ReadTracker'
 import { mdxComponents } from '@/components/blog/MDXComponents'
 import { getAllPosts, getPostBySlug, getRelatedPosts } from '@/lib/markdown/blog'
 import { extractTOC } from '@/lib/utils/toc'
@@ -39,7 +41,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: post.description,
     canonical: `/blog/${post.slug}`,
     type: 'article',
-    ogImage: post.featuredImage || undefined,
+    ogImage: buildOgImageUrl({
+      title: post.title,
+      description: post.description,
+      type: 'article',
+      category: post.category,
+      readingTime: post.readingTime,
+    }),
+    publishedTime: post.createdAt,
+    modifiedTime: post.updatedAt,
+    authors: [post.author],
+    section: post.category,
+    tags: post.tags,
   })
 }
 
@@ -68,16 +81,10 @@ export default async function BlogPostPage({ params }: Props) {
   const toc = extractTOC(post.content)
   const relatedPosts = getRelatedPosts(post.slug)
 
-  const breadcrumbs = [
-    { name: 'Home', url: 'https://devstash.me' },
-    { name: 'Blog', url: 'https://devstash.me/blog' },
-    { name: post.title, url: `https://devstash.me/blog/${post.slug}` },
-  ]
-
   return (
     <>
       <JsonLd data={buildBlogPostingSchema(post)} />
-      <JsonLd data={buildBreadcrumbSchema(breadcrumbs)} />
+      <ReadTracker slug={post.slug} />
 
       <div className="container mx-auto max-w-6xl px-4 py-12">
         <Breadcrumb

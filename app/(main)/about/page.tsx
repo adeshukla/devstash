@@ -1,14 +1,19 @@
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
+import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildPersonSchema } from '@/lib/schema/builders'
 import { Badge, Button } from '@/components/ui'
 
+const title = 'About Adesh Shukla — Frontend Developer'
+const description =
+  'Frontend developer with 6+ years across React, Next.js, and UI systems. A designer-turned-developer based in Ghaziabad, NCR, now open to frontend roles.'
+
 export const metadata: Metadata = buildMetadata({
-  title: 'About — Adesh Shukla | DevStash',
-  description:
-    'Frontend developer with 6+ years of experience in React, Next.js, and UI systems. Designer-turned-developer based in Ghaziabad, NCR. Open to frontend roles.',
-  canonical: 'https://devstash.me/about',
+  title,
+  description,
+  canonical: '/about',
+  ogImage: buildOgImageUrl({ title, description, type: 'website' }),
   // ogType 'profile' removed — MetadataOptions only supports 'website' | 'article'
 })
 
@@ -74,6 +79,14 @@ export default function AboutPage() {
               <Button href="/contact" variant="outline">
                 Let&apos;s connect
               </Button>
+              <a
+                href="/resume-adesh-shukla.pdf"
+                download
+                data-analytics-event="cv_viewed"
+                className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-5 text-[14px] font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+              >
+                Download résumé ↓
+              </a>
             </div>
           </div>
         </section>
@@ -147,6 +160,14 @@ export default function AboutPage() {
               <Button href="/contact" size="lg">
                 Contact me
               </Button>
+              <a
+                href="/resume-adesh-shukla.pdf"
+                download
+                data-analytics-event="cv_viewed"
+                className="border-ds-accent text-ds-accent hover:bg-ds-accent focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg inline-flex h-12 items-center justify-center gap-2.5 rounded-xl border px-6 text-[15px] font-medium transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+              >
+                Download résumé ↓
+              </a>
               <Button href="https://github.com/adeshukla" variant="ghost" size="lg">
                 GitHub →
               </Button>

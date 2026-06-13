@@ -2,7 +2,7 @@
 
 # Paste this at the start of every new Claude conversation
 
-# Last updated: Phase 2 complete
+# Last updated: Phase 9 complete
 
 ---
 
@@ -310,73 +310,182 @@ devstash/
 - app/api/og/route.tsx: Edge runtime OG image (1200x630, branded)
 - Route groups: app/(standalone)/ and app/(main)/
 
-### ⬜ Phase 3 — Content Layer (NEXT)
+### ✅ Phase 3 — Content Layer (COMPLETE)
 
-- types/blog.ts + types/project.ts
-- MDX pipeline: gray-matter, rehype-slug, rehype-pretty-code, remark-gfm
+- types/blog.ts: BlogPost, BlogCategory, BlogTag interfaces
+- types/project.ts: Project interface
+- MDX pipeline: **next-mdx-remote** (switched from @next/mdx — Turbopack serialization error on Windows), gray-matter, rehype-slug, rehype-pretty-code, remark-gfm
 - lib/markdown/blog.ts: getAllPosts(), getPostBySlug(), getRelatedPosts()
 - lib/markdown/projects.ts: getAllProjects(), getProjectBySlug(), getFeaturedProjects()
 - lib/automation/utils.ts: slugify(), readingTime(), validateFrontmatter()
-- app/sitemap.ts: auto-generated XML sitemap
+- app/sitemap.ts: auto-generated XML sitemap (static routes + blog posts + projects)
 - app/robots.ts: crawl directives
-- First real content files (1 test blog post + 1 project)
+- First real content files: 1 test blog post (content/blogs/) + 1 project (content/projects/)
 
-### ⬜ Phase 4 — Core Marketing Pages
+**⚠️ Package note:** Use `next-mdx-remote`, NOT `@next/mdx`. The `@next/mdx` package causes a Turbopack serialization error. Switch was made during this phase.
+
+### ✅ Phase 4 — Core Marketing Pages (COMPLETE)
 
 - app/(main)/about/page.tsx
 - app/(main)/projects/page.tsx + [slug]/page.tsx
 - app/(main)/resources/page.tsx
 - app/(main)/tools/page.tsx
-- app/(main)/contact/page.tsx (form + Resend email)
+- app/(main)/contact/page.tsx (form + Resend email via /api/contact route)
 - app/(main)/privacy/page.tsx + terms/page.tsx
 - components/sections/: HeroSection, ProjectsGrid, FeaturedPosts
+- All pages have buildMetadata() + JsonLd schema + BreadcrumbList where applicable
 
-### ⬜ Phase 5 — Blog System
+### ✅ Phase 5 — Blog System (COMPLETE)
 
-- app/(main)/blog/page.tsx (list + filter)
-- app/(main)/blog/[slug]/page.tsx (post + TOC + related)
-- app/(main)/blog/category/[category]/page.tsx
-- app/(main)/blog/tag/[tag]/page.tsx
+- app/(main)/blog/page.tsx (list + filter by category/tag)
+- app/(main)/blog/[slug]/page.tsx (post + TOC + related posts)
+- app/(main)/blog/category/[category]/page.tsx (category archives)
+- app/(main)/blog/tag/[tag]/page.tsx (tag archives)
 - components/blog/: BlogCard, BlogList, BlogFilter, TOC, AuthorBio, RelatedPosts, MDXComponents
+- BlogPosting + BreadcrumbList JSON-LD on every post page
+- generateStaticParams for all slugs, categories, and tags
 
-### ⬜ Phase 6 — SEO & OG Images
+### ✅ Phase 6 — SEO & OG Images (COMPLETE)
 
-- Dynamic OG images wired into all buildMetadata() calls
-- Full SEO audit pass on every page
-- All JSON-LD schemas validated via Google Rich Results Test
-- Sitemap submitted to GSC + Bing
+- Dynamic OG endpoint (app/api/og, edge, 1200×630) + lib/seo/ogImage.ts helper
+- OG image URLs wired into every page's buildMetadata()
+- Article OG tags (published/modified time, author, section, tags) on blog posts
+- Root layout provides default OG/Twitter + robots/googleBot tags (covers client pages)
+- SEO audit: relative canonicals, single h1, JSON-LD coverage; fixed canonical & title-suffix bugs
+- sitemap.ts covers all public routes; robots.ts allow-all + sitemap; verification meta tags
+- docs/seo-checklist.md created
+- Remaining manual step: validate JSON-LD via Rich Results Test + submit sitemap to GSC/Bing
 
-### ⬜ Phase 7 — Automation Scripts
+### ✅ Phase 7 — Automation Scripts (COMPLETE)
 
-- scripts/seo/check-metadata.ts (MDX frontmatter linter in CI)
-- scripts/automation/check-links.ts (weekly cron)
-- pnpm run lint:content added to CI pipeline
+- scripts/seo/check-metadata.mjs — MDX frontmatter linter (errors fail, SEO issues warn)
+- scripts/automation/check-links.mjs — broken internal-link checker (--external opt-in)
+- pnpm scripts: lint:content, check:links
+- @lhci/cli + lighthouserc.cjs + .github/workflows/lighthouse.yml (perf/a11y/seo/best-practices ≥ 0.9)
+- Wired into .husky/pre-commit (lint:content) and ci.yml (content-checks job)
+- Manual step: install the Lighthouse CI GitHub App + set LHCI_GITHUB_APP_TOKEN secret
 
-### ⬜ Phase 8 — Analytics & Launch
+### ✅ Phase 8 — Analytics & Launch (COMPLETE)
 
-- GA4 events wired: cv_viewed, contact_form_submitted, github_link_clicked, blog_post_read
-- lib/analytics/events.ts with typed EventName union
-- Search Console + Bing Webmaster verified and sitemap submitted
+- lib/analytics/events.ts — typed trackEvent + ANALYTICS_EVENTS (5 events) + crash-proof no-op
+- GA4 + optional Clarity via next/script (lazyOnload), env-gated in components/layout/Analytics.tsx
+- Events wired: contact_form_submitted, github_link_clicked, resource_clicked, blog_post_read (75% scroll), cv_viewed (dormant until a CV/PDF link exists)
+- AnalyticsClicks delegated listener + ReadTracker scroll tracker
+- docs/launch-checklist.md — GA4/GSC/Bing/custom-domain/Vercel-env runbook
+- Manual steps for Adesh: create GA4 property, verify GSC/Bing, configure Cloudflare DNS (grey-cloud), set Vercel env vars
 - Pre-launch checklist complete
 - Custom domain live: devstash.me
+
+### ✅ Phase 9 — Blog Admin Panel (COMPLETE — local-only)
+
+> **Implemented as a local-only authoring tool.** Vercel's runtime FS is read-only,
+> so the whole admin surface is disabled (404) in production via `isAdminEnabled()`
+> (`NODE_ENV !== 'production'`). Author locally → commit + push.
+
+**Auth:** `iron-session` encrypted cookie (`devstash_admin`). Login password from
+`ADMIN_PASSWORD`, cookie secret from `SESSION_SECRET` (≥32 chars). Constant-time
+password check (`crypto.timingSafeEqual`). Secrets are server-only (`import
+'server-only'` in lib/auth/session.ts); never NEXT*PUBLIC*.
+
+**Routes:** `app/admin/` layout (noindex) + dashboard, `/admin/login`, `/admin/new`,
+`/admin/edit/[slug]`. API: `/api/admin/login`, `/api/admin/logout`,
+`/api/admin/posts` (POST create / PUT update).
+
+**Write path:** `lib/markdown/writePost.ts` (server-only) — path-traversal-safe,
+kebab-slug validated, create=409-on-exists / update=404-if-missing, frontmatter
+validated, written via `gray-matter` stringify. Output passes `pnpm lint:content`.
+
+**New files:** lib/auth/{adminEnabled,session}.ts, lib/markdown/writePost.ts,
+components/admin/{PostEditor,LoginForm,LogoutButton}.tsx, app/admin/**, app/api/admin/**.
+
+**Env vars:** `ADMIN_PASSWORD`, `SESSION_SECRET` (both server-only, set in .env.local).
+
+**Package added:** `iron-session` (^8).
+
+**Note:** `/admin` is noindex and excluded from the sitemap. Not reachable in prod.
+
+### ⬜ Phase 10 — AI Blog Automation + Humanizing (NOT IN ORIGINAL PLAN — Proposed)
+
+> **Status:** Not in any existing docs. Completely new feature. Referenced in project discussions but never documented.
+> **Why needed:** Speeds up content creation. AI drafts → humanizing pass removes robotic patterns → developer voice applied → lands in admin as a draft for final review.
+
+**Stack:** n8n (already running at localhost:5678) + Groq API (already used in cold email workflow, `llama-3.1-8b-instant`) + DevStash Admin API (Phase 9).
+
+**Full n8n Workflow — "Blog Draft Generator":**
+
+```
+1. Webhook Trigger
+   → Triggered from Admin Panel "Generate with AI" button
+   → Payload: { topic, keywords[], tone, targetLength, notes }
+
+2. Draft Generation (Groq — LLM Chain)
+   → Model: llama-3.1-8b-instant
+   → Prompt: "Write a technical blog post for developers about [topic].
+     Target keywords: [keywords]. Length: ~[targetLength] words.
+     Use real code examples. No fluff. Notes: [notes]."
+   → Output: raw draft text
+
+3. Humanizing Pass (Groq — second LLM Chain)
+   → Takes output from step 2 via $('Draft Generation').all()[0].json.text
+   → Prompt: "Rewrite this draft to sound like a real developer wrote it.
+     Remove all AI giveaways (avoid: 'In conclusion', 'It's worth noting',
+     'Delve into', 'Leverage', 'Comprehensive'). Add opinions, real-world
+     frustration, and developer humor where natural. Keep all code examples
+     intact. Keep technical accuracy."
+   → Output: humanized draft
+
+4. SEO + Frontmatter Generation (Groq — third LLM Chain)
+   → Takes humanized draft
+   → Prompt: "Generate JSON frontmatter for this blog post.
+     Return ONLY valid JSON, no markdown. Schema: { title, slug, description,
+     category, tags, readingTime (int, estimate at 200wpm) }"
+   → Output: JSON string
+
+5. Code Node — Assemble MDX
+   → Parses frontmatter JSON from step 4
+   → Assembles full MDX file string with frontmatter + humanized content
+   → Sets draft: true, featured: false
+   → Payload: { slug, mdxContent, frontmatter }
+
+6. HTTP Request Node — POST to DevStash Admin API
+   → POST https://devstash.me/api/admin/posts (or localhost:3000 for local)
+   → Header: Authorization: Bearer [ADMIN_PASSWORD]
+   → Body: { slug, content: mdxContent }
+   → Saves as draft in content/blogs/
+
+7. Respond to Webhook
+   → Returns { success: true, slug, adminUrl: /admin/edit/[slug] }
+   → Admin panel redirects to edit page for final review
+```
+
+**Admin Panel Integration:** "Generate with AI" button on `/admin/new` opens a modal: topic input + keyword tags + tone selector (Technical/Conversational/Tutorial) + length slider. On submit → calls n8n webhook → polls for result → redirects to edit page with generated draft.
+
+**Key n8n gotcha (already known):** Each LLM Chain node drops upstream JSON fields. Use `$('NodeName').all()[0].json.text` in subsequent nodes to pass content between steps.
+
+**New env vars:**
+
+```bash
+N8N_BLOG_WEBHOOK_URL=http://localhost:5678/webhook/blog-draft   # or ngrok URL
+N8N_WEBHOOK_SECRET=your-webhook-secret                          # to verify origin
+```
 
 ---
 
 ## SECTION 8 — THIRD-PARTY TOOLS
 
-| Tool                  | Status       | Notes                                              |
-| --------------------- | ------------ | -------------------------------------------------- |
-| Vercel                | ✅ Connected | pnpm build, github.com/adeshukla/devstash          |
-| GitHub                | ✅ Setup     | main (prod) + dev (staging) branches               |
-| Cloudflare            | ✅ DNS Only  | Grey cloud on all records (no proxy with Vercel)   |
-| Google Search Console | ⬜ Pending   | Add after custom domain live                       |
-| Google Analytics 4    | ⬜ Pending   | Add NEXT_PUBLIC_GA_ID                              |
-| Bing Webmaster        | ⬜ Pending   | After GSC setup                                    |
-| Ahrefs Webmaster      | ⬜ Pending   | Free tier, after launch                            |
-| Microsoft Clarity     | ⬜ Optional  | Heatmaps/session recording                         |
-| Resend                | ⬜ Phase 4   | Contact form email delivery                        |
-| Formspree             | ⬜ Temporary | Coming soon email form (replace with Resend later) |
-| Lighthouse CI         | ⬜ Phase 7   | pnpm add -D @lhci/cli                              |
+| Tool                  | Status       | Notes                                             |
+| --------------------- | ------------ | ------------------------------------------------- |
+| Vercel                | ✅ Connected | pnpm build, github.com/adeshukla/devstash         |
+| GitHub                | ✅ Setup     | main (prod) + dev (staging) branches              |
+| Cloudflare            | ✅ DNS Only  | Grey cloud on all records (no proxy with Vercel)  |
+| Google Search Console | ⬜ Pending   | Add after custom domain live                      |
+| Google Analytics 4    | ⬜ Pending   | Add NEXT_PUBLIC_GA_ID                             |
+| Bing Webmaster        | ⬜ Pending   | After GSC setup                                   |
+| Ahrefs Webmaster      | ⬜ Pending   | Free tier, after launch                           |
+| Microsoft Clarity     | ⬜ Optional  | Heatmaps/session recording                        |
+| Resend                | ✅ Phase 4   | Contact form email delivery — installed           |
+| Formspree             | ✅ Done      | Coming soon page (replaced by Resend in Phase 4)  |
+| Lighthouse CI         | ✅ Phase 7   | @lhci/cli installed — lighthouserc.cjs + workflow |
 
 ---
 
@@ -406,35 +515,46 @@ featured: false
 
 ## SECTION 10 — KNOWN ISSUES & FIXES
 
-| Issue                                                 | Fix Applied                                                         |
-| ----------------------------------------------------- | ------------------------------------------------------------------- |
-| Turbopack crashes on Windows                          | Removed --turbopack flag from package.json dev script               |
-| Hydration mismatch (Grammarly/Dark Reader)            | suppressHydrationWarning on <body> in layout.tsx                    |
-| ESLint 9 + Next.js 15 flat config circular JSON error | ESLint deferred — only Prettier via lint-staged                     |
-| CRLF line endings on Windows                          | git config --global core.autocrlf true + .gitattributes             |
-| pnpm approve-builds (sharp/unrs-resolver)             | Added to .npmrc: onlyBuiltDependencies                              |
-| Tailwind v4 @theme warning in VS Code                 | .vscode/settings.json: "css.validate": false                        |
-| bg-ds-\* classes not working                          | Tokens in @theme in globals.css (v4 syntax), NOT tailwind.config.ts |
-| .env\* in .gitignore blocking .env.example            | Changed to explicit: .env, .env.local, .env.\*.local                |
+| Issue                                                   | Fix Applied                                                                                                                                                                          |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Turbopack crashes on Windows                            | Removed --turbopack flag from package.json dev script                                                                                                                                |
+| Hydration mismatch (Grammarly/Dark Reader)              | suppressHydrationWarning on <body> in layout.tsx                                                                                                                                     |
+| ESLint 9 + Next.js 15 flat config circular JSON error   | ESLint deferred — only Prettier via lint-staged                                                                                                                                      |
+| CRLF line endings on Windows                            | git config --global core.autocrlf true + .gitattributes                                                                                                                              |
+| pnpm approve-builds (sharp/unrs-resolver)               | Added to .npmrc: onlyBuiltDependencies                                                                                                                                               |
+| Tailwind v4 @theme warning in VS Code                   | .vscode/settings.json: "css.validate": false                                                                                                                                         |
+| bg-ds-\* classes not working                            | Tokens in @theme in globals.css (v4 syntax), NOT tailwind.config.ts                                                                                                                  |
+| .env\* in .gitignore blocking .env.example              | Changed to explicit: .env, .env.local, .env.\*.local                                                                                                                                 |
+| @next/mdx Turbopack serialization error                 | Switched to next-mdx-remote — works with App Router + Turbopack off                                                                                                                  |
+| TypeScript errors: canonical vs path in MetadataOptions | Field is `canonical` (NOT `path`), and it takes a RELATIVE path — buildMetadata prepends siteConfig.url. MetadataOptions lives in types/seo.ts                                       |
+| buildMetadata `type` union                              | Only `'website' \| 'article'` (NO `'profile'`). Article pages may also pass publishedTime/modifiedTime/authors/section/tags                                                          |
+| BreadcrumbItem fields                                   | Fields are `name` and `url` (NOT `label`/`href`) — verified in types/seo.ts                                                                                                          |
+| JsonLd prop                                             | Prop is `data` (NOT `schema`) — verified in components/seo/JsonLd.tsx. The `<Breadcrumb>` component emits its own BreadcrumbList JSON-LD, so don't add a manual one on the same page |
 
 ---
 
 ## SECTION 11 — INSTALLED PACKAGES (NON-DEFAULT)
 
 ```bash
-# Installed
+# ✅ Phase 0-2 (installed)
 pnpm add schema-dts clsx tailwind-merge
 pnpm add -D prettier prettier-plugin-tailwindcss husky lint-staged @eslint/eslintrc
 
-# To install in Phase 3
-pnpm add @next/mdx @mdx-js/loader @mdx-js/react
-pnpm add -D gray-matter remark remark-gfm rehype-slug rehype-pretty-code
+# ✅ Phase 3 (installed) — NOTE: next-mdx-remote, NOT @next/mdx
+pnpm add next-mdx-remote gray-matter
+pnpm add -D remark remark-gfm rehype-slug rehype-pretty-code
 
-# To install in Phase 4
+# ✅ Phase 4 (installed)
 pnpm add resend zod
 
-# To install in Phase 7
+# ✅ Phase 7 (installed)
 pnpm add -D @lhci/cli
+
+# ✅ Phase 9 — Blog Admin Panel (installed)
+pnpm add iron-session
+
+# ⬜ Phase 10 — AI Blog Automation (pending — n8n side, no new npm packages needed)
+# n8n workflow uses Groq API (already set up) + HTTP Request node to DevStash API
 ```
 
 ---
@@ -478,4 +598,4 @@ Current task: [what you want to do]
 
 **Update this file after each phase completes.**
 
-**Current Status:** Phase 2 complete. Starting Phase 3 — Content Layer.
+**Current Status:** Phase 9 complete (Blog Admin Panel — local-only). Next: Phase 10 — AI Blog Automation.

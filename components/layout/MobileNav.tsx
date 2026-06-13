@@ -156,8 +156,16 @@ export function MobileNav({ items }: MobileNavProps) {
             })}
           </nav>
 
-          {/* Contact CTA */}
-          <div className="border-ds-border border-t p-4">
+          {/* Contact CTA + Résumé */}
+          <div className="border-ds-border flex flex-col gap-2 border-t p-4">
+            <a
+              href="/resume-adesh-shukla.pdf"
+              download
+              data-analytics-event="cv_viewed"
+              className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent flex h-11 w-full items-center justify-center rounded-lg border text-[14px] font-medium transition-colors"
+            >
+              Download résumé ↓
+            </a>
             <Link
               href="/contact"
               className="bg-ds-accent flex h-11 w-full items-center justify-center rounded-lg text-[14px] font-semibold text-white transition-colors hover:bg-blue-400"

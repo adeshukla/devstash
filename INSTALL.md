@@ -115,13 +115,13 @@ Replace with your real photo when ready.
 ## 7. Verify TypeScript
 
 ```bash
-pnpm tsc --noEmit
+pnpm exec tsc --noEmit
 ```
 
 Common issues:
 
 - `buildBlogPostingSchema` signature mismatch → update `lib/schema/builders.ts` as shown above
-- `buildMetadata` ogType `'article'` not in union → add `'article'` to `MetadataOptions` type
+- `buildMetadata` field is `type` (NOT `ogType`); the union is `'website' | 'article'`. Canonical takes a RELATIVE path. `MetadataOptions` is defined in `types/seo.ts`
 
 ---
 

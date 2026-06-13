@@ -2,6 +2,7 @@
 import { Suspense } from 'react'
 import { type Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
+import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildBreadcrumbSchema, buildWebSiteSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
@@ -13,12 +14,16 @@ import { type BlogCategory } from '@/types/blog'
 
 const POSTS_PER_PAGE = 9
 
+const title = 'Blog — Frontend, Automation & AI Workflows'
+const description =
+  'Articles on frontend development, automation, AI workflows, and developer tooling — practical write-ups from things Adesh figures out while building.'
+
 export const metadata: Metadata = buildMetadata({
-  title: 'Blog',
-  description:
-    'Articles on frontend development, automation, AI workflows, and developer tooling by Adesh Shukla.',
+  title,
+  description,
   canonical: '/blog',
   type: 'website',
+  ogImage: buildOgImageUrl({ title, description, type: 'website' }),
 })
 
 type Props = {

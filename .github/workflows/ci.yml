@@ -27,6 +27,29 @@ jobs:
       - name: TypeScript type check
         run: pnpm tsc --noEmit
 
+  content-checks:
+    name: Content Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint MDX frontmatter
+        run: pnpm lint:content
+
+      - name: Check internal links
+        run: pnpm check:links
+
   build:
     name: Build Check
     runs-on: ubuntu-latest

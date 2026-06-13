@@ -7,11 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "echo 'Lint configured in Phase 1'",
+    "lint:content": "node scripts/seo/check-metadata.mjs",
+    "check:links": "node scripts/automation/check-links.mjs",
     "prepare": "husky"
   },
   "dependencies": {
     "clsx": "^2.1.1",
     "gray-matter": "^4.0.3",
+    "iron-session": "^8.0.4",
     "next": "16.2.6",
     "next-mdx-remote": "^6.0.0",
     "react": "19.2.4",
@@ -26,6 +29,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
+    "@lhci/cli": "^0.15.1",
     "@next/eslint-plugin-next": "^16.2.6",
     "@tailwindcss/postcss": "^4",
     "@types/mdx": "^2.0.14",

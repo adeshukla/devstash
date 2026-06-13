@@ -2,6 +2,7 @@
 import { notFound } from 'next/navigation'
 import { type Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
+import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildBreadcrumbSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
@@ -29,6 +30,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: `All DevStash blog posts in the ${label} category.`,
     canonical: `/blog/category/${category}`,
     type: 'website',
+    ogImage: buildOgImageUrl({
+      title: `${label} — Blog`,
+      description: `All DevStash blog posts in the ${label} category.`,
+      type: 'website',
+    }),
   })
 }
 

@@ -64,9 +64,9 @@ export function ProjectsGrid({ projects, showAll = false }: ProjectsGridProps) {
 
                       {/* Title + description */}
                       <div>
-                        <h3 className="text-ds-text group-hover:text-ds-accent font-semibold transition-colors">
+                        <h2 className="text-ds-text group-hover:text-ds-accent font-semibold transition-colors">
                           {project.title}
-                        </h3>
+                        </h2>
                         <p className="text-ds-muted mt-1 line-clamp-2 text-sm">
                           {project.description}
                         </p>

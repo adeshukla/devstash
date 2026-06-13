@@ -7,6 +7,12 @@ export interface MetadataOptions {
   ogImage?: string
   type?: 'website' | 'article'
   noIndex?: boolean
+  // ── Article-only Open Graph fields (used when type === 'article') ──
+  publishedTime?: string
+  modifiedTime?: string
+  authors?: string[]
+  section?: string
+  tags?: string[]
 }
 
 export interface BreadcrumbItem {

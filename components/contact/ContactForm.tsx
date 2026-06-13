@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Button, Input, Textarea } from '@/components/ui'
+import { trackAndLog, ANALYTICS_EVENTS } from '@/lib/analytics/events'
 
 interface FormState {
   status: 'idle' | 'loading' | 'success' | 'error'
@@ -105,6 +106,10 @@ export function ContactForm() {
         message: data.message ?? "Message sent! I'll get back to you soon.",
       })
       setValues({ name: '', email: '', subject: '', message: '' })
+      // Conversion event — fire only on confirmed success. No PII (no email/
+      // message content); only a non-identifying source label. Also writes a
+      // server-side visit log via /api/track.
+      trackAndLog(ANALYTICS_EVENTS.contactFormSubmitted, { form: 'contact' })
     } catch (err) {
       setFormState({
         status: 'error',
