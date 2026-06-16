@@ -20,7 +20,7 @@ export function FeaturedPosts({ posts }: FeaturedPostsProps) {
               Thoughts on frontend, automation, and developer tooling
             </p>
           </div>
-          <Button href="/blog" variant="ghost" size="sm">
+          <Button href="/blog" variant="ghost" size="sm" className="flex-shrink-0 p-3">
             All posts →
           </Button>
         </div>

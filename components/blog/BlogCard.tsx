@@ -37,7 +37,7 @@ export function BlogCard({ post, featured = false, className }: BlogCardProps) {
     <article
       className={cn(
         'group border-ds-border bg-ds-surface flex flex-col overflow-hidden rounded-xl border',
-        'hover:border-ds-border2 transition-all duration-200 hover:shadow-lg hover:shadow-black/20',
+        'card-glow hover:border-ds-accent/50',
         featured && 'md:flex-row',
         className
       )}

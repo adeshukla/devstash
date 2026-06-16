@@ -27,7 +27,7 @@ export function ProjectsGrid({ projects, showAll = false }: ProjectsGridProps) {
               <h2 className="text-ds-text text-3xl font-bold">Projects</h2>
               <p className="text-ds-muted mt-1">Things I&apos;ve built and shipped</p>
             </div>
-            <Button href="/projects" variant="ghost" size="sm">
+            <Button href="/projects" variant="ghost" size="sm" className="flex-shrink-0 p-3">
               View all →
             </Button>
           </div>

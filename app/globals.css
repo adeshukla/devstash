@@ -160,3 +160,106 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
 }
+
+/* ──────────────────────────────────────────────────────────────
+   Interactive / decorative animations
+   ────────────────────────────────────────────────────────────── */
+
+/* Aurora blob drift (hero background) */
+@keyframes auroraDrift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(6%, -4%) scale(1.08);
+  }
+  66% {
+    transform: translate(-5%, 5%) scale(0.96);
+  }
+}
+
+/* Animated gradient sweep (for gradient text / bars) */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Soft float (badges, accents) */
+@keyframes floatY {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Aurora background blob */
+.animate-aurora {
+  animation: auroraDrift 18s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Blue→purple animated gradient text (hero accent word, etc.) */
+.text-gradient-animate {
+  background-image: linear-gradient(100deg, #3b82f6, #8b5cf6, #60a5fa, #3b82f6);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradientShift 6s ease infinite;
+}
+
+.animate-float {
+  animation: floatY 5s ease-in-out infinite;
+}
+
+/* Card hover lift + accent glow — pair with the `group`/hover utilities */
+.card-glow {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.2s ease;
+}
+.card-glow:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px -8px rgba(59, 130, 246, 0.25);
+}
+
+/* Reveal-on-scroll (toggled by the <Reveal> client component) */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Respect users who prefer reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

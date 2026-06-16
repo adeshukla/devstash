@@ -16,6 +16,7 @@ import { TOC } from '@/components/blog/TOC'
 import { AuthorBio } from '@/components/blog/AuthorBio'
 import { RelatedPosts } from '@/components/blog/RelatedPosts'
 import { ReadTracker } from '@/components/blog/ReadTracker'
+import { ReadingProgress } from '@/components/blog/ReadingProgress'
 import { mdxComponents } from '@/components/blog/MDXComponents'
 import { getAllPosts, getPostBySlug, getRelatedPosts } from '@/lib/markdown/blog'
 import { extractTOC } from '@/lib/utils/toc'
@@ -84,6 +85,7 @@ export default async function BlogPostPage({ params }: Props) {
   return (
     <>
       <JsonLd data={buildBlogPostingSchema(post)} />
+      <ReadingProgress />
       <ReadTracker slug={post.slug} />
 
       <div className="container mx-auto max-w-6xl px-4 py-12">

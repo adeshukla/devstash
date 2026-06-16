@@ -17,7 +17,7 @@ const variantStyles: Record<CardVariant, string> = {
   default: 'bg-ds-surface border border-ds-border',
   hover: [
     'bg-ds-surface border border-ds-border',
-    'cursor-pointer transition-colors duration-200',
+    'card-glow cursor-pointer',
     'hover:border-ds-accent/50',
   ].join(' '),
   accent: [

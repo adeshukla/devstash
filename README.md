@@ -139,15 +139,16 @@ You can also create/edit/delete posts locally via the admin panel: run
 
 ## 📚 Documentation Index
 
-| Doc                                                                      | What it's for                                                             |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| [`docs/blog-authoring-guide.md`](./docs/blog-authoring-guide.md)         | How to write a blog post + the AI generation prompt                       |
-| [`docs/home-page-strategy.md`](./docs/home-page-strategy.md)             | Why the home page is structured the way it is (recruiters/companies/devs) |
-| [`docs/phase-10-blog-automation.md`](./docs/phase-10-blog-automation.md) | Step-by-step n8n + Groq pipeline to auto-generate and publish blogs       |
-| [`docs/devstash-future-roadmap.md`](./docs/devstash-future-roadmap.md)   | Market-informed roadmap: projects, content, and automation to build next  |
-| [`docs/backend-overview.md`](./docs/backend-overview.md)                 | Where forms submit, where logs go, what's stored, and the full data flow  |
-| [`docs/seo-checklist.md`](./docs/seo-checklist.md)                       | Pre-submission SEO verification (GSC/Bing)                                |
-| [`docs/launch-checklist.md`](./docs/launch-checklist.md)                 | Analytics + custom-domain launch runbook                                  |
+| Doc                                                                        | What it's for                                                             |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| [`docs/blog-authoring-guide.md`](./docs/blog-authoring-guide.md)           | How to write a blog post + the AI generation prompt                       |
+| [`docs/home-page-strategy.md`](./docs/home-page-strategy.md)               | Why the home page is structured the way it is (recruiters/companies/devs) |
+| [`docs/phase-10-blog-automation.md`](./docs/phase-10-blog-automation.md)   | Step-by-step n8n + Groq pipeline to auto-generate and publish blogs       |
+| [`docs/devstash-future-roadmap.md`](./docs/devstash-future-roadmap.md)     | Market-informed roadmap: projects, content, and automation to build next  |
+| [`docs/backend-overview.md`](./docs/backend-overview.md)                   | Where forms submit, where logs go, what's stored, and the full data flow  |
+| [`docs/seo-checklist.md`](./docs/seo-checklist.md)                         | Pre-submission SEO verification (GSC/Bing)                                |
+| [`docs/search-console-submission.md`](./docs/search-console-submission.md) | robots.txt + sitemap.xml review and GSC/Bing submission steps             |
+| [`docs/launch-checklist.md`](./docs/launch-checklist.md)                   | Analytics + custom-domain launch runbook                                  |
 
 ---
 

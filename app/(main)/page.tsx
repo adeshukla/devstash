@@ -6,6 +6,7 @@ import { buildWebSiteSchema, buildPersonSchema } from '@/lib/schema/builders'
 import { HeroSection } from '@/components/sections/HeroSection'
 import { ProjectsGrid } from '@/components/sections/ProjectsGrid'
 import { FeaturedPosts } from '@/components/sections/FeaturedPosts'
+import { Reveal } from '@/components/ui'
 import { getAllProjects, getFeaturedProjects } from '@/lib/markdown/projects'
 import { getAllPosts, getFeaturedPosts } from '@/lib/markdown/blog'
 
@@ -32,10 +33,14 @@ export default function HomePage() {
       <HeroSection />
 
       {/* Featured projects (preview — links to /projects) */}
-      <ProjectsGrid projects={projects} />
+      <Reveal>
+        <ProjectsGrid projects={projects} />
+      </Reveal>
 
       {/* Latest writing (renders nothing if there are no posts) */}
-      <FeaturedPosts posts={posts} />
+      <Reveal>
+        <FeaturedPosts posts={posts} />
+      </Reveal>
 
       {/* Closing CTA */}
       <section className="border-ds-border bg-ds-surface border-t py-20">
