@@ -3,6 +3,8 @@ import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildPersonSchema } from '@/lib/schema/builders'
+import { siteConfig } from '@/content/metadata/site.config'
+import { stack } from '@/lib/site/stack'
 import { Badge, Button } from '@/components/ui'
 
 const title = 'About Adesh Shukla — Frontend Developer'
@@ -20,7 +22,7 @@ export const metadata: Metadata = buildMetadata({
 // ─── Static data ──────────────────────────────────────────────────────────────
 
 const SKILLS: Record<string, string[]> = {
-  Frontend: ['React', 'Next.js 15', 'TypeScript', 'Tailwind CSS v4', 'Redux Toolkit'],
+  Frontend: [stack.react, stack.next, stack.typescript, stack.tailwind, 'Redux Toolkit'],
   Tooling: ['Vite', 'pnpm', 'Webpack', 'Husky', 'Prettier'],
   Automation: ['n8n', 'Groq API', 'Ollama', 'Google Sheets API', 'Resend'],
   Design: ['Figma', 'UI/UX Design', 'Design Systems', 'Tailwind UI'],
@@ -39,7 +41,7 @@ const TIMELINE = [
 
 const CURRENTLY = [
   '🔨 Building DevStash — personal developer ecosystem',
-  '📚 Deep-diving into Next.js 15 App Router & RSC patterns',
+  `📚 Deep-diving into ${stack.next} App Router & RSC patterns`,
   '🤖 Automating workflows with n8n and local LLMs (Ollama)',
   '🔍 Open to frontend roles · Noida / Delhi NCR · immediate–20 days notice',
   // TODO: Keep this section updated
@@ -168,7 +170,7 @@ export default function AboutPage() {
               >
                 Download résumé ↓
               </a>
-              <Button href="https://github.com/adeshukla" variant="ghost" size="lg">
+              <Button href={siteConfig.author.github} variant="ghost" size="lg">
                 GitHub →
               </Button>
             </div>

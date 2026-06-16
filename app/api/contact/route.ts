@@ -25,9 +25,9 @@ function getResend() {
   return new Resend(key)
 }
 
-// TODO: Replace with your verified Resend sender domain + your personal inbox
-const FROM_EMAIL = 'DevStash Contact <contact@devstash.me>'
-const TO_EMAIL = 'TODO_YOUR_EMAIL@gmail.com' // ← update before launch
+// Resend sender + recipient. FROM must be on your verified Resend domain.
+const FROM_EMAIL = 'DevStash Contact <hello@devstash.me>'
+const TO_EMAIL = 'hello@devstash.me'
 
 // ─── POST handler ─────────────────────────────────────────────────────────────
 

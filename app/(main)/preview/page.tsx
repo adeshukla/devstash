@@ -100,7 +100,7 @@ export default function PreviewPage() {
       <section className="space-y-4">
         <h2 className="text-ds-muted font-mono text-xs tracking-widest uppercase">Inputs</h2>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Input label="Email" type="email" placeholder="you@devstash.me" />
+          <Input label="Email" type="email" placeholder="you@example.com" />
           <Input label="With hint" placeholder="Username" hint="Only letters and numbers" />
           <Input label="With error" placeholder="Email" error="Invalid email address" />
           <Input label="Required" placeholder="Name" required />

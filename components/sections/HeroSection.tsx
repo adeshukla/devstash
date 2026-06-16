@@ -24,23 +24,21 @@ export function HeroSection() {
               <span className="bg-ds-success relative inline-flex h-2 w-2 rounded-full" />
             </span>
             <span className="text-ds-muted font-mono text-sm">
-              {/* TODO: Update availability status dynamically */}
-              Available for frontend roles · Noida / Delhi NCR
+              Available for frontend roles · Noida / Delhi NCR · Remote
             </span>
           </div>
 
           {/* Main heading */}
           <h1 className="text-ds-text text-4xl leading-tight font-bold tracking-tight sm:text-5xl lg:text-6xl">
-            {/* TODO: Finalise headline */}
-            Building interfaces that <span className="text-ds-accent">actually work.</span>
+            Web interfaces that ship —{' '}
+            <span className="text-ds-accent">fast, accessible, built to last.</span>
           </h1>
 
           {/* Sub-copy */}
           <p className="text-ds-muted max-w-2xl text-lg leading-relaxed">
-            {/* TODO: Update with final bio copy */}
-            Frontend developer with a designer&apos;s eye. I specialise in React, Next.js, and
-            automation workflows — turning Figma designs into high-performance, SEO-ready web
-            experiences.
+            I&apos;m Adesh Shukla — a frontend developer with a designer&apos;s eye. I build with
+            React and Next.js, turn Figma into high-performance, SEO-ready products, and automate
+            the repetitive parts of the workflow.
           </p>
 
           {/* CTAs */}
@@ -59,8 +57,7 @@ export function HeroSection() {
               [
                 { label: 'Years experience', value: '6+' },
                 { label: 'Landing pages shipped', value: '200+' },
-                // TODO: Update with real numbers before launch
-                { label: 'Open source projects', value: '5+' },
+                { label: 'Lighthouse score', value: '90+' },
               ] as const
             ).map(({ label, value }) => (
               <div key={label} className="flex flex-col gap-0.5">

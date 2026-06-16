@@ -4,6 +4,7 @@ import { isAdminEnabled } from '@/lib/auth/adminEnabled'
 import { getSession } from '@/lib/auth/session'
 import { getAllPosts } from '@/lib/markdown/blog'
 import { Badge } from '@/components/ui'
+import { DeletePostButton } from '@/components/admin/DeletePostButton'
 
 export default async function AdminDashboardPage() {
   if (!isAdminEnabled()) notFound()
@@ -29,6 +30,11 @@ export default async function AdminDashboardPage() {
           New post
         </Link>
       </div>
+
+      <p className="text-ds-muted -mt-4 text-xs">
+        Need the format or the AI prompt? See{' '}
+        <code className="font-mono">docs/blog-authoring-guide.md</code>.
+      </p>
 
       {posts.length === 0 ? (
         <p className="text-ds-muted border-ds-border rounded-lg border border-dashed px-6 py-12 text-center text-sm">
@@ -56,12 +62,15 @@ export default async function AdminDashboardPage() {
                 </div>
                 <p className="text-ds-muted mt-1 truncate font-mono text-xs">{post.slug}</p>
               </div>
-              <Link
-                href={`/admin/edit/${post.slug}`}
-                className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg inline-flex h-9 shrink-0 items-center justify-center rounded-lg border px-4 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-              >
-                Edit
-              </Link>
+              <div className="flex shrink-0 items-center gap-2">
+                <Link
+                  href={`/admin/edit/${post.slug}`}
+                  className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg inline-flex h-9 shrink-0 items-center justify-center rounded-lg border px-4 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                >
+                  Edit
+                </Link>
+                <DeletePostButton slug={post.slug} />
+              </div>
             </li>
           ))}
         </ul>

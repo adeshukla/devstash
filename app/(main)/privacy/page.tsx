@@ -123,12 +123,12 @@ export default function PrivacyPage() {
               <PolicySection title="7. Your Rights">
                 <p>
                   You have the right to access, correct, or delete your personal data. To exercise
-                  these rights, contact us at {/* TODO: Replace with real contact email */}
+                  these rights, contact us at{' '}
                   <a
-                    href="mailto:contact@devstash.me"
+                    href="mailto:hello@devstash.me"
                     className="text-ds-accent underline-offset-4 hover:underline"
                   >
-                    contact@devstash.me
+                    hello@devstash.me
                   </a>
                   .
                 </p>
@@ -146,10 +146,10 @@ export default function PrivacyPage() {
                 <p>
                   Questions about this policy? Email{' '}
                   <a
-                    href="mailto:contact@devstash.me"
+                    href="mailto:hello@devstash.me"
                     className="text-ds-accent underline-offset-4 hover:underline"
                   >
-                    contact@devstash.me
+                    hello@devstash.me
                   </a>
                   .
                 </p>

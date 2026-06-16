@@ -53,6 +53,18 @@ interface PostsApiResponse {
   details?: Record<string, string>
 }
 
+interface UploadApiResponse {
+  ok?: boolean
+  path?: string
+  error?: string
+}
+
+interface UploadState {
+  status: 'idle' | 'loading' | 'success' | 'error'
+  message: string
+  path: string
+}
+
 export function PostEditor({ mode, initial }: PostEditorProps) {
   const router = useRouter()
   const [values, setValues] = useState<PostFormValues>(initial ?? EMPTY_VALUES)
@@ -61,8 +73,17 @@ export function PostEditor({ mode, initial }: PostEditorProps) {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [submitState, setSubmitState] = useState<SubmitState>({ status: 'idle', message: '' })
 
+  // Image uploader (additive — does not affect form submission).
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploadState, setUploadState] = useState<UploadState>({
+    status: 'idle',
+    message: '',
+    path: '',
+  })
+
   const isLoading = submitState.status === 'loading'
   const isCreate = mode === 'create'
+  const isUploading = uploadState.status === 'loading'
 
   function clearFieldError(field: string) {
     setFieldErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev))
@@ -112,6 +133,59 @@ export function PostEditor({ mode, initial }: PostEditorProps) {
   function handleFeaturedImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     setValues((prev) => ({ ...prev, featuredImage: e.target.value }))
     clearFieldError('featuredImage')
+  }
+
+  // ── Image upload ───────────────────────────────────────────────
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null
+    setSelectedFile(file)
+    setUploadState({ status: 'idle', message: '', path: '' })
+  }
+
+  async function handleUpload() {
+    if (!selectedFile) {
+      setUploadState({ status: 'error', message: 'Choose a file first.', path: '' })
+      return
+    }
+
+    setUploadState({ status: 'loading', message: '', path: '' })
+
+    try {
+      const formData = new FormData()
+      formData.append('file', selectedFile)
+      // Derive a name hint from the file name (extension stripped server-side).
+      const baseName = selectedFile.name.replace(/\.[^.]+$/, '')
+      if (baseName) formData.append('name', baseName)
+
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = (await res.json()) as UploadApiResponse
+
+      if (res.ok && data.path) {
+        const uploadedPath = data.path
+        // Auto-fill the featured image only if it's currently empty.
+        setValues((prev) =>
+          prev.featuredImage.trim() === '' ? { ...prev, featuredImage: uploadedPath } : prev
+        )
+        setUploadState({ status: 'success', message: 'Image uploaded.', path: uploadedPath })
+        return
+      }
+
+      setUploadState({
+        status: 'error',
+        message: data.error ?? 'Upload failed. Please try again.',
+        path: '',
+      })
+    } catch (err) {
+      setUploadState({
+        status: 'error',
+        message: err instanceof Error ? err.message : 'Upload failed. Please try again.',
+        path: '',
+      })
+    }
   }
 
   function handleReadingTimeChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -307,6 +381,57 @@ export function PostEditor({ mode, initial }: PostEditorProps) {
         hint="Comma-separated, 2–5 tags (e.g. automation, ci-cd, mdx)."
         placeholder="automation, ci-cd, mdx"
       />
+
+      {/* Image uploader (local-only) */}
+      <div className="border-ds-border bg-ds-surface2 flex flex-col gap-3 rounded-lg border p-4">
+        <div className="flex flex-col gap-1">
+          <span className="text-ds-text text-[13px] font-medium">Upload image</span>
+          <span className="text-ds-muted text-[12px]">
+            Saves to <code className="font-mono">public/images/blog/</code>. Max 5MB — webp, png,
+            jpg, gif, svg.
+          </span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            disabled={isUploading}
+            aria-label="Choose an image to upload"
+            className="text-ds-muted file:bg-ds-surface file:text-ds-text file:border-ds-border hover:file:border-ds-accent text-[13px] file:mr-3 file:cursor-pointer file:rounded-md file:border file:px-3 file:py-1.5 file:text-[13px] file:transition-colors disabled:opacity-50"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleUpload}
+            loading={isUploading}
+            disabled={isUploading || !selectedFile}
+          >
+            {isUploading ? 'Uploading…' : 'Upload image'}
+          </Button>
+        </div>
+
+        {uploadState.status === 'error' && (
+          <p role="alert" className="text-ds-error text-[12px]">
+            {uploadState.message}
+          </p>
+        )}
+
+        {uploadState.status === 'success' && (
+          <div role="status" aria-live="polite" className="flex flex-col gap-1">
+            <p className="text-ds-success text-[12px]">{uploadState.message}</p>
+            <code className="text-ds-text bg-ds-surface border-ds-border block rounded-md border px-3 py-2 font-mono text-[12px] break-all">
+              {uploadState.path}
+            </code>
+            <p className="text-ds-muted text-[12px]">
+              Paste into the MDX body as{' '}
+              <code className="font-mono">![alt]({uploadState.path})</code>
+            </p>
+          </div>
+        )}
+      </div>
 
       <Input
         label="Featured image"

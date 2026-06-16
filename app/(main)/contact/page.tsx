@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
+import { siteConfig } from '@/content/metadata/site.config'
 import { Breadcrumb } from '@/components/layout'
 import { ContactForm } from '@/components/contact/ContactForm'
 
@@ -15,24 +16,24 @@ export const metadata: Metadata = buildMetadata({
   ogImage: buildOgImageUrl({ title, description, type: 'website' }),
 })
 
-// ─── Social links ─────────────────────────────────────────────────────────────
+// ─── Social links (single source: content/metadata/site.config.ts) ─────────────
 
 const SOCIAL_LINKS = [
   {
     label: 'GitHub',
-    href: 'https://github.com/adeshukla',
+    href: siteConfig.author.github,
     handle: '@adeshukla',
     icon: '⌥',
   },
   {
     label: 'LinkedIn',
-    href: 'https://linkedin.com/in/adeshukla', // TODO: Verify URL
+    href: siteConfig.author.linkedin,
     handle: 'Adesh Shukla',
     icon: '⌘',
   },
   {
     label: 'Twitter / X',
-    href: 'https://x.com/adeshukla', // TODO: Verify URL or remove
+    href: siteConfig.author.x,
     handle: '@adeshukla',
     icon: '𝕏',
   },

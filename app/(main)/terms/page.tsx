@@ -3,6 +3,7 @@ import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildWebSiteSchema } from '@/lib/schema/builders'
+import { siteConfig } from '@/content/metadata/site.config'
 
 const title = 'Terms of Service — Using the DevStash Website'
 const description =
@@ -71,7 +72,7 @@ export default function TermsPage() {
                   All content on the Site — including text, code snippets, design, and graphics — is
                   owned by Adesh Shukla unless otherwise stated. Open source code on{' '}
                   <a
-                    href="https://github.com/adeshukla"
+                    href={siteConfig.author.github}
                     className="text-ds-accent underline-offset-4 hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -124,10 +125,10 @@ export default function TermsPage() {
                 <p>
                   Questions? Email us at{' '}
                   <a
-                    href="mailto:contact@devstash.me"
+                    href="mailto:hello@devstash.me"
                     className="text-ds-accent underline-offset-4 hover:underline"
                   >
-                    contact@devstash.me
+                    hello@devstash.me
                   </a>
                   .
                 </p>

@@ -3,6 +3,7 @@ import fs from 'fs'
 import path from 'path'
 import Image from 'next/image'
 import Link from 'next/link'
+import { siteConfig } from '@/content/metadata/site.config'
 
 interface AuthorBioProps {
   author: string
@@ -16,8 +17,8 @@ const AUTHORS: Record<
     name: 'Adesh Shukla',
     bio: 'Frontend developer with a design background. Building DevStash — a developer ecosystem covering automation, AI workflows, and modern frontend systems.',
     avatar: '/images/avatar.webp',
-    github: 'https://github.com/adeshukla',
-    twitter: 'https://twitter.com/adeshukla',
+    github: siteConfig.author.github,
+    twitter: siteConfig.author.x,
   },
 }
 

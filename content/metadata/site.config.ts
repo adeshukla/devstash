@@ -13,7 +13,8 @@ export const siteConfig = {
     name: 'Adesh Shukla',
     email: 'hello@devstash.me',
     github: 'https://github.com/adeshukla',
-    linkedin: 'https://linkedin.com/in/adeshukla',
+    linkedin: 'https://www.linkedin.com/in/adeshukla',
+    x: 'https://x.com/adeshukla',
   },
 } as const
 

@@ -15,6 +15,7 @@ Personal Portfolio → Developer Brand → Content Engine → Product Ecosystem
 ```
 
 The goal is to build a trusted, high-performance, SEO-optimized platform that serves:
+
 - **Recruiters** — fast-loading proof of work, clean UX, easy CV access.
 - **Developers** — educational blogs, automation guides, reusable resources.
 - **Founders & Tech Leads** — engineering mindset, execution capability, technical depth.
@@ -23,15 +24,15 @@ The goal is to build a trusted, high-performance, SEO-optimized platform that se
 
 ## Tech Stack
 
-| Layer | Choice |
-|---|---|
-| Framework | Next.js (App Router) |
-| Styling | Tailwind CSS (design tokens defined) |
-| Content | MD / MDX / JSON (file-based, CMS-ready) |
-| Fonts | Inter, Satoshi/Geist (headings), JetBrains Mono (code) |
-| Analytics | GA4, Google Search Console, Bing Webmaster |
-| Deployment | Vercel (or similar edge-first platform) |
-| Automation | GitHub Actions, Node scripts, n8n (optional) |
+| Layer      | Choice                                                 |
+| ---------- | ------------------------------------------------------ |
+| Framework  | Next.js (App Router)                                   |
+| Styling    | Tailwind CSS (design tokens defined)                   |
+| Content    | MD / MDX / JSON (file-based, CMS-ready)                |
+| Fonts      | Inter, Satoshi/Geist (headings), JetBrains Mono (code) |
+| Analytics  | GA4, Google Search Console, Bing Webmaster             |
+| Deployment | Vercel (or similar edge-first platform)                |
+| Automation | GitHub Actions, Node scripts, n8n (optional)           |
 
 ---
 
@@ -102,6 +103,7 @@ root/
 ## SEO Strategy
 
 DevStash is built SEO-first. Every page ships with:
+
 - Unique `<title>` and `<meta name="description">`
 - `<link rel="canonical">`
 - Open Graph + Twitter Card tags
@@ -121,11 +123,38 @@ Blog content lives at `/blog` on the main domain. It is architecturally separate
 
 📖 Full details: [`/docs/workflows/blog-architecture.md`](./docs/workflows/blog-architecture.md)
 
+### ✍️ Writing a blog post
+
+Posts are MDX files in `content/blogs/`. The complete authoring spec — file
+format, allowed content/code, image handling, SEO rules, and a copy-paste **AI
+prompt** that generates a ready-to-publish post — is here:
+
+📖 **[`docs/blog-authoring-guide.md`](./docs/blog-authoring-guide.md)**
+
+You can also create/edit/delete posts locally via the admin panel: run
+`pnpm dev` → visit `/admin` (set `ADMIN_PASSWORD` + `SESSION_SECRET` in
+`.env.local` first). The admin is local-only and disabled in production.
+
+---
+
+## 📚 Documentation Index
+
+| Doc                                                                      | What it's for                                                             |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| [`docs/blog-authoring-guide.md`](./docs/blog-authoring-guide.md)         | How to write a blog post + the AI generation prompt                       |
+| [`docs/home-page-strategy.md`](./docs/home-page-strategy.md)             | Why the home page is structured the way it is (recruiters/companies/devs) |
+| [`docs/phase-10-blog-automation.md`](./docs/phase-10-blog-automation.md) | Step-by-step n8n + Groq pipeline to auto-generate and publish blogs       |
+| [`docs/devstash-future-roadmap.md`](./docs/devstash-future-roadmap.md)   | Market-informed roadmap: projects, content, and automation to build next  |
+| [`docs/backend-overview.md`](./docs/backend-overview.md)                 | Where forms submit, where logs go, what's stored, and the full data flow  |
+| [`docs/seo-checklist.md`](./docs/seo-checklist.md)                       | Pre-submission SEO verification (GSC/Bing)                                |
+| [`docs/launch-checklist.md`](./docs/launch-checklist.md)                 | Analytics + custom-domain launch runbook                                  |
+
 ---
 
 ## Automation Workflows
 
 Repetitive tasks are scripted or AI-assisted:
+
 - OG image generation from post metadata
 - Sitemap auto-update on content change
 - MDX frontmatter linting
@@ -150,6 +179,7 @@ All AI-assisted work on DevStash must follow the Master AI System Prompt to ensu
 > TODO: Add environment variables list and deployment steps once hosting is finalized.
 
 **Recommended checklist before deploy:**
+
 - [ ] `robots.txt` configured correctly (no accidental blocking).
 - [ ] `sitemap.xml` generated and submitted to Google Search Console and Bing Webmaster Tools.
 - [ ] All `.env` values set in the hosting platform.

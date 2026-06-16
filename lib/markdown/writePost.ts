@@ -56,3 +56,18 @@ export function writePost(
 
   return target
 }
+
+/**
+ * Delete a blog post at `content/blogs/<slug>.mdx`.
+ *
+ * Uses `resolvePostPath` so the slug is validated and the target is guaranteed
+ * to live inside `content/blogs/` (throws `INVALID_SLUG`/`PATH_TRAVERSAL`).
+ * Throws `NOT_FOUND` if the file does not exist.
+ */
+export function deletePost(slug: string): void {
+  const target = resolvePostPath(slug)
+
+  if (!fs.existsSync(target)) throw new Error('NOT_FOUND')
+
+  fs.unlinkSync(target)
+}

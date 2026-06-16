@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { isAdminEnabled } from '@/lib/auth/adminEnabled'
 import { getSession } from '@/lib/auth/session'
 import { getPostBySlug } from '@/lib/markdown/blog'
-import { writePost } from '@/lib/markdown/writePost'
+import { deletePost, writePost } from '@/lib/markdown/writePost'
 import { readingTime } from '@/lib/automation/utils'
 import type { BlogCategory, BlogFrontmatter } from '@/types/blog'
 
@@ -173,6 +173,31 @@ export async function PUT(request: Request) {
   try {
     writePost(frontmatter, payload.body, { overwrite: true })
     return NextResponse.json({ ok: true, slug: payload.slug })
+  } catch (err) {
+    return errorResponse(err)
+  }
+}
+
+// ─── DELETE (remove) ─────────────────────────────────────────────────────────
+
+export async function DELETE(request: Request) {
+  if (!isAdminEnabled()) {
+    return new NextResponse(null, { status: 404 })
+  }
+
+  const session = await getSession()
+  if (!session.isAdmin) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const slug = new URL(request.url).searchParams.get('slug')
+  if (!slug) {
+    return NextResponse.json({ error: 'Missing slug.' }, { status: 400 })
+  }
+
+  try {
+    deletePost(slug)
+    return NextResponse.json({ ok: true, slug })
   } catch (err) {
     return errorResponse(err)
   }
