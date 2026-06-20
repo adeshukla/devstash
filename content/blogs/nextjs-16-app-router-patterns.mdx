@@ -1,29 +1,29 @@
 ---
-title: 'Next.js 15 App Router: Patterns I Actually Use'
-slug: 'nextjs-15-app-router-patterns'
-description: 'Practical patterns from building a real Next.js 15 project: async searchParams, MDX with next-mdx-remote/rsc, generateStaticParams on dynamic routes, and why Server Components change the way you think about data fetching.'
+title: 'Next.js 16 App Router: Patterns I Actually Use'
+slug: 'nextjs-16-app-router-patterns'
+description: 'Practical patterns from building a real Next.js 16 project: async searchParams, MDX with next-mdx-remote/rsc, generateStaticParams on dynamic routes, and why Server Components change the way you think about data fetching.'
 author: 'Adesh Shukla'
-createdAt: '2025-05-20'
-updatedAt: '2025-05-20'
+createdAt: '2026-06-20'
+updatedAt: '2026-06-20'
 category: 'frontend'
 tags: ['nextjs', 'react', 'typescript', 'app-router']
-featuredImage: '/images/blog/nextjs-15-patterns.webp'
+featuredImage: '/images/blog/nextjs-16-patterns.webp'
 readingTime: 6
-canonical: 'https://devstash.me/blog/nextjs-15-app-router-patterns'
+canonical: 'https://devstash.me/blog/nextjs-16-app-router-patterns'
 draft: false
 featured: false
 ---
 
-I've been building DevStash — this site — on Next.js 15 App Router with TypeScript strict mode. Some patterns I expected from the docs. Others I only found by reading the breaking-change notes carefully, or by hitting confusing runtime errors at 11pm.
+I've been building DevStash — this site — on Next.js 16 App Router with TypeScript strict mode. Some patterns I expected from the docs. Others I only found by reading the breaking-change notes carefully, or by hitting confusing runtime errors at 11pm.
 
 Here are the ones worth documenting.
 
 ## async searchParams in Page Components
 
-This is the biggest "gotcha" in Next.js 15. `searchParams` (and `params`) are now **Promises** — you have to `await` them before accessing any property.
+This is the biggest "gotcha" in Next.js 16. `searchParams` (and `params`) are now **Promises** — you have to `await` them before accessing any property.
 
 ```tsx
-// ✅ Next.js 15 — correct
+// ✅ Next.js 16 — correct
 type Props = {
   searchParams: Promise<{ category?: string; page?: string }>
 }
@@ -35,7 +35,7 @@ export default async function BlogPage({ searchParams }: Props) {
 ```
 
 ```tsx
-// ❌ Next.js 14 pattern — breaks in 15
+// ❌ Next.js 14 pattern — breaks in 16
 export default function BlogPage({ searchParams }) {
   const category = searchParams.category // undefined, no error — silently broken
 }
@@ -131,7 +131,7 @@ For the blog, the TOC is `'use client'` because it uses IntersectionObserver. Th
 
 ## useSearchParams Needs Suspense
 
-If a `'use client'` component calls `useSearchParams()`, it must be wrapped in a `<Suspense>` boundary at the parent level. Without it, Next.js 15 throws a build error:
+If a `'use client'` component calls `useSearchParams()`, it must be wrapped in a `<Suspense>` boundary at the parent level. Without it, Next.js 16 throws a build error:
 
 ```
 useSearchParams() should be wrapped in a suspense boundary at page "..."

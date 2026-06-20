@@ -5,7 +5,8 @@
 > **Model:** claude-opus-4-8  
 > **Project:** DevStash (devstash.me) — Developer platform, NOT a basic portfolio  
 > **Current Status:** Phase 9 COMPLETE · Home page LIVE · Phase 10 documented as a guide (docs/phase-10-blog-automation.md)  
-> **Developer:** Adesh Shukla, Ghaziabad, India
+> **Developer:** Adesh Shukla, Ghaziabad, India  
+> **Versions verified against package.json (Jun 2026):** Next.js 16.2.6, React 19.2.4 — see Tech Stack section below
 
 ---
 
@@ -85,17 +86,23 @@ const crumbs: BreadcrumbItem[] = [
 ## 🛠️ TECH STACK — HARD CONSTRAINTS
 
 ```
-Framework     : Next.js 15, App Router, NO turbopack
+Framework     : Next.js 16.2.6, App Router, NO turbopack
+UI Library    : React 19.2.4 (exact pin) + react-dom 19.2.4 (exact pin)
 Language      : TypeScript — strict: true, noUnusedLocals, noUnusedParameters
 Styling       : Tailwind CSS v4 — tokens in globals.css @theme (NOT tailwind.config.ts)
-Content       : next-mdx-remote + gray-matter (NOT @next/mdx)
+Content       : next-mdx-remote ^6.0.0 + gray-matter ^4.0.3 (NOT @next/mdx)
+Validation    : Zod ^4.4.3 — v4 API, BREAKING changes from v3 (do not write v3-style schemas)
+Email         : Resend ^6.12.4
+Auth          : iron-session ^8.0.4
+Utilities     : clsx ^2.1.1 + tailwind-merge ^3.6.0 (v3 API)
+Analytics     : @vercel/speed-insights ^2.0.0 (real user monitoring, already wired)
 Package Mgr   : pnpm ONLY
 Fonts         : next/font/google → DM Sans (--font-sans) + JetBrains Mono (--font-mono)
-Images        : next/image ONLY (@next/next/no-img-element ESLint enforced)
+Images        : next/image ONLY (@next/next/no-img-element rule — ESLint installed, not yet configured)
 Deployment    : Vercel (pnpm build, pnpm install)
 DNS           : Cloudflare — grey cloud DNS Only (never orange cloud with Vercel)
 SEO           : lib/seo/buildMetadata.ts + lib/schema/builders.ts
-Analytics     : GA4 + GSC (lazyOnload strategy)
+Analytics     : GA4 + GSC (lazyOnload strategy) + Vercel Speed Insights
 ```
 
 ---
@@ -272,27 +279,52 @@ N8N_WEBHOOK_SECRET=                          # Phase 10
 
 ---
 
-## 📦 INSTALLED PACKAGES — DO NOT RE-INSTALL
+## 📦 INSTALLED PACKAGES — EXACT VERSIONS (DO NOT RE-INSTALL)
 
-These are already installed. Don't add them again.
+These are already installed. Don't add them again. **Verified against package.json, Jun 2026.**
 
 ```bash
+# Core framework — EXACT pins, not caret ranges
+next 16.2.6
+react 19.2.4
+react-dom 19.2.4
+
 # Core (Phases 0-2)
-clsx tailwind-merge schema-dts
-prettier prettier-plugin-tailwindcss husky lint-staged
+clsx ^2.1.1
+tailwind-merge ^3.6.0          # v3 API — breaking changes from v2
+schema-dts ^2.0.0
+prettier ^3.8.3
+prettier-plugin-tailwindcss ^0.8.0
+husky ^9.1.7
+lint-staged ^17.0.5
 
 # Content (Phase 3) — USE next-mdx-remote, NEVER @next/mdx
-next-mdx-remote gray-matter
-remark remark-gfm rehype-slug rehype-pretty-code  # devDeps
+next-mdx-remote ^6.0.0
+gray-matter ^4.0.3
+remark-gfm ^4.0.1              # devDep
+rehype-slug ^6.0.0             # devDep
+rehype-pretty-code ^0.14.3     # devDep
 
 # Phase 4
-resend zod
+resend ^6.12.4                 # major version — verify API against current docs, not training data
+zod ^4.4.3                     # v4 — BREAKING from v3, different schema/parse API
 
 # Phase 7 (installed) — Lighthouse CI
-@lhci/cli  # devDep
+@lhci/cli ^0.15.1               # devDep
 
 # Phase 9 (installed) — Blog Admin auth
-iron-session
+iron-session ^8.0.4
+
+# NOT in any phase doc until now — confirmed in package.json
+@vercel/speed-insights ^2.0.0   # already wired in, do not add a duplicate analytics script
+
+# ESLint toolchain — INSTALLED but lint script is a placeholder echo (not active yet)
+eslint ^9
+eslint-config-next 16.2.6
+@next/eslint-plugin-next ^16.2.6
+@typescript-eslint/eslint-plugin ^8.60.0
+@typescript-eslint/parser ^8.60.0
+@eslint/eslintrc ^3.3.5
 ```
 
 Pending (don't install until their phase):
@@ -305,20 +337,20 @@ Pending (don't install until their phase):
 
 ## 🐛 KNOWN ISSUES — ALREADY FIXED, DON'T UNDO
 
-| Issue                                | Fix in place — DO NOT revert                                                                                                           |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Turbopack crashes                    | `--turbopack` removed from package.json dev script                                                                                     |
-| Hydration mismatch                   | `suppressHydrationWarning` on `<body>` in app/layout.tsx                                                                               |
-| CRLF on Windows                      | `.gitattributes` has `* text=auto eol=lf`                                                                                              |
-| pnpm approve-builds                  | `.npmrc` has `onlyBuiltDependencies` for sharp/unrs-resolver                                                                           |
-| Tailwind v4 CSS warning              | `.vscode/settings.json` has `"css.validate": false`                                                                                    |
-| `bg-ds-*` not working                | Tokens are in `@theme` in globals.css — never move to tailwind.config.ts                                                               |
-| `.env*` gitignore issue              | Explicit entries: `.env`, `.env.local`, `.env.*.local`                                                                                 |
-| ESLint 9 circular JSON               | ESLint DEFERRED — Prettier-only via lint-staged (do not add ESLint config)                                                             |
-| `@next/mdx` crash                    | Replaced with `next-mdx-remote` — NEVER add @next/mdx back                                                                             |
-| Canonical double-prefix (Phase 6)    | `buildMetadata` prepends `siteConfig.url`, so ALWAYS pass a RELATIVE `canonical` (`/about`) — never an absolute URL                    |
-| Double `\| DevStash` title (Phase 6) | `buildMetadata` appends ` \| DevStash`, so pass BARE page titles — never embed `\| DevStash`/`— DevStash`                              |
-| Duplicate BreadcrumbList (Phase 6)   | The `<Breadcrumb>` component emits its own BreadcrumbList JSON-LD — don't also add a manual `buildBreadcrumbSchema()` on the same page |
+| Issue                                 | Fix in place — DO NOT revert                                                                                                                                                                           |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Turbopack crashes                     | `--turbopack` removed from package.json dev script                                                                                                                                                     |
+| Hydration mismatch                    | `suppressHydrationWarning` on `<body>` in app/layout.tsx                                                                                                                                               |
+| CRLF on Windows                       | `.gitattributes` has `* text=auto eol=lf`                                                                                                                                                              |
+| pnpm approve-builds                   | `.npmrc` has `onlyBuiltDependencies` for sharp/unrs-resolver                                                                                                                                           |
+| Tailwind v4 CSS warning               | `.vscode/settings.json` has `"css.validate": false`                                                                                                                                                    |
+| `bg-ds-*` not working                 | Tokens are in `@theme` in globals.css — never move to tailwind.config.ts                                                                                                                               |
+| `.env*` gitignore issue               | Explicit entries: `.env`, `.env.local`, `.env.*.local`                                                                                                                                                 |
+| ESLint 9 circular JSON / not wired up | ESLint packages ARE installed (eslint ^9, eslint-config-next 16.2.6) but `lint` script is a placeholder echo — Prettier-only via lint-staged for now (do not add ESLint config until explicitly asked) |
+| `@next/mdx` crash                     | Replaced with `next-mdx-remote` — NEVER add @next/mdx back                                                                                                                                             |
+| Canonical double-prefix (Phase 6)     | `buildMetadata` prepends `siteConfig.url`, so ALWAYS pass a RELATIVE `canonical` (`/about`) — never an absolute URL                                                                                    |
+| Double `\| DevStash` title (Phase 6)  | `buildMetadata` appends ` \| DevStash`, so pass BARE page titles — never embed `\| DevStash`/`— DevStash`                                                                                              |
+| Duplicate BreadcrumbList (Phase 6)    | The `<Breadcrumb>` component emits its own BreadcrumbList JSON-LD — don't also add a manual `buildBreadcrumbSchema()` on the same page                                                                 |
 
 ---
 
@@ -407,3 +439,19 @@ DevStash is a **developer ecosystem**, not a resume site. Positioning:
 Evolution path: Personal Portfolio → Developer Brand → **Content Engine** → Product Ecosystem
 
 Every page, every component, every piece of copy should feel like it belongs to a serious developer tool brand. Think Vercel, Linear, Raycast — opinionated, dark, precise.
+
+---
+
+## 🔖 VERSION VERIFICATION NOTE (Jun 2026)
+
+This steering doc was corrected against the live `package.json`. Key corrections from earlier drafts:
+
+- Next.js is **16.2.6**, not 15
+- React and react-dom are **exact-pinned at 19.2.4**, not caret-ranged
+- Zod is **^4.4.3** — v4 API, breaking changes from v3 syntax
+- Resend is **^6.12.4**
+- tailwind-merge is **^3.6.0** — v3 API
+- **@vercel/speed-insights ^2.0.0** is installed and wired (was undocumented before)
+- ESLint packages are installed but the `lint` script is still a placeholder — don't assume it's active
+
+If anything here ever conflicts with `package.json`, **package.json wins.** Re-verify periodically.

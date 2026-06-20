@@ -2,7 +2,7 @@
 
 # Paste this at the start of every new Claude conversation
 
-# Last updated: Phase 9 complete
+# Last updated: Phase 9 complete — versions verified against package.json (Jun 2026)
 
 ---
 
@@ -76,19 +76,20 @@ Never mix concerns between modules.
 
 ## SECTION 3 — TECH STACK (HARD CONSTRAINTS)
 
-| Layer           | Choice                 | Notes                                                 |
-| --------------- | ---------------------- | ----------------------------------------------------- |
-| Framework       | Next.js 15 App Router  | Turbopack DISABLED (Windows crashes)                  |
-| Language        | TypeScript strict mode | noUnusedLocals, noUnusedParameters                    |
-| Styling         | Tailwind CSS v4        | Tokens in globals.css @theme (NOT tailwind.config.ts) |
-| Package manager | pnpm ONLY              | Never suggest npm or yarn                             |
-| Fonts           | next/font/google       | DM Sans (sans) + JetBrains Mono (mono)                |
-| Images          | next/image             | @next/next/no-img-element ESLint rule enforced        |
-| Deployment      | Vercel                 | pnpm build, pnpm install commands                     |
-| DNS             | Cloudflare             | DNS Only mode (grey cloud) — no proxy with Vercel     |
-| Content         | MDX + JSON             | File-based, CMS-ready                                 |
-| CI/CD           | GitHub Actions         | .github/workflows/ci.yml                              |
-| Analytics       | GA4 + Search Console   | lazyOnload strategy                                   |
+| Layer           | Choice                                | Notes                                                    |
+| --------------- | ------------------------------------- | -------------------------------------------------------- |
+| Framework       | Next.js 16.2.6 App Router             | Turbopack DISABLED (Windows crashes)                     |
+| UI Library      | React 19.2.4 (exact pin)              | react-dom 19.2.4 — pinned, not caret-ranged              |
+| Language        | TypeScript strict mode                | noUnusedLocals, noUnusedParameters                       |
+| Styling         | Tailwind CSS v4                       | Tokens in globals.css @theme (NOT tailwind.config.ts)    |
+| Package manager | pnpm ONLY                             | Never suggest npm or yarn                                |
+| Fonts           | next/font/google                      | DM Sans (sans) + JetBrains Mono (mono)                   |
+| Images          | next/image                            | @next/next/no-img-element ESLint rule (config pending)   |
+| Deployment      | Vercel                                | pnpm build, pnpm install commands                        |
+| DNS             | Cloudflare                            | DNS Only mode (grey cloud) — no proxy with Vercel        |
+| Content         | MDX + JSON                            | File-based, CMS-ready (next-mdx-remote ^6.0.0)           |
+| CI/CD           | GitHub Actions                        | .github/workflows/ci.yml                                 |
+| Analytics       | GA4 + Search Console + Speed Insights | lazyOnload strategy; @vercel/speed-insights ^2.0.0 wired |
 
 ---
 
@@ -246,7 +247,7 @@ devstash/
 
 ### ✅ Phase 0 — Foundation (COMPLETE)
 
-- Next.js 15 scaffolded, TypeScript, Tailwind v4, App Router
+- Next.js 16.2.6 scaffolded, TypeScript, Tailwind v4, App Router
 - Full folder structure created with .gitkeep
 - GitHub repo: github.com/adeshukla/devstash (main + dev branches)
 - Branch protection on main (require PR)
@@ -255,7 +256,7 @@ devstash/
 - Prettier configured (.prettierrc + prettier-plugin-tailwindcss)
 - Husky + lint-staged (Prettier only — ESLint deferred)
 - .gitattributes for CRLF normalization
-- ESLint: DEFERRED (ESLint 9 + Next.js 15 flat config unstable)
+- ESLint: packages installed (eslint ^9, eslint-config-next 16.2.6, @typescript-eslint ^8.60.0) but `lint` script is still a placeholder echo — config not wired up yet
 
 ### ✅ Phase 1 — Core Infrastructure (COMPLETE)
 
@@ -473,19 +474,20 @@ N8N_WEBHOOK_SECRET=your-webhook-secret                          # to verify orig
 
 ## SECTION 8 — THIRD-PARTY TOOLS
 
-| Tool                  | Status       | Notes                                             |
-| --------------------- | ------------ | ------------------------------------------------- |
-| Vercel                | ✅ Connected | pnpm build, github.com/adeshukla/devstash         |
-| GitHub                | ✅ Setup     | main (prod) + dev (staging) branches              |
-| Cloudflare            | ✅ DNS Only  | Grey cloud on all records (no proxy with Vercel)  |
-| Google Search Console | ⬜ Pending   | Add after custom domain live                      |
-| Google Analytics 4    | ⬜ Pending   | Add NEXT_PUBLIC_GA_ID                             |
-| Bing Webmaster        | ⬜ Pending   | After GSC setup                                   |
-| Ahrefs Webmaster      | ⬜ Pending   | Free tier, after launch                           |
-| Microsoft Clarity     | ⬜ Optional  | Heatmaps/session recording                        |
-| Resend                | ✅ Phase 4   | Contact form email delivery — installed           |
-| Formspree             | ✅ Done      | Coming soon page (replaced by Resend in Phase 4)  |
-| Lighthouse CI         | ✅ Phase 7   | @lhci/cli installed — lighthouserc.cjs + workflow |
+| Tool                  | Status       | Notes                                                                                 |
+| --------------------- | ------------ | ------------------------------------------------------------------------------------- |
+| Vercel                | ✅ Connected | pnpm build, github.com/adeshukla/devstash                                             |
+| GitHub                | ✅ Setup     | main (prod) + dev (staging) branches                                                  |
+| Cloudflare            | ✅ DNS Only  | Grey cloud on all records (no proxy with Vercel)                                      |
+| Google Search Console | ⬜ Pending   | Add after custom domain live                                                          |
+| Google Analytics 4    | ⬜ Pending   | Add NEXT_PUBLIC_GA_ID                                                                 |
+| Bing Webmaster        | ⬜ Pending   | After GSC setup                                                                       |
+| Ahrefs Webmaster      | ⬜ Pending   | Free tier, after launch                                                               |
+| Microsoft Clarity     | ⬜ Optional  | Heatmaps/session recording                                                            |
+| Resend                | ✅ Phase 4   | Contact form email delivery — v6.12.4 installed                                       |
+| Formspree             | ✅ Done      | Coming soon page (replaced by Resend in Phase 4)                                      |
+| Lighthouse CI         | ✅ Phase 7   | @lhci/cli installed — lighthouserc.cjs + workflow                                     |
+| Vercel Speed Insights | ✅ Installed | @vercel/speed-insights ^2.0.0 — real user perf monitoring, not in original phase docs |
 
 ---
 
@@ -519,7 +521,7 @@ featured: false
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Turbopack crashes on Windows                            | Removed --turbopack flag from package.json dev script                                                                                                                                |
 | Hydration mismatch (Grammarly/Dark Reader)              | suppressHydrationWarning on <body> in layout.tsx                                                                                                                                     |
-| ESLint 9 + Next.js 15 flat config circular JSON error   | ESLint deferred — only Prettier via lint-staged                                                                                                                                      |
+| ESLint 9 + Next.js 16 flat config not yet wired up      | ESLint deferred — only Prettier via lint-staged. Packages ARE installed (eslint ^9, eslint-config-next 16.2.6); `lint` script is a placeholder echo until configured                 |
 | CRLF line endings on Windows                            | git config --global core.autocrlf true + .gitattributes                                                                                                                              |
 | pnpm approve-builds (sharp/unrs-resolver)               | Added to .npmrc: onlyBuiltDependencies                                                                                                                                               |
 | Tailwind v4 @theme warning in VS Code                   | .vscode/settings.json: "css.validate": false                                                                                                                                         |
@@ -533,29 +535,63 @@ featured: false
 
 ---
 
-## SECTION 11 — INSTALLED PACKAGES (NON-DEFAULT)
+## SECTION 11 — INSTALLED PACKAGES (EXACT VERSIONS — verified against package.json)
 
 ```bash
 # ✅ Phase 0-2 (installed)
-pnpm add schema-dts clsx tailwind-merge
-pnpm add -D prettier prettier-plugin-tailwindcss husky lint-staged @eslint/eslintrc
+clsx ^2.1.1
+tailwind-merge ^3.6.0          # NOTE: v3, not v2 — breaking API changes if you remember v2 patterns
+schema-dts ^2.0.0
+prettier ^3.8.3
+prettier-plugin-tailwindcss ^0.8.0
+husky ^9.1.7
+lint-staged ^17.0.5
+@eslint/eslintrc ^3.3.5        # installed, NOT wired into a working lint script yet
 
 # ✅ Phase 3 (installed) — NOTE: next-mdx-remote, NOT @next/mdx
-pnpm add next-mdx-remote gray-matter
-pnpm add -D remark remark-gfm rehype-slug rehype-pretty-code
+next-mdx-remote ^6.0.0
+gray-matter ^4.0.3
+remark-gfm ^4.0.1              # devDep
+rehype-slug ^6.0.0             # devDep
+rehype-pretty-code ^0.14.3     # devDep
+unified ^11.0.5                # devDep
 
 # ✅ Phase 4 (installed)
-pnpm add resend zod
+resend ^6.12.4                 # major version bump from early docs — check changelog before assuming old API
+zod ^4.4.3                     # BREAKING from v3 — different API (e.g. error handling, .parse() changes).
+                                # Never write Zod v3-style code. Verify schema syntax against v4 docs.
 
 # ✅ Phase 7 (installed)
-pnpm add -D @lhci/cli
+@lhci/cli ^0.15.1               # devDep
 
-# ✅ Phase 9 — Blog Admin Panel (installed)
-pnpm add iron-session
+# ✅ Phase 9 (installed) — Blog Admin auth
+iron-session ^8.0.4
+
+# ✅ NOT IN ORIGINAL PHASE DOCS — confirmed in package.json, undocumented until now
+@vercel/speed-insights ^2.0.0   # Real user monitoring on Vercel dashboard. Already wired — do not add a duplicate.
+
+# Core framework (exact pins — do not assume looser ranges)
+next 16.2.6                     # EXACT pin, not ^16
+react 19.2.4                    # EXACT pin, not ^19
+react-dom 19.2.4                # EXACT pin, not ^19
+
+# ESLint stack — installed but NOT active (lint script is a placeholder echo)
+eslint ^9
+eslint-config-next 16.2.6
+@next/eslint-plugin-next ^16.2.6
+@typescript-eslint/eslint-plugin ^8.60.0
+@typescript-eslint/parser ^8.60.0
+
+# Tailwind v4 toolchain
+tailwindcss ^4
+@tailwindcss/postcss ^4
 
 # ⬜ Phase 10 — AI Blog Automation (pending — n8n side, no new npm packages needed)
 # n8n workflow uses Groq API (already set up) + HTTP Request node to DevStash API
 ```
+
+**Rule:** When suggesting any code using `zod`, `resend`, or `tailwind-merge`, verify against the
+exact versions above first — these have had breaking changes from common older patterns in training data.
 
 ---
 
@@ -599,3 +635,8 @@ Current task: [what you want to do]
 **Update this file after each phase completes.**
 
 **Current Status:** Phase 9 complete (Blog Admin Panel — local-only). Next: Phase 10 — AI Blog Automation.
+
+**Version note (Jun 2026):** This file's tech stack was corrected against the live `package.json` —
+Next.js is **16.2.6** (not 15), React is pinned at **19.2.4**, Zod is **^4.4.3** (v4 API, breaking
+from v3), Resend is **^6.12.4**, tailwind-merge is **^3.6.0**, and **@vercel/speed-insights ^2.0.0**
+is installed and wired (previously undocumented). Always cross-check `package.json` directly if in doubt.

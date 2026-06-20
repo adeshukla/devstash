@@ -72,9 +72,9 @@ export function HeroSection() {
           <div className="border-ds-border mt-6 flex flex-wrap gap-10 border-t pt-8">
             {(
               [
-                { label: 'Years experience', value: '6+' },
-                { label: 'Landing pages shipped', value: '200+' },
-                { label: 'Lighthouse score', value: '90+' },
+                { label: 'Years Frontend Eng', value: '6+' },
+                { label: 'Posts by 2027 (AI-Powered)', value: '50+' },
+                { label: 'Lighthouse Avg Score', value: '90+' },
               ] as const
             ).map(({ label, value }) => (
               <div key={label} className="flex flex-col gap-0.5">
