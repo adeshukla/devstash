@@ -32,7 +32,7 @@ These convert visitors and cost little.
 2. **Ship 3–5 strong case-study projects.** Not just "a clone" — each project
    page should tell: problem → approach → architecture → result/metrics →
    what you'd do differently. This is what founders actually read. Add real
-   screenshots/GIFs.
+   interface/GIFs.
 3. **Publish 5–8 quality blog posts** on topics you can speak to (Next.js 16,
    automation with n8n, AI workflows, performance). Use the AI pipeline to draft,
    then humanize. Consistency > volume. This is your organic-traffic engine.

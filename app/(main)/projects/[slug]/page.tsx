@@ -7,7 +7,7 @@ import { JsonLd } from '@/components/seo/JsonLd'
 import { buildProjectSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
 import { getAllProjects, getProjectBySlug } from '@/lib/markdown/projects'
-import { Badge, Button, Separator } from '@/components/ui'
+import { Badge, Button, ImageGallery, Separator } from '@/components/ui'
 
 // ─── Static generation ────────────────────────────────────────────────────────
 
@@ -105,14 +105,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
               {/* Action buttons */}
               <div className="flex flex-wrap gap-3">
-                {project.demo && (
-                  <Button href={project.demo} target="_blank" rel="noopener noreferrer">
+                {project.liveUrl && (
+                  <Button href={project.liveUrl} target="_blank" rel="noopener noreferrer">
                     Live Demo →
                   </Button>
                 )}
-                {project.github && (
+                {project.githubUrl && (
                   <Button
-                    href={project.github}
+                    href={project.githubUrl}
                     variant="outline"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -140,13 +140,25 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         <section className="py-16">
           <div className="mx-auto max-w-4xl px-6">
             {/* TODO: Replace with MDX rendered content in Phase 5 */}
+
+            {project.interface && project.interface.length > 0 && (
+              <>
+                <h2 className="text-ds-text text-2xl font-bold">Interface</h2>
+                <p className="text-ds-muted mt-4 mb-8">
+                  User interface flow — from authentication to AI recommendations
+                </p>
+                <ImageGallery images={project.interface} />
+              </>
+            )}
+
             {project.highlights && project.highlights.length > 0 && (
               <>
+                <Separator className="my-10" />
                 <h2 className="text-ds-text mb-6 text-2xl font-bold">Highlights</h2>
                 <ul className="flex flex-col gap-3">
                   {project.highlights.map((item) => (
                     <li key={item} className="flex items-start gap-3">
-                      <span className="bg-ds-accent mt-1 h-1.5 w-1.5 shrink-0 rounded-full" />
+                      <span className="bg-ds-accent mt-2 h-1.5 w-1.5 shrink-0 rounded-full" />
                       <span className="text-ds-muted">{item}</span>
                     </li>
                   ))}

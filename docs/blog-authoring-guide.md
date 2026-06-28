@@ -159,7 +159,7 @@ path. The convention is `/images/blog/<name>.webp`.
 - **Easiest:** in the local admin editor (`/admin/new` or `/admin/edit/...`)
   use **Upload image** → it saves to `public/images/blog/` and gives you the
   exact path. Max **5 MB**; formats: `webp`, `png`, `jpg`, `gif`, `svg`
-  (prefer **webp** for photos/screenshots).
+  (prefer **webp** for photos/interface).
 - **Or manually:** drop the file into `public/images/blog/` yourself.
 
 ### Step 2 — reference it in the body (Markdown image syntax)

@@ -16,11 +16,11 @@
     "Gemini AI",
     "GitHub Actions"
   ],
-  "liveUrl": "https://netflix-gpt.vercel.app",
-  "githubUrl": "https://github.com/adeshukla/netflix-gpt",
+  "liveUrl": "https://flix-gpt.devstash.me",
+  "githubUrl": "https://github.com/adeshukla/Netflix-GPT",
   "image": "/images/projects/netflix-gpt.webp",
   "images": ["/images/projects/netflix-gpt.webp", "/images/projects/netflix-gpt-search.webp"],
-  "startDate": "2025-01-01",
+  "startDate": "2026-01-01",
   "highlights": [
     "Gemini 2.5 Flash Lite API integration for AI-powered movie search",
     "Redux Toolkit for global state — auth, movie data, GPT results",
@@ -28,5 +28,17 @@
     "Fully responsive — mobile to 4K",
     "GitHub Actions CI/CD — TypeScript check + build on every PR",
     "CRLF normalization fix for Vercel Linux deployment"
+  ],
+  "interface": [
+    { "src": "/images/projects/netflix-gpt/netflix-gpt-login.png", "alt": "Sign-in screen" },
+    {
+      "src": "/images/projects/netflix-gpt/netflix-gpt-browse.png",
+      "alt": "Browse screen with AI picks"
+    },
+    {
+      "src": "/images/projects/netflix-gpt/netflix-gpt-movies-list.png",
+      "alt": "Movies List screen"
+    },
+    { "src": "/images/projects/netflix-gpt/netflix-gpt-gpt-search.png", "alt": "GPT Search screen" }
   ]
 }

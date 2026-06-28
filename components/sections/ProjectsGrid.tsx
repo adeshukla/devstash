@@ -90,14 +90,14 @@ export function ProjectsGrid({ projects, showAll = false }: ProjectsGridProps) {
                     </div>
 
                     {/* Footer links */}
-                    {(project.github || project.demo) && (
+                    {(project.githubUrl || project.liveUrl) && (
                       <div className="border-ds-border flex items-center gap-3 border-t px-5 py-3">
-                        {project.github && (
+                        {project.githubUrl && (
                           <span className="text-ds-muted group-hover:text-ds-accent text-xs transition-colors">
                             GitHub →
                           </span>
                         )}
-                        {project.demo && (
+                        {project.liveUrl && (
                           <span className="text-ds-muted group-hover:text-ds-accent text-xs transition-colors">
                             Live →
                           </span>

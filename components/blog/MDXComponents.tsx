@@ -2,6 +2,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { MDXComponents } from 'mdx/types'
+import { ImageGallery } from '@/components/ui'
 import { cn } from '@/lib/utils/cn'
 
 // ─── Callout ────────────────────────────────────────────────────────────────
@@ -176,4 +177,5 @@ export const mdxComponents: MDXComponents = {
 
   // Custom Components
   Callout,
+  ImageGallery,
 }

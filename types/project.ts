@@ -1,3 +1,5 @@
+import type { GalleryImage } from '@/components/ui/ImageGallery'
+
 export type ProjectStatus = 'live' | 'wip' | 'archived'
 
 export type ProjectCategory = 'web-app' | 'automation' | 'tool' | 'clone' | 'open-source'
@@ -20,6 +22,5 @@ export interface Project {
   endDate?: string
   highlights: string[]
   year?: number
-  demo?: string
-  github?: string
+  interface?: GalleryImage[]
 }
