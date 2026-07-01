@@ -1,0 +1,91 @@
+---
+title: 'n8n + Groq: The Workflow Patterns I Keep Reusing'
+slug: 'n8n-groq-workflow-patterns'
+description: 'Reusable n8n + Groq automation patterns — prompt chaining, structured output, and rate-limit handling — from workflows I actually run.'
+author: 'Adesh Shukla'
+createdAt: '2026-07-02'
+updatedAt: '2026-07-02'
+category: 'automation'
+tags: ['n8n', 'groq', 'automation', 'ai-workflows']
+featuredImage: '/images/blog/n8n-groq-workflow-patterns.webp'
+readingTime: 7
+canonical: 'https://devstash.me/blog/n8n-groq-workflow-patterns'
+draft: false
+featured: false
+---
+
+I've built a handful of n8n + Groq workflows at this point — a job-application automation I've [written about before](/blog/n8n-job-application-automation-groq-google-sheets), and a couple of smaller ones I haven't documented. The tools change per workflow, but the actual architecture problems repeat almost every time. This is the list of patterns I now reach for by default instead of re-solving them from scratch.
+
+## Chain LLM calls instead of one giant prompt
+
+My first instinct, every time, is to write one big prompt that does everything — draft the content, format it, add metadata, all in one call. It never works as well as I expect. Splitting the same job into two or three smaller, single-purpose LLM Chain nodes consistently produces better output than one node trying to do it all, and it's much easier to debug when something goes wrong, because you can see exactly which stage produced the bad output.
+
+The pattern I use now: one node per _distinct task_, not one node per step of a checklist. "Draft the content" is one task. "Extract structured metadata from that draft" is a second, separate task — even though it feels like it could be tacked onto the end of the first prompt.
+
+<Callout type="warning" title="The gotcha that gets everyone">
+  n8n's LLM Chain node strips every field from the upstream JSON except its own `text` output. If
+  node 2 needs a field that node 1's *input* had (not node 1's output), you have to reach back for
+  it explicitly: `$('NodeName').all()[0].json.fieldName`. I've hit this on every multi-step chain
+  I've built — it's not a one-time gotcha, it's just how the node works.
+</Callout>
+
+## Treat the LLM's output as untrusted input to the next step
+
+An LLM Chain node's output is a string. Even when you ask for JSON, you'll occasionally get a string that _looks_ like JSON but has a trailing comma, a stray code fence, or explanatory text before the actual object. I stopped trusting raw LLM output as structured data and now always route it through a **Code node** that does a defensive parse:
+
+````js
+// Code node — after any LLM Chain node that's supposed to return JSON
+const raw = $input.first().json.text
+// Strip markdown code fences if the model added them despite instructions
+const cleaned = raw
+  .replace(/^```json\s*/i, '')
+  .replace(/```\s*$/i, '')
+  .trim()
+
+let parsed
+try {
+  parsed = JSON.parse(cleaned)
+} catch (err) {
+  throw new Error(`LLM returned invalid JSON: ${cleaned.slice(0, 200)}`)
+}
+
+return [{ json: parsed }]
+````
+
+Failing loudly here beats failing quietly three nodes downstream, where the error message has nothing to do with the actual cause.
+
+## Be explicit about output format in the prompt, every time
+
+"Output ONLY the JSON object, no explanation, no markdown formatting" needs to be in the prompt itself, not something you assume the model will infer from context. `llama-3.1-8b-instant` on Groq is fast and cheap, but it's also more likely to add a friendly "Here's the JSON you requested:" preamble than a larger model would if you don't explicitly forbid it. I add this instruction to every prompt that expects structured output, even when it feels redundant.
+
+## Rate limits are per-minute, not just per-day
+
+Groq's free tier gives a generous daily request count, but the per-minute limit is the one that actually bites you. If a workflow loops over a batch — rows in a spreadsheet, items in a queue — and fires requests as fast as n8n can process them, you'll hit 429s well before the daily cap. A **Wait node** with a 1–2 second delay between iterations is cheap insurance. It feels like it's slowing the workflow down for no reason, right up until the run that would have failed at item 40 out of 200.
+
+## Log the raw LLM response somewhere, even temporarily
+
+When a workflow fails at 2am (mine tend to), the first thing I want is the actual text the model returned, not just "workflow failed at node 4." I now route LLM outputs through a simple **Set node** that writes the raw response to a field I can inspect in the execution log, before any parsing happens. It's a few seconds of setup that turns "something broke" into "here's exactly what broke and why," every time.
+
+<Callout type="tip" title="Where this is going next">
+  I'm currently building this same pattern set into a blog-draft generator for this site — one node
+  drafts the post, a second humanizes it, a third generates frontmatter — which is exactly the kind
+  of three-stage chain this post is about. Not live yet, but the architecture is the direct result
+  of the gotchas above.
+</Callout>
+
+## A practical takeaway
+
+None of these patterns are exotic — they're closer to "defensive programming, applied to a visual
+workflow tool." The LLM Chain node's data-stripping behavior, JSON that isn't always valid JSON,
+and per-minute rate limits are the three things that have broken every non-trivial n8n + Groq
+workflow I've built, until I started designing around them from the start instead of debugging
+them after the fact.
+
+If you're setting up your first multi-step n8n + Groq workflow, I'd start with the
+[Groq documentation](https://console.groq.com/docs) for the exact rate limits on your model, and
+build the defensive JSON parsing in from node one rather than adding it after your first silent
+failure.
+
+<Callout type="info" title="Images to add">
+  /images/blog/n8n-groq-workflow-patterns.webp (featured/hero image)
+</Callout>

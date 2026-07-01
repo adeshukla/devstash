@@ -2,31 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-
-// ─── Logo Mark ────────────────────────────────────────────────
-function LogoMark({ size = 36 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <rect width="100" height="100" rx="22" fill="#0B0F19" />
-      <rect width="100" height="100" rx="22" stroke="#1F2937" strokeWidth="2" />
-      <path
-        d="M23 34L46 50L23 66"
-        stroke="#3B82F6"
-        strokeWidth="7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6" />
-    </svg>
-  )
-}
+import { LogoMark } from '@/components/ui/LogoMark'
 
 // ─── Monitor SVG Illustration ─────────────────────────────────
 function MonitorIllustration() {

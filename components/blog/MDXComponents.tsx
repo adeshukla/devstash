@@ -24,7 +24,14 @@ function Callout({ type = 'info', title, children }: CalloutProps) {
   const { border, bg, icon } = config[type]
 
   return (
-    <div className={cn('my-6 rounded-lg border-l-4 p-4', border, bg)}>
+    <div
+      className={cn(
+        'my-6 rounded-lg border-l-4 p-4 transition-colors',
+        'hover:bg-ds-surface2',
+        border,
+        bg
+      )}
+    >
       {title && (
         <p className="text-ds-text mb-1 font-semibold">
           <span className="mr-2">{icon}</span>
@@ -113,9 +120,14 @@ export const mdxComponents: MDXComponents = {
     )
   },
 
-  // Code block wrapper — rehype-pretty-code injects syntax styles into the pre/code
+  // Code block wrapper — rehype-pretty-code (configured with dual dark/light
+  // themes in the blog post route) injects its own background/text color as
+  // an inline style on <pre>, and a matching light-mode override lives in
+  // globals.css ([data-theme='light'] pre[style]...). The wrapper must NOT
+  // set its own bg-ds-* class here — that would create a seam between the
+  // wrapper's background and the pre's own (theme-matched) background.
   pre: ({ children, ...props }) => (
-    <div className="group border-ds-border bg-ds-surface relative my-6 overflow-hidden rounded-lg border">
+    <div className="group border-ds-border relative my-6 overflow-hidden rounded-lg border">
       <CopyCodeButton />
       <pre {...props} className="overflow-x-auto p-4 text-sm leading-relaxed">
         {children}
@@ -165,13 +177,15 @@ export const mdxComponents: MDXComponents = {
     if (!src) return null
     return (
       <figure className="my-8">
-        <Image
-          src={src}
-          alt={alt ?? ''}
-          width={720}
-          height={400}
-          className="border-ds-border w-full rounded-lg border object-cover"
-        />
+        <div className="border-ds-border overflow-hidden rounded-lg border">
+          <Image
+            src={src}
+            alt={alt ?? ''}
+            width={720}
+            height={400}
+            className="w-full object-cover transition-transform duration-300 hover:scale-[1.03]"
+          />
+        </div>
         {alt && <figcaption className="text-ds-muted mt-2 text-center text-sm">{alt}</figcaption>}
       </figure>
     )

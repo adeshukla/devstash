@@ -1,6 +1,7 @@
 // components/layout/Footer.tsx
 import Link from 'next/link'
 import { siteConfig } from '@/content/metadata/site.config'
+import { LogoMark } from '@/components/ui/LogoMark'
 
 const navLinks = [
   { label: 'Home', href: '/' },
@@ -53,18 +54,7 @@ export function Footer() {
               className="mb-3 inline-flex items-center gap-2.5 no-underline"
               aria-label="DevStash home"
             >
-              <svg width="28" height="28" viewBox="0 0 100 100" fill="none" aria-hidden="true">
-                <rect width="100" height="100" rx="22" fill="#0B0F19" />
-                <rect width="100" height="100" rx="22" stroke="#1F2937" strokeWidth="2" />
-                <path
-                  d="M23 34L46 50L23 66"
-                  stroke="#3B82F6"
-                  strokeWidth="7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <rect x="53" y="57" width="26" height="7" rx="3.5" fill="#8B5CF6" />
-              </svg>
+              <LogoMark size={28} />
               <span
                 className="text-ds-text text-[16px] font-bold"
                 style={{ letterSpacing: '-0.04em' }}

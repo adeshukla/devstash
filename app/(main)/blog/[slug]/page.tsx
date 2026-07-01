@@ -11,7 +11,8 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildBlogPostingSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
-import { Badge, Reveal } from '@/components/ui'
+import { Badge, Reveal, MountReveal } from '@/components/ui'
+import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
 import { TOC } from '@/components/blog/TOC'
 import { AuthorBio } from '@/components/blog/AuthorBio'
 import { RelatedPosts } from '@/components/blog/RelatedPosts'
@@ -67,7 +68,10 @@ const rehypePlugins: PluggableList = [
   rehypeSlug,
   [
     rehypePrettyCode,
-    { theme: 'github-dark-dimmed', keepBackground: true, defaultLang: 'plaintext' },
+    {
+      theme: { dark: 'github-dark-dimmed', light: 'github-light' },
+      defaultLang: 'plaintext',
+    },
   ],
 ]
 
@@ -97,43 +101,61 @@ export default async function BlogPostPage({ params }: Props) {
         />
 
         {/* ── Hero ── */}
-        <header className="mt-6 mb-10 max-w-3xl">
-          <div className="mb-4 flex items-center gap-3">
-            <Badge variant="blue">{post.category.replace('-', ' ')}</Badge>
-            <span className="text-ds-muted text-xs">{post.readingTime} min read</span>
-          </div>
+        <header className="mt-6 mb-10">
+          <MountReveal>
+            <div className="border-ds-border bg-ds-surface2 mb-8 h-56 max-w-3xl overflow-hidden rounded-2xl border sm:h-64">
+              <CategoryIllustration category={post.category} kind="blog" seed={post.slug} />
+            </div>
+          </MountReveal>
 
-          <h1 className="text-ds-text mb-4 font-sans text-3xl leading-tight font-bold tracking-tight md:text-4xl">
-            {post.title}
-          </h1>
+          <div className="max-w-3xl">
+            <MountReveal delay={80}>
+              <div className="mb-4 flex items-center gap-3">
+                <Badge variant="blue">{post.category.replace('-', ' ')}</Badge>
+                <span className="text-ds-muted text-xs">{post.readingTime} min read</span>
+              </div>
+            </MountReveal>
 
-          <p className="text-ds-muted mb-6 text-lg leading-relaxed">{post.description}</p>
+            <MountReveal delay={160}>
+              <h1 className="text-ds-text mb-4 font-sans text-3xl leading-tight font-bold tracking-tight md:text-4xl">
+                {post.title}
+              </h1>
+            </MountReveal>
 
-          <div className="text-ds-muted flex flex-wrap items-center gap-3 text-sm">
-            <span>{post.author}</span>
-            <span>·</span>
-            <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
-            {post.updatedAt !== post.createdAt && (
-              <>
+            <MountReveal delay={240}>
+              <p className="text-ds-muted mb-6 text-lg leading-relaxed">{post.description}</p>
+            </MountReveal>
+
+            <MountReveal delay={320}>
+              <div className="text-ds-muted flex flex-wrap items-center gap-3 text-sm">
+                <span>{post.author}</span>
                 <span>·</span>
-                <span>Updated {formatDate(post.updatedAt)}</span>
-              </>
+                <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
+                {post.updatedAt !== post.createdAt && (
+                  <>
+                    <span>·</span>
+                    <span>Updated {formatDate(post.updatedAt)}</span>
+                  </>
+                )}
+              </div>
+            </MountReveal>
+
+            {post.tags.length > 0 && (
+              <MountReveal delay={380}>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {post.tags.map((tag) => (
+                    <a
+                      key={tag}
+                      href={`/blog/tag/${tag}`}
+                      className="bg-ds-surface2 text-ds-muted hover:text-ds-accent rounded px-2.5 py-0.5 font-mono text-xs transition-colors"
+                    >
+                      #{tag}
+                    </a>
+                  ))}
+                </div>
+              </MountReveal>
             )}
           </div>
-
-          {post.tags.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {post.tags.map((tag) => (
-                <a
-                  key={tag}
-                  href={`/blog/tag/${tag}`}
-                  className="bg-ds-surface2 text-ds-muted hover:text-ds-accent rounded px-2.5 py-0.5 font-mono text-xs transition-colors"
-                >
-                  #{tag}
-                </a>
-              ))}
-            </div>
-          )}
         </header>
 
         {/* ── Content + TOC layout ── */}

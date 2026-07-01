@@ -31,8 +31,11 @@ export function CopyCodeButton() {
         onClick={handleCopy}
         aria-label={copied ? 'Copied' : 'Copy code'}
         className={cn(
-          'border-ds-border bg-ds-surface text-ds-muted hover:border-ds-accent hover:text-ds-accent',
-          'inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-xs opacity-0 backdrop-blur transition-opacity',
+          'border-ds-border/60 bg-ds-surface text-ds-muted hover:border-ds-accent hover:text-ds-accent',
+          // Dimly visible by default (not opacity-0) so it's discoverable
+          // without requiring a hover to reveal it exists at all — full
+          // opacity on hover/focus.
+          'inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-xs opacity-40 backdrop-blur transition-opacity',
           'group-hover:opacity-100 focus-visible:opacity-100',
           copied && 'border-ds-success text-ds-success opacity-100'
         )}

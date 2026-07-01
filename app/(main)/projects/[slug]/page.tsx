@@ -7,7 +7,8 @@ import { JsonLd } from '@/components/seo/JsonLd'
 import { buildProjectSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
 import { getAllProjects, getProjectBySlug } from '@/lib/markdown/projects'
-import { Badge, Button, ImageGallery, Reveal, Separator } from '@/components/ui'
+import { Badge, Button, ImageGallery, Reveal, MountReveal, Separator } from '@/components/ui'
+import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
 
 // ─── Static generation ────────────────────────────────────────────────────────
 
@@ -76,62 +77,85 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         {/* ── Header ── */}
         <section className="border-ds-border border-b py-16">
           <div className="mx-auto max-w-4xl px-6">
-            <Breadcrumb
-              items={[
-                { name: 'Home', url: 'https://devstash.me' },
-                { name: 'Projects', url: 'https://devstash.me/projects' },
-                {
-                  name: project.title,
-                  url: `https://devstash.me/projects/${project.slug}`,
-                },
-              ]}
-            />
+            <MountReveal>
+              <Breadcrumb
+                items={[
+                  { name: 'Home', url: 'https://devstash.me' },
+                  { name: 'Projects', url: 'https://devstash.me/projects' },
+                  {
+                    name: project.title,
+                    url: `https://devstash.me/projects/${project.slug}`,
+                  },
+                ]}
+              />
+            </MountReveal>
+
+            {/* Hero illustration — only when there's no real screenshot gallery
+                (projects with `interface` already show real UI, no need for a
+                decorative stand-in on top of that). */}
+            {(!project.interface || project.interface.length === 0) && (
+              <MountReveal delay={80}>
+                <div className="border-ds-border bg-ds-surface2 mt-6 h-56 overflow-hidden rounded-2xl border sm:h-64">
+                  <CategoryIllustration
+                    category={project.category}
+                    kind="project"
+                    seed={project.slug}
+                  />
+                </div>
+              </MountReveal>
+            )}
 
             <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="sm:flex-1">
-                <div className="mb-3 flex items-center gap-3">
-                  {statusInfo && (
-                    <Badge variant={statusInfo.variant} dot>
-                      {statusInfo.label}
-                    </Badge>
-                  )}
-                  {project.year && (
-                    <span className="text-ds-muted font-mono text-xs">{project.year}</span>
-                  )}
+              <MountReveal delay={160} className="sm:flex-1">
+                <div>
+                  <div className="mb-3 flex items-center gap-3">
+                    {statusInfo && (
+                      <Badge variant={statusInfo.variant} dot>
+                        {statusInfo.label}
+                      </Badge>
+                    )}
+                    {project.year && (
+                      <span className="text-ds-muted font-mono text-xs">{project.year}</span>
+                    )}
+                  </div>
+                  <h1 className="text-ds-text text-4xl font-bold">{project.title}</h1>
+                  <p className="text-ds-muted mt-4 max-w-2xl text-lg">{project.description}</p>
                 </div>
-                <h1 className="text-ds-text text-4xl font-bold">{project.title}</h1>
-                <p className="text-ds-muted mt-4 max-w-2xl text-lg">{project.description}</p>
-              </div>
+              </MountReveal>
 
               {/* Action buttons */}
-              <div className="flex flex-wrap gap-3">
-                {project.liveUrl && (
-                  <Button href={project.liveUrl} target="_blank" rel="noopener noreferrer">
-                    Live Demo →
-                  </Button>
-                )}
-                {project.githubUrl && (
-                  <Button
-                    href={project.githubUrl}
-                    variant="outline"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    GitHub →
-                  </Button>
-                )}
-              </div>
+              <MountReveal delay={240}>
+                <div className="flex flex-wrap gap-3">
+                  {project.liveUrl && (
+                    <Button href={project.liveUrl} target="_blank" rel="noopener noreferrer">
+                      Live Demo →
+                    </Button>
+                  )}
+                  {project.githubUrl && (
+                    <Button
+                      href={project.githubUrl}
+                      variant="outline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      GitHub →
+                    </Button>
+                  )}
+                </div>
+              </MountReveal>
             </div>
 
             {/* Tech stack */}
             {project.tech && project.tech.length > 0 && (
-              <div className="mt-8 flex flex-wrap gap-2">
-                {project.tech.map((t) => (
-                  <Badge key={t} variant="default" className="font-mono text-xs">
-                    {t}
-                  </Badge>
-                ))}
-              </div>
+              <MountReveal delay={320}>
+                <div className="mt-8 flex flex-wrap gap-2">
+                  {project.tech.map((t) => (
+                    <Badge key={t} variant="default" className="font-mono text-xs">
+                      {t}
+                    </Badge>
+                  ))}
+                </div>
+              </MountReveal>
             )}
           </div>
         </section>

@@ -1,7 +1,22 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import Link from 'next/link'
-import { Card, Badge, Button, Reveal } from '@/components/ui'
+import Image from 'next/image'
+import { Card, Badge, Button, Reveal, CardTilt } from '@/components/ui'
 import { Icon, type IconName } from '@/components/icons/Icon'
+import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
 import type { Project } from '@/types/project'
+
+// Several existing project entries reference an `image` path that isn't
+// actually on disk yet (only a JSON field, not a real screenshot). Rather
+// than let next/image 400 on a missing file, or silently drop the image slot
+// entirely, check for the real file at render time (Server Component, cheap)
+// and fall back to a category illustration when it's not there.
+function hasRealImage(imagePath: string | undefined): imagePath is string {
+  if (!imagePath) return false
+  const abs = path.join(process.cwd(), 'public', imagePath.replace(/^\//, ''))
+  return fs.existsSync(abs)
+}
 
 // Matched against the literal `tech` strings actually used in content/projects/*.json.
 // Anything not listed here just falls back to a plain text badge below.
@@ -56,7 +71,7 @@ export function ProjectsGrid({ projects, showAll = false }: ProjectsGridProps) {
         {displayed.length === 0 ? (
           <p className="text-ds-muted py-16 text-center">No projects yet — check back soon.</p>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
             {displayed.map((project, i) => {
               const status = project.status
                 ? (statusConfig[project.status] ?? statusConfig.archived)
@@ -64,78 +79,101 @@ export function ProjectsGrid({ projects, showAll = false }: ProjectsGridProps) {
 
               return (
                 <Reveal key={project.slug} delay={(i % 6) * 60}>
-                  <Link
-                    href={`/projects/${project.slug}`}
-                    className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                  >
-                    <Card variant="hover" className="flex h-full flex-col">
-                      <div className="flex flex-1 flex-col gap-4 p-5">
-                        {/* Status + year */}
-                        <div className="flex items-center justify-between">
-                          {status && (
-                            <Badge variant={status.variant} dot>
-                              {status.label}
-                            </Badge>
-                          )}
-                          {project.year && (
-                            <span className="text-ds-muted font-mono text-xs">{project.year}</span>
+                  <CardTilt>
+                    <Link
+                      href={`/projects/${project.slug}`}
+                      className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                    >
+                      <Card variant="hover" className="flex h-full flex-col" padding="none">
+                        <div className="relative h-56 w-full overflow-hidden">
+                          {hasRealImage(project.image) ? (
+                            <Image
+                              src={project.image}
+                              alt={project.title}
+                              fill
+                              className="object-cover transition-transform duration-300 group-hover:scale-105"
+                              sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"
+                            />
+                          ) : (
+                            <div className="h-full w-full transition-transform duration-300 group-hover:scale-105">
+                              <CategoryIllustration
+                                category={project.category}
+                                kind="project"
+                                seed={project.slug}
+                              />
+                            </div>
                           )}
                         </div>
-
-                        {/* Title + description */}
-                        <div>
-                          <h2 className="text-ds-text group-hover:text-ds-accent font-semibold transition-colors">
-                            {project.title}
-                          </h2>
-                          <p className="text-ds-muted mt-1 line-clamp-2 text-sm">
-                            {project.description}
-                          </p>
-                        </div>
-
-                        {/* Tech stack pills */}
-                        {project.tech && project.tech.length > 0 && (
-                          <div className="mt-auto flex flex-wrap gap-1.5 pt-2">
-                            {project.tech.slice(0, 4).map((t) => {
-                              const iconName = TECH_ICONS[t]
-                              return (
-                                <Badge
-                                  key={t}
-                                  variant="default"
-                                  className="font-mono text-xs"
-                                  icon={iconName ? <Icon name={iconName} /> : undefined}
-                                >
-                                  {t}
-                                </Badge>
-                              )
-                            })}
-                            {project.tech.length > 4 && (
-                              <Badge variant="muted" className="text-xs">
-                                +{project.tech.length - 4} more
+                        <div className="flex flex-1 flex-col gap-4 p-6">
+                          {/* Status + year */}
+                          <div className="flex items-center justify-between">
+                            {status && (
+                              <Badge variant={status.variant} dot>
+                                {status.label}
                               </Badge>
+                            )}
+                            {project.year && (
+                              <span className="text-ds-muted font-mono text-xs">
+                                {project.year}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Title + description */}
+                          <div>
+                            <h2 className="text-ds-text group-hover:text-ds-accent text-lg font-semibold transition-colors">
+                              {project.title}
+                            </h2>
+                            <p className="text-ds-muted mt-1 line-clamp-2 text-sm">
+                              {project.description}
+                            </p>
+                          </div>
+
+                          {/* Tech stack pills */}
+                          {project.tech && project.tech.length > 0 && (
+                            <div className="mt-auto flex flex-wrap gap-1.5 pt-2">
+                              {project.tech.slice(0, 4).map((t) => {
+                                const iconName = TECH_ICONS[t]
+                                return (
+                                  <Badge
+                                    key={t}
+                                    variant="default"
+                                    className="font-mono text-xs"
+                                    icon={iconName ? <Icon name={iconName} /> : undefined}
+                                  >
+                                    {t}
+                                  </Badge>
+                                )
+                              })}
+                              {project.tech.length > 4 && (
+                                <Badge variant="muted" className="text-xs">
+                                  +{project.tech.length - 4} more
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Footer links */}
+                        {(project.githubUrl || project.liveUrl) && (
+                          <div className="border-ds-border flex items-center gap-4 border-t px-5 py-3">
+                            {project.githubUrl && (
+                              <span className="text-ds-muted group-hover:text-ds-accent inline-flex items-center gap-1.5 text-xs transition-colors">
+                                <Icon name="github" className="h-3.5 w-3.5" />
+                                GitHub
+                              </span>
+                            )}
+                            {project.liveUrl && (
+                              <span className="text-ds-muted group-hover:text-ds-accent inline-flex items-center gap-1.5 text-xs transition-colors">
+                                <Icon name="external-link" className="h-3.5 w-3.5" />
+                                Live
+                              </span>
                             )}
                           </div>
                         )}
-                      </div>
-
-                      {/* Footer links */}
-                      {(project.githubUrl || project.liveUrl) && (
-                        <div className="border-ds-border flex items-center gap-4 border-t px-5 py-3">
-                          {project.githubUrl && (
-                            <span className="text-ds-muted group-hover:text-ds-accent inline-flex items-center gap-1.5 text-xs transition-colors">
-                              <Icon name="github" className="h-3.5 w-3.5" />
-                              GitHub
-                            </span>
-                          )}
-                          {project.liveUrl && (
-                            <span className="text-ds-muted group-hover:text-ds-accent inline-flex items-center gap-1.5 text-xs transition-colors">
-                              <Icon name="external-link" className="h-3.5 w-3.5" />
-                              Live
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </Card>
-                  </Link>
+                      </Card>
+                    </Link>
+                  </CardTilt>
                 </Reveal>
               )
             })}

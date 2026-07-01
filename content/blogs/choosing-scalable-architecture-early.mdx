@@ -1,0 +1,57 @@
+---
+title: 'Choosing an Architecture That Scales, Without Over-Building It'
+slug: 'choosing-scalable-architecture-early'
+description: 'How I decide between simple and scalable architecture early in a project — file-based content, CMS-ready layers, and when to actually add complexity.'
+author: 'Adesh Shukla'
+createdAt: '2026-07-02'
+updatedAt: '2026-07-02'
+category: 'frontend'
+tags: ['architecture', 'nextjs', 'frontend', 'scalability']
+featuredImage: '/images/blog/choosing-scalable-architecture-early.webp'
+readingTime: 7
+canonical: 'https://devstash.me/blog/choosing-scalable-architecture-early'
+draft: false
+featured: false
+---
+
+"Build it to scale" is advice that sounds responsible and usually produces the opposite of what it promises — a project with three abstraction layers for a feature that has one real use case, built by someone guessing at a future that may never show up. The advice that's actually worked for me is narrower: don't design against scale you don't have yet, but don't make choices that would be expensive to undo if that scale actually arrives. Those are different things, and mixing them up is where most premature complexity comes from.
+
+## The test I actually use: how expensive is it to be wrong?
+
+Every architecture decision splits into two kinds. Some are cheap to reverse later — a component's internal structure, which state-management library you reach for inside one feature, how you name a folder. Get those wrong and the fix is a refactor, contained to the part you got wrong.
+
+Others are expensive to reverse — your content layer's shape, your data-fetching boundary, whether URLs are stable. Get those wrong and the fix touches everything downstream of the decision, not just the decision itself.
+
+I spend real design time on the second category and deliberately under-engineer the first. This site is a concrete example: the blog and project content live as MDX/JSON files in `content/`, read through a `lib/markdown/` layer — not because a database was too much effort, but because that data-access layer is the thing that's expensive to change later. If this site ever needs a real CMS, the swap happens inside `lib/markdown/blog.ts` and `lib/markdown/projects.ts` — the pages that call `getAllPosts()` never know the difference. The _interface_ was worth designing carefully on day one. The _storage_ behind it (flat files vs. a database) was cheap to defer, so I deferred it.
+
+## Token systems are worth the same treatment
+
+Same logic applies to design tokens. Every color, spacing value, and radius on this site resolves through a small set of `ds-*` tokens defined once, not hardcoded per component. Setting that up took maybe twenty extra minutes over just writing hex values directly into JSX the first time. What it bought back: adding a full light theme later touched exactly two things — the token definitions and a handful of components that had bypassed the tokens with a hardcoded value (a real bug I found and fixed, not a hypothetical one). Without the token layer, a site-wide theme change means finding and rewriting every hardcoded color reference individually.
+
+The trap on the other side of this is real too — a token system with forty variables for a five-page site is its own kind of premature complexity. The number of tokens should track the number of distinct visual roles that actually recur, not the number you can imagine recurring someday.
+
+## Signs you're over-building, not scaling
+
+A few patterns I've learned to treat as warnings rather than good instincts:
+
+- **An abstraction with exactly one implementation.** An interface that only ever has a single class behind it isn't flexibility, it's indirection you're paying for without using.
+- **Configuration for cases that don't exist yet.** A settings object with fields for scenarios the product doesn't support is a maintenance cost today for a hypothetical tomorrow.
+- **Splitting a component before it's had two real use cases.** The second use case tells you what actually needs to be a parameter. Guessing at that from the first use case alone usually gets the wrong shape.
+
+The common thread: complexity that's justified by a _future_ requirement, rather than a _current_ one, is usually wrong about what that future requirement will actually need — because you're designing from imagination rather than from a second real example.
+
+## Signs you're under-building, not keeping it simple
+
+The opposite failure is just as real, and "keep it simple" gets used to justify it:
+
+- **A data shape that's genuinely hard to change once real content exists in it.** This is the one worth real design time up front, precisely because the fix later means a migration, not a refactor.
+- **Hardcoded values standing in for what should be a token or a constant**, the moment there's a second thing that needs to match the first. One hardcoded color is a shortcut. The same hex value copy-pasted into six components is a future site-wide inconsistency waiting to happen.
+- **No seam between "how data is stored" and "how data is used."** If every page component reaches directly into a specific file format or a specific API shape, changing that format later means touching every page instead of one access layer.
+
+## A practical takeaway
+
+Before adding a layer of abstraction, I ask one question: if I'm wrong about needing this, what does undoing it cost? If the answer is "a contained refactor," I build the simple version and wait for a second real use case to tell me the actual shape. If the answer is "a rewrite of everything downstream," that's the one decision worth spending real design time on now — even on a project that's small today. The skill isn't building for scale everywhere. It's telling the two situations apart correctly, which is a much smaller list of decisions than it first appears.
+
+<Callout type="info" title="Images to add">
+  /images/blog/choosing-scalable-architecture-early.webp (featured/hero image)
+</Callout>

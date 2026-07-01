@@ -18,12 +18,12 @@
     "Scarcity line ('Limited to 10 audits this week') used once, plainly, instead of countdown timers or pop-ups"
   ],
   "caseStudy": {
-    "problem": "Generic 'Contact Us' lead-gen pages ask for too much too soon (name, company, phone, message) before the visitor has any reason to trust the business — that mismatch between ask and trust is what kills conversion on cold PPC traffic.",
-    "approach": "Replaced the generic contact form with a specific, low-effort lead magnet: submit a URL and email, get a free audit back. The form sits beside the headline (not below a scroll), and a three-step process explainer answers 'what happens after I submit' immediately below it.",
+    "problem": "Most lead-gen pages default to a 'Contact Us' form — name, company, phone, message — and ask for all of it before the visitor has any reason to trust the business yet. That mismatch, asking for more than you've earned, is what actually kills conversion on cold traffic.",
+    "approach": "I swapped the generic form for a specific, low-effort lead magnet instead: give a URL and an email, get a free audit back. Nothing vague about what happens next. The form sits right beside the headline, not below a scroll, and a three-step explainer directly under it answers the obvious question — what happens after I submit this?",
     "decisions": [
-      "Cut the form to two fields — URL and email — since every additional field on a cold-traffic landing page is a drop-off point",
-      "Framed the offer as a specific deliverable ('a free audit report') instead of a vague 'get in touch', which gives the visitor a concrete reason to trust the exchange",
-      "Used a plain-text scarcity line instead of a countdown timer or modal, since artificial urgency widgets tend to read as untrustworthy on B2B-leaning traffic"
+      "Two fields, URL and email. Every extra field on cold traffic is a place someone leaves.",
+      "The offer is a specific deliverable — 'a free audit report' — not a vague 'get in touch.' Specific things are easier to trust.",
+      "Scarcity gets one plain-text line, not a countdown timer. Timers read as fake on B2B-leaning traffic more often than they read as urgent."
     ],
     "outcome": "// TODO: No real traffic — this is a self-initiated sample, not a deployed campaign. Conversion data not available."
   }

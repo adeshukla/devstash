@@ -18,12 +18,12 @@
     "Feature grid framed around outcomes (what you see/avoid) rather than feature names alone"
   ],
   "caseStudy": {
-    "problem": "SaaS trial pages often lose visitors to decision fatigue — too many nav links, vague feature lists, and an unstated cost of entry (credit card) that creates hesitation before the visitor even reads the value proposition.",
-    "approach": "Stripped the page down to one path: headline, single email field, one CTA, repeated once more at the bottom. No navbar, no competing links — every element on the page exists to either build trust in the next ten seconds or move the visitor toward the form.",
+    "problem": "Decision fatigue is the real killer on SaaS trial pages. Too many nav links, feature lists that don't say anything concrete, and a credit-card ask nobody mentions until checkout — by the time a visitor half-decides to try the product, they've already found three reasons to hesitate.",
+    "approach": "So I cut it down to one path. Headline, one email field, one CTA — repeated once more at the bottom for anyone who scrolls first. No navbar. Nothing on the page is allowed to exist unless it's either building trust in the next ten seconds or pushing toward the form.",
     "decisions": [
-      "Removed all navigation — a PPC visitor arrived for one reason, so the page should only offer one next action",
-      "Put 'No credit card required · 14-day trial · Cancel anytime' directly beneath the CTA, not buried in fine print, since it answers the most common hesitation at the exact decision point",
-      "Used three feature cards instead of a long list — each framed as a benefit statement, not a technical feature name, since PPC traffic skims rather than reads"
+      "No navigation at all. A PPC visitor already had a reason to be here — giving them four more places to click just splits that intent.",
+      "'No credit card required · 14-day trial · Cancel anytime' sits directly under the button, not in a footnote, because that's the exact moment someone hesitates.",
+      "Three feature cards instead of a longer list, each written as a benefit rather than a spec sheet — PPC traffic skims, it doesn't read."
     ],
     "outcome": "// TODO: No real traffic — this is a self-initiated sample, not a deployed campaign. Conversion data not available."
   }

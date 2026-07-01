@@ -18,12 +18,12 @@
     "Two CTA tiers — 'Schedule a tour' (primary) and 'Request a callback' (lower-commitment) — for visitors at different intent levels"
   ],
   "caseStudy": {
-    "problem": "Single-property listing pages often bury the inquiry form below a long description, or push it to a separate Contact page entirely — by the time an interested visitor finds it, they've lost momentum.",
-    "approach": "Put the inquiry form in a sticky sidebar next to the property details on desktop, so it's always one glance away regardless of scroll position, and gave it two CTA options so visitors who aren't ready to book a tour still have a lower-friction way to engage.",
+    "problem": "A lot of single-property pages bury the inquiry form under a wall of description, or send it off to a separate Contact page. By the time an interested visitor actually finds it, the moment that made them want to reach out has already passed.",
+    "approach": "I kept the form in a sticky sidebar next to the property details on desktop — always one glance away, no matter how far down the page you've scrolled — and gave it two ways in, not just one, since not everyone who's interested is ready to book a tour yet.",
     "decisions": [
-      "Used a sticky sidebar form instead of a bottom-of-page or separate-page form, since real-estate visitors browse details before they're ready to act, and the form needs to stay reachable through that browsing",
-      "Showed the facts strip (beds/baths/sqft/price) before any narrative copy, since PPC visitors filter on hard numbers first and decide whether to keep reading based on those",
-      "Offered a secondary 'Request a callback' CTA alongside the primary 'Schedule a tour' button, since not every interested visitor is ready to commit to a tour booking yet"
+      "Sticky sidebar form, not a bottom-of-page one. People browse property details before they act, so the form has to stay reachable the whole time they're browsing.",
+      "The facts strip (beds, baths, sqft, price) comes before any narrative copy — PPC visitors filter on the numbers first and decide from there whether the story's worth reading.",
+      "A second, lower-commitment CTA ('Request a callback') sits next to 'Schedule a tour', because booking a tour is a bigger ask than some visitors are ready for yet."
     ],
     "outcome": "// TODO: No real traffic — this is a self-initiated sample, not a deployed campaign. Conversion data not available."
   }

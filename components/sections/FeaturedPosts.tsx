@@ -1,5 +1,7 @@
 import Link from 'next/link'
-import { Card, Badge, Button, Reveal } from '@/components/ui'
+import Image from 'next/image'
+import { Card, Badge, Button, Reveal, CardTilt } from '@/components/ui'
+import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
 import type { BlogPost } from '@/types/blog'
 
 interface FeaturedPostsProps {
@@ -30,45 +32,66 @@ export function FeaturedPosts({ posts }: FeaturedPostsProps) {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.slice(0, 3).map((post, i) => (
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+          {posts.slice(0, 4).map((post, i) => (
             <Reveal key={post.slug} delay={i * 60}>
-              <Link
-                href={`/blog/${post.slug}`}
-                className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-              >
-                <Card variant="hover" className="flex h-full flex-col">
-                  <div className="flex flex-1 flex-col gap-3 p-5">
-                    {/* Category + read time */}
-                    <div className="flex items-center gap-2">
-                      <Badge variant="blue">{post.category}</Badge>
-                      <span className="text-ds-muted font-mono text-xs">
-                        {post.readingTime} min read
-                      </span>
+              <CardTilt>
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                >
+                  <Card variant="hover" className="flex h-full flex-col" padding="none">
+                    <div className="relative h-56 w-full overflow-hidden">
+                      {post.featuredImage ? (
+                        <Image
+                          src={post.featuredImage}
+                          alt={post.title}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"
+                        />
+                      ) : (
+                        <div className="h-full w-full transition-transform duration-300 group-hover:scale-105">
+                          <CategoryIllustration
+                            category={post.category}
+                            kind="blog"
+                            seed={post.slug}
+                          />
+                        </div>
+                      )}
                     </div>
+                    <div className="flex flex-1 flex-col gap-3 p-6">
+                      {/* Category + read time */}
+                      <div className="flex items-center gap-2">
+                        <Badge variant="blue">{post.category}</Badge>
+                        <span className="text-ds-muted font-mono text-xs">
+                          {post.readingTime} min read
+                        </span>
+                      </div>
 
-                    {/* Title */}
-                    <h3 className="text-ds-text group-hover:text-ds-accent line-clamp-2 font-semibold transition-colors">
-                      {post.title}
-                    </h3>
+                      {/* Title */}
+                      <h3 className="text-ds-text group-hover:text-ds-accent line-clamp-2 text-xl font-semibold transition-colors">
+                        {post.title}
+                      </h3>
 
-                    {/* Excerpt */}
-                    <p className="text-ds-muted line-clamp-3 text-sm">{post.description}</p>
+                      {/* Excerpt */}
+                      <p className="text-ds-muted line-clamp-3 text-sm">{post.description}</p>
 
-                    {/* Date */}
-                    <time
-                      dateTime={post.createdAt}
-                      className="text-ds-muted mt-auto font-mono text-xs"
-                    >
-                      {new Date(post.createdAt).toLocaleDateString('en-IN', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </time>
-                  </div>
-                </Card>
-              </Link>
+                      {/* Date */}
+                      <time
+                        dateTime={post.createdAt}
+                        className="text-ds-muted mt-auto font-mono text-xs"
+                      >
+                        {new Date(post.createdAt).toLocaleDateString('en-IN', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </time>
+                    </div>
+                  </Card>
+                </Link>
+              </CardTilt>
             </Reveal>
           ))}
         </div>

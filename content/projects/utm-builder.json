@@ -1,0 +1,31 @@
+{
+  "slug": "utm-builder",
+  "title": "UTM Link Builder",
+  "description": "A real, working UTM link builder for PPC landing pages — fully client-side, built from the habits of actually tagging 200+ campaign URLs by hand.",
+  "longDescription": "A small utility, not a landing page — enter a base URL and campaign parameters, get a properly tagged link back with a one-click copy. Nothing is sent to a server; the whole thing runs in the browser using the native URL and URLSearchParams APIs.",
+  "status": "live",
+  "featured": true,
+  "order": 6,
+  "category": "tool",
+  "tech": ["Next.js", "TypeScript", "Tailwind CSS"],
+  "liveUrl": "/lab/utm-builder",
+  "image": "/images/projects/utm-builder.webp",
+  "startDate": "2026-07-02",
+  "year": 2026,
+  "highlights": [
+    "Fully client-side — no API route, no data leaves the browser",
+    "Uses the native URL/URLSearchParams APIs instead of manual string concatenation, so existing query params on the base URL are preserved",
+    "Separates required fields (source, medium, campaign) from the two people actually forget (term, content)",
+    "Copy-to-clipboard with a visible confirmation state, not a silent copy"
+  ],
+  "caseStudy": {
+    "problem": "Tagging campaign URLs by hand is error-prone in small, specific ways — a missing utm_ prefix, an existing query param on the base URL getting clobbered instead of preserved, or utm_term/utm_content skipped because they feel optional until you're trying to tell two ad variants apart in a report three weeks later.",
+    "approach": "Built a small tool that does the mechanical part correctly every time: parse the base URL properly (so existing params survive), only add a utm_ param if the field actually has a value, and make copying the result a one-click action instead of a manual select-and-copy.",
+    "decisions": [
+      "Used the native URL/URLSearchParams parser instead of string-splicing the query string by hand — malformed URLs and existing params are exactly what hand-rolled string concatenation gets wrong.",
+      "Term and content are visually separated from the three 'always fill these' fields, since those two are the ones that get skipped and then can't be recovered after a campaign has already run.",
+      "No backend at all. A tool like this has no reason to touch a server, and it's one less thing that can be down when someone actually needs to tag a link fast."
+    ],
+    "outcome": "// TODO: No usage data yet — this is a self-initiated sample tool, not a deployed internal tool."
+  }
+}

@@ -1,0 +1,106 @@
+---
+title: 'Screen Reader Accessibility: What I Actually Check'
+slug: 'screen-reader-accessibility-checklist'
+description: 'Practical screen-reader accessibility checks for React apps — semantic HTML, focus management, ARIA landmarks, and how I actually test them.'
+author: 'Adesh Shukla'
+createdAt: '2026-07-02'
+updatedAt: '2026-07-02'
+category: 'frontend'
+tags: ['accessibility', 'frontend', 'react', 'aria']
+featuredImage: '/images/blog/screen-reader-accessibility-checklist.webp'
+readingTime: 8
+canonical: 'https://devstash.me/blog/screen-reader-accessibility-checklist'
+draft: false
+featured: false
+---
+
+Accessibility usually gets treated as a checkbox — run an automated audit, fix the flagged issues, move on. The problem is that automated tools (Lighthouse, axe) catch maybe a third of what actually breaks a screen reader experience. Missing alt text, they'll flag. A focus trap that never releases, or a dynamic update nobody gets told about, they mostly won't. This is the list of things I actually check by hand, not just what a linter reports.
+
+## Semantic HTML first — ARIA is a patch, not a starting point
+
+The single highest-leverage thing you can do for screen reader users is use the HTML element that already means what you're building. A `<button>` is focusable, announces its role, and responds to both click and keyboard activation for free. A `<div onClick>` styled to look like a button gets none of that — you'd have to hand-roll `role="button"`, `tabIndex="0"`, and a keydown handler for Enter/Space just to get back to where `<button>` started.
+
+I keep a short mental checklist before reaching for a `<div>`:
+
+- Is this clickable? → `<button>`, not `<div onClick>`
+- Is this a link to another page/section? → `<a href>`, not a button styled like a link
+- Is this a list of things? → `<ul>`/`<ol>`, not a stack of `<div>`s
+- Is this the main heading of the page? → exactly one `<h1>`, not a styled `<div>` or a skipped heading level
+
+`role="button"` on a `<div>` is a real, valid pattern — but it's the fallback for when semantic HTML genuinely can't express what you need, not the default.
+
+## Focus management on route changes and modals
+
+This is the one automated tools miss almost entirely, and it's the one that actually breaks the experience worst. Two specific cases:
+
+**Client-side route changes.** When a screen reader user activates a link that swaps content without a full page load, focus needs to move somewhere sensible — usually the new page's heading. Otherwise focus stays wherever it was on the old page, and the screen reader keeps announcing content that's no longer there.
+
+**Modals and dialogs.** Opening a modal should move focus into it, and closing it should return focus to whatever triggered it. If you're using the native `<dialog>` element (which this site's mobile nav does), a lot of this comes for free — `showModal()` handles focus trapping and `Escape`-to-close natively, and returning focus on close is close to automatic if you don't fight the browser's default behavior.
+
+```tsx
+// The pattern that actually matters: return focus to the trigger on close
+const triggerRef = useRef<HTMLButtonElement>(null)
+
+function closeDialog() {
+  dialogRef.current?.close()
+  triggerRef.current?.focus() // don't skip this
+}
+```
+
+<Callout type="warning" title="A gap I've caught in my own work">
+  It's easy to get focus-trapping right inside a modal and still forget the return-focus step on
+  close. The modal itself tests fine in isolation — the miss only shows up when you tab through the
+  full open → interact → close flow with a keyboard, not when you click through it with a mouse.
+</Callout>
+
+## Announce dynamic content changes with `aria-live`
+
+If content updates without a page reload — a form validation error, a "message sent" confirmation, a live search result count — and there's no `aria-live` region involved, a screen reader user has no way to know it happened. They'd have to manually re-explore the page to discover the change.
+
+Two live-region levels cover almost everything:
+
+- `aria-live="polite"` — waits for the screen reader to finish whatever it's currently announcing, then reads the update. Right for most status messages (form success/error banners).
+- `aria-live="assertive"` — interrupts immediately. Reserve this for things that are actually urgent, like a session-timeout warning. Overusing `assertive` is its own accessibility problem — it trains users to distrust interruptions.
+
+```tsx
+<div role="status" aria-live="polite" aria-atomic="true">
+  {successMessage}
+</div>
+```
+
+`role="status"` and `role="alert"` are shorthand for `aria-live="polite"`/`"assertive"` respectively with sensible defaults baked in — I reach for the role first and only drop to the raw `aria-live` attribute when I need finer control.
+
+## Landmarks and heading structure are the screen-reader table of contents
+
+Sighted users scan a page visually to find what they need. Screen reader users often navigate by landmark region (`<nav>`, `<main>`, `<footer>`) or by jumping heading-to-heading — most screen readers have a dedicated keyboard shortcut just for this. If your heading levels skip around (an `<h2>` followed by an `<h4>` because that's what looked right visually) or your page has no `<main>` landmark at all, that navigation mode stops working correctly.
+
+The rule I hold myself to: heading levels only ever increase by one at a time, and every page has exactly one `<main>`. Visual hierarchy is a CSS problem — font size and weight don't need to match the semantic heading level, and it's better to use the correct `<h2>`/`<h3>` and restyle it than to pick whichever heading tag happens to look right by default.
+
+## How I actually test this — not just Lighthouse
+
+Automated tools are worth running (they catch the cheap, obvious wins fast), but the real test is turning on a screen reader and using the page the way someone would: keyboard only, no mouse.
+
+- **macOS**: VoiceOver (Cmd+F5) is built in and free — no excuse not to have tried it at least once on your own work.
+- **Windows**: NVDA is free and widely used; it's the one I'd test against first if I only had time for one.
+- The test itself: unplug the mouse, tab through every interactive element on the page, and confirm you can reach and understand everything using only keyboard + screen reader announcements.
+
+<Callout type="tip" title="Where to start if this feels like a lot">
+  Pick one page you actually own, turn on VoiceOver or NVDA, and try to complete its main task —
+  submitting a form, reading an article — using only the keyboard. You will find something. That's
+  normal, and it's a better starting point than trying to fix the whole site from a Lighthouse
+  report.
+</Callout>
+
+## A practical takeaway
+
+Automated accessibility audits are a floor, not a ceiling — they catch missing alt text and low
+contrast, but focus management, live-region announcements, and heading structure need an actual
+keyboard-and-screen-reader pass to catch. If you do nothing else from this post, pick one flow on
+your site — a form submission, a modal — and walk through it with a keyboard and VoiceOver or NVDA
+turned on. The [WebAIM screen reader survey](https://webaim.org/projects/screenreadersurvey/) is a
+good source if you want to know which combinations of browser and screen reader are actually
+common among real users, rather than guessing.
+
+<Callout type="info" title="Images to add">
+  /images/blog/screen-reader-accessibility-checklist.webp (featured/hero image)
+</Callout>

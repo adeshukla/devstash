@@ -1,0 +1,32 @@
+{
+  "slug": "css-shapes-playground",
+  "title": "CSS Shapes & Animation Playground",
+  "description": "A real, working CSS showcase — a live shape + color customizer, animated borders, CTA button animations, and box-shadow effects, with copyable CSS on every single demo.",
+  "longDescription": "Twelve real CSS techniques across four categories — shape morphing, animated borders, CTA button motion, and box-shadow effects — plus an interactive customizer where you pick a color and shape and get the exact CSS back. Every demo card ships its own copy-able CSS snippet. No canvas, no animation library, no JS driving the actual motion — only the customizer's shape/color state is React; everything else is plain, running CSS.",
+  "status": "live",
+  "featured": true,
+  "order": 5,
+  "category": "tool",
+  "tech": ["Next.js", "TypeScript", "CSS"],
+  "liveUrl": "/lab/css-shapes-playground",
+  "image": "/images/projects/css-shapes-playground.webp",
+  "startDate": "2026-07-02",
+  "year": 2026,
+  "highlights": [
+    "Interactive customizer — 5 shapes × unlimited colors × spin toggle — with the exact CSS for the current combination generated live",
+    "Every one of the 12 demo cards has its own real, copyable CSS snippet, not just the customizer",
+    "Animated borders using three different real techniques: padding-box/border-box gradients, a conic-gradient wrapper trick, and a repeating-gradient marching-ants effect",
+    "Working CTA button demos — shine sweep, ripple pulse, and hover-lift — not screenshots of buttons",
+    "Respects prefers-reduced-motion across every animated demo on the page"
+  ],
+  "caseStudy": {
+    "problem": "The first version of this page was four passive animation loops and one color picker — you could watch it, but you couldn't build anything from it. A CSS showcase that doesn't let you copy the CSS or change more than a color isn't actually useful to anyone trying to learn or reuse the techniques.",
+    "approach": "Rebuilt around two ideas: every demo needs its real CSS visible and copyable, and there needs to be at least one genuinely interactive centerpiece — not just recoloring, but actually changing the shape — so the page proves the techniques instead of just displaying them. Expanded from one category (shapes) to four (shapes, borders, buttons, box-shadow) so it reads as a reference, not a single trick shown four ways.",
+    "decisions": [
+      "Built a shared CssCodeBlock component with a real copy button instead of screenshotting code or leaving it out — a CSS showcase that hides its own CSS defeats the point.",
+      "Made the customizer control shape AND color, not just color, since 'customization' that only changes a hex value isn't much of a customizer.",
+      "Split into four named categories (shapes, borders, buttons, shadows) instead of one long undifferentiated grid, so a visitor looking for 'how do I animate a border' can find that section directly."
+    ],
+    "outcome": "// TODO: No analytics on this page yet — it's a self-initiated sample, not a deployed campaign."
+  }
+}

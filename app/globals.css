@@ -137,6 +137,20 @@
   }
 }
 
+/* ── Dual-theme code blocks (rehype-pretty-code) ──
+   Configured with theme: { dark: ..., light: ... } in the blog post route
+   (app/(main)/blog/[slug]/page.tsx). rehype-pretty-code writes the DARK
+   variant as the base color/background-color on every token (this site's
+   default theme), and exposes the light variant as --shiki-light /
+   --shiki-light-bg custom properties on those same tokens. In light mode we
+   swap to those — actual light-on-light-background code, not a fixed-dark
+   block sitting oddly in an otherwise light page. */
+[data-theme='light'] pre[style],
+[data-theme='light'] pre[style] span {
+  color: var(--shiki-light) !important;
+  background-color: var(--shiki-light-bg) !important;
+}
+
 /* ── Base ── */
 @layer base {
   /* ── Reset ── */
