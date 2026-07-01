@@ -42,11 +42,7 @@ export function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer
-      className="border-ds-border w-full border-t"
-      style={{ background: '#0a0e17' }}
-      aria-label="Site footer"
-    >
+    <footer className="border-ds-border bg-ds-surface w-full border-t" aria-label="Site footer">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         {/* Top row */}
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">

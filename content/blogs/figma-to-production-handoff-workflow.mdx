@@ -1,0 +1,87 @@
+---
+title: 'Figma to Production in Under a Day: My Handoff Workflow'
+slug: 'figma-to-production-handoff-workflow'
+description: 'My actual Figma-to-production handoff workflow for landing pages — tokens first, component inventory second, build last. No guessing at spacing.'
+author: 'Adesh Shukla'
+createdAt: '2026-07-01'
+updatedAt: '2026-07-01'
+category: 'frontend'
+tags: ['figma', 'frontend', 'design-systems', 'workflow']
+featuredImage: '/images/blog/figma-to-production-handoff-workflow.webp'
+readingTime: 6
+canonical: 'https://devstash.me/blog/figma-to-production-handoff-workflow'
+draft: false
+featured: false
+---
+
+"Can you have this live by tomorrow?" is a normal question when you're building landing pages on a deadline-driven marketing team. The honest answer is usually yes — but only because the workflow is the same every time, not because I'm typing faster. Here's the actual sequence, not the idealized version with three rounds of design review that most teams don't have time for.
+
+## The mistake I used to make: opening the editor first
+
+Early on, my instinct was to open VS Code and start building the hero section as soon as I had a Figma link. That felt productive — code was appearing — but it meant I'd build the hero, then notice the spacing scale didn't match the section below it, then go back and refactor. On a one-day deadline, that refactor loop is where the time actually goes.
+
+The fix wasn't to code faster. It was to spend the first 20–30 minutes *not* coding at all.
+
+## Step 1: Pull tokens before pulling components
+
+Before touching a single component, I go through the Figma file and extract:
+
+- **Color palette** — not "what colors do I see," but the actual named styles in Figma's color panel, since that tells me what the designer considers a reusable token versus a one-off.
+- **Type scale** — every font size/weight/line-height combination actually used. Usually there are 5–7 real combinations even if the file has more text layers than that.
+- **Spacing scale** — I sample the gaps between a handful of elements (padding inside cards, gaps between sections) and look for the pattern. Most well-built Figma files follow a consistent scale (4px or 8px base); inconsistent ones tell you to pick a sensible scale yourself rather than copy exact pixel values everywhere.
+
+On a project using Tailwind, this step maps directly onto editing the token layer — for DevStash that's the `@theme` block in `globals.css`, since Tailwind v4 moved tokens out of `tailwind.config.ts` entirely. Having the tokens defined before writing the first component means I'm never eyeballing a "close enough" spacing value mid-build.
+
+<Callout type="tip" title="Why this saves time, not costs it">
+  Skipping token extraction feels faster in the first ten minutes. It costs more than that back the
+  first time you build a second section that needs to match the first one's spacing, and you have to
+  go hunting through Figma again mid-build instead of having the scale already in front of you.
+</Callout>
+
+## Step 2: Inventory components before writing any markup
+
+Once tokens are pulled, I go through the Figma frames and list every distinct component I'll need — buttons (and their variants), cards, badges, form inputs, and so on — before writing markup for any of them.
+
+This matters for a specific reason on a deadline: it's the difference between building five one-off buttons that each need separate fixes later, versus building one `Button` component with `variant` and `size` props up front. The inventory pass takes ten minutes. Skipping it costs much more once the second or third button shows up mid-build and you realize the first one wasn't built to flex.
+
+A rough inventory for a typical landing page looks like:
+
+```text
+Button   — variants: primary, outline, ghost · sizes: sm, md, lg
+Card     — variants: default, hover (elevated)
+Badge    — variants: default, accent, success, warning
+Input    — text, email, with label + error state
+Section  — consistent vertical padding wrapper
+```
+
+Most of those map almost directly onto whatever component library already exists in the codebase — which is exactly the point of building one in the first place. Re-using existing primitives instead of one-off markup is most of why a same-day turnaround is realistic at all.
+
+## Step 3: Build outside-in — layout shell, then sections, then details
+
+With tokens and components settled, the build order is: page layout shell first (the overall vertical rhythm and section wrappers), then each section's structure, then the fine details inside each section (copy, icons, micro-interactions).
+
+Building details first is a trap — it's satisfying to get one hero pixel-perfect, but if the overall section spacing is wrong, you end up adjusting that hero again once the rest of the page exists around it. Layout shell first means every section you add afterward already sits in a correct rhythm.
+
+## Step 4: Compare against Figma at 100% zoom, not "looks close"
+
+Before calling it done, I put the built page and the Figma frame side by side at actual size (not Figma's fit-to-screen zoom, which lies about proportions) and check:
+
+- Spacing between major sections
+- Font sizes at actual rendered size, not assumed from the design file's display zoom
+- Color values — copy the hex/token directly rather than eyeballing it
+
+This step catches the small drift that accumulates over a few hours of building: a section that crept from 64px of padding to 56px because that's what felt right at the time.
+
+## What "under a day" actually requires
+
+To be specific about what makes the one-day timeline realistic: a Figma file that uses real styles (not just visually-consistent-looking layers), an existing component library to map onto, and a known token system to drop new values into. Without those three things, a same-day landing page is a much harder promise to keep — and that's worth saying out loud to whoever's asking for the deadline, rather than quietly absorbing scope you don't have time for.
+
+If the Figma file is genuinely inconsistent — three different paddings that should be one, colors that aren't in named styles — I raise that before starting the build, not after. A five-minute conversation up front is cheaper than guessing wrong and rebuilding.
+
+## A practical takeaway
+
+The fastest path from Figma to production isn't writing code faster — it's spending the first 20–30 minutes extracting tokens and inventorying components so the actual build phase doesn't hit decision points it should've resolved before the editor was even open. I write more about the build side of this kind of fast-turnaround work in [what actually drives PPC landing page conversion](/blog/ppc-landing-page-conversion-lessons), and you can see this workflow applied directly in a few of the [sample landing pages](/projects) on this site.
+
+<Callout type="info" title="Images to add">
+  /images/blog/figma-to-production-handoff-workflow.webp (featured/hero image)
+</Callout>

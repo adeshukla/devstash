@@ -31,12 +31,17 @@ const SKILLS: Record<string, string[]> = {
 
 const TIMELINE = [
   {
-    year: '2024 – Present',
+    year: 'Jul 2021 – Present',
     role: 'Frontend Developer',
     company: 'Chetu India Pvt. Ltd.',
     desc: 'Building 200+ high-conversion PPC landing pages for US-based clients. Internal marketing web team.',
   },
-  // TODO: Add previous experience entries
+  {
+    year: 'Jul 2020 – Jun 2021',
+    role: 'Frontend Developer',
+    company: 'IS Global',
+    desc: 'General frontend development — building and maintaining websites and UIs with HTML, CSS, JavaScript, and React.',
+  },
 ]
 
 const CURRENTLY = [

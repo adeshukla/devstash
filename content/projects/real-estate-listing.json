@@ -1,0 +1,30 @@
+{
+  "slug": "real-estate-listing",
+  "title": "Maple Court Residences — Property Listing Landing Page",
+  "description": "An original single-property real-estate landing page sample with a sticky inquiry form, built to keep the contact path visible without a separate 'Contact Us' page.",
+  "longDescription": "A self-initiated sample for a fictional single-property listing. Real-estate PPC traffic is usually looking at one specific property, so the page is built around that — a facts strip up top, a sticky inquiry form beside the details on desktop, and no navigation away from the page.",
+  "status": "live",
+  "featured": true,
+  "order": 4,
+  "category": "web-app",
+  "tech": ["Next.js", "TypeScript", "Tailwind CSS"],
+  "liveUrl": "/lab/real-estate-listing",
+  "image": "/images/projects/real-estate-listing.webp",
+  "startDate": "2026-06-15",
+  "year": 2026,
+  "highlights": [
+    "Sticky inquiry form on desktop so the CTA stays visible while scrolling through property details",
+    "Key-facts strip (beds/baths/sqft/price) placed immediately below the hero, before any descriptive copy",
+    "Two CTA tiers — 'Schedule a tour' (primary) and 'Request a callback' (lower-commitment) — for visitors at different intent levels"
+  ],
+  "caseStudy": {
+    "problem": "Single-property listing pages often bury the inquiry form below a long description, or push it to a separate Contact page entirely — by the time an interested visitor finds it, they've lost momentum.",
+    "approach": "Put the inquiry form in a sticky sidebar next to the property details on desktop, so it's always one glance away regardless of scroll position, and gave it two CTA options so visitors who aren't ready to book a tour still have a lower-friction way to engage.",
+    "decisions": [
+      "Used a sticky sidebar form instead of a bottom-of-page or separate-page form, since real-estate visitors browse details before they're ready to act, and the form needs to stay reachable through that browsing",
+      "Showed the facts strip (beds/baths/sqft/price) before any narrative copy, since PPC visitors filter on hard numbers first and decide whether to keep reading based on those",
+      "Offered a secondary 'Request a callback' CTA alongside the primary 'Schedule a tour' button, since not every interested visitor is ready to commit to a tour booking yet"
+    ],
+    "outcome": "// TODO: No real traffic — this is a self-initiated sample, not a deployed campaign. Conversion data not available."
+  }
+}

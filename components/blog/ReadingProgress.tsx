@@ -32,7 +32,7 @@ export function ReadingProgress() {
         className="h-full origin-left"
         style={{
           transform: `scaleX(${progress / 100})`,
-          background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
+          background: 'linear-gradient(90deg, var(--color-ds-accent), var(--color-ds-purple))',
           transition: 'transform 80ms linear',
         }}
       />

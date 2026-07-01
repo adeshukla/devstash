@@ -13,16 +13,20 @@ interface CardProps {
   as?: 'div' | 'article' | 'section' | 'li'
 }
 
+// shadow-black/5 (light) + shadow-black/20 (dark via the CSS below) gives every
+// card real edge definition instead of relying solely on the border token,
+// which is too close to the surface color to read as a boundary on its own —
+// especially in light mode where border + surface + bg sit close together.
 const variantStyles: Record<CardVariant, string> = {
-  default: 'bg-ds-surface border border-ds-border',
+  default: 'bg-ds-surface border border-ds-border shadow-sm',
   hover: [
-    'bg-ds-surface border border-ds-border',
+    'bg-ds-surface border border-ds-border shadow-sm',
     'card-glow cursor-pointer',
     'hover:border-ds-accent/50',
   ].join(' '),
   accent: [
-    'bg-ds-surface border border-ds-accent/25',
-    'shadow-[0_0_0_1px_rgba(59,130,246,0.05)]',
+    'bg-ds-surface border border-ds-accent/25 shadow-sm',
+    'shadow-[0_0_0_1px] shadow-ds-accent/5',
   ].join(' '),
 }
 

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
-import { Badge, Card } from '@/components/ui'
+import { Badge, Card, Reveal } from '@/components/ui'
 import toolsData from '@/content/tools/tools.json'
 
 const title = 'Tools — The Developer Stack Adesh Uses Daily'
@@ -91,37 +91,38 @@ export default function ToolsPage() {
                 <span className="bg-ds-border h-px flex-1" aria-hidden="true" />
               </h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {grouped[cat]?.map((tool) => (
-                  <Link
-                    key={tool.id}
-                    href={tool.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                  >
-                    <Card variant="hover" className="h-full">
-                      <div className="flex flex-col gap-3 p-5">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-ds-text group-hover:text-ds-accent font-semibold transition-colors">
-                            {tool.name}
-                          </h3>
-                          {tool.free ? (
-                            <Badge variant="green">Free</Badge>
-                          ) : (
-                            <Badge variant="muted">Paid</Badge>
-                          )}
+                {grouped[cat]?.map((tool, i) => (
+                  <Reveal key={tool.id} delay={(i % 6) * 60}>
+                    <Link
+                      href={tool.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                    >
+                      <Card variant="hover" className="h-full">
+                        <div className="flex flex-col gap-3 p-5">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-ds-text group-hover:text-ds-accent font-semibold transition-colors">
+                              {tool.name}
+                            </h3>
+                            {tool.free ? (
+                              <Badge variant="green">Free</Badge>
+                            ) : (
+                              <Badge variant="muted">Paid</Badge>
+                            )}
+                          </div>
+                          <p className="text-ds-muted text-sm">{tool.description}</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {tool.tags.map((t) => (
+                              <span key={t} className="text-ds-muted font-mono text-xs">
+                                #{t}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                        <p className="text-ds-muted text-sm">{tool.description}</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {tool.tags.map((t) => (
-                            <span key={t} className="text-ds-muted font-mono text-xs">
-                              #{t}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </Card>
-                  </Link>
+                      </Card>
+                    </Link>
+                  </Reveal>
                 ))}
               </div>
             </div>

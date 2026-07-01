@@ -177,7 +177,7 @@ export default function NotFound() {
           {
             w: 600,
             h: 600,
-            color: '#3B82F6',
+            color: 'var(--color-ds-accent)',
             top: '-200px',
             left: '-100px',
             dur: '18s',
@@ -186,13 +186,21 @@ export default function NotFound() {
           {
             w: 500,
             h: 500,
-            color: '#8B5CF6',
+            color: 'var(--color-ds-purple)',
             bottom: '-150px',
             right: '-100px',
             dur: '22s',
             delay: '-7s',
           },
-          { w: 400, h: 400, color: '#2563EB', top: '50%', left: '50%', dur: '15s', delay: '-3s' },
+          {
+            w: 400,
+            h: 400,
+            color: 'var(--color-ds-accent)',
+            top: '50%',
+            left: '50%',
+            dur: '15s',
+            delay: '-3s',
+          },
         ].map((orb, i) => (
           <div
             key={i}
@@ -217,7 +225,7 @@ export default function NotFound() {
           className="absolute inset-0"
           style={{
             backgroundImage:
-              'linear-gradient(rgba(59,130,246,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.05) 1px, transparent 1px)',
+              'linear-gradient(color-mix(in srgb, var(--color-ds-accent) 5%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-ds-accent) 5%, transparent) 1px, transparent 1px)',
             backgroundSize: '52px 52px',
           }}
         />
@@ -235,11 +243,11 @@ export default function NotFound() {
           <LogoMark size={36} />
           <span
             className="text-lg font-medium"
-            style={{ fontFamily: 'var(--font-mono)', color: '#F3F4F6' }}
+            style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-ds-text)' }}
           >
-            <span style={{ color: '#3B82F6' }}>&lt;</span>
+            <span style={{ color: 'var(--color-ds-accent)' }}>&lt;</span>
             <span>devstash</span>
-            <span style={{ color: '#3B82F6' }}>/&gt;</span>
+            <span style={{ color: 'var(--color-ds-accent)' }}>/&gt;</span>
           </span>
         </Link>
 
@@ -259,7 +267,7 @@ export default function NotFound() {
             style={{
               fontFamily: 'var(--font-sans)',
               fontSize: 'clamp(5rem, 18vw, 9rem)',
-              color: '#F3F4F6',
+              color: 'var(--color-ds-text)',
               letterSpacing: '-0.05em',
             }}
             aria-label="404"

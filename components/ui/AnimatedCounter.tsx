@@ -28,7 +28,10 @@ export function AnimatedCounter({ value, duration = 1200, className }: AnimatedC
 
   const ref = useRef<HTMLSpanElement | null>(null)
   const hasRun = useRef(false)
-  const [display, setDisplay] = useState(0)
+  // Default to the real target so SSR markup and pre-hydration/no-JS visitors
+  // always see the correct number instead of a literal "0" — the count-up
+  // animation (when it runs) explicitly resets to 0 right before it starts.
+  const [display, setDisplay] = useState(target)
 
   useEffect(() => {
     // Non-numeric values or already-animated → nothing to do.
@@ -48,6 +51,7 @@ export function AnimatedCounter({ value, duration = 1200, className }: AnimatedC
     let raf = 0
 
     const animate = () => {
+      setDisplay(0)
       const start = performance.now()
       const tick = (now: number) => {
         const progress = Math.min((now - start) / duration, 1)

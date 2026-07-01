@@ -29,7 +29,7 @@ export function NavbarLinks({ items }: NavbarLinksProps) {
             className={cn(
               'relative inline-flex h-9 items-center px-3 text-[13px] font-medium',
               'rounded-lg transition-colors duration-200',
-              'hover:text-ds-text hover:bg-white/5',
+              'hover:text-ds-text hover:bg-ds-text/5',
               isActive ? 'text-ds-text' : 'text-ds-muted'
             )}
             aria-current={isActive ? 'page' : undefined}

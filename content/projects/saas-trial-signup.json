@@ -1,0 +1,30 @@
+{
+  "slug": "saas-trial-signup",
+  "title": "Pulse — SaaS Trial Signup Landing Page",
+  "description": "An original free-trial signup landing page sample for a fictional product-analytics SaaS — built to test a single-CTA, no-card-required conversion pattern.",
+  "longDescription": "Pulse is a self-initiated landing-page sample, not a real product. I built it to apply the same conversion-focused layout discipline I use for client PPC pages: one clear CTA above the fold, friction-reducing copy ('no credit card required'), and a feature grid that answers objections instead of just listing capabilities.",
+  "status": "live",
+  "featured": true,
+  "order": 2,
+  "category": "web-app",
+  "tech": ["Next.js", "TypeScript", "Tailwind CSS"],
+  "liveUrl": "/lab/saas-trial-signup",
+  "image": "/images/projects/saas-trial-signup.webp",
+  "startDate": "2026-06-01",
+  "year": 2026,
+  "highlights": [
+    "Single repeated CTA (hero + footer) instead of a multi-link nav, to avoid splitting attention",
+    "\"No credit card required\" placed directly under the CTA to pre-empt the #1 signup objection",
+    "Feature grid framed around outcomes (what you see/avoid) rather than feature names alone"
+  ],
+  "caseStudy": {
+    "problem": "SaaS trial pages often lose visitors to decision fatigue — too many nav links, vague feature lists, and an unstated cost of entry (credit card) that creates hesitation before the visitor even reads the value proposition.",
+    "approach": "Stripped the page down to one path: headline, single email field, one CTA, repeated once more at the bottom. No navbar, no competing links — every element on the page exists to either build trust in the next ten seconds or move the visitor toward the form.",
+    "decisions": [
+      "Removed all navigation — a PPC visitor arrived for one reason, so the page should only offer one next action",
+      "Put 'No credit card required · 14-day trial · Cancel anytime' directly beneath the CTA, not buried in fine print, since it answers the most common hesitation at the exact decision point",
+      "Used three feature cards instead of a long list — each framed as a benefit statement, not a technical feature name, since PPC traffic skims rather than reads"
+    ],
+    "outcome": "// TODO: No real traffic — this is a self-initiated sample, not a deployed campaign. Conversion data not available."
+  }
+}

@@ -4,6 +4,17 @@ export type ProjectStatus = 'live' | 'wip' | 'archived'
 
 export type ProjectCategory = 'web-app' | 'automation' | 'tool' | 'clone' | 'open-source'
 
+/** Mini case-study breakdown — used for original landing-page samples and
+ * anonymized client work where the design reasoning matters as much as the result. */
+export interface ProjectCaseStudy {
+  problem: string
+  approach: string
+  decisions: string[]
+  outcome?: string
+  /** Set only when details are anonymized per a confidentiality agreement. */
+  confidentialityNote?: string
+}
+
 export interface Project {
   slug: string
   title: string
@@ -23,4 +34,5 @@ export interface Project {
   highlights: string[]
   year?: number
   interface?: GalleryImage[]
+  caseStudy?: ProjectCaseStudy
 }

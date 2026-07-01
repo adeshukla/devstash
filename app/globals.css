@@ -95,6 +95,48 @@
   --color-error: #ef4444;
 }
 
+/* ── Light theme — overrides the @theme color tokens above ──
+   Applied two ways:
+   1. [data-theme="light"] — an explicit user choice (ThemeToggle), persisted
+      to localStorage and re-applied by a tiny post-mount effect.
+   2. The prefers-color-scheme media query below — a first-visit default with
+      NO JS and NO blocking script, so there is zero FOUC risk and nothing to
+      crash. This is intentionally simpler than a blocking init script: a
+      returning visitor who explicitly overrode their system preference may
+      see one frame of the system-preference theme before the toggle's mount
+      effect corrects it — an acceptable tradeoff for removing the crash. */
+[data-theme='light'] {
+  --color-ds-bg: #ffffff;
+  --color-ds-surface: #f8fafc;
+  --color-ds-surface2: #eef1f6;
+  --color-ds-accent: #2563eb;
+  --color-ds-purple: #7c3aed;
+  --color-ds-text: #0f172a;
+  --color-ds-muted: #586375;
+  --color-ds-border: #cbd5e1;
+  --color-ds-border2: #94a3b8;
+  --color-ds-success: #047857;
+  --color-ds-warning: #b45309;
+  --color-ds-error: #dc2626;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    --color-ds-bg: #ffffff;
+    --color-ds-surface: #f8fafc;
+    --color-ds-surface2: #eef1f6;
+    --color-ds-accent: #2563eb;
+    --color-ds-purple: #7c3aed;
+    --color-ds-text: #0f172a;
+    --color-ds-muted: #586375;
+    --color-ds-border: #cbd5e1;
+    --color-ds-border2: #94a3b8;
+    --color-ds-success: #047857;
+    --color-ds-warning: #b45309;
+    --color-ds-error: #dc2626;
+  }
+}
+
 /* ── Base ── */
 @layer base {
   /* ── Reset ── */
@@ -133,15 +175,18 @@ html {
 
 body {
   min-height: 100vh;
-  background-color: #0b0f19;
-  color: #f3f4f6;
+  background-color: var(--color-ds-bg);
+  color: var(--color-ds-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 /* ── Focus ── */
 :focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--color-ds-accent);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -151,14 +196,14 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0b0f19;
+  background: var(--color-ds-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1f2937;
+  background: var(--color-ds-border);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: var(--color-ds-muted);
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -211,7 +256,13 @@ body {
 
 /* Blue→purple animated gradient text (hero accent word, etc.) */
 .text-gradient-animate {
-  background-image: linear-gradient(100deg, #3b82f6, #8b5cf6, #60a5fa, #3b82f6);
+  background-image: linear-gradient(
+    100deg,
+    var(--color-ds-accent),
+    var(--color-ds-purple),
+    var(--color-ds-accent),
+    var(--color-ds-purple)
+  );
   background-size: 250% 100%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -232,7 +283,7 @@ body {
 }
 .card-glow:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 32px -8px rgba(59, 130, 246, 0.25);
+  box-shadow: 0 12px 32px -8px color-mix(in srgb, var(--color-ds-accent) 25%, transparent);
 }
 
 /* Reveal-on-scroll (toggled by the <Reveal> client component) */

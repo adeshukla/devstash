@@ -52,14 +52,18 @@ automation, and AI workflows.
 
 ### Frontend Developer — Chetu India Pvt. Ltd.
 
-_2024 – Present · Internal marketing web team_
+_Jul 2021 – Present · Internal marketing web team_
 
 - Build high-conversion PPC landing pages (200+) for US-based clients.
 - <!-- TODO: add 2–3 measurable achievements, e.g. "Improved LCP from X to Ys",
   "Increased conversion by N%", "Reduced build time / page weight by N%". -->
 
-<!-- TODO: Add earlier roles to cover the full 6+ years (company, title, dates,
-2–3 bullet points each). The site only documents the role above. -->
+### Frontend Developer — IS Global
+
+_Jul 2020 – Jun 2021_
+
+- General frontend development — building and maintaining websites and UIs
+  with HTML, CSS, JavaScript, and React.
 
 ---
 

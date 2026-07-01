@@ -1,0 +1,30 @@
+{
+  "slug": "marketing-lead-gen",
+  "title": "Free Marketing Audit — Lead-Gen Landing Page",
+  "description": "An original lead-magnet landing page sample for a fictional marketing agency — tests a low-friction, two-field form against a typical multi-field 'contact us' pattern.",
+  "longDescription": "A self-initiated sample built around a lead-magnet pattern I've seen work well on real PPC pages: ask for almost nothing up front (just a URL and an email), promise a specific, fast deliverable (an audit report), and explain the process in three short steps so the visitor knows exactly what happens after they submit.",
+  "status": "live",
+  "featured": true,
+  "order": 3,
+  "category": "web-app",
+  "tech": ["Next.js", "TypeScript", "Tailwind CSS"],
+  "liveUrl": "/lab/marketing-lead-gen",
+  "image": "/images/projects/marketing-lead-gen.webp",
+  "startDate": "2026-06-08",
+  "year": 2026,
+  "highlights": [
+    "Two-field lead form (URL + email) instead of a full contact form, to lower the commitment ask",
+    "Three-step 'what happens next' section placed right after the form to reduce post-submit anxiety",
+    "Scarcity line ('Limited to 10 audits this week') used once, plainly, instead of countdown timers or pop-ups"
+  ],
+  "caseStudy": {
+    "problem": "Generic 'Contact Us' lead-gen pages ask for too much too soon (name, company, phone, message) before the visitor has any reason to trust the business — that mismatch between ask and trust is what kills conversion on cold PPC traffic.",
+    "approach": "Replaced the generic contact form with a specific, low-effort lead magnet: submit a URL and email, get a free audit back. The form sits beside the headline (not below a scroll), and a three-step process explainer answers 'what happens after I submit' immediately below it.",
+    "decisions": [
+      "Cut the form to two fields — URL and email — since every additional field on a cold-traffic landing page is a drop-off point",
+      "Framed the offer as a specific deliverable ('a free audit report') instead of a vague 'get in touch', which gives the visitor a concrete reason to trust the exchange",
+      "Used a plain-text scarcity line instead of a countdown timer or modal, since artificial urgency widgets tend to read as untrustworthy on B2B-leaning traffic"
+    ],
+    "outcome": "// TODO: No real traffic — this is a self-initiated sample, not a deployed campaign. Conversion data not available."
+  }
+}

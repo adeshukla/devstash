@@ -1,0 +1,82 @@
+---
+title: 'Core Web Vitals on High-Traffic Landing Pages'
+slug: 'core-web-vitals-high-traffic-landing-pages'
+description: 'What I actually check and fix for Core Web Vitals on PPC landing pages — real LCP, CLS, and INP issues, not the generic checklist version.'
+author: 'Adesh Shukla'
+createdAt: '2026-07-01'
+updatedAt: '2026-07-01'
+category: 'performance'
+tags: ['core-web-vitals', 'performance', 'lcp', 'landing-pages']
+featuredImage: '/images/blog/core-web-vitals-high-traffic-landing-pages.webp'
+readingTime: 7
+canonical: 'https://devstash.me/blog/core-web-vitals-high-traffic-landing-pages'
+draft: false
+featured: false
+---
+
+Core Web Vitals advice online tends to read the same way: "optimize images, minify CSS, use a CDN." True, but generic enough to be useless on an actual page that's bleeding ad spend because it loads slow. On PPC landing pages specifically — pages built fast, under deadline, often with a hero image and a form above the fold — the failure modes are pretty consistent. Here's what I actually check, in the order I check it.
+
+## Why landing pages fail Core Web Vitals differently than normal pages
+
+A typical marketing site page loads once and sits there. A PPC landing page gets hit by paid traffic on mobile networks, often from an ad platform's in-app browser (Facebook, Instagram, Google Ads click-throughs), which has its own rendering quirks and is usually slower than a regular mobile Chrome session. The page also almost always has a large hero image and a form — two of the most common LCP and CLS offenders — stacked right at the top.
+
+So the three metrics that matter, and what actually breaks them on this kind of page:
+
+## LCP: the hero image is almost always the culprit
+
+Largest Contentful Paint is, on a typical landing page, the hero image or the headline text block — and on image-heavy pages, it's the image nearly every time.
+
+What I actually do:
+
+1. **Set explicit width/height (or aspect-ratio) on the hero image.** This prevents layout shift and lets the browser reserve space before the image loads.
+2. **Preload the hero image**, don't lazy-load it. Lazy-loading anything above the fold is a common mistake — it delays the exact thing you're trying to paint first.
+
+   ```html
+   <link rel="preload" as="image" href="your-hero-image.webp" fetchpriority="high" />
+   ```
+
+3. **Serve it in a modern format at the right size.** `webp` or `avif`, sized for the actual rendered dimensions — not a 4000px source image scaled down by CSS. On a Next.js stack, `next/image` handles this automatically as long as you give it real `width`/`height` and don't fight it with `fill` on every image out of habit.
+4. **Check the font loading strategy.** If your headline text is the LCP element and it's using a web font with `font-display: block` (or no `display` property at all, which can default to blocking in some setups), you're adding font-load time directly to your LCP. `font-display: swap` with a close fallback font is usually the right call for marketing pages.
+
+<Callout type="warning" title="A mistake I made early on">
+  I once set a hero image to lazy-load by default because that was the team's standard pattern for
+  every image on the page — without checking that this particular image was above the fold. LCP
+  went from acceptable to clearly failing. Lazy-loading is the right default for below-the-fold
+  images and the wrong default for anything visible on first paint.
+</Callout>
+
+## CLS: forms and embedded scripts are the usual offenders
+
+Cumulative Layout Shift on landing pages mostly comes from two sources: images/embeds without reserved dimensions, and third-party scripts (chat widgets, tracking pixels, A/B testing tools) injecting content after the initial render.
+
+What actually fixes it:
+
+- **Reserve space for everything that loads asynchronously** — chat widget buttons, embedded video, dynamically inserted badges/trust seals. A `min-height` placeholder is cheap insurance.
+- **Load tracking and marketing scripts with `async` or `defer`, and as late as reasonably possible.** Pixel and analytics scripts don't need to block rendering. On a Next.js app this is `next/script` with `strategy="lazyOnload"` or `"afterInteractive"` depending on how time-sensitive the script actually is — most marketing pixels are fine as `lazyOnload`.
+- **Don't let web fonts cause a visible reflow.** Pairing `font-display: swap` with a fallback font stack that's metrically close (similar x-height and width) keeps the swap from causing a visible jump.
+
+## INP: usually a forms and third-party script problem, not a "your code is slow" problem
+
+Interaction to Next Paint is newer territory for a lot of marketing teams, and on landing pages it's rarely caused by your own form-handling logic — it's almost always death by a thousand third-party scripts. Every chat widget, heatmap tool, A/B testing script, and ad pixel adds its own JavaScript execution that can block the main thread right when a visitor taps the CTA button.
+
+What I check first:
+
+- **Audit the actual number of third-party scripts on the page.** It's common for a landing page to accumulate five or six tracking/testing tools over time without anyone removing the ones that are no longer used. Each one is main-thread cost.
+- **Make sure your own CTA click handler isn't doing synchronous work it doesn't need to.** Form validation that runs expensive checks on every keystroke instead of on blur/submit is a common one.
+- **Test on a throttled mid-tier Android device, not your dev laptop.** A lot of ad traffic, especially from social platforms, comes from exactly this kind of device. Chrome DevTools' CPU throttling (4x slowdown) gets you closer to real-world numbers than testing unthrottled.
+
+## The tool I actually open first
+
+Not Lighthouse in DevTools — that's a lab test on your machine, on your network, once. For a page that's actually live and getting ad traffic, [PageSpeed Insights](https://pagespeed.web.dev/) gives you the **field data** (real Chrome User Experience Report numbers from actual visitors) alongside the lab score. The field data is what Google's ranking systems and your actual visitors experience — the lab score is a useful diagnostic, not the real verdict.
+
+If field data isn't available yet (low-traffic page, too new), only then do I treat the lab Lighthouse score as the source of truth, with the caveat that it's a single run on a single network condition.
+
+## A practical takeaway
+
+If I had to compress this into one rule: assume the hero image is your LCP problem, assume a third-party script is your INP problem, and check field data before you trust a lab score. Most of the "Core Web Vitals work" I actually do on landing pages is removing or deferring things, not adding optimization code.
+
+This pairs with the structural conversion work I wrote about in [what actually drives PPC landing page conversion](/blog/ppc-landing-page-conversion-lessons) — a fast page that doesn't match the ad's promise still won't convert, and a perfectly-matched page that takes six seconds to paint won't either. You need both. For more on the metrics themselves, [web.dev's Core Web Vitals guide](https://web.dev/articles/vitals) is the most reliable primary source — it's maintained by the Chrome team and updated when the metrics or thresholds change.
+
+<Callout type="info" title="Images to add">
+  /images/blog/core-web-vitals-high-traffic-landing-pages.webp (featured/hero image)
+</Callout>

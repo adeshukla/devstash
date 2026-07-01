@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils/cn'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 interface NavItem {
   label: string
@@ -95,12 +96,8 @@ export function MobileNav({ items }: MobileNavProps) {
         }}
       >
         <div
-          className="absolute top-0 right-0 flex h-full w-72 flex-col"
-          style={{
-            background: '#111827',
-            borderLeft: '1px solid rgba(255,255,255,0.06)',
-            animation: open ? 'slideIn .25s ease' : undefined,
-          }}
+          className="bg-ds-surface border-ds-border absolute top-0 right-0 flex h-full w-72 flex-col border-l"
+          style={{ animation: open ? 'slideIn .25s ease' : undefined }}
         >
           {/* Header */}
           <div className="border-ds-border flex h-[58px] items-center justify-between border-b px-5">
@@ -110,21 +107,24 @@ export function MobileNav({ items }: MobileNavProps) {
             >
               <span className="text-ds-accent">Dev</span>Stash
             </span>
-            <button
-              onClick={() => setOpen(false)}
-              className="text-ds-muted hover:text-ds-text flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
-              aria-label="Close menu"
-              autoFocus
-            >
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path
-                  d="M2 2l12 12M14 2L2 14"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
+            <div className="flex items-center gap-2">
+              <ThemeToggle className="text-ds-muted hover:text-ds-text flex h-8 w-8 items-center justify-center rounded-lg transition-colors" />
+              <button
+                onClick={() => setOpen(false)}
+                className="text-ds-muted hover:text-ds-text flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
+                aria-label="Close menu"
+                autoFocus
+              >
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path
+                    d="M2 2l12 12M14 2L2 14"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* Nav links */}
@@ -140,7 +140,7 @@ export function MobileNav({ items }: MobileNavProps) {
                     'transition-colors duration-200',
                     isActive
                       ? 'bg-ds-accent/10 text-ds-accent'
-                      : 'text-ds-muted hover:text-ds-text hover:bg-white/5'
+                      : 'text-ds-muted hover:text-ds-text hover:bg-ds-text/5'
                   )}
                   aria-current={isActive ? 'page' : undefined}
                 >

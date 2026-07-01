@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { NavbarLinks } from './NavbarLinks'
 import { MobileNav } from './MobileNav'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 // ── Logo Mark ─────────────────────────────────────────────────
 function NavLogo() {
@@ -45,15 +46,7 @@ export const navItems = [
 // ── Navbar (Server Component) ─────────────────────────────────
 export function Navbar() {
   return (
-    <header
-      className="sticky top-0 z-50 w-full"
-      style={{
-        background: 'rgba(11,15,25,0.85)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-      }}
-    >
+    <header className="bg-ds-bg/85 border-ds-border sticky top-0 z-50 w-full border-b backdrop-blur-[16px]">
       <nav
         className="mx-auto flex h-[58px] max-w-6xl items-center justify-between px-4 sm:px-6"
         aria-label="Main navigation"
@@ -64,6 +57,7 @@ export function Navbar() {
         {/* Center/Right — Desktop links (Client island) */}
         <div className="hidden items-center gap-1 md:flex">
           <NavbarLinks items={navItems} />
+          <ThemeToggle className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent ml-2 flex h-9 w-9 items-center justify-center rounded-lg border transition-colors" />
           <a
             href="/resume-adesh-shukla.pdf"
             download

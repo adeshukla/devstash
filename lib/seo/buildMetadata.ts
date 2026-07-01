@@ -69,7 +69,12 @@ export function buildMetadata(options: MetadataOptions = {}): Metadata {
         }
 
   return {
-    title: fullTitle,
+    // Root layout applies a '%s | DevStash' title template to plain string
+    // titles. We already append the suffix above when `title` is provided,
+    // so use `{ absolute }` to opt out of the template and avoid doubling it.
+    // When no `title` override is given, fullTitle is the bare site title
+    // (no suffix) and should still flow through the template as normal.
+    title: title ? { absolute: fullTitle } : fullTitle,
     description,
     alternates: {
       canonical: canonicalUrl,

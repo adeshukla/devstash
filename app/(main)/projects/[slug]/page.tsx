@@ -151,30 +151,84 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </>
             )}
 
-            {project.highlights && project.highlights.length > 0 && (
-              <>
+            {/* Only needed to separate the Interface gallery from the body text —
+                the header section above already has its own border-b, so when
+                there's no gallery, a second divider here is redundant (it was
+                creating a big dead gap between two lines doing the same job). */}
+            {project.interface &&
+              project.interface.length > 0 &&
+              (project.caseStudy || project.highlights?.length || project.longDescription) && (
                 <Separator className="my-10" />
-                <h2 className="text-ds-text mb-6 text-2xl font-bold">Highlights</h2>
-                <ul className="flex flex-col gap-3">
-                  {project.highlights.map((item) => (
-                    <li key={item} className="flex items-start gap-3">
-                      <span className="bg-ds-accent mt-2 h-1.5 w-1.5 shrink-0 rounded-full" />
-                      <span className="text-ds-muted">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
+              )}
 
-            {project.longDescription && (
-              <>
-                <Separator className="my-10" />
+            {/* Overview, case study, and highlights read as one continuous body —
+                each gets generous spacing, not a hard rule between every block. */}
+            <div className="flex flex-col gap-12">
+              {project.longDescription && (
                 <div className="prose prose-invert max-w-none">
                   {/* TODO: Render MDX in Phase 5 */}
                   <p className="text-ds-muted">{project.longDescription}</p>
                 </div>
-              </>
-            )}
+              )}
+
+              {project.caseStudy && (
+                <div>
+                  <h2 className="text-ds-text mb-6 text-2xl font-bold">Case study</h2>
+                  {project.caseStudy.confidentialityNote && (
+                    <p className="text-ds-muted border-ds-border bg-ds-surface mb-6 rounded-lg border px-4 py-3 text-sm italic">
+                      {project.caseStudy.confidentialityNote}
+                    </p>
+                  )}
+                  <div className="flex flex-col gap-6">
+                    <div>
+                      <h3 className="text-ds-accent mb-2 font-mono text-sm font-medium">Problem</h3>
+                      <p className="text-ds-muted">{project.caseStudy.problem}</p>
+                    </div>
+                    <div>
+                      <h3 className="text-ds-accent mb-2 font-mono text-sm font-medium">
+                        Approach
+                      </h3>
+                      <p className="text-ds-muted">{project.caseStudy.approach}</p>
+                    </div>
+                    <div>
+                      <h3 className="text-ds-accent mb-2 font-mono text-sm font-medium">
+                        Key decisions
+                      </h3>
+                      <ul className="flex flex-col gap-2">
+                        {project.caseStudy.decisions.map((d) => (
+                          <li key={d} className="flex items-start gap-3">
+                            <span className="bg-ds-accent mt-2 h-1.5 w-1.5 shrink-0 rounded-full" />
+                            <span className="text-ds-muted">{d}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    {project.caseStudy.outcome && (
+                      <div>
+                        <h3 className="text-ds-accent mb-2 font-mono text-sm font-medium">
+                          Outcome
+                        </h3>
+                        <p className="text-ds-muted">{project.caseStudy.outcome}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {project.highlights && project.highlights.length > 0 && (
+                <div>
+                  <h2 className="text-ds-text mb-6 text-2xl font-bold">Highlights</h2>
+                  <ul className="flex flex-col gap-3">
+                    {project.highlights.map((item) => (
+                      <li key={item} className="flex items-start gap-3">
+                        <span className="bg-ds-accent mt-2 h-1.5 w-1.5 shrink-0 rounded-full" />
+                        <span className="text-ds-muted">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
