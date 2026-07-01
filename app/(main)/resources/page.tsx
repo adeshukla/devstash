@@ -4,6 +4,7 @@ import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
 import { Badge, Card, Reveal } from '@/components/ui'
+import { Icon, type IconName } from '@/components/icons/Icon'
 import resourcesData from '@/content/resources/resources.json'
 
 const title = 'Developer Resources — Docs, Articles & Courses'
@@ -36,6 +37,15 @@ const CATEGORY_LABELS: Record<Resource['category'], string> = {
   repo: 'Repository',
   video: 'Video',
   tool: 'Tool',
+}
+
+const CATEGORY_ICONS: Record<Resource['category'], IconName> = {
+  docs: 'docs',
+  article: 'article',
+  course: 'course',
+  repo: 'repo',
+  video: 'video',
+  tool: 'devtools',
 }
 
 const CATEGORY_VARIANTS: Record<
@@ -85,7 +95,10 @@ export default function ResourcesPage() {
         <div className="mx-auto flex max-w-5xl flex-col gap-16 px-6">
           {(Object.keys(grouped) as Resource['category'][]).map((cat) => (
             <div key={cat}>
-              <h2 className="text-ds-text mb-6 text-xl font-bold">{CATEGORY_LABELS[cat]}</h2>
+              <h2 className="text-ds-text mb-6 flex items-center gap-3 text-xl font-bold">
+                <Icon name={CATEGORY_ICONS[cat]} className="text-ds-accent h-5 w-5 flex-shrink-0" />
+                {CATEGORY_LABELS[cat]}
+              </h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {grouped[cat]?.map((resource, i) => (
                   <Reveal key={resource.id} delay={(i % 6) * 60}>
@@ -98,7 +111,10 @@ export default function ResourcesPage() {
                       <Card variant="hover" className="h-full">
                         <div className="flex flex-col gap-3 p-5">
                           <div className="flex items-center justify-between gap-2">
-                            <Badge variant={CATEGORY_VARIANTS[resource.category]}>
+                            <Badge
+                              variant={CATEGORY_VARIANTS[resource.category]}
+                              icon={<Icon name={CATEGORY_ICONS[resource.category]} />}
+                            >
                               {CATEGORY_LABELS[resource.category]}
                             </Badge>
                             {resource.free && <Badge variant="muted">Free</Badge>}

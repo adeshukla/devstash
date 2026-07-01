@@ -8,6 +8,7 @@ interface BadgeProps {
   variant?: BadgeVariant
   size?: 'sm' | 'md'
   dot?: boolean
+  icon?: ReactNode
   className?: string
   children: ReactNode
 }
@@ -41,6 +42,7 @@ export function Badge({
   variant = 'default',
   size = 'md',
   dot = false,
+  icon,
   className,
   children,
 }: BadgeProps) {
@@ -60,6 +62,7 @@ export function Badge({
           aria-hidden="true"
         />
       )}
+      {icon && <span className="h-3 w-3 flex-shrink-0 [&>svg]:h-full [&>svg]:w-full">{icon}</span>}
       {children}
     </span>
   )

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { type BlogPost } from '@/types/blog'
 import { Badge } from '@/components/ui'
+import { Icon, type IconName } from '@/components/icons/Icon'
 import { cn } from '@/lib/utils/cn'
 
 interface BlogCardProps {
@@ -22,6 +23,16 @@ const CATEGORY_COLORS: Record<string, 'blue' | 'purple' | 'green' | 'warn' | 'de
     career: 'muted',
   }
 
+const CATEGORY_ICONS: Record<string, IconName> = {
+  automation: 'automation',
+  frontend: 'frontend',
+  performance: 'performance',
+  'ai-workflows': 'ai',
+  devtools: 'devtools',
+  tutorials: 'tutorials',
+  career: 'career',
+}
+
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -32,6 +43,7 @@ function formatDate(dateStr: string): string {
 
 export function BlogCard({ post, featured = false, className }: BlogCardProps) {
   const badgeVariant = CATEGORY_COLORS[post.category] ?? 'default'
+  const badgeIcon = CATEGORY_ICONS[post.category]
 
   return (
     <article
@@ -92,7 +104,9 @@ export function BlogCard({ post, featured = false, className }: BlogCardProps) {
       <div className="flex flex-1 flex-col p-5">
         {/* Category + read time */}
         <div className="mb-3 flex items-center justify-between gap-2">
-          <Badge variant={badgeVariant}>{post.category.replace('-', ' ')}</Badge>
+          <Badge variant={badgeVariant} icon={badgeIcon ? <Icon name={badgeIcon} /> : undefined}>
+            {post.category.replace('-', ' ')}
+          </Badge>
           <span className="text-ds-muted text-xs">{post.readingTime} min read</span>
         </div>
 

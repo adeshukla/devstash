@@ -1,4 +1,4 @@
-import { Button, AnimatedCounter, TerminalTyping } from '@/components/ui'
+import { Button, AnimatedCounter, TerminalTyping, HeroGraphic } from '@/components/ui'
 
 // Server Component — no 'use client'
 export function HeroSection() {
@@ -20,68 +20,74 @@ export function HeroSection() {
       />
 
       <div className="mx-auto max-w-5xl px-6">
-        <div className="flex flex-col gap-6">
-          {/* Terminal typing kicker */}
-          <div className="border-ds-border bg-ds-surface/60 inline-flex w-fit items-center rounded-lg border px-3 py-1.5 text-sm backdrop-blur">
-            <TerminalTyping
-              prompt="adesh@devstash:~$"
-              phrases={[
-                'building developer tools',
-                'shipping Next.js apps',
-                'automating workflows',
-                'writing about frontend',
-              ]}
-            />
+        <div className="grid gap-12 lg:grid-cols-[1fr_300px] lg:items-center">
+          <div className="flex flex-col gap-6">
+            {/* Terminal typing kicker */}
+            <div className="border-ds-border bg-ds-surface/60 inline-flex w-fit items-center rounded-lg border px-3 py-1.5 text-sm backdrop-blur">
+              <TerminalTyping
+                prompt="adesh@devstash:~$"
+                phrases={[
+                  'building developer tools',
+                  'shipping Next.js apps',
+                  'automating workflows',
+                  'writing about frontend',
+                ]}
+              />
+            </div>
+
+            {/* Availability indicator */}
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="bg-ds-success absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
+                <span className="bg-ds-success relative inline-flex h-2 w-2 rounded-full" />
+              </span>
+              <span className="text-ds-muted font-mono text-sm">
+                Available for frontend roles · Noida / Delhi NCR · Remote
+              </span>
+            </div>
+
+            {/* Main heading */}
+            <h1 className="text-ds-text text-4xl leading-tight font-bold tracking-tight sm:text-5xl lg:text-6xl">
+              Web interfaces that ship —{' '}
+              <span className="text-gradient-animate">fast, accessible, built to last.</span>
+            </h1>
+
+            {/* Sub-copy */}
+            <p className="text-ds-muted max-w-2xl text-lg leading-relaxed">
+              I&apos;m Adesh Shukla — a frontend developer with a designer&apos;s eye. I build with
+              React and Next.js, turn Figma into high-performance, SEO-ready products, and automate
+              the repetitive parts of the workflow.
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-wrap items-center gap-4 pt-2">
+              <Button href="/projects" size="lg">
+                View Projects
+              </Button>
+              <Button href="/contact" variant="outline" size="lg">
+                Get in Touch
+              </Button>
+            </div>
+
+            {/* Quick stats */}
+            <div className="border-ds-border mt-6 flex flex-wrap gap-10 border-t pt-8">
+              {(
+                [
+                  { label: 'Years Frontend Eng', value: '6+' },
+                  { label: 'Posts by 2027 (AI-Powered)', value: '50+' },
+                  { label: 'Lighthouse Avg Score', value: '90+' },
+                ] as const
+              ).map(({ label, value }) => (
+                <div key={label} className="flex flex-col gap-0.5">
+                  <AnimatedCounter value={value} className="text-ds-text text-2xl font-bold" />
+                  <span className="text-ds-muted text-sm">{label}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Availability indicator */}
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="bg-ds-success absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
-              <span className="bg-ds-success relative inline-flex h-2 w-2 rounded-full" />
-            </span>
-            <span className="text-ds-muted font-mono text-sm">
-              Available for frontend roles · Noida / Delhi NCR · Remote
-            </span>
-          </div>
-
-          {/* Main heading */}
-          <h1 className="text-ds-text text-4xl leading-tight font-bold tracking-tight sm:text-5xl lg:text-6xl">
-            Web interfaces that ship —{' '}
-            <span className="text-gradient-animate">fast, accessible, built to last.</span>
-          </h1>
-
-          {/* Sub-copy */}
-          <p className="text-ds-muted max-w-2xl text-lg leading-relaxed">
-            I&apos;m Adesh Shukla — a frontend developer with a designer&apos;s eye. I build with
-            React and Next.js, turn Figma into high-performance, SEO-ready products, and automate
-            the repetitive parts of the workflow.
-          </p>
-
-          {/* CTAs */}
-          <div className="flex flex-wrap items-center gap-4 pt-2">
-            <Button href="/projects" size="lg">
-              View Projects
-            </Button>
-            <Button href="/contact" variant="outline" size="lg">
-              Get in Touch
-            </Button>
-          </div>
-
-          {/* Quick stats */}
-          <div className="border-ds-border mt-6 flex flex-wrap gap-10 border-t pt-8">
-            {(
-              [
-                { label: 'Years Frontend Eng', value: '6+' },
-                { label: 'Posts by 2027 (AI-Powered)', value: '50+' },
-                { label: 'Lighthouse Avg Score', value: '90+' },
-              ] as const
-            ).map(({ label, value }) => (
-              <div key={label} className="flex flex-col gap-0.5">
-                <AnimatedCounter value={value} className="text-ds-text text-2xl font-bold" />
-                <span className="text-ds-muted text-sm">{label}</span>
-              </div>
-            ))}
+          <div className="hidden lg:block">
+            <HeroGraphic />
           </div>
         </div>
       </div>

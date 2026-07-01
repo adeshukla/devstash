@@ -6,6 +6,7 @@ import { buildPersonSchema } from '@/lib/schema/builders'
 import { siteConfig } from '@/content/metadata/site.config'
 import { stack } from '@/lib/site/stack'
 import { Badge, Button, Reveal } from '@/components/ui'
+import { Icon } from '@/components/icons/Icon'
 
 const title = 'About Adesh Shukla — Frontend Developer'
 const description =
@@ -92,7 +93,8 @@ export default function AboutPage() {
                 data-analytics-event="cv_viewed"
                 className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-5 text-[14px] font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
-                Download résumé ↓
+                Download résumé
+                <Icon name="download" className="h-4 w-4" />
               </a>
             </div>
           </div>
@@ -173,7 +175,8 @@ export default function AboutPage() {
                 data-analytics-event="cv_viewed"
                 className="border-ds-accent text-ds-accent hover:bg-ds-accent focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg inline-flex h-12 items-center justify-center gap-2.5 rounded-xl border px-6 text-[15px] font-medium transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
-                Download résumé ↓
+                Download résumé
+                <Icon name="download" className="h-4 w-4" />
               </a>
               <Button href={siteConfig.author.github} variant="ghost" size="lg">
                 GitHub →

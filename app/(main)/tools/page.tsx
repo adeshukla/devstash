@@ -4,6 +4,7 @@ import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
 import { Badge, Card, Reveal } from '@/components/ui'
+import { Icon, type IconName } from '@/components/icons/Icon'
 import toolsData from '@/content/tools/tools.json'
 
 const title = 'Tools — The Developer Stack Adesh Uses Daily'
@@ -37,6 +38,16 @@ const CATEGORY_LABELS: Record<Tool['category'], string> = {
   productivity: 'Productivity',
   ai: 'AI & LLMs',
   devtools: 'Dev & Deployment',
+}
+
+const CATEGORY_ICONS: Record<Tool['category'], IconName> = {
+  editor: 'editor',
+  terminal: 'terminal',
+  browser: 'browser',
+  design: 'design',
+  productivity: 'productivity',
+  ai: 'ai',
+  devtools: 'devtools',
 }
 
 const CATEGORY_ORDER: Tool['category'][] = [
@@ -87,6 +98,7 @@ export default function ToolsPage() {
           {orderedCats.map((cat) => (
             <div key={cat}>
               <h2 className="text-ds-text mb-6 flex items-center gap-3 text-xl font-bold">
+                <Icon name={CATEGORY_ICONS[cat]} className="text-ds-accent h-5 w-5 flex-shrink-0" />
                 {CATEGORY_LABELS[cat]}
                 <span className="bg-ds-border h-px flex-1" aria-hidden="true" />
               </h2>

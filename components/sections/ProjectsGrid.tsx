@@ -1,6 +1,21 @@
 import Link from 'next/link'
 import { Card, Badge, Button, Reveal } from '@/components/ui'
+import { Icon, type IconName } from '@/components/icons/Icon'
 import type { Project } from '@/types/project'
+
+// Matched against the literal `tech` strings actually used in content/projects/*.json.
+// Anything not listed here just falls back to a plain text badge below.
+const TECH_ICONS: Partial<Record<string, IconName>> = {
+  React: 'react',
+  'Next.js': 'nextjs',
+  TypeScript: 'typescript',
+  'Tailwind CSS': 'tailwind',
+  'Redux Toolkit': 'redux',
+  Firebase: 'firebase',
+  Vite: 'vite',
+  'GitHub Actions': 'github-actions',
+  'Gemini AI': 'gemini',
+}
 
 interface ProjectsGridProps {
   projects: Project[]
@@ -75,11 +90,19 @@ export function ProjectsGrid({ projects, showAll = false }: ProjectsGridProps) {
                         {/* Tech stack pills */}
                         {project.tech && project.tech.length > 0 && (
                           <div className="mt-auto flex flex-wrap gap-1.5 pt-2">
-                            {project.tech.slice(0, 4).map((t) => (
-                              <Badge key={t} variant="default" className="font-mono text-xs">
-                                {t}
-                              </Badge>
-                            ))}
+                            {project.tech.slice(0, 4).map((t) => {
+                              const iconName = TECH_ICONS[t]
+                              return (
+                                <Badge
+                                  key={t}
+                                  variant="default"
+                                  className="font-mono text-xs"
+                                  icon={iconName ? <Icon name={iconName} /> : undefined}
+                                >
+                                  {t}
+                                </Badge>
+                              )
+                            })}
                             {project.tech.length > 4 && (
                               <Badge variant="muted" className="text-xs">
                                 +{project.tech.length - 4} more
@@ -91,15 +114,17 @@ export function ProjectsGrid({ projects, showAll = false }: ProjectsGridProps) {
 
                       {/* Footer links */}
                       {(project.githubUrl || project.liveUrl) && (
-                        <div className="border-ds-border flex items-center gap-3 border-t px-5 py-3">
+                        <div className="border-ds-border flex items-center gap-4 border-t px-5 py-3">
                           {project.githubUrl && (
-                            <span className="text-ds-muted group-hover:text-ds-accent text-xs transition-colors">
-                              GitHub →
+                            <span className="text-ds-muted group-hover:text-ds-accent inline-flex items-center gap-1.5 text-xs transition-colors">
+                              <Icon name="github" className="h-3.5 w-3.5" />
+                              GitHub
                             </span>
                           )}
                           {project.liveUrl && (
-                            <span className="text-ds-muted group-hover:text-ds-accent text-xs transition-colors">
-                              Live →
+                            <span className="text-ds-muted group-hover:text-ds-accent inline-flex items-center gap-1.5 text-xs transition-colors">
+                              <Icon name="external-link" className="h-3.5 w-3.5" />
+                              Live
                             </span>
                           )}
                         </div>

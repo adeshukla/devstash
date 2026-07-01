@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { Icon } from '@/components/icons/Icon'
 import { cn } from '@/lib/utils/cn'
 
 /**
@@ -31,11 +32,12 @@ export function CopyCodeButton() {
         aria-label={copied ? 'Copied' : 'Copy code'}
         className={cn(
           'border-ds-border bg-ds-surface text-ds-muted hover:border-ds-accent hover:text-ds-accent',
-          'rounded-md border px-2 py-1 font-mono text-xs opacity-0 backdrop-blur transition-opacity',
+          'inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-xs opacity-0 backdrop-blur transition-opacity',
           'group-hover:opacity-100 focus-visible:opacity-100',
           copied && 'border-ds-success text-ds-success opacity-100'
         )}
       >
+        <Icon name={copied ? 'check' : 'copy'} className="h-3.5 w-3.5" />
         {copied ? 'Copied' : 'Copy'}
       </button>
     </div>
