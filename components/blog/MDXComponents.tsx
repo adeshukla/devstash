@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { MDXComponents } from 'mdx/types'
 import { ImageGallery } from '@/components/ui'
+import { CopyCodeButton } from '@/components/blog/CopyCodeButton'
 import { cn } from '@/lib/utils/cn'
 
 // ─── Callout ────────────────────────────────────────────────────────────────
@@ -114,7 +115,8 @@ export const mdxComponents: MDXComponents = {
 
   // Code block wrapper — rehype-pretty-code injects syntax styles into the pre/code
   pre: ({ children, ...props }) => (
-    <div className="group border-ds-border bg-ds-surface my-6 overflow-hidden rounded-lg border">
+    <div className="group border-ds-border bg-ds-surface relative my-6 overflow-hidden rounded-lg border">
+      <CopyCodeButton />
       <pre {...props} className="overflow-x-auto p-4 text-sm leading-relaxed">
         {children}
       </pre>

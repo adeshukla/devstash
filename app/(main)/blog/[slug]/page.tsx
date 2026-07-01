@@ -11,7 +11,7 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildBlogPostingSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
-import { Badge } from '@/components/ui'
+import { Badge, Reveal } from '@/components/ui'
 import { TOC } from '@/components/blog/TOC'
 import { AuthorBio } from '@/components/blog/AuthorBio'
 import { RelatedPosts } from '@/components/blog/RelatedPosts'
@@ -154,9 +154,9 @@ export default async function BlogPostPage({ params }: Props) {
             />
 
             {/* Author */}
-            <div className="border-ds-border mt-12 border-t pt-10">
+            <Reveal className="border-ds-border mt-12 border-t pt-10">
               <AuthorBio author={post.author} />
-            </div>
+            </Reveal>
           </article>
 
           {/* Desktop TOC sidebar */}
@@ -171,9 +171,9 @@ export default async function BlogPostPage({ params }: Props) {
 
         {/* ── Related Posts ── */}
         {relatedPosts.length > 0 && (
-          <div className="border-ds-border mt-16 border-t pt-12">
+          <Reveal className="border-ds-border mt-16 border-t pt-12">
             <RelatedPosts posts={relatedPosts} />
-          </div>
+          </Reveal>
         )}
       </div>
     </>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ElementType, type ReactNode } from 'react'
 import { cn } from '@/lib/utils/cn'
 
 interface RevealProps {
@@ -8,6 +8,8 @@ interface RevealProps {
   className?: string
   /** Delay before the reveal animation starts, in milliseconds. */
   delay?: number
+  /** Element/landmark to render as. Defaults to 'div'. */
+  as?: ElementType
 }
 
 /**
@@ -15,8 +17,8 @@ interface RevealProps {
  * Content is always in the DOM (only visually animated), and users with
  * `prefers-reduced-motion` see it immediately via the `.reveal` CSS guard.
  */
-export function Reveal({ children, className, delay = 0 }: RevealProps) {
-  const ref = useRef<HTMLDivElement | null>(null)
+export function Reveal({ children, className, delay = 0, as: Tag = 'div' }: RevealProps) {
+  const ref = useRef<HTMLElement | null>(null)
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -46,12 +48,12 @@ export function Reveal({ children, className, delay = 0 }: RevealProps) {
   }, [])
 
   return (
-    <div
+    <Tag
       ref={ref}
       className={cn('reveal', visible && 'is-visible', className)}
       style={delay ? { transitionDelay: `${delay}ms` } : undefined}
     >
       {children}
-    </div>
+    </Tag>
   )
 }

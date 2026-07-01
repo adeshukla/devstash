@@ -4,6 +4,7 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { siteConfig } from '@/content/metadata/site.config'
 import { Breadcrumb } from '@/components/layout'
 import { ContactForm } from '@/components/contact/ContactForm'
+import { Reveal } from '@/components/ui'
 
 const title = 'Contact Adesh Shukla — Frontend Developer'
 const description =
@@ -67,7 +68,7 @@ export default function ContactPage() {
         <div className="mx-auto max-w-5xl px-6">
           <div className="grid grid-cols-1 gap-16 lg:grid-cols-3">
             {/* Left — meta info */}
-            <aside className="flex flex-col gap-10 lg:col-span-1">
+            <Reveal as="aside" className="flex flex-col gap-10 lg:col-span-1">
               {/* Response time */}
               <div>
                 <h2 className="text-ds-accent mb-2 font-mono text-sm font-medium">Response time</h2>
@@ -119,12 +120,12 @@ export default function ContactPage() {
                   ))}
                 </ul>
               </div>
-            </aside>
+            </Reveal>
 
             {/* Right — form */}
-            <div className="lg:col-span-2">
+            <Reveal delay={80} className="lg:col-span-2">
               <ContactForm />
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>

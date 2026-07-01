@@ -5,7 +5,7 @@ import { JsonLd } from '@/components/seo/JsonLd'
 import { buildPersonSchema } from '@/lib/schema/builders'
 import { siteConfig } from '@/content/metadata/site.config'
 import { stack } from '@/lib/site/stack'
-import { Badge, Button } from '@/components/ui'
+import { Badge, Button, Reveal } from '@/components/ui'
 
 const title = 'About Adesh Shukla — Frontend Developer'
 const description =
@@ -100,7 +100,7 @@ export default function AboutPage() {
 
         {/* ── Skills ── */}
         <section className="py-16">
-          <div className="mx-auto max-w-4xl px-6">
+          <Reveal className="mx-auto max-w-4xl px-6">
             <h2 className="text-ds-text mb-8 text-2xl font-bold">Tech I use</h2>
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {Object.entries(SKILLS).map(([category, items]) => (
@@ -116,12 +116,12 @@ export default function AboutPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </Reveal>
         </section>
 
         {/* ── Experience timeline ── */}
         <section className="border-ds-border border-t py-16">
-          <div className="mx-auto max-w-4xl px-6">
+          <Reveal className="mx-auto max-w-4xl px-6">
             <h2 className="text-ds-text mb-10 text-2xl font-bold">Experience</h2>
             <ol className="flex flex-col gap-0">
               {TIMELINE.map((item, i) => (
@@ -139,12 +139,12 @@ export default function AboutPage() {
                 </li>
               ))}
             </ol>
-          </div>
+          </Reveal>
         </section>
 
         {/* ── Currently ── */}
         <section className="border-ds-border border-t py-16">
-          <div className="mx-auto max-w-4xl px-6">
+          <Reveal className="mx-auto max-w-4xl px-6">
             <h2 className="text-ds-text mb-6 text-2xl font-bold">Currently</h2>
             <ul className="flex flex-col gap-3">
               {CURRENTLY.map((item) => (
@@ -153,12 +153,12 @@ export default function AboutPage() {
                 </li>
               ))}
             </ul>
-          </div>
+          </Reveal>
         </section>
 
         {/* ── CTA strip ── */}
         <section className="border-ds-border bg-ds-surface border-t py-16">
-          <div className="mx-auto max-w-4xl px-6 text-center">
+          <Reveal className="mx-auto max-w-4xl px-6 text-center">
             <h2 className="text-ds-text text-2xl font-bold">Want to work together?</h2>
             <p className="text-ds-muted mt-3">
               I&apos;m open to frontend roles and freelance collabs. Drop me a line.
@@ -179,7 +179,7 @@ export default function AboutPage() {
                 GitHub →
               </Button>
             </div>
-          </div>
+          </Reveal>
         </section>
       </main>
     </>

@@ -7,7 +7,7 @@ import { JsonLd } from '@/components/seo/JsonLd'
 import { buildProjectSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
 import { getAllProjects, getProjectBySlug } from '@/lib/markdown/projects'
-import { Badge, Button, ImageGallery, Separator } from '@/components/ui'
+import { Badge, Button, ImageGallery, Reveal, Separator } from '@/components/ui'
 
 // ─── Static generation ────────────────────────────────────────────────────────
 
@@ -138,7 +138,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
         {/* ── Body ── */}
         <section className="py-16">
-          <div className="mx-auto max-w-4xl px-6">
+          <Reveal className="mx-auto max-w-4xl px-6">
             {/* TODO: Replace with MDX rendered content in Phase 5 */}
 
             {project.interface && project.interface.length > 0 && (
@@ -229,7 +229,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </div>
               )}
             </div>
-          </div>
+          </Reveal>
         </section>
 
         {/* ── Back link ── */}
