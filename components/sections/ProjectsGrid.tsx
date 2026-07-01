@@ -37,12 +37,17 @@ export function ProjectsGrid({ projects, showAll = false }: ProjectsGridProps) {
     <section className="py-16">
       <div className="mx-auto max-w-5xl px-6">
         {!showAll && (
-          <div className="mb-10 flex items-end justify-between">
+          <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-ds-text text-3xl font-bold">Projects</h2>
               <p className="text-ds-muted mt-1">Things I&apos;ve built and shipped</p>
             </div>
-            <Button href="/projects" variant="ghost" size="sm" className="flex-shrink-0 p-3">
+            <Button
+              href="/projects"
+              variant="ghost"
+              size="sm"
+              className="flex-shrink-0 self-start p-3 sm:self-auto"
+            >
               View all →
             </Button>
           </div>

@@ -86,7 +86,7 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className="hidden lg:block">
+          <div className="mx-auto w-full max-w-xs sm:max-w-sm lg:mx-0 lg:max-w-none">
             <HeroGraphic />
           </div>
         </div>

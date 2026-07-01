@@ -87,8 +87,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               ]}
             />
 
-            <div className="mt-6 flex flex-wrap items-start justify-between gap-4">
-              <div className="flex-1">
+            <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="sm:flex-1">
                 <div className="mb-3 flex items-center gap-3">
                   {statusInfo && (
                     <Badge variant={statusInfo.variant} dot>
