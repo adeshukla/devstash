@@ -4,7 +4,7 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { siteConfig } from '@/content/metadata/site.config'
 import { Breadcrumb } from '@/components/layout'
 import { ContactForm } from '@/components/contact/ContactForm'
-import { Reveal } from '@/components/ui'
+import { Reveal, Card, Separator } from '@/components/ui'
 
 const title = 'Contact Adesh Shukla — Frontend Developer'
 const description =
@@ -68,58 +68,66 @@ export default function ContactPage() {
         <div className="mx-auto max-w-5xl px-6">
           <div className="grid grid-cols-1 gap-16 lg:grid-cols-3">
             {/* Left — meta info */}
-            <Reveal as="aside" className="flex flex-col gap-10 lg:col-span-1">
-              {/* Response time */}
-              <div>
-                <h2 className="text-ds-accent mb-2 font-mono text-sm font-medium">Response time</h2>
-                <p className="text-ds-muted text-sm">
-                  I aim to reply within 48 hours. For urgent inquiries, DM me on LinkedIn.
-                </p>
-              </div>
+            <Reveal as="aside" className="lg:col-span-1">
+              <Card padding="lg" className="flex flex-col gap-8">
+                {/* Response time */}
+                <div>
+                  <h2 className="text-ds-accent mb-2 font-mono text-sm font-medium">
+                    Response time
+                  </h2>
+                  <p className="text-ds-muted text-sm">
+                    I aim to reply within 48 hours. For urgent inquiries, DM me on LinkedIn.
+                  </p>
+                </div>
 
-              {/* Location */}
-              <div>
-                <h2 className="text-ds-accent mb-2 font-mono text-sm font-medium">Location</h2>
-                <p className="text-ds-muted text-sm">
-                  Ghaziabad, UP — open to Noida / Delhi NCR roles and remote.
-                </p>
-              </div>
+                {/* Location */}
+                <div>
+                  <h2 className="text-ds-accent mb-2 font-mono text-sm font-medium">Location</h2>
+                  <p className="text-ds-muted text-sm">
+                    Ghaziabad, UP — open to Noida / Delhi NCR roles and remote.
+                  </p>
+                </div>
 
-              {/* Availability */}
-              <div>
-                <h2 className="text-ds-accent mb-2 font-mono text-sm font-medium">Availability</h2>
-                <p className="text-ds-muted text-sm">
-                  Immediate to ~20 days notice. Open to contract and full-time.
-                </p>
-              </div>
+                {/* Availability */}
+                <div>
+                  <h2 className="text-ds-accent mb-2 font-mono text-sm font-medium">
+                    Availability
+                  </h2>
+                  <p className="text-ds-muted text-sm">
+                    Immediate to ~20 days notice. Open to contract and full-time.
+                  </p>
+                </div>
 
-              {/* Social links */}
-              <div>
-                <h2 className="text-ds-accent mb-4 font-mono text-sm font-medium">Elsewhere</h2>
-                <ul className="flex flex-col gap-3">
-                  {SOCIAL_LINKS.map((link) => (
-                    <li key={link.label}>
-                      <a
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group text-ds-muted hover:text-ds-text flex items-center gap-3 text-sm transition-colors"
-                      >
-                        <span
-                          className="border-ds-border bg-ds-surface text-ds-muted group-hover:border-ds-accent group-hover:text-ds-accent flex h-8 w-8 items-center justify-center rounded-lg border font-mono text-xs transition-colors"
-                          aria-hidden="true"
+                <Separator />
+
+                {/* Social links */}
+                <div>
+                  <h2 className="text-ds-accent mb-4 font-mono text-sm font-medium">Elsewhere</h2>
+                  <ul className="flex flex-col gap-3">
+                    {SOCIAL_LINKS.map((link) => (
+                      <li key={link.label}>
+                        <a
+                          href={link.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group text-ds-muted hover:text-ds-text flex items-center gap-3 text-sm transition-colors"
                         >
-                          {link.icon}
-                        </span>
-                        <span className="flex flex-col">
-                          <span className="text-ds-text font-medium">{link.label}</span>
-                          <span className="text-ds-muted text-xs">{link.handle}</span>
-                        </span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                          <span
+                            className="border-ds-border bg-ds-surface2 text-ds-muted group-hover:border-ds-accent group-hover:text-ds-accent flex h-8 w-8 items-center justify-center rounded-lg border font-mono text-xs transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_8px_18px_-8px_color-mix(in_srgb,var(--color-ds-accent)_45%,transparent)]"
+                            aria-hidden="true"
+                          >
+                            {link.icon}
+                          </span>
+                          <span className="flex flex-col">
+                            <span className="text-ds-text font-medium">{link.label}</span>
+                            <span className="text-ds-muted text-xs">{link.handle}</span>
+                          </span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </Card>
             </Reveal>
 
             {/* Right — form */}

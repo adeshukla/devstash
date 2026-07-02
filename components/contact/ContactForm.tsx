@@ -131,12 +131,15 @@ export function ContactForm() {
         </span>
         <p className="text-ds-success text-lg font-semibold">Message sent!</p>
         <p className="text-ds-muted text-sm">{formState.message}</p>
-        <button
+        <Button
+          type="button"
           onClick={() => setFormState({ status: 'idle', message: '' })}
-          className="text-ds-accent mt-2 text-sm underline-offset-4 hover:underline"
+          variant="ghost"
+          size="sm"
+          className="mt-2"
         >
           Send another message
-        </button>
+        </Button>
       </div>
     )
   }

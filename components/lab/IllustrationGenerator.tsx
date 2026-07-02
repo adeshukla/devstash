@@ -221,18 +221,10 @@ function GenerateTab() {
           >
             Abstract (shapes, charts, network)
           </button>
-          <button
-            type="button"
-            onClick={() => setStyle('character')}
-            aria-pressed={style === 'character'}
-            className={
-              style === 'character'
-                ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
-                : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
-            }
-          >
-            Character (flat-icon people scenes)
-          </button>
+          {/* "Character" style toggle intentionally hidden for now — the
+              character scenes need another quality pass. All the underlying
+              logic below (isCharacter branches, characterEngine imports)
+              is untouched; re-add this button to bring it back. */}
         </div>
       </div>
 

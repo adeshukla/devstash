@@ -43,7 +43,22 @@ export function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="border-ds-border bg-ds-surface w-full border-t" aria-label="Site footer">
+    <footer
+      className="border-ds-border bg-ds-surface relative w-full overflow-hidden border-t"
+      aria-label="Site footer"
+    >
+      {/* Same subtle grid + aurora-glow treatment as the hero, toned down —
+          fills the empty margin outside the centered content wrapper on wide
+          desktop screens instead of leaving flat, empty background there. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_right,var(--color-ds-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-ds-border)_1px,transparent_1px)] bg-[size:64px_64px] opacity-[0.15]"
+      />
+      <div
+        aria-hidden="true"
+        className="bg-ds-accent absolute -bottom-32 left-1/2 -z-10 h-[420px] w-[420px] -translate-x-1/2 rounded-full opacity-[0.06] blur-3xl"
+      />
+
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         {/* Top row */}
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
@@ -70,7 +85,7 @@ export function Footer() {
             <address className="mt-4 not-italic">
               <a
                 href={`mailto:${siteConfig.author.email}`}
-                className="text-ds-muted hover:text-ds-accent font-mono text-[13px] transition-colors"
+                className="link-underline text-ds-muted hover:text-ds-accent font-mono text-[13px] transition-colors"
               >
                 {siteConfig.author.email}
               </a>
@@ -88,7 +103,7 @@ export function Footer() {
                   <li key={href}>
                     <Link
                       href={href}
-                      className="text-ds-muted hover:text-ds-text text-[13px] transition-colors"
+                      className="link-underline text-ds-muted hover:text-ds-text text-[13px] transition-colors"
                     >
                       {label}
                     </Link>
@@ -110,9 +125,14 @@ export function Footer() {
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-ds-muted hover:text-ds-text inline-flex items-center gap-2 text-[13px] transition-colors"
+                    className="group text-ds-muted hover:text-ds-text flex items-center gap-2.5 text-[13px] transition-colors"
                   >
-                    {icon}
+                    <span
+                      className="border-ds-border bg-ds-bg/40 group-hover:border-ds-accent flex h-7 w-7 items-center justify-center rounded-md border transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_6px_16px_-6px_color-mix(in_srgb,var(--color-ds-accent)_45%,transparent)]"
+                      aria-hidden="true"
+                    >
+                      {icon}
+                    </span>
                     {label}
                   </a>
                 </li>
@@ -132,7 +152,7 @@ export function Footer() {
                 <li key={href}>
                   <Link
                     href={href}
-                    className="text-ds-muted hover:text-ds-text font-mono text-[12px] transition-colors"
+                    className="link-underline text-ds-muted hover:text-ds-text font-mono text-[12px] transition-colors"
                   >
                     {label}
                   </Link>

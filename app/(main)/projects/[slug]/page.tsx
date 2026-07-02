@@ -9,6 +9,8 @@ import { Breadcrumb } from '@/components/layout'
 import { getAllProjects, getProjectBySlug } from '@/lib/markdown/projects'
 import { Badge, Button, ImageGallery, Reveal, MountReveal, Separator } from '@/components/ui'
 import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
+import { Icon } from '@/components/icons/Icon'
+import { TECH_ICONS } from '@/lib/utils/techIcons'
 
 // ─── Static generation ────────────────────────────────────────────────────────
 
@@ -149,11 +151,19 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             {project.tech && project.tech.length > 0 && (
               <MountReveal delay={320}>
                 <div className="mt-8 flex flex-wrap gap-2">
-                  {project.tech.map((t) => (
-                    <Badge key={t} variant="default" className="font-mono text-xs">
-                      {t}
-                    </Badge>
-                  ))}
+                  {project.tech.map((t) => {
+                    const iconName = TECH_ICONS[t]
+                    return (
+                      <Badge
+                        key={t}
+                        variant="default"
+                        className="font-mono text-xs"
+                        icon={iconName ? <Icon name={iconName} /> : undefined}
+                      >
+                        {t}
+                      </Badge>
+                    )
+                  })}
                 </div>
               </MountReveal>
             )}

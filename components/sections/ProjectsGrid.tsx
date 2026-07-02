@@ -3,8 +3,9 @@ import path from 'node:path'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Card, Badge, Button, Reveal, CardTilt } from '@/components/ui'
-import { Icon, type IconName } from '@/components/icons/Icon'
+import { Icon } from '@/components/icons/Icon'
 import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
+import { TECH_ICONS } from '@/lib/utils/techIcons'
 import type { Project } from '@/types/project'
 
 // Several existing project entries reference an `image` path that isn't
@@ -16,20 +17,6 @@ function hasRealImage(imagePath: string | undefined): imagePath is string {
   if (!imagePath) return false
   const abs = path.join(process.cwd(), 'public', imagePath.replace(/^\//, ''))
   return fs.existsSync(abs)
-}
-
-// Matched against the literal `tech` strings actually used in content/projects/*.json.
-// Anything not listed here just falls back to a plain text badge below.
-const TECH_ICONS: Partial<Record<string, IconName>> = {
-  React: 'react',
-  'Next.js': 'nextjs',
-  TypeScript: 'typescript',
-  'Tailwind CSS': 'tailwind',
-  'Redux Toolkit': 'redux',
-  Firebase: 'firebase',
-  Vite: 'vite',
-  'GitHub Actions': 'github-actions',
-  'Gemini AI': 'gemini',
 }
 
 interface ProjectsGridProps {
