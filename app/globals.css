@@ -288,6 +288,29 @@ body {
   animation: floatY 5s ease-in-out infinite;
 }
 
+/* Animated accent→purple gradient border — same gradient as
+   .text-gradient-animate, applied as a 1px ring via the padding-box/
+   border-box double-background trick so it works regardless of what's
+   rendered inside. Used on every Card variant. */
+.gradient-border-animated {
+  border: 1px solid transparent;
+  background-image:
+    linear-gradient(var(--color-ds-surface), var(--color-ds-surface)),
+    linear-gradient(
+      100deg,
+      var(--color-ds-accent),
+      var(--color-ds-purple),
+      var(--color-ds-accent),
+      var(--color-ds-purple)
+    );
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-size:
+    100% 100%,
+    250% 100%;
+  animation: gradientShift 8s ease infinite;
+}
+
 /* Card hover lift + accent glow — pair with the `group`/hover utilities */
 .card-glow {
   transition:

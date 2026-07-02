@@ -1,0 +1,33 @@
+{
+  "slug": "illustration-generator",
+  "title": "Illustration Generator",
+  "description": "A real tool that composes a unique, theme-aware animated SVG from a description — procedural generation from motif primitives, not a fixed list of presets to pick from.",
+  "longDescription": "Two generation styles plus a legacy matcher. Abstract style hashes your description into a seed that deterministically composes a layout from six motif primitives (geometric, network, bars, terminal, organic, connectors) — auto-picked by keyword but fully overridable. Character style builds flat-icon corporate scenes — modeled on how modular illustration kits like unDraw and Humaaans assemble people from separate head/hair/clothing/pose layers rather than one fixed drawing — with real clothing detail (blazer, lapels, collar, tie, shoes, cuffs), a masculine/feminine figure-style toggle, independently customizable skin tone and outfit palette, and 7 scenes including a boardroom presentation with a presenter, seated attendees, a table, a growing bar chart, and a handshake/deal scene. Both styles support density/palette/motion controls, a shuffle button, and — since a preview panel is now clickable — output a standalone SVG with the *actual* light or dark theme's literal colors baked in, matching whichever preview you clicked. A separate tab keeps the original workflow — transparent keyword matching against the exact SCENE_KEYWORDS index that decides which of the site's 16 hand-built scenes a real blog post or project gets, outputting a copy-ready SLUG_SCENE_OVERRIDES line.",
+  "status": "live",
+  "featured": true,
+  "order": 7,
+  "category": "tool",
+  "tech": ["Next.js", "TypeScript", "SVG"],
+  "liveUrl": "/lab/illustration-generator",
+  "image": "/images/projects/illustration-generator.webp",
+  "startDate": "2026-07-03",
+  "year": 2026,
+  "highlights": [
+    "Two generation styles — Abstract (six motif primitives) and Character (flat-icon corporate scenes with real clothing: blazer, lapels, collar, optional tie, cuffed sleeves, shoes) — not a fixed list of pre-drawn illustrations",
+    "7 character scenes — wave hello, solo presenting, a full boardroom presentation (presenter, seated attendees, table, growing bar chart), team, handshake/deal, celebrating, idea — each with independent skin tone, masculine/feminine figure style, and outfit palette",
+    "Click either the light or dark preview to make the copyable SVG use that theme's actual literal colors, instead of one generic export regardless of which preview you were looking at",
+    "Description auto-picks motifs or a character scene by keyword, fully overridable — plus density, palette (auto/accent-purple/warm/cool/mono), and per-style animation controls",
+    "Deterministic but reshuffleable — same input always gives the same layout, and a Shuffle button reseeds a new arrangement without touching the text",
+    "A separate tab keeps the original scene-matcher workflow for the site's real 16 hand-built CategoryIllustration scenes, output as a copy-ready SLUG_SCENE_OVERRIDES line"
+  ],
+  "caseStudy": {
+    "problem": "The first character pass shipped 5 scenes built from bare colored rectangles for limbs and torso — no clothing, no hair variety, and the copyable SVG always used dark-theme fallback colors even when previewing light mode, so the exported code didn't actually match what you were looking at.",
+    "approach": "Looked at how modular illustration kits (unDraw, Humaaans) actually construct people — layered, swappable components (head, hair, clothing, pose) sharing consistent proportions, not one fixed drawing per scene — and rebuilt the person primitive around that: a base shirt, two blazer panels with lapel notches, an optional tie, cuffed sleeves, shoes, and two hairstyle families (short/professional vs. bun-and-side-volume) selected by a real masculine/feminine style control. Added a proper boardroom scene as the centerpiece — presenter, seated attendees, conference table, growing bar chart, window — since that was the specific gap. Reworked color handling so every shape resolves through a shared token system that can be evaluated for either theme, not just rendered with one CSS custom property fallback.",
+    "decisions": [
+      "Kept the figures flat and stylized rather than attempting anatomical realism — hand-authored SVG paths can't credibly fake photorealism, and flat-icon proportions are also how every reference illustration kit in this space actually works.",
+      "Split color resolution into a token layer (components/lab/designTokens.ts) used by both the live preview (CSS custom properties, theme-reactive) and the export step (literal hex per theme), instead of baking one fallback color in at generation time.",
+      "Made the boardroom scene reuse the same growing-bar-chart primitive as the solo presenting scene rather than drawing a second, separate chart implementation."
+    ],
+    "outcome": "// TODO: No usage data yet — this is a self-initiated sample tool, not a deployed internal tool."
+  }
+}

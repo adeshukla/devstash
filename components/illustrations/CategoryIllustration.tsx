@@ -24,6 +24,7 @@ export type Scene =
   | 'link'
   | 'house'
   | 'megaphone'
+  | 'design'
 
 const BLOG_SCENE: Record<BlogCategory, Scene> = {
   frontend: 'frontend',
@@ -56,6 +57,13 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   'utm-builder': 'link',
   'real-estate-listing': 'house',
   'marketing-lead-gen': 'megaphone',
+  // These four all share the 'frontend'/'automation' category bucket with at
+  // least one other post, so without an override they'd render the exact
+  // same scene as something else on the same /blog grid.
+  'building-devstash-with-nextjs': 'devtools',
+  'figma-to-production-handoff-workflow': 'design',
+  'ppc-landing-page-conversion-lessons': 'megaphone',
+  'n8n-groq-workflow-patterns': 'ai-workflows',
 }
 
 interface CategoryIllustrationProps {
@@ -158,6 +166,8 @@ export function SceneContent({ scene }: { scene: Scene }) {
       return <HouseScene />
     case 'megaphone':
       return <MegaphoneScene />
+    case 'design':
+      return <DesignScene />
   }
 }
 
@@ -179,6 +189,7 @@ export const ALL_SCENES: Scene[] = [
   'link',
   'house',
   'megaphone',
+  'design',
 ]
 
 // Keyword index — maps a scene to the words a topic string is checked
@@ -197,10 +208,11 @@ export const SCENE_KEYWORDS: Record<Scene, string[]> = {
   'open-source': ['open source', 'github', 'repository', 'contribution', 'branch', 'pull request'],
   accessibility: ['accessibility', 'a11y', 'screen reader', 'aria', 'wcag', 'inclusive'],
   architecture: ['architecture', 'scalability', 'system design', 'structure', 'foundation'],
-  shapes: ['css', 'shapes', 'animation', 'design', 'color', 'gradient', 'style'],
+  shapes: ['css', 'shapes', 'animation', 'color', 'gradient', 'style', 'border'],
   link: ['link', 'url', 'utm', 'tracking', 'redirect', 'chain'],
   house: ['real estate', 'property', 'listing', 'house', 'home', 'rental'],
-  megaphone: ['marketing', 'audit', 'campaign', 'ads', 'lead gen', 'announcement'],
+  megaphone: ['marketing', 'audit', 'campaign', 'ads', 'lead gen', 'announcement', 'conversion'],
+  design: ['figma', 'design', 'handoff', 'artboard', 'mockup', 'ui design', 'prototype'],
 }
 
 // ── Frontend — browser window + a cursor click ripple ──────────────────────
@@ -697,6 +709,44 @@ function MegaphoneScene() {
           fill="none"
         />
       </g>
+    </g>
+  )
+}
+
+// ── Design — an artboard with color swatches + a cursor, Figma-style ────────
+function DesignScene() {
+  return (
+    <g>
+      <rect
+        x="100"
+        y="60"
+        width="150"
+        height="110"
+        rx="6"
+        className="fill-ds-surface stroke-ds-border"
+      />
+      <rect x="116" y="76" width="118" height="16" rx="3" className="fill-ds-muted/30" />
+      <circle cx="132" cy="118" r="14" className="fill-ds-accent" />
+      <circle cx="164" cy="118" r="14" className="fill-ds-purple" />
+      <circle cx="196" cy="118" r="14" className="fill-ds-warning" />
+      <rect x="116" y="144" width="60" height="10" rx="3" className="fill-ds-muted/30" />
+      <g className="animate-float">
+        <path
+          d="M255 130l16 8-7 3-2 8-7-19z"
+          className="fill-ds-text stroke-ds-text"
+          strokeWidth="1"
+          strokeLinejoin="round"
+        />
+      </g>
+      <rect
+        x="260"
+        y="75"
+        width="30"
+        height="30"
+        rx="4"
+        className="fill-ds-accent/10 stroke-ds-accent/40"
+        strokeDasharray="3 3"
+      />
     </g>
   )
 }

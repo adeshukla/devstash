@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { ShapeCustomizer } from '@/components/lab/ShapeCustomizer'
+import { BorderCustomizer } from '@/components/lab/BorderCustomizer'
+import { ShadowCustomizer } from '@/components/lab/ShadowCustomizer'
 import { CssCodeBlock } from '@/components/lab/CssCodeBlock'
 
 export const metadata: Metadata = buildMetadata({
@@ -49,45 +51,6 @@ const SHAPE_GALLERY_CSS = {
 .flip-card-back { transform: rotateY(180deg); }`,
 }
 
-const BORDER_CSS = {
-  gradient: `.gradient-border {
-  border: 3px solid transparent;
-  background:
-    linear-gradient(#111827, #111827) padding-box,
-    linear-gradient(90deg, var(--accent), transparent, var(--accent)) border-box;
-  background-size: 300% 100%, 300% 100%;
-  animation: borderSlide 3s linear infinite;
-}
-@keyframes borderSlide {
-  to { background-position: 300% 0, 300% 0; }
-}`,
-  conic: `.conic-border {
-  padding: 3px;
-  border-radius: 16px;
-  background: conic-gradient(from 0deg, var(--accent), transparent 50%, var(--accent));
-  animation: spin 4s linear infinite;
-}
-.conic-border-inner {
-  border-radius: 13px;
-  background: #111827;
-  height: 100%;
-}
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}`,
-  ants: `.marching-border {
-  border: 3px solid transparent;
-  border-radius: 12px;
-  background:
-    linear-gradient(#111827, #111827) padding-box,
-    repeating-linear-gradient(45deg, var(--accent) 0 10px, transparent 10px 20px) border-box;
-  animation: marchAnts 1s linear infinite;
-}
-@keyframes marchAnts {
-  to { background-position: 0 0, 28px 0; }
-}`,
-}
-
 const BUTTON_CSS = {
   shine: `.shine-btn {
   position: relative;
@@ -125,23 +88,45 @@ const BUTTON_CSS = {
   transform: translateY(-3px);
   box-shadow: 0 10px 24px -6px var(--accent);
 }`,
+  outline: `.outline-btn {
+  position: relative;
 }
-
-const SHADOW_CSS = {
-  glow: `.glow-box {
-  animation: glowPulse 2.4s ease-in-out infinite;
+.outline-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid var(--accent);
+  transform: scale(1.18);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
-@keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 12px 0 var(--accent); }
-  50%      { box-shadow: 0 0 32px 8px var(--accent); }
+.outline-btn:hover::before {
+  transform: scale(1.08);
+  opacity: 1;
 }`,
-  depth: `.depth-box {
-  box-shadow: 0 2px 6px -2px rgba(0,0,0,0.3);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  iconSlide: `.icon-slide-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
-.depth-box:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5);
+.icon-slide-btn .arrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+.icon-slide-btn:hover .arrow {
+  transform: translateX(6px);
+}`,
+  press: `.press-btn {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 0 0 color-mix(in srgb, var(--accent) 60%, black);
+}
+.press-btn:hover {
+  transform: translateY(-2px);
+}
+.press-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 0 color-mix(in srgb, var(--accent) 60%, black);
 }`,
 }
 
@@ -181,8 +166,8 @@ export default function CssShapesPlaygroundPage() {
             Modern CSS, actually working.
           </h1>
           <p className="text-ds-muted mt-6 text-lg leading-relaxed">
-            Every demo below is real, running CSS — pick a color and shape in the customizer, and
-            copy the exact code for anything on this page.
+            Every demo below is real, running CSS — pick a color and build a shape three different
+            ways in the customizer, and copy the exact code for anything on this page.
           </p>
         </div>
       </section>
@@ -192,8 +177,9 @@ export default function CssShapesPlaygroundPage() {
         <div className="mx-auto max-w-4xl">
           <h2 className="text-ds-text mb-2 text-2xl font-bold">Customize it yourself</h2>
           <p className="text-ds-muted mb-8">
-            Change the color, change the shape, toggle the spin — the CSS below updates live to
-            match exactly what you're looking at.
+            11 presets, 4 independent corner-radius sliders, or drag actual points on a polygon to
+            build a shape that doesn't exist anywhere else — then add an animation and copy the
+            exact CSS for what's on screen.
           </p>
           <ShapeCustomizer />
         </div>
@@ -241,35 +227,16 @@ export default function CssShapesPlaygroundPage() {
         </div>
       </section>
 
-      {/* ── Border animations ── */}
+      {/* ── Border customizer ── */}
       <section className="border-ds-border bg-ds-surface2/30 border-t px-6 py-16">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="text-ds-text mb-8 text-2xl font-bold">Border animations</h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-            <DemoCard
-              title="Sliding gradient border"
-              description="A padding-box/border-box double background, animated via background-position."
-              cssCode={BORDER_CSS.gradient}
-            >
-              <div className="gradient-border flex h-28 w-28 items-center justify-center rounded-xl" />
-            </DemoCard>
-            <DemoCard
-              title="Rotating conic border"
-              description="An outer conic-gradient div wraps a solid inner div — the 'border' is really the gap."
-              cssCode={BORDER_CSS.conic}
-            >
-              <div className="conic-border h-28 w-28">
-                <div className="conic-border-inner" />
-              </div>
-            </DemoCard>
-            <DemoCard
-              title="Marching ants"
-              description="A repeating-linear-gradient border-box background, animated into motion."
-              cssCode={BORDER_CSS.ants}
-            >
-              <div className="marching-border h-28 w-28" />
-            </DemoCard>
-          </div>
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-ds-text mb-2 text-2xl font-bold">Border functions</h2>
+          <p className="text-ds-muted mb-8">
+            6 real border techniques — gradient sweep, conic spin, marching ants, dashed rotate,
+            double ring, and glow pulse — each with its own color, width, speed, and easing
+            (including a custom cubic-bezier curve).
+          </p>
+          <BorderCustomizer />
         </div>
       </section>
 
@@ -314,30 +281,55 @@ export default function CssShapesPlaygroundPage() {
                 Hover me
               </button>
             </DemoCard>
+            <DemoCard
+              title="Outline halo"
+              description="A ::before border scales in from outside and settles into place on hover."
+              cssCode={BUTTON_CSS.outline}
+            >
+              <button
+                type="button"
+                className="outline-btn bg-ds-accent rounded-xl px-6 py-3 font-medium text-white"
+              >
+                Hover me
+              </button>
+            </DemoCard>
+            <DemoCard
+              title="Icon slide"
+              description="A nested arrow span slides on hover — no JS, just a scoped child transition."
+              cssCode={BUTTON_CSS.iconSlide}
+            >
+              <button
+                type="button"
+                className="icon-slide-btn bg-ds-accent rounded-xl px-6 py-3 font-medium text-white"
+              >
+                Get started <span className="arrow">→</span>
+              </button>
+            </DemoCard>
+            <DemoCard
+              title="Tactile press"
+              description="A hard drop-shadow 'ledge' that compresses on :active — color-mix() for the shadow tone."
+              cssCode={BUTTON_CSS.press}
+            >
+              <button
+                type="button"
+                className="press-btn bg-ds-accent rounded-xl px-6 py-3 font-medium text-white"
+              >
+                Press me
+              </button>
+            </DemoCard>
           </div>
         </div>
       </section>
 
       {/* ── Box-shadow animations ── */}
       <section className="border-ds-border bg-ds-surface2/30 border-t px-6 py-16">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="text-ds-text mb-8 text-2xl font-bold">Box-shadow animations</h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <DemoCard
-              title="Pulsing glow"
-              description="box-shadow blur and spread animate on a loop — a breathing glow."
-              cssCode={SHADOW_CSS.glow}
-            >
-              <div className="glow-box bg-ds-accent h-24 w-24 rounded-2xl" />
-            </DemoCard>
-            <DemoCard
-              title="Depth lift on hover"
-              description="A flat, close shadow becomes a large, soft one on hover — implies elevation."
-              cssCode={SHADOW_CSS.depth}
-            >
-              <div className="depth-box bg-ds-surface2 border-ds-border h-24 w-24 rounded-2xl border" />
-            </DemoCard>
-          </div>
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-ds-text mb-2 text-2xl font-bold">Box-shadow functions</h2>
+          <p className="text-ds-muted mb-8">
+            Glow pulse, depth lift, neon layering, and inset press — with color, blur, and spread
+            control.
+          </p>
+          <ShadowCustomizer />
         </div>
       </section>
 
@@ -401,41 +393,6 @@ export default function CssShapesPlaygroundPage() {
         .flip-card-front { background: var(--accent); }
         .flip-card-back { background: var(--accent); transform: rotateY(180deg); font-size: 2rem; }
 
-        /* ── Borders ── */
-        .gradient-border {
-          border: 3px solid transparent;
-          background:
-            linear-gradient(var(--color-ds-surface), var(--color-ds-surface)) padding-box,
-            linear-gradient(90deg, var(--accent), transparent, var(--accent)) border-box;
-          background-size: 300% 100%, 300% 100%;
-          animation: borderSlide 3s linear infinite;
-        }
-        @keyframes borderSlide {
-          to { background-position: 300% 0, 300% 0; }
-        }
-        .conic-border {
-          padding: 3px;
-          border-radius: 16px;
-          background: conic-gradient(from 0deg, var(--accent), transparent 50%, var(--accent));
-          animation: ringSpin 4s linear infinite;
-        }
-        .conic-border-inner {
-          border-radius: 13px;
-          background: var(--color-ds-surface);
-          height: 100%;
-        }
-        .marching-border {
-          border: 3px solid transparent;
-          border-radius: 12px;
-          background:
-            linear-gradient(var(--color-ds-surface), var(--color-ds-surface)) padding-box,
-            repeating-linear-gradient(45deg, var(--accent) 0 10px, transparent 10px 20px) border-box;
-          animation: marchAnts 1s linear infinite;
-        }
-        @keyframes marchAnts {
-          to { background-position: 0 0, 28px 0; }
-        }
-
         /* ── Buttons ── */
         .shine-btn { position: relative; overflow: hidden; }
         .shine-btn::before {
@@ -465,25 +422,35 @@ export default function CssShapesPlaygroundPage() {
         .lift-btn { transition: transform 0.2s ease, box-shadow 0.2s ease; }
         .lift-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 24px -6px var(--accent); }
 
-        /* ── Box shadows ── */
-        .glow-box { animation: glowPulse 2.4s ease-in-out infinite; }
-        @keyframes glowPulse {
-          0%, 100% { box-shadow: 0 0 12px 0 var(--accent); }
-          50%      { box-shadow: 0 0 32px 8px var(--accent); }
+        .outline-btn { position: relative; }
+        .outline-btn::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          border: 2px solid var(--accent);
+          transform: scale(1.18);
+          opacity: 0;
+          transition: transform 0.3s ease, opacity 0.3s ease;
         }
-        .depth-box {
-          box-shadow: 0 2px 6px -2px rgba(0,0,0,0.3);
-          transition: box-shadow 0.3s ease, transform 0.3s ease;
+        .outline-btn:hover::before { transform: scale(1.08); opacity: 1; }
+
+        .icon-slide-btn { display: inline-flex; align-items: center; gap: 0.5rem; }
+        .icon-slide-btn .arrow { display: inline-block; transition: transform 0.3s ease; }
+        .icon-slide-btn:hover .arrow { transform: translateX(6px); }
+
+        .press-btn {
+          transition: transform 0.15s ease, box-shadow 0.15s ease;
+          box-shadow: 0 4px 0 0 color-mix(in srgb, var(--accent) 60%, black);
         }
-        .depth-box:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5);
+        .press-btn:hover { transform: translateY(-2px); }
+        .press-btn:active {
+          transform: translateY(2px);
+          box-shadow: 0 2px 0 0 color-mix(in srgb, var(--accent) 60%, black);
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .blob-shape, .clip-morph, .conic-ring, .flip-card-inner,
-          .gradient-border, .conic-border, .marching-border,
-          .ripple-btn::after, .glow-box {
+          .blob-shape, .clip-morph, .conic-ring, .flip-card-inner, .ripple-btn::after {
             animation: none !important;
             transition: none !important;
           }

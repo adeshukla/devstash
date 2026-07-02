@@ -13,10 +13,11 @@
   "startDate": "2026-07-02",
   "year": 2026,
   "highlights": [
-    "Interactive customizer — 5 shapes × unlimited colors × spin toggle — with the exact CSS for the current combination generated live",
-    "Every one of the 12 demo cards has its own real, copyable CSS snippet, not just the customizer",
-    "Animated borders using three different real techniques: padding-box/border-box gradients, a conic-gradient wrapper trick, and a repeating-gradient marching-ants effect",
-    "Working CTA button demos — shine sweep, ripple pulse, and hover-lift — not screenshots of buttons",
+    "Shape customizer with three real modes — 11 presets, 4 independent corner-radius sliders, or a drag-to-build polygon editor where every vertex is grabbable",
+    "A real cubic-bezier(x1,y1,x2,y2) curve editor with draggable control handles, wired into every animated demo's easing",
+    "7 animation functions (spin, pulse, float, wobble, shake, bounce) and a 6-technique interactive border customizer (gradient sweep, conic spin, marching ants, dashed rotate, double ring, glow pulse)",
+    "A 4-technique box-shadow customizer (glow pulse, depth lift, neon layering, inset press) with live color/blur/spread control",
+    "6 working CTA button hover effects — shine sweep, ripple pulse, lift, outline halo, icon slide, and a color-mix() tactile press",
     "Respects prefers-reduced-motion across every animated demo on the page"
   ],
   "caseStudy": {

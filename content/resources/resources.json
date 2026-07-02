@@ -52,5 +52,86 @@
     "category": "article",
     "tags": ["css", "animations", "frontend"],
     "free": true
+  },
+  {
+    "id": "mdn",
+    "title": "MDN Web Docs",
+    "description": "The reference for HTML, CSS, and JS. When in doubt, this is the source of truth.",
+    "url": "https://developer.mozilla.org",
+    "category": "docs",
+    "tags": ["html", "css", "javascript"],
+    "free": true
+  },
+  {
+    "id": "total-typescript",
+    "title": "Total TypeScript",
+    "description": "Matt Pocock's free TypeScript tips and exercises — generics, inference, and the type-level tricks docs don't cover.",
+    "url": "https://www.totaltypescript.com",
+    "category": "course",
+    "tags": ["typescript"],
+    "free": true
+  },
+  {
+    "id": "kent-c-dodds",
+    "title": "Kent C. Dodds — Epic React & Blog",
+    "description": "Deep, opinionated React patterns and testing philosophy from someone who's shipped a lot of it.",
+    "url": "https://kentcdodds.com",
+    "category": "course",
+    "tags": ["react", "testing"],
+    "free": false
+  },
+  {
+    "id": "awesome-n8n",
+    "title": "Awesome n8n",
+    "description": "A curated GitHub list of n8n community nodes, templates, and workflow examples.",
+    "url": "https://github.com/restyler/awesome-n8n",
+    "category": "repo",
+    "tags": ["automation", "n8n"],
+    "free": true
+  },
+  {
+    "id": "shadcn-ui",
+    "title": "shadcn/ui",
+    "description": "Copy-pasteable, unstyled-by-default React components built on Radix — not a dependency, a starting point.",
+    "url": "https://ui.shadcn.com",
+    "category": "repo",
+    "tags": ["react", "components", "tailwind"],
+    "free": true
+  },
+  {
+    "id": "theo-t3",
+    "title": "Theo — t3.gg",
+    "description": "Fast-moving takes on the Next.js/React ecosystem, framework tradeoffs, and what's actually worth learning.",
+    "url": "https://www.youtube.com/@t3dotgg",
+    "category": "video",
+    "tags": ["react", "nextjs", "ecosystem"],
+    "free": true
+  },
+  {
+    "id": "cubic-bezier",
+    "title": "cubic-bezier.com",
+    "description": "The original visual cubic-bezier() curve editor — drag two points, copy the timing function.",
+    "url": "https://cubic-bezier.com",
+    "category": "tool",
+    "tags": ["css", "animation", "easing"],
+    "free": true
+  },
+  {
+    "id": "can-i-use",
+    "title": "Can I Use",
+    "description": "Browser support tables for CSS, JS, and web platform features — check before you ship anything cutting-edge.",
+    "url": "https://caniuse.com",
+    "category": "tool",
+    "tags": ["compatibility", "css", "javascript"],
+    "free": true
+  },
+  {
+    "id": "regex101",
+    "title": "regex101",
+    "description": "A regex tester with a live explanation panel — the fastest way to debug a pattern that isn't matching.",
+    "url": "https://regex101.com",
+    "category": "tool",
+    "tags": ["regex", "debugging"],
+    "free": true
   }
 ]

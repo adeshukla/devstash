@@ -1,0 +1,33 @@
+{
+  "slug": "meta-tag-generator",
+  "title": "Meta Tags & Social Preview Generator",
+  "description": "A free tool that previews a title/description as a Google result, an X/Twitter card, and a Facebook/OG card — with live character counts and copyable meta tags.",
+  "longDescription": "Type a title, description, URL, and OG image — see exactly how it renders as a Google search result, an X/Twitter summary card, and a Facebook/OG card, side by side, with character counters against the 50–60 / 130–160 ranges search engines actually truncate at. Or paste real content first: a local extractive-summarization pass (word-frequency sentence scoring plus a filler-phrase cleanup — not an AI model call) drafts a starting title and description for you to edit. Copy the finished <title>/<meta>/og:*/twitter:* block when it looks right. Unlike the other /lab samples, this one isn't a portfolio demo — it's a genuinely useful tool for anyone shipping a page.",
+  "status": "live",
+  "featured": true,
+  "order": 8,
+  "category": "tool",
+  "tech": ["Next.js", "TypeScript", "SEO"],
+  "liveUrl": "/lab/meta-tag-generator",
+  "image": "/images/projects/meta-tag-generator.webp",
+  "startDate": "2026-07-03",
+  "year": 2026,
+  "highlights": [
+    "Draft-from-content — paste real content or a topic sentence and a local extractive-summarization pass (word-frequency sentence scoring + filler-phrase cleanup) drafts a starting title and description",
+    "Live Google SERP preview, X/Twitter card, and Facebook/OG card — all three side by side, not just a raw character count",
+    "Character counters use the same 50–60 (title) and 130–160 (description) ranges this site's own buildMetadata() helper is built against, so the thresholds aren't arbitrary",
+    "No broken-image state — the image field starts empty with a clear placeholder, and a bad URL falls back to the same placeholder instead of a browser broken-image icon",
+    "Outputs a copy-ready <title>/<meta>/og:*/twitter:* block, not just a preview",
+    "Fully client-side — nothing typed or pasted into it is sent anywhere, including the draft pass"
+  ],
+  "caseStudy": {
+    "problem": "Most meta-tag generators only show you the raw text or a single preview type, and expect you to already have a polished title/description in hand. In practice a page's copy gets rendered three different, incompatible ways — Google's SERP, an X/Twitter card, a Facebook/OG card — and it's easy to write copy that looks fine in one and gets truncated or looks wrong in another. The first version also defaulted its OG image field to a fake example.com URL, which just showed a broken image icon out of the box.",
+    "approach": "Built one form that drives all three previews at once instead of three separate tools, using the exact truncation ranges this site already enforces on every real page via lib/seo/buildMetadata.ts. Added a real draft step on top — sentence-frequency scoring against the pasted content, not a hallucinated AI feature — so the tool can go from raw content to a starting title/description instead of assuming you already wrote them. Fixed the broken-image default by making the image field genuinely optional with its own placeholder state.",
+    "decisions": [
+      "Used a plain <img> with an onError fallback instead of next/image, since the image URL is arbitrary user input from anywhere on the internet, not a known remote pattern this site controls.",
+      "Built the draft feature as honest extractive summarization (rank real sentences from the input) rather than faking a generative-AI call — the tool has no LLM behind it, and claiming otherwise would be exactly the kind of hallucinated capability this site's own rules rule out.",
+      "Kept it fully client-side with no backend call — there's nothing to submit, so there's nothing to log or store, which matters for a tool that might get pasted with an unpublished page's real title/description."
+    ],
+    "outcome": "// TODO: No usage data yet — this is a self-initiated sample tool, not a deployed internal tool."
+  }
+}
