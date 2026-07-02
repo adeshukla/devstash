@@ -133,6 +133,11 @@ export type CPart =
       stroke?: Paint
       strokeWidth?: number
       opacity?: number
+      // GSAP's DrawSVG plugin progressively reveals a stroke by tweening
+      // stroke-dashoffset; this is the same idea done with a plain CSS
+      // keyframe (pathLength="1" makes the dash math shape-independent).
+      motion?: 'drawIn'
+      motionDelay?: number
     }
   | {
       kind: 'group'
@@ -140,6 +145,11 @@ export type CPart =
       motion?: 'wave' | 'floaty' | 'breathe' | 'growUp' | 'waveSmooth' | 'blink'
       originX?: number
       originY?: number
+      // A per-instance animation-delay (seconds), randomized at composition
+      // time. Multiple people breathing/blinking in perfect lockstep reads
+      // as mechanical — real GSAP demos stagger otherwise-identical loops
+      // with gsap.utils.random() per element for exactly this reason.
+      motionDelay?: number
     }
 
 type Pose = 'idle' | 'wave' | 'present' | 'celebrate' | 'reach'
@@ -476,7 +486,12 @@ function person(opts: PersonOptions): CPart {
     ...face,
   ]
 
-  return withSkin([{ kind: 'group', motion: 'breathe', children }], skin)[0]
+  // A per-instance delay so multiple people on screen (team, boardroom)
+  // don't breathe in perfect lockstep — see the CPart.motionDelay comment.
+  return withSkin(
+    [{ kind: 'group', motion: 'breathe', motionDelay: rng() * 3.2, children }],
+    skin
+  )[0]
 }
 
 // ---------------------------------------------------------------------------
@@ -529,13 +544,19 @@ interface ChibiPersonOptions {
 function personChibi(opts: ChibiPersonOptions): CPart {
   const { cx, groundY, scale: s, skin, style, outfit, accent, rng } = opts
 
-  const headR = 24 * s
+  // Research note: genuine chibi/mascot proportions read as ~3 "heads tall"
+  // total, not the ~2-heads-tall blob this v1 first shipped with — head
+  // diameter (2*headR) should be roughly a third of the full figure height
+  // (2*headR + neckH + torsoH + legH). These numbers hit that ratio while
+  // keeping the same overall figure height (so the arc/hand clearance
+  // math in sceneWave() below still holds).
+  const headR = 18 * s
   const neckH = 3 * s
-  const neckHalfW = 6 * s
-  const torsoH = 30 * s
+  const neckHalfW = 5 * s
+  const torsoH = 34 * s
   const shoulderHalfW = 19 * s
   const waistHalfW = 14 * s
-  const legH = 20 * s
+  const legH = 28 * s
   const torsoTop = groundY - legH - torsoH
   const torsoBottom = torsoTop + torsoH
   const headCy = torsoTop - neckH - headR
@@ -664,6 +685,7 @@ function personChibi(opts: ChibiPersonOptions): CPart {
   const blink: CPart = {
     kind: 'group',
     motion: 'blink',
+    motionDelay: rng() * 4,
     children: [
       {
         kind: 'rect',
@@ -696,16 +718,24 @@ function personChibi(opts: ChibiPersonOptions): CPart {
     blink,
   ]
 
-  return withSkin([{ kind: 'group', motion: 'breathe', children }], skin)[0]
+  return withSkin(
+    [{ kind: 'group', motion: 'breathe', motionDelay: rng() * 3.2, children }],
+    skin
+  )[0]
 }
 
+/** Three greeting strokes near the waving hand, each one drawn in (not just
+ * faded in) and staggered — the DrawSVG-style reveal + per-element stagger
+ * that the GSAP reference examples use to avoid everything moving in
+ * lockstep, echoing the dashed motion-lines in the reference illustration. */
 function greetingArcs(cx: number, cy: number, color: Paint): CPart {
   const arcs: CPart[] = [0, 1, 2].map((i) => ({
     kind: 'path',
     d: `M ${cx + 10 + i * 8} ${cy - 6 - i * 3} q ${6 + i * 2} ${-4} ${0} ${-10 - i * 2}`,
     stroke: color,
     strokeWidth: 2,
-    opacity: 0.6 - i * 0.15,
+    motion: 'drawIn',
+    motionDelay: i * 0.3,
   }))
   return { kind: 'group', motion: 'floaty', children: arcs }
 }
@@ -1135,6 +1165,7 @@ function renderPart(part: CPart, key: string | number, motionOn: boolean): React
     )
   }
   if (part.kind === 'path') {
+    const drawIn = motionOn && part.motion === 'drawIn'
     return (
       <path
         key={key}
@@ -1144,6 +1175,9 @@ function renderPart(part: CPart, key: string | number, motionOn: boolean): React
         strokeWidth={part.strokeWidth}
         strokeLinecap="round"
         opacity={part.opacity}
+        pathLength={drawIn ? 1 : undefined}
+        className={drawIn ? 'ig-char-draw' : undefined}
+        style={drawIn && part.motionDelay ? { animationDelay: `${part.motionDelay}s` } : undefined}
       />
     )
   }
@@ -1172,8 +1206,14 @@ function renderPart(part: CPart, key: string | number, motionOn: boolean): React
               transformOrigin: part.motion === 'breathe' ? 'bottom' : 'center',
             } as React.CSSProperties)
           : undefined
+  const styleWithDelay =
+    style && part.motionDelay
+      ? { ...style, animationDelay: `${part.motionDelay}s` }
+      : part.motionDelay
+        ? { animationDelay: `${part.motionDelay}s` }
+        : style
   return (
-    <g key={key} className={cls} style={style}>
+    <g key={key} className={cls} style={styleWithDelay}>
       {part.children.map((c, i) => renderPart(c, i, motionOn))}
     </g>
   )
@@ -1198,12 +1238,18 @@ export const CHARACTER_KEYFRAMES = `
 @keyframes igCharGrow { 0% { transform: scaleY(0); } 60% { transform: scaleY(1.06); } 100% { transform: scaleY(1); } }
 @keyframes igCharWaveSmooth { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(28deg); } }
 @keyframes igCharBlink { 0%, 92%, 100% { transform: scaleY(0); } 96% { transform: scaleY(1); } }
+@keyframes igCharDraw {
+  0%, 10% { stroke-dashoffset: 1; opacity: 0.9; }
+  55%, 75% { stroke-dashoffset: 0; opacity: 0.9; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
 .ig-char-wave { animation: igCharWave 1.6s ease-in-out infinite; }
 .ig-char-floaty { animation: igCharFloaty 2.4s ease-in-out infinite; }
 .ig-char-breathe { animation: igCharBreathe 3.2s ease-in-out infinite; }
 .ig-char-grow { animation: igCharGrow 1.1s cubic-bezier(0.34, 1.4, 0.64, 1) both; }
 .ig-char-wave-smooth { animation: igCharWaveSmooth 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) infinite; }
 .ig-char-blink { animation: igCharBlink 4s ease-in-out infinite; }
+.ig-char-draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: igCharDraw 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
 `.trim()
 
 function partToSvg(part: CPart, motionOn: boolean, theme: Theme): string {
@@ -1222,7 +1268,11 @@ function partToSvg(part: CPart, motionOn: boolean, theme: Theme): string {
       ? ` stroke="${resolvePaint(part.stroke, theme)}" stroke-width="${part.strokeWidth ?? 1}" stroke-linecap="round"`
       : ''
     const opacity = part.opacity !== undefined ? ` opacity="${part.opacity}"` : ''
-    return `<path d="${part.d}"${fill}${stroke}${opacity} />`
+    const drawIn = motionOn && part.motion === 'drawIn'
+    const drawAttrs = drawIn
+      ? ` pathLength="1" class="ig-char-draw"${part.motionDelay ? ` style="animation-delay: ${part.motionDelay}s;"` : ''}`
+      : ''
+    return `<path d="${part.d}"${fill}${stroke}${opacity}${drawAttrs} />`
   }
   const clsName = part.motion
     ? {
@@ -1235,13 +1285,14 @@ function partToSvg(part: CPart, motionOn: boolean, theme: Theme): string {
       }[part.motion]
     : undefined
   const cls = motionOn && clsName ? ` class="${clsName}"` : ''
+  const delayDecl = motionOn && part.motionDelay ? ` animation-delay: ${part.motionDelay}s;` : ''
   const style =
     part.motion === 'wave' || part.motion === 'waveSmooth'
-      ? ` style="transform-origin: ${part.originX}px ${part.originY}px;"`
+      ? ` style="transform-origin: ${part.originX}px ${part.originY}px;${delayDecl}"`
       : part.motion === 'growUp'
-        ? ` style="transform-origin: ${part.originX}px ${part.originY}px; transform-box: view-box;"`
+        ? ` style="transform-origin: ${part.originX}px ${part.originY}px; transform-box: view-box;${delayDecl}"`
         : part.motion === 'floaty' || part.motion === 'breathe' || part.motion === 'blink'
-          ? ` style="transform-box: fill-box; transform-origin: ${part.motion === 'breathe' ? 'bottom' : 'center'};"`
+          ? ` style="transform-box: fill-box; transform-origin: ${part.motion === 'breathe' ? 'bottom' : 'center'};${delayDecl}"`
           : ''
   const inner = part.children.map((c) => partToSvg(c, motionOn, theme)).join('\n  ')
   return `<g${cls}${style}>\n  ${inner}\n</g>`

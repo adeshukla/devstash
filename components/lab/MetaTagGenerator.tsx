@@ -158,7 +158,7 @@ ${imageLines}<meta name="twitter:card" content="summary_large_image" />
           rows={3}
           className="border-ds-border bg-ds-surface text-ds-text placeholder:text-ds-muted focus:border-ds-accent w-full resize-none rounded-lg border px-4 py-3 text-sm transition-colors outline-none"
         />
-        <div className="mt-2 flex items-center justify-between gap-3">
+        <div className="mt-2 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-ds-muted text-xs">
             Local analysis + phrase composition, not an AI model call — drafts several options,
             cycle them with Shuffle.
@@ -167,7 +167,7 @@ ${imageLines}<meta name="twitter:card" content="summary_large_image" />
             type="button"
             onClick={handleDraft}
             disabled={!content.trim()}
-            className="bg-ds-accent shrink-0 rounded-lg px-4 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-40"
+            className="bg-ds-accent w-full shrink-0 rounded-lg px-4 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-40 sm:w-auto"
           >
             Draft title &amp; description
           </button>
