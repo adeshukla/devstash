@@ -54,6 +54,7 @@ const FACE = '#2a2118'
 const SHIRT = '#eef1f6'
 const SHOE = '#20242e'
 const SCREEN_DARK = '#0f1420'
+const BLUSH = '#e8846b'
 
 /** A color reference is either a ds-token key (resolved per render mode) or
  * a literal hex string (skin/hair/shirt/shoe — theme-invariant). */
@@ -136,7 +137,7 @@ export type CPart =
   | {
       kind: 'group'
       children: CPart[]
-      motion?: 'wave' | 'floaty' | 'breathe' | 'growUp'
+      motion?: 'wave' | 'floaty' | 'breathe' | 'growUp' | 'waveSmooth' | 'blink'
       originX?: number
       originY?: number
     }
@@ -478,6 +479,226 @@ function person(opts: PersonOptions): CPart {
   return withSkin([{ kind: 'group', motion: 'breathe', children }], skin)[0]
 }
 
+// ---------------------------------------------------------------------------
+// Chibi character v1 — hand-authored bezier silhouette, used ONLY by
+// sceneWave() for now. Rects/circles stacked at odd proportions read as
+// "programmatic" rather than a real character; this replaces the torso and
+// limbs with smooth tapered <path> shapes and bigger, more expressive
+// chibi/mascot proportions (big head, small body). Kept separate from
+// person() so the other 6 scenes are untouched until this one is approved
+// and the geometry is rolled out to them.
+
+/** A tapered limb silhouette — wider at the joint end, narrower at the
+ * extremity, with a slight outward belly instead of straight sides so it
+ * reads as a limb rather than a ruler. */
+function taperedLimb(
+  x: number,
+  topY: number,
+  botY: number,
+  topHalfW: number,
+  botHalfW: number,
+  bulge: number,
+  fill: Paint
+): CPart {
+  const midY = topY + (botY - topY) * 0.55
+  return {
+    kind: 'path',
+    d: `M ${x - topHalfW} ${topY}
+        C ${x - topHalfW - bulge} ${midY}, ${x - botHalfW - bulge} ${botY - (botY - midY) * 0.6}, ${x - botHalfW} ${botY}
+        L ${x + botHalfW} ${botY}
+        C ${x + botHalfW + bulge} ${botY - (botY - midY) * 0.6}, ${x + topHalfW + bulge} ${midY}, ${x + topHalfW} ${topY}
+        Z`,
+    fill,
+  }
+}
+
+interface ChibiPersonOptions {
+  cx: number
+  groundY: number
+  scale: number
+  skin: string
+  style: PersonStyle
+  outfit: Paint
+  accent: Paint
+  rng: Rng
+}
+
+/** A chibi/mascot-proportioned figure with a soft bezier torso, tapered
+ * limbs, an expressive face (big eyes, eyebrows, filled smile, blush) and a
+ * blink loop — v1 of the illustration-quality rework, waving hello. */
+function personChibi(opts: ChibiPersonOptions): CPart {
+  const { cx, groundY, scale: s, skin, style, outfit, accent, rng } = opts
+
+  const headR = 24 * s
+  const neckH = 3 * s
+  const neckHalfW = 6 * s
+  const torsoH = 30 * s
+  const shoulderHalfW = 19 * s
+  const waistHalfW = 14 * s
+  const legH = 20 * s
+  const torsoTop = groundY - legH - torsoH
+  const torsoBottom = torsoTop + torsoH
+  const headCy = torsoTop - neckH - headR
+  const hairColor = rng() > 0.65 ? HAIR_ALT : HAIR
+
+  const torsoOuter: CPart = {
+    kind: 'path',
+    d: `M ${cx - shoulderHalfW} ${torsoTop + 6 * s}
+        C ${cx - shoulderHalfW} ${torsoTop + 1 * s}, ${cx - shoulderHalfW * 0.5} ${torsoTop - 2 * s}, ${cx - neckHalfW} ${torsoTop - 1 * s}
+        L ${cx + neckHalfW} ${torsoTop - 1 * s}
+        C ${cx + shoulderHalfW * 0.5} ${torsoTop - 2 * s}, ${cx + shoulderHalfW} ${torsoTop + 1 * s}, ${cx + shoulderHalfW} ${torsoTop + 6 * s}
+        C ${cx + shoulderHalfW + 2 * s} ${torsoTop + torsoH * 0.45}, ${cx + waistHalfW + 3 * s} ${torsoTop + torsoH * 0.75}, ${cx + waistHalfW} ${torsoBottom - 4 * s}
+        Q ${cx + waistHalfW * 0.6} ${torsoBottom + 3 * s}, ${cx} ${torsoBottom + 3 * s}
+        Q ${cx - waistHalfW * 0.6} ${torsoBottom + 3 * s}, ${cx - waistHalfW} ${torsoBottom - 4 * s}
+        C ${cx - waistHalfW - 3 * s} ${torsoTop + torsoH * 0.75}, ${cx - shoulderHalfW - 2 * s} ${torsoTop + torsoH * 0.45}, ${cx - shoulderHalfW} ${torsoTop + 6 * s}
+        Z`,
+    fill: outfit,
+  }
+  const shirtInsert: CPart = {
+    kind: 'path',
+    d: `M ${cx - neckHalfW * 0.9} ${torsoTop + 1 * s}
+        L ${cx + neckHalfW * 0.9} ${torsoTop + 1 * s}
+        L ${cx + neckHalfW * 0.5} ${torsoTop + 10 * s}
+        Q ${cx} ${torsoTop + 13 * s}, ${cx - neckHalfW * 0.5} ${torsoTop + 10 * s}
+        Z`,
+    fill: SHIRT,
+  }
+  const clothing: CPart[] = [torsoOuter, shirtInsert]
+  if (style === 'masculine' && rng() > 0.35) {
+    clothing.push({
+      kind: 'path',
+      d: `M ${cx - 1.6 * s} ${torsoTop + 9 * s} L ${cx + 1.6 * s} ${torsoTop + 9 * s} L ${cx + 1 * s} ${torsoTop + 22 * s} L ${cx} ${torsoTop + 25 * s} L ${cx - 1 * s} ${torsoTop + 22 * s} Z`,
+      fill: accent,
+    })
+  }
+
+  const legGap = 6 * s
+  const legs: CPart[] = [
+    taperedLimb(cx - legGap, torsoBottom - 2 * s, groundY - 4 * s, 6 * s, 4.5 * s, 1 * s, accent),
+    taperedLimb(cx + legGap, torsoBottom - 2 * s, groundY - 4 * s, 6 * s, 4.5 * s, 1 * s, accent),
+  ]
+  const shoes: CPart[] = [
+    { kind: 'circle', cx: cx - legGap, cy: groundY - 3 * s, r: 4.5 * s, fill: SHOE },
+    { kind: 'circle', cx: cx + legGap, cy: groundY - 3 * s, r: 4.5 * s, fill: SHOE },
+  ]
+
+  const leftShoulderX = cx - shoulderHalfW * 0.85
+  const rightShoulderX = cx + shoulderHalfW * 0.85
+  const armTop = torsoTop + 5 * s
+
+  const leftArm: CPart = {
+    kind: 'group',
+    children: [
+      taperedLimb(leftShoulderX, armTop, armTop + 22 * s, 5 * s, 3.6 * s, 0.6 * s, outfit),
+      {
+        kind: 'circle',
+        cx: leftShoulderX,
+        cy: armTop + 24 * s,
+        r: 3.6 * s,
+        fill: SKIN_PLACEHOLDER,
+      },
+    ],
+  }
+  // The waving arm gets its own motion key (not the shared "wave" every
+  // other scene's gestureArm uses) so its easing can be tuned without
+  // touching those scenes before this rework is approved.
+  const rightArm: CPart = {
+    kind: 'group',
+    motion: 'waveSmooth',
+    originX: rightShoulderX,
+    originY: armTop,
+    children: [
+      taperedLimb(rightShoulderX, armTop - 20 * s, armTop, 3.6 * s, 5 * s, 0.6 * s, outfit),
+      { kind: 'circle', cx: rightShoulderX, cy: armTop - 22 * s, r: 4 * s, fill: SKIN_PLACEHOLDER },
+    ],
+  }
+
+  const eyeDy = -1 * s
+  const eyeDx = 7 * s
+  const eyeRy = 3.4 * s
+  const eyeRx = 2.6 * s
+  const face: CPart[] = [
+    // big filled eyes read as friendly/expressive rather than dot-like
+    { kind: 'circle', cx: cx - eyeDx, cy: headCy + eyeDy, r: eyeRy, fill: FACE },
+    { kind: 'circle', cx: cx + eyeDx, cy: headCy + eyeDy, r: eyeRy, fill: FACE },
+    // eyebrows
+    {
+      kind: 'path',
+      d: `M ${cx - eyeDx - eyeRx} ${headCy + eyeDy - eyeRy - 2 * s} q ${eyeRx} -2, ${eyeRx * 2} 0`,
+      stroke: FACE,
+      strokeWidth: 1.4 * s,
+    },
+    {
+      kind: 'path',
+      d: `M ${cx + eyeDx - eyeRx} ${headCy + eyeDy - eyeRy - 2 * s} q ${eyeRx} -2, ${eyeRx * 2} 0`,
+      stroke: FACE,
+      strokeWidth: 1.4 * s,
+    },
+    // filled open smile — a wave/greeting expression, not a thin stroke arc
+    {
+      kind: 'path',
+      d: `M ${cx - 6 * s} ${headCy + 8 * s} Q ${cx} ${headCy + 15 * s}, ${cx + 6 * s} ${headCy + 8 * s} Q ${cx} ${headCy + 12 * s}, ${cx - 6 * s} ${headCy + 8 * s} Z`,
+      fill: FACE,
+    },
+    // blush
+    {
+      kind: 'circle',
+      cx: cx - eyeDx - 1 * s,
+      cy: headCy + 6 * s,
+      r: 2.6 * s,
+      fill: BLUSH,
+      opacity: 0.4,
+    },
+    {
+      kind: 'circle',
+      cx: cx + eyeDx + 1 * s,
+      cy: headCy + 6 * s,
+      r: 2.6 * s,
+      fill: BLUSH,
+      opacity: 0.4,
+    },
+  ]
+
+  // Eyelids sit over the eyes, normally scaled to nothing and periodically
+  // scaling up to cover them — a cheap, high-life-to-effort periodic blink.
+  const blink: CPart = {
+    kind: 'group',
+    motion: 'blink',
+    children: [
+      {
+        kind: 'rect',
+        x: cx - eyeDx - eyeRy,
+        y: headCy + eyeDy - eyeRy,
+        w: eyeRy * 2,
+        h: eyeRy * 2,
+        fill: skin,
+      },
+      {
+        kind: 'rect',
+        x: cx + eyeDx - eyeRy,
+        y: headCy + eyeDy - eyeRy,
+        w: eyeRy * 2,
+        h: eyeRy * 2,
+        fill: skin,
+      },
+    ],
+  }
+
+  const children: CPart[] = [
+    ...legs,
+    ...shoes,
+    ...clothing,
+    leftArm,
+    rightArm,
+    { kind: 'circle', cx, cy: headCy, r: headR, fill: skin },
+    ...hairShapes(style, cx, headCy, headR, hairColor),
+    ...face,
+    blink,
+  ]
+
+  return withSkin([{ kind: 'group', motion: 'breathe', children }], skin)[0]
+}
+
 function greetingArcs(cx: number, cy: number, color: Paint): CPart {
   const arcs: CPart[] = [0, 1, 2].map((i) => ({
     kind: 'path',
@@ -495,18 +716,17 @@ function sceneWave(
   style: PersonStyle,
   colors: [ColorKey, ColorKey]
 ): CPart[] {
-  const p = person({
-    cx: 200,
+  const p = personChibi({
+    cx: 185,
     groundY: 195,
     scale: 1.5,
     skin,
     style,
     outfit: colors[0],
     accent: colors[1],
-    pose: 'wave',
     rng,
   })
-  return [p, greetingArcs(232, 88, colors[1])]
+  return [p, greetingArcs(260, 65, colors[1])]
 }
 
 function chartScreen(
@@ -934,17 +1154,19 @@ function renderPart(part: CPart, key: string | number, motionOn: boolean): React
           floaty: 'ig-char-floaty',
           breathe: 'ig-char-breathe',
           growUp: 'ig-char-grow',
+          waveSmooth: 'ig-char-wave-smooth',
+          blink: 'ig-char-blink',
         }[part.motion]
       : undefined
   const style: React.CSSProperties | undefined =
-    part.motion === 'wave'
+    part.motion === 'wave' || part.motion === 'waveSmooth'
       ? { transformOrigin: `${part.originX}px ${part.originY}px` }
       : part.motion === 'growUp'
         ? {
             transformOrigin: `${part.originX}px ${part.originY}px`,
             transformBox: 'view-box' as const,
           }
-        : part.motion === 'floaty' || part.motion === 'breathe'
+        : part.motion === 'floaty' || part.motion === 'breathe' || part.motion === 'blink'
           ? ({
               transformBox: 'fill-box',
               transformOrigin: part.motion === 'breathe' ? 'bottom' : 'center',
@@ -974,10 +1196,14 @@ export const CHARACTER_KEYFRAMES = `
 @keyframes igCharFloaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 @keyframes igCharBreathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.015); } }
 @keyframes igCharGrow { 0% { transform: scaleY(0); } 60% { transform: scaleY(1.06); } 100% { transform: scaleY(1); } }
+@keyframes igCharWaveSmooth { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(28deg); } }
+@keyframes igCharBlink { 0%, 92%, 100% { transform: scaleY(0); } 96% { transform: scaleY(1); } }
 .ig-char-wave { animation: igCharWave 1.6s ease-in-out infinite; }
 .ig-char-floaty { animation: igCharFloaty 2.4s ease-in-out infinite; }
 .ig-char-breathe { animation: igCharBreathe 3.2s ease-in-out infinite; }
 .ig-char-grow { animation: igCharGrow 1.1s cubic-bezier(0.34, 1.4, 0.64, 1) both; }
+.ig-char-wave-smooth { animation: igCharWaveSmooth 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) infinite; }
+.ig-char-blink { animation: igCharBlink 4s ease-in-out infinite; }
 `.trim()
 
 function partToSvg(part: CPart, motionOn: boolean, theme: Theme): string {
@@ -1004,15 +1230,17 @@ function partToSvg(part: CPart, motionOn: boolean, theme: Theme): string {
         floaty: 'ig-char-floaty',
         breathe: 'ig-char-breathe',
         growUp: 'ig-char-grow',
+        waveSmooth: 'ig-char-wave-smooth',
+        blink: 'ig-char-blink',
       }[part.motion]
     : undefined
   const cls = motionOn && clsName ? ` class="${clsName}"` : ''
   const style =
-    part.motion === 'wave'
+    part.motion === 'wave' || part.motion === 'waveSmooth'
       ? ` style="transform-origin: ${part.originX}px ${part.originY}px;"`
       : part.motion === 'growUp'
         ? ` style="transform-origin: ${part.originX}px ${part.originY}px; transform-box: view-box;"`
-        : part.motion === 'floaty' || part.motion === 'breathe'
+        : part.motion === 'floaty' || part.motion === 'breathe' || part.motion === 'blink'
           ? ` style="transform-box: fill-box; transform-origin: ${part.motion === 'breathe' ? 'bottom' : 'center'};"`
           : ''
   const inner = part.children.map((c) => partToSvg(c, motionOn, theme)).join('\n  ')

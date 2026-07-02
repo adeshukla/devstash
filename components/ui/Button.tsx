@@ -19,6 +19,8 @@ interface ButtonProps {
   href?: string
   target?: string
   rel?: string
+  download?: boolean | string
+  'data-analytics-event'?: string
   // Button-specific
   type?: 'button' | 'submit' | 'reset'
   onClick?: () => void
@@ -27,18 +29,17 @@ interface ButtonProps {
 // ── Style maps ────────────────────────────────────────────────
 
 const variantStyles: Record<Variant, string> = {
-  primary: ['bg-ds-accent text-white', 'hover:bg-blue-400', 'disabled:bg-ds-accent/50'].join(' '),
+  primary: ['btn-cta btn-cta-primary text-white', 'disabled:opacity-50'].join(' '),
   ghost: [
-    'bg-transparent text-ds-muted',
+    'btn-cta btn-cta-ghost bg-transparent text-ds-muted',
     'border border-ds-border',
     'hover:border-ds-accent hover:text-ds-accent',
     'disabled:opacity-50',
   ].join(' '),
-  danger: ['bg-ds-error text-white', 'hover:bg-red-400', 'disabled:bg-ds-error/50'].join(' '),
+  danger: ['btn-cta btn-cta-danger bg-ds-error text-white', 'disabled:opacity-50'].join(' '),
   outline: [
-    'bg-transparent text-ds-accent',
+    'btn-cta btn-cta-outline bg-transparent text-ds-accent',
     'border border-ds-accent',
-    'hover:bg-ds-accent hover:text-white',
     'disabled:opacity-50',
   ].join(' '),
 }
@@ -79,12 +80,13 @@ export function Button({
   href,
   target,
   rel,
+  download,
+  'data-analytics-event': analyticsEvent,
   type = 'button',
   onClick,
 }: ButtonProps) {
   const base = cn(
-    'inline-flex items-center justify-center font-medium',
-    'transition-colors duration-200 select-none',
+    'inline-flex items-center justify-center font-medium select-none',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ds-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ds-bg',
     'disabled:cursor-not-allowed',
     variantStyles[variant],
@@ -106,6 +108,8 @@ export function Button({
         href={href}
         target={target}
         rel={rel ?? (target === '_blank' ? 'noopener noreferrer' : undefined)}
+        download={download}
+        data-analytics-event={analyticsEvent}
         className={base}
         aria-disabled={disabled}
       >

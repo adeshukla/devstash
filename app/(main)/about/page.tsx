@@ -89,15 +89,15 @@ export default function AboutPage() {
                 <Button href="/contact" variant="outline">
                   Let&apos;s connect
                 </Button>
-                <a
+                <Button
                   href="/resume-adesh-shukla.pdf"
                   download
                   data-analytics-event="cv_viewed"
-                  className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-5 text-[14px] font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  variant="ghost"
+                  iconRight={<Icon name="download" className="h-4 w-4" />}
                 >
                   Download résumé
-                  <Icon name="download" className="h-4 w-4" />
-                </a>
+                </Button>
               </div>
             </div>
 
@@ -202,15 +202,16 @@ export default function AboutPage() {
               <Button href="/contact" size="lg">
                 Contact me
               </Button>
-              <a
+              <Button
                 href="/resume-adesh-shukla.pdf"
                 download
                 data-analytics-event="cv_viewed"
-                className="border-ds-accent text-ds-accent hover:bg-ds-accent focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg inline-flex h-12 items-center justify-center gap-2.5 rounded-xl border px-6 text-[15px] font-medium transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                variant="outline"
+                size="lg"
+                iconRight={<Icon name="download" className="h-4 w-4" />}
               >
                 Download résumé
-                <Icon name="download" className="h-4 w-4" />
-              </a>
+              </Button>
               <Button href={siteConfig.author.github} variant="ghost" size="lg">
                 GitHub →
               </Button>

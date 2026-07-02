@@ -336,6 +336,112 @@ body {
   transform: translateY(0);
 }
 
+/* ──────────────────────────────────────────────────────────────
+   CTA button interaction — shared by every <Button> variant so every
+   CTA site-wide gets the same signature motion: a smooth lift, a
+   one-shot diagonal shine sweep, and a duotone accent→purple glow
+   (same gradient pair as .text-gradient-animate / .gradient-border-
+   animated). Built only from transform/opacity/box-shadow/background-
+   position — nothing that triggers layout — so it never jerks.
+   ────────────────────────────────────────────────────────────── */
+:root {
+  --ds-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-cta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    transform 0.32s var(--ds-ease-smooth),
+    box-shadow 0.32s var(--ds-ease-smooth),
+    color 0.32s var(--ds-ease-smooth),
+    border-color 0.32s var(--ds-ease-smooth),
+    background-position 0.32s var(--ds-ease-smooth);
+}
+.btn-cta > * {
+  position: relative;
+  z-index: 1;
+}
+.btn-cta:hover {
+  transform: translateY(-2px);
+}
+.btn-cta:active {
+  transform: translateY(0) scale(0.97);
+  transition-duration: 0.12s;
+}
+.btn-cta:disabled,
+.btn-cta[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+/* Diagonal shine — one clean light pass across the button on hover,
+   parked off-canvas at rest so it never loops or draws attention idle. */
+.btn-cta::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 25%,
+    color-mix(in srgb, white 35%, transparent) 50%,
+    transparent 75%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.65s var(--ds-ease-smooth);
+  pointer-events: none;
+}
+.btn-cta:hover::after {
+  transform: translateX(130%);
+}
+
+/* Primary — the accent half of the brand gradient at rest, sliding to
+   reveal its purple half on hover (background-position, not a color
+   swap, so it never jumps) plus a matching duotone glow. */
+.btn-cta-primary {
+  background-image: linear-gradient(100deg, var(--color-ds-accent), var(--color-ds-purple));
+  background-size: 220% 100%;
+  background-position: 0% 0%;
+}
+.btn-cta-primary:hover {
+  background-position: 100% 0%;
+  box-shadow:
+    0 10px 28px -8px color-mix(in srgb, var(--color-ds-accent) 55%, transparent),
+    0 4px 16px -6px color-mix(in srgb, var(--color-ds-purple) 45%, transparent);
+}
+
+/* Outline — the accent/purple duo fills in behind the text on hover
+   instead of a flat single-color fill. */
+.btn-cta-outline::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: linear-gradient(100deg, var(--color-ds-accent), var(--color-ds-purple));
+  opacity: 0;
+  transition: opacity 0.32s var(--ds-ease-smooth);
+}
+.btn-cta-outline:hover::before {
+  opacity: 1;
+}
+.btn-cta-outline:hover {
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 8px 22px -10px color-mix(in srgb, var(--color-ds-accent) 45%, transparent);
+}
+
+/* Ghost — stays the subtlest variant (border/text shift only), just
+   picks up the shared lift/shine plus a faint single-color glow. */
+.btn-cta-ghost:hover {
+  box-shadow: 0 6px 16px -10px color-mix(in srgb, var(--color-ds-accent) 30%, transparent);
+}
+
+/* Danger keeps its own red family — same lift/shine, no accent/purple mixing. */
+.btn-cta-danger:hover {
+  box-shadow: 0 10px 26px -8px color-mix(in srgb, var(--color-ds-error) 50%, transparent);
+}
+
 /* ── Respect users who prefer reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   *,

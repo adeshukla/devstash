@@ -11,6 +11,37 @@ function countClass(len: number, min: number, max: number): string {
   return 'text-ds-success'
 }
 
+function ShuffleControl({
+  index,
+  total,
+  onShuffle,
+}: {
+  index: number
+  total: number
+  onShuffle: () => void
+}) {
+  if (total < 2) return null
+  return (
+    <button
+      type="button"
+      onClick={onShuffle}
+      className="text-ds-muted hover:text-ds-accent flex shrink-0 items-center gap-1 font-mono text-xs transition-colors"
+      title="Cycle to the next drafted option"
+    >
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+          d="M17 3l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 21l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      Shuffle · {index + 1}/{total}
+    </button>
+  )
+}
+
 function ImagePlaceholder({ label }: { label: string }) {
   return (
     <div className="bg-ds-surface2 text-ds-muted flex aspect-[1.91/1] w-full flex-col items-center justify-center gap-1 text-xs">
@@ -52,6 +83,14 @@ export function MetaTagGenerator() {
   const [imageError, setImageError] = useState(false)
   const [twitterHandle, setTwitterHandle] = useState('@example')
 
+  // Candidates + cursor for the "Shuffle" controls — draftFromContent()
+  // returns several ranked options per field, and shuffle just cycles the
+  // index rather than re-running the analysis.
+  const [titleCandidates, setTitleCandidates] = useState<string[]>([])
+  const [titleCandidateIndex, setTitleCandidateIndex] = useState(0)
+  const [descCandidates, setDescCandidates] = useState<string[]>([])
+  const [descCandidateIndex, setDescCandidateIndex] = useState(0)
+
   const domain = useMemo(() => {
     try {
       return new URL(url).hostname
@@ -62,8 +101,26 @@ export function MetaTagGenerator() {
 
   function handleDraft() {
     const result = draftFromContent(content)
-    if (result.title) setTitle(result.title)
-    if (result.description) setDescription(result.description)
+    setTitleCandidates(result.titleCandidates)
+    setTitleCandidateIndex(0)
+    if (result.titleCandidates[0]) setTitle(result.titleCandidates[0])
+    setDescCandidates(result.descriptionCandidates)
+    setDescCandidateIndex(0)
+    if (result.descriptionCandidates[0]) setDescription(result.descriptionCandidates[0])
+  }
+
+  function handleShuffleTitle() {
+    if (titleCandidates.length < 2) return
+    const next = (titleCandidateIndex + 1) % titleCandidates.length
+    setTitleCandidateIndex(next)
+    setTitle(titleCandidates[next])
+  }
+
+  function handleShuffleDescription() {
+    if (descCandidates.length < 2) return
+    const next = (descCandidateIndex + 1) % descCandidates.length
+    setDescCandidateIndex(next)
+    setDescription(descCandidates[next])
   }
 
   const showImage = image.trim() && !imageError
@@ -103,7 +160,8 @@ ${imageLines}<meta name="twitter:card" content="summary_large_image" />
         />
         <div className="mt-2 flex items-center justify-between gap-3">
           <p className="text-ds-muted text-xs">
-            Local sentence extraction + filler cleanup — not an AI model call.
+            Local analysis + phrase composition, not an AI model call — drafts several options,
+            cycle them with Shuffle.
           </p>
           <button
             type="button"
@@ -123,8 +181,15 @@ ${imageLines}<meta name="twitter:card" content="summary_large_image" />
             className="text-ds-text mb-1.5 flex items-center justify-between text-sm font-medium"
           >
             Title
-            <span className={`font-mono text-xs ${countClass(title.length, 50, 60)}`}>
-              {title.length}/60
+            <span className="flex items-center gap-3">
+              <ShuffleControl
+                index={titleCandidateIndex}
+                total={titleCandidates.length}
+                onShuffle={handleShuffleTitle}
+              />
+              <span className={`font-mono text-xs ${countClass(title.length, 50, 60)}`}>
+                {title.length}/60
+              </span>
             </span>
           </label>
           <input
@@ -153,8 +218,15 @@ ${imageLines}<meta name="twitter:card" content="summary_large_image" />
           className="text-ds-text mb-1.5 flex items-center justify-between text-sm font-medium"
         >
           Description
-          <span className={`font-mono text-xs ${countClass(description.length, 130, 160)}`}>
-            {description.length}/160
+          <span className="flex items-center gap-3">
+            <ShuffleControl
+              index={descCandidateIndex}
+              total={descCandidates.length}
+              onShuffle={handleShuffleDescription}
+            />
+            <span className={`font-mono text-xs ${countClass(description.length, 130, 160)}`}>
+              {description.length}/160
+            </span>
           </span>
         </label>
         <textarea

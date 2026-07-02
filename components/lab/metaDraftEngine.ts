@@ -1,11 +1,10 @@
 // A local heuristic text drafter — NOT an LLM call. It splits your pasted
 // content into sentences, scores them by word-frequency overlap with the
 // rest of the text plus a lead-paragraph bias (classic extractive
-// summarization), picks a short phrase from the strongest sentence for the
-// title, and a *different* strong sentence for the description so the two
-// fields say different things instead of repeating each other. Deterministic,
-// client-side, honest about what it is: sentence extraction + cleanup, not
-// generation.
+// summarization), then assembles several title/description *candidates*
+// from different sentences/clauses/keywords so the "Shuffle" control has
+// real variety to cycle through. Deterministic, client-side, honest about
+// what it is: sentence extraction + phrase composition, not generation.
 
 const FILLER_REPLACEMENTS: [RegExp, string][] = [
   [/\bin today's fast-paced world,?\s*/gi, ''],
@@ -104,10 +103,7 @@ function words(sentence: string): string[] {
   return sentence.toLowerCase().match(/[a-z0-9']+/g) ?? []
 }
 
-/** Word-frequency score with a lead-paragraph bias — real writing usually
- * states its topic early, so sentences in the first third get a boost
- * rather than the pick being decided purely by keyword density. */
-function scoreSentences(sentences: string[]): number[] {
+function buildFrequency(sentences: string[]): Map<string, number> {
   const freq = new Map<string, number>()
   for (const s of sentences) {
     for (const w of words(s)) {
@@ -115,6 +111,13 @@ function scoreSentences(sentences: string[]): number[] {
       freq.set(w, (freq.get(w) ?? 0) + 1)
     }
   }
+  return freq
+}
+
+/** Word-frequency score with a lead-paragraph bias — real writing usually
+ * states its topic early, so sentences in the first third get a boost
+ * rather than the pick being decided purely by keyword density. */
+function scoreSentences(sentences: string[], freq: Map<string, number>): number[] {
   const leadZone = Math.max(2, Math.ceil(sentences.length / 3))
   return sentences.map((s, i) => {
     const ws = words(s).filter((w) => !STOPWORDS.has(w))
@@ -125,17 +128,10 @@ function scoreSentences(sentences: string[]): number[] {
   })
 }
 
-function bestIndexExcluding(scores: number[], exclude: Set<number>): number {
-  let bestIndex = -1
-  let bestScore = -Infinity
-  scores.forEach((score, i) => {
-    if (exclude.has(i)) return
-    if (score > bestScore) {
-      bestScore = score
-      bestIndex = i
-    }
-  })
-  return bestIndex
+/** Sentence indices ordered strongest-first — the base ranking every
+ * candidate (title or description) is drawn from. */
+function rankedIndices(scores: number[]): number[] {
+  return scores.map((_, i) => i).sort((a, b) => scores[b] - scores[a])
 }
 
 /** Pulls a short headline-style phrase out of a full sentence — cuts at the
@@ -148,6 +144,75 @@ function extractPhrase(sentence: string, maxWords = 10): string {
   const wordsArr = sentence.trim().split(/\s+/)
   if (wordsArr.length <= maxWords) return sentence.trim()
   return wordsArr.slice(0, maxWords).join(' ') + '…'
+}
+
+/** Splits a sentence into clause-sized fragments on comma/dash/colon/
+ * semicolon boundaries — the unit "condensed multi-clause" descriptions and
+ * the keyword-combo title are stitched from, instead of a whole sentence. */
+function splitClauses(sentence: string): string[] {
+  return sentence
+    .split(/\s*(?:,|;|—|--|:)\s*/)
+    .map((c) => c.trim())
+    .filter((c) => c.length >= 12)
+}
+
+/** The strongest-scoring clause within one sentence, by the same
+ * word-frequency weighting used for whole sentences. Falls back to the full
+ * sentence if it has no comma/dash/colon boundaries to split on. */
+function bestClause(sentence: string, freq: Map<string, number>): string {
+  const clauses = splitClauses(sentence)
+  if (clauses.length === 0) return sentence
+  let best = clauses[0]
+  let bestScore = -Infinity
+  for (const clause of clauses) {
+    const ws = words(clause).filter((w) => !STOPWORDS.has(w))
+    if (ws.length === 0) continue
+    const score = ws.reduce((sum, w) => sum + (freq.get(w) ?? 0), 0) / Math.sqrt(ws.length)
+    if (score > bestScore) {
+      bestScore = score
+      best = clause
+    }
+  }
+  return best
+}
+
+function topKeywords(freq: Map<string, number>, n: number, exclude: Set<string>): string[] {
+  return [...freq.entries()]
+    .filter(([word]) => !exclude.has(word) && word.length > 2)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, n)
+    .map(([word]) => word)
+}
+
+function titleCaseWord(word: string): string {
+  return word.charAt(0).toUpperCase() + word.slice(1)
+}
+
+/** Caps a fragment at maxWords with no ellipsis — used where the final
+ * `truncate()` call already handles overflow, so an inner ellipsis here
+ * would just double up with the outer one. */
+function capWords(text: string, maxWords: number): string {
+  const arr = text.trim().split(/\s+/)
+  return arr.length <= maxWords ? text.trim() : arr.slice(0, maxWords).join(' ')
+}
+
+/** Composes a title from an anchor clause plus separate high-frequency
+ * keywords, rather than a sentence copy — the "assembled from analyzed
+ * content" candidate the shuffle needs alongside the sentence-derived ones. */
+function buildKeywordComboTitle(
+  sentences: string[],
+  ranked: number[],
+  freq: Map<string, number>
+): string {
+  const anchorClause = capWords(bestClause(sentences[ranked[0]], freq), 8)
+  const anchorWords = new Set(words(anchorClause))
+  const extraKeywords = topKeywords(freq, 6, anchorWords)
+    .filter((w) => !anchorWords.has(w))
+    .slice(0, 2)
+  if (extraKeywords.length === 0) return ''
+  const keywordPhrase = extraKeywords.map(titleCaseWord).join(' & ')
+  const cleanAnchor = capitalize(humanize(anchorClause).replace(/[.?!,;:—-]+$/, ''))
+  return `${cleanAnchor}: ${keywordPhrase}`
 }
 
 function capitalize(text: string): string {
@@ -165,18 +230,33 @@ function truncate(text: string, max: number): string {
   return cut.trimEnd() + '…'
 }
 
-export interface DraftResult {
-  title: string
-  description: string
+/** Drops empty/duplicate candidates and caps the list length, preserving
+ * the strongest-first order they were generated in. */
+function dedupeCandidates(list: string[], max: number): string[] {
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const raw of list) {
+    const cleaned = raw.trim()
+    if (!cleaned || seen.has(cleaned)) continue
+    seen.add(cleaned)
+    out.push(cleaned)
+    if (out.length >= max) break
+  }
+  return out
 }
 
-/** Drafts a title/description from pasted content or a topic sentence.
- * Real extractive summarization (word-frequency + lead-bias scoring), not a
- * model call — title and description are deliberately drawn from different
- * sentences so they don't just repeat each other. */
-export function draftFromContent(raw: string): DraftResult {
+export interface DraftCandidates {
+  titleCandidates: string[]
+  descriptionCandidates: string[]
+}
+
+/** Drafts several title/description candidates from pasted content or a
+ * topic sentence — real extractive summarization (word-frequency + lead-bias
+ * scoring) plus clause/keyword composition, not a model call. Callers pick
+ * candidates[0] initially and cycle through the rest via "Shuffle". */
+export function draftFromContent(raw: string): DraftCandidates {
   const trimmed = raw.trim()
-  if (!trimmed) return { title: '', description: '' }
+  if (!trimmed) return { titleCandidates: [], descriptionCandidates: [] }
 
   // A short first line reads like an intentional heading — pull it out for
   // the title and score the *rest* of the text for the description, so the
@@ -193,38 +273,59 @@ export function draftFromContent(raw: string): DraftResult {
 
   if (sentences.length === 0) {
     // No body left after pulling out the heading (or the whole paste was one
-    // short line) — use that line for both fields rather than leaving the
-    // description blank.
+    // short line) — use that line for both fields rather than leaving them
+    // blank. Only one candidate is possible with this little input.
     const title = truncate(capitalize(humanize(firstLineText).replace(/[.?!]+$/, '')), 60)
     const description = truncate(humanize(firstLineText), 160)
-    return { title, description }
-  }
-
-  const scores = scoreSentences(sentences)
-
-  // Title source: the heading line if there was one, otherwise the single
-  // strongest sentence — reduced to a short phrase, not copied whole.
-  const titleSentenceIndex = looksLikeHeading ? -1 : bestIndexExcluding(scores, new Set())
-  const titleSource = looksLikeHeading ? firstLineText : sentences[titleSentenceIndex]
-  const title = truncate(
-    capitalize(humanize(extractPhrase(titleSource)).replace(/[.?!,;:—-]+$/, '')),
-    60
-  )
-
-  // Description: the strongest sentence that ISN'T the one the title came
-  // from, so the two fields read as complementary rather than duplicated.
-  const exclude = titleSentenceIndex >= 0 ? new Set([titleSentenceIndex]) : new Set<number>()
-  let descIndex = bestIndexExcluding(scores, exclude)
-  if (descIndex === -1) descIndex = titleSentenceIndex >= 0 ? titleSentenceIndex : 0
-
-  let description = sentences[descIndex]
-  if (description.length < 130 && sentences.length > 1) {
-    const neighbor = sentences[descIndex + 1] ?? sentences[descIndex - 1]
-    if (neighbor && neighbor !== sentences[titleSentenceIndex]) {
-      description = `${description} ${neighbor}`.trim()
+    return {
+      titleCandidates: title ? [title] : [],
+      descriptionCandidates: description ? [description] : [],
     }
   }
-  description = truncate(description, 160)
 
-  return { title, description }
+  const freq = buildFrequency(sentences)
+  const scores = scoreSentences(sentences, freq)
+  const ranked = rankedIndices(scores)
+
+  // Title candidates: the heading line (if any), short phrases pulled from
+  // the top-ranked sentences, and one keyword-composed title — never a
+  // whole sentence copied verbatim.
+  const titleRaw: string[] = []
+  if (looksLikeHeading) titleRaw.push(capitalize(humanize(firstLineText)))
+  for (const idx of ranked.slice(0, 3)) {
+    const phrase = extractPhrase(sentences[idx])
+    titleRaw.push(capitalize(humanize(phrase).replace(/[.?!,;:—-]+$/, '')))
+  }
+  const comboTitle = buildKeywordComboTitle(sentences, ranked, freq)
+  if (comboTitle) titleRaw.push(comboTitle)
+  const titleCandidates = dedupeCandidates(titleRaw, 4).map((t) => truncate(t, 60))
+
+  // Description candidates: the top-ranked sentences (padded with a
+  // neighbor if short, same as before) plus one condensed candidate that
+  // stitches the strongest clause of the two best sentences together, so
+  // you can't always find one whole original sentence in the result.
+  const descRaw: string[] = []
+  for (const idx of ranked.slice(0, 3)) {
+    let text = sentences[idx]
+    if (text.length < 130 && sentences.length > 1) {
+      const neighbor = sentences[idx + 1] ?? sentences[idx - 1]
+      if (neighbor) text = `${text} ${neighbor}`.trim()
+    }
+    // Filler stripping in humanize() can leave a sentence starting mid-clause
+    // (its original leading phrase removed) — re-capitalize so it doesn't
+    // read as a lowercase fragment.
+    descRaw.push(capitalize(text))
+  }
+  if (ranked.length >= 2) {
+    const clauseA = bestClause(sentences[ranked[0]], freq)
+    const clauseB = bestClause(sentences[ranked[1]], freq)
+    if (clauseA && clauseB && clauseA !== clauseB) {
+      const cleanA = capitalize(humanize(clauseA).replace(/[.?!,;:—-]+$/, ''))
+      const cleanB = humanize(clauseB).replace(/[.?!]+$/, '')
+      descRaw.push(`${cleanA} — ${cleanB}.`)
+    }
+  }
+  const descriptionCandidates = dedupeCandidates(descRaw, 4).map((d) => truncate(d, 160))
+
+  return { titleCandidates, descriptionCandidates }
 }
