@@ -155,8 +155,8 @@ ${imageLines}<meta name="twitter:card" content="summary_large_image" />
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Paste a topic sentence, an intro paragraph, or a full draft — the tool will pull a title and description out of it."
-          rows={3}
-          className="border-ds-border bg-ds-surface text-ds-text placeholder:text-ds-muted focus:border-ds-accent w-full resize-none rounded-lg border px-4 py-3 text-sm transition-colors outline-none"
+          rows={5}
+          className="border-ds-border bg-ds-surface text-ds-text placeholder:text-ds-muted focus:border-ds-accent w-full resize-y rounded-lg border px-4 py-3 text-sm leading-relaxed transition-colors outline-none"
         />
         <div className="mt-2 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-ds-muted text-xs">
@@ -233,8 +233,8 @@ ${imageLines}<meta name="twitter:card" content="summary_large_image" />
           id="mt-desc"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          rows={3}
-          className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent w-full resize-none rounded-lg border px-4 py-3 text-sm transition-colors outline-none"
+          rows={5}
+          className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent w-full resize-y rounded-lg border px-4 py-3 text-sm leading-relaxed transition-colors outline-none"
         />
       </div>
 

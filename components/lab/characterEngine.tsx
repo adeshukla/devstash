@@ -46,15 +46,13 @@ export const SKIN_TONES = [
   { name: 'Porcelain', value: '#ffdbac' },
 ]
 
-// Clothing/skin detail colors that don't change between themes — a white
-// shirt is white regardless of light/dark mode, same as skin and hair.
+// Clothing/skin detail colors that don't change between themes — hair,
+// face linework, and shoes stay the same regardless of light/dark mode.
 const HAIR = '#2b2320'
 const HAIR_ALT = '#4a2f1c'
 const FACE = '#2a2118'
-const SHIRT = '#eef1f6'
 const SHOE = '#20242e'
 const SCREEN_DARK = '#0f1420'
-const BLUSH = '#e8846b'
 
 /** A color reference is either a ds-token key (resolved per render mode) or
  * a literal hex string (skin/hair/shirt/shoe — theme-invariant). */
@@ -154,120 +152,8 @@ export type CPart =
 
 type Pose = 'idle' | 'wave' | 'present' | 'celebrate' | 'reach'
 
-function gestureArm(
-  shoulderX: number,
-  shoulderY: number,
-  s: number,
-  outfit: Paint,
-  pose: Pose
-): CPart {
-  if (pose === 'wave' || pose === 'celebrate') {
-    return {
-      kind: 'group',
-      motion: 'wave',
-      originX: shoulderX,
-      originY: shoulderY,
-      children: [
-        {
-          kind: 'rect',
-          x: shoulderX - 4 * s,
-          y: shoulderY - 30 * s,
-          w: 8 * s,
-          h: 32 * s,
-          rx: 4 * s,
-          fill: outfit,
-        },
-        {
-          kind: 'rect',
-          x: shoulderX - 4 * s,
-          y: shoulderY - 4 * s,
-          w: 8 * s,
-          h: 6 * s,
-          fill: SHIRT,
-          opacity: 0.9,
-        },
-        { kind: 'circle', cx: shoulderX, cy: shoulderY - 32 * s, r: 5 * s, fill: SKIN_PLACEHOLDER },
-      ],
-    }
-  }
-  if (pose === 'present') {
-    return {
-      kind: 'group',
-      originX: shoulderX,
-      originY: shoulderY,
-      children: [
-        {
-          kind: 'rect',
-          x: shoulderX,
-          y: shoulderY - 2 * s,
-          w: 30 * s,
-          h: 8 * s,
-          rx: 4 * s,
-          fill: outfit,
-        },
-        {
-          kind: 'circle',
-          cx: shoulderX + 30 * s,
-          cy: shoulderY + 2 * s,
-          r: 5 * s,
-          fill: SKIN_PLACEHOLDER,
-        },
-      ],
-    }
-  }
-  if (pose === 'reach') {
-    return {
-      kind: 'group',
-      originX: shoulderX,
-      originY: shoulderY,
-      children: [
-        {
-          kind: 'rect',
-          x: shoulderX,
-          y: shoulderY + 4 * s,
-          w: 26 * s,
-          h: 7 * s,
-          rx: 3.5 * s,
-          fill: outfit,
-        },
-        {
-          kind: 'circle',
-          cx: shoulderX + 26 * s,
-          cy: shoulderY + 7.5 * s,
-          r: 4.5 * s,
-          fill: SKIN_PLACEHOLDER,
-        },
-      ],
-    }
-  }
-  return {
-    kind: 'group',
-    children: [
-      {
-        kind: 'rect',
-        x: shoulderX - 4 * s,
-        y: shoulderY,
-        w: 8 * s,
-        h: 30 * s,
-        rx: 4 * s,
-        fill: outfit,
-      },
-      {
-        kind: 'rect',
-        x: shoulderX - 4 * s,
-        y: shoulderY + 26 * s,
-        w: 8 * s,
-        h: 5 * s,
-        fill: SHIRT,
-        opacity: 0.9,
-      },
-      { kind: 'circle', cx: shoulderX, cy: shoulderY + 34 * s, r: 4.5 * s, fill: SKIN_PLACEHOLDER },
-    ],
-  }
-}
-
 // person() substitutes the real skin tone in place of this sentinel so
-// gestureArm() doesn't need skin threaded through every call site.
+// limb-building helpers don't need skin threaded through every call site.
 const SKIN_PLACEHOLDER = '@@skin@@'
 function withSkin(parts: CPart[], skin: string): CPart[] {
   return parts.map((p) => {
@@ -315,6 +201,57 @@ function hairShapes(
   return [cap, sideLeft, sideRight, bun]
 }
 
+/** A robust capsule between two points at (possibly different) widths,
+ * built from two elliptical end-caps rather than a hand-tuned bezier
+ * bulge — correct at any angle, not just near-vertical, so the same
+ * helper covers every arm and leg regardless of pose. */
+function limb(
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  w1: number,
+  w2: number,
+  fill: Paint
+): CPart {
+  const dx = x2 - x1
+  const dy = y2 - y1
+  const len = Math.hypot(dx, dy) || 1
+  const nx = -dy / len
+  const ny = dx / len
+  const p1a = { x: x1 + nx * w1, y: y1 + ny * w1 }
+  const p1b = { x: x1 - nx * w1, y: y1 - ny * w1 }
+  const p2a = { x: x2 + nx * w2, y: y2 + ny * w2 }
+  const p2b = { x: x2 - nx * w2, y: y2 - ny * w2 }
+  return {
+    kind: 'path',
+    d: `M ${p1a.x} ${p1a.y} L ${p2a.x} ${p2a.y} A ${w2} ${w2} 0 0 1 ${p2b.x} ${p2b.y} L ${p1b.x} ${p1b.y} A ${w1} ${w1} 0 0 1 ${p1a.x} ${p1a.y} Z`,
+    fill,
+  }
+}
+
+/** One arm — a capsule limb plus a small hand blob at the end, optionally
+ * wrapped in a motion group that rotates the whole rigid arm around the
+ * shoulder (the wave gesture). */
+function armPart(
+  shoulderX: number,
+  shoulderY: number,
+  handX: number,
+  handY: number,
+  s: number,
+  outfit: Paint,
+  motion?: 'waveSmooth'
+): CPart {
+  const children: CPart[] = [
+    limb(shoulderX, shoulderY, handX, handY, 6 * s, 4 * s, outfit),
+    { kind: 'circle', cx: handX, cy: handY, r: 4 * s, fill: SKIN_PLACEHOLDER },
+  ]
+  if (motion) {
+    return { kind: 'group', motion, originX: shoulderX, originY: shoulderY, children }
+  }
+  return { kind: 'group', children }
+}
+
 interface PersonOptions {
   cx: number
   groundY: number
@@ -325,363 +262,131 @@ interface PersonOptions {
   accent: Paint
   pose: Pose
   seated?: boolean
+  // Flips which way "present"/"reach" gestures point — used so two people
+  // facing each other (handshake) both reach toward the middle instead of
+  // both reaching the same screen direction.
+  mirror?: boolean
   rng: Rng
 }
 
-/** A single flat-icon corporate figure — head, hair, blazer-over-shirt torso
- * with lapels, tie/neckline detail, cuffed sleeves, trousers, and shoes,
- * built from one shared geometry so every scene stays visually consistent.
- * Deliberately stylized (flat shapes, simplified face) rather than aiming
- * for photorealism, which hand-authored SVG can't credibly deliver. */
+/** A flat corporate-illustration figure in the unDraw/Storyset vein: one
+ * smooth silhouette for the torso (no separate blazer/lapel panels), robust
+ * capsule limbs, and a near-featureless face (small dot eyes, a hint of a
+ * smile, no eyebrows/blush) — the reference style is deliberately minimal,
+ * not a cartoon/chibi mascot. One shared geometry so every scene stays
+ * visually consistent. */
 function person(opts: PersonOptions): CPart {
-  const { cx, groundY, scale: s, skin, style, outfit, accent, pose, seated, rng } = opts
+  const { cx, groundY, scale: s, skin, style, outfit, accent, pose, seated, mirror, rng } = opts
+  const dir = mirror ? -1 : 1
   const legH = (seated ? 20 : 34) * s
-  const headR = 15 * s
-  const headCy = groundY - 100 * s
-  const shoulderY = groundY - 78 * s
-  const leftShoulderX = cx - 15 * s
-  const rightShoulderX = cx + 15 * s
-  const torsoTop = groundY - 80 * s
-  const torsoH = 48 * s
-  const torsoW = 36 * s
+  const headR = 14 * s
+  const neckH = 3 * s
+  const torsoH = 40 * s
+  const shoulderHalfW = 19 * s
+  const hipHalfW = 23 * s
+  const torsoBottom = groundY - legH
+  const torsoTop = torsoBottom - torsoH
+  const headCy = torsoTop - neckH - headR
   const hairColor = rng() > 0.65 ? HAIR_ALT : HAIR
 
-  const leftArmParts =
-    pose === 'celebrate'
-      ? [gestureArm(leftShoulderX, shoulderY, s, outfit, 'celebrate')]
-      : [
-          {
-            kind: 'rect' as const,
-            x: leftShoulderX - 6 * s,
-            y: shoulderY,
-            w: 8 * s,
-            h: 30 * s,
-            rx: 4 * s,
-            fill: outfit,
-          },
-          {
-            kind: 'rect' as const,
-            x: leftShoulderX - 6 * s,
-            y: shoulderY + 26 * s,
-            w: 8 * s,
-            h: 5 * s,
-            fill: SHIRT,
-            opacity: 0.9,
-          },
-          {
-            kind: 'circle' as const,
-            cx: leftShoulderX - 2 * s,
-            cy: shoulderY + 34 * s,
-            r: 4.5 * s,
-            fill: SKIN_PLACEHOLDER,
-          },
-        ]
-
-  const rightArm = gestureArm(rightShoulderX, shoulderY, s, outfit, pose)
-
-  const panelW = torsoW * 0.42
-  const clothing: CPart[] = [
-    // shirt base
-    { kind: 'rect', x: cx - torsoW / 2, y: torsoTop, w: torsoW, h: torsoH, rx: 8 * s, fill: SHIRT },
-    // blazer panels either side, leaving a V of shirt showing
-    {
-      kind: 'rect',
-      x: cx - torsoW / 2,
-      y: torsoTop,
-      w: panelW,
-      h: torsoH,
-      rx: 6 * s,
-      fill: outfit,
-    },
-    {
-      kind: 'rect',
-      x: cx + torsoW / 2 - panelW,
-      y: torsoTop,
-      w: panelW,
-      h: torsoH,
-      rx: 6 * s,
-      fill: outfit,
-    },
-    // lapel notches
-    {
-      kind: 'path',
-      d: `M ${cx - torsoW * 0.06} ${torsoTop} L ${cx - torsoW * 0.02} ${torsoTop + 9 * s} L ${cx - torsoW * 0.18} ${torsoTop + 5 * s} Z`,
-      fill: outfit,
-    },
-    {
-      kind: 'path',
-      d: `M ${cx + torsoW * 0.06} ${torsoTop} L ${cx + torsoW * 0.02} ${torsoTop + 9 * s} L ${cx + torsoW * 0.18} ${torsoTop + 5 * s} Z`,
-      fill: outfit,
-    },
-  ]
-  if (style === 'masculine' && rng() > 0.35) {
-    clothing.push({
-      kind: 'rect',
-      x: cx - 2.2 * s,
-      y: torsoTop + 3 * s,
-      w: 4.4 * s,
-      h: 24 * s,
-      fill: accent,
-    })
+  const neckHalfW = 6 * s
+  const torso: CPart = {
+    kind: 'path',
+    d: `M ${cx - neckHalfW} ${torsoTop}
+        Q ${cx} ${torsoTop - 3 * s}, ${cx + neckHalfW} ${torsoTop}
+        C ${cx + shoulderHalfW * 0.7} ${torsoTop + 2 * s}, ${cx + shoulderHalfW} ${torsoTop + 10 * s}, ${cx + shoulderHalfW * 0.9} ${torsoTop + 18 * s}
+        C ${cx + hipHalfW * 1.02} ${torsoTop + torsoH * 0.55}, ${cx + hipHalfW} ${torsoBottom - 8 * s}, ${cx + hipHalfW * 0.65} ${torsoBottom}
+        Q ${cx} ${torsoBottom + 5 * s}, ${cx - hipHalfW * 0.65} ${torsoBottom}
+        C ${cx - hipHalfW} ${torsoBottom - 8 * s}, ${cx - hipHalfW * 1.02} ${torsoTop + torsoH * 0.55}, ${cx - shoulderHalfW * 0.9} ${torsoTop + 18 * s}
+        C ${cx - shoulderHalfW} ${torsoTop + 10 * s}, ${cx - shoulderHalfW * 0.7} ${torsoTop + 2 * s}, ${cx - neckHalfW} ${torsoTop}
+        Z`,
+    fill: outfit,
   }
 
+  const shoulderY = torsoTop + 13 * s
+  const leftShoulderX = cx - shoulderHalfW * 0.75
+  const rightShoulderX = cx + shoulderHalfW * 0.75
+
+  const leftArm =
+    pose === 'celebrate'
+      ? armPart(
+          leftShoulderX,
+          shoulderY,
+          leftShoulderX - 16 * s,
+          shoulderY - 28 * s,
+          s,
+          outfit,
+          'waveSmooth'
+        )
+      : armPart(leftShoulderX, shoulderY, leftShoulderX - 2 * s, shoulderY + 30 * s, s, outfit)
+
+  const rightArm =
+    pose === 'wave' || pose === 'celebrate'
+      ? armPart(
+          rightShoulderX,
+          shoulderY,
+          rightShoulderX + 16 * s,
+          shoulderY - 28 * s,
+          s,
+          outfit,
+          'waveSmooth'
+        )
+      : pose === 'present'
+        ? armPart(
+            rightShoulderX,
+            shoulderY,
+            rightShoulderX + 34 * s * dir,
+            shoulderY + 6 * s,
+            s,
+            outfit
+          )
+        : pose === 'reach'
+          ? armPart(
+              rightShoulderX,
+              shoulderY,
+              rightShoulderX + 30 * s * dir,
+              shoulderY + 8 * s,
+              s,
+              outfit
+            )
+          : armPart(
+              rightShoulderX,
+              shoulderY,
+              rightShoulderX + 2 * s,
+              shoulderY + 30 * s,
+              s,
+              outfit
+            )
+
+  const legGap = 7 * s
   const legs: CPart[] = [
-    { kind: 'rect', x: cx - 12 * s, y: groundY - legH, w: 9 * s, h: legH, rx: 3 * s, fill: accent },
-    { kind: 'rect', x: cx + 3 * s, y: groundY - legH, w: 9 * s, h: legH, rx: 3 * s, fill: accent },
+    limb(cx - legGap, torsoBottom - 2 * s, cx - legGap, groundY - 4 * s, 7 * s, 5 * s, accent),
+    limb(cx + legGap, torsoBottom - 2 * s, cx + legGap, groundY - 4 * s, 7 * s, 5 * s, accent),
   ]
   const shoes: CPart[] = seated
     ? []
     : [
-        {
-          kind: 'rect',
-          x: cx - 13 * s,
-          y: groundY - 4 * s,
-          w: 11 * s,
-          h: 5 * s,
-          rx: 2.5 * s,
-          fill: SHOE,
-        },
-        {
-          kind: 'rect',
-          x: cx + 2 * s,
-          y: groundY - 4 * s,
-          w: 11 * s,
-          h: 5 * s,
-          rx: 2.5 * s,
-          fill: SHOE,
-        },
+        { kind: 'circle', cx: cx - legGap, cy: groundY - 3 * s, r: 4.5 * s, fill: SHOE },
+        { kind: 'circle', cx: cx + legGap, cy: groundY - 3 * s, r: 4.5 * s, fill: SHOE },
       ]
 
+  // Deliberately minimal — small dot eyes and a hint of a smile, no
+  // eyebrows/big filled mouth/blush. That near-featureless face is the
+  // actual reference style, not an oversight.
   const face: CPart[] = [
-    { kind: 'circle', cx: cx - 5 * s, cy: headCy + 2 * s, r: 1.5 * s, fill: FACE },
-    { kind: 'circle', cx: cx + 5 * s, cy: headCy + 2 * s, r: 1.5 * s, fill: FACE },
+    { kind: 'circle', cx: cx - 4 * s, cy: headCy, r: 1.4 * s, fill: FACE },
+    { kind: 'circle', cx: cx + 4 * s, cy: headCy, r: 1.4 * s, fill: FACE },
     {
       kind: 'path',
-      d: `M ${cx - 7 * s} ${headCy - 4 * s} l 4 -1.5`,
+      d: `M ${cx - 3 * s} ${headCy + 6 * s} Q ${cx} ${headCy + 8 * s}, ${cx + 3 * s} ${headCy + 6 * s}`,
       stroke: FACE,
-      strokeWidth: 1.2 * s,
-    },
-    {
-      kind: 'path',
-      d: `M ${cx + 7 * s} ${headCy - 4 * s} l -4 -1.5`,
-      stroke: FACE,
-      strokeWidth: 1.2 * s,
-    },
-    {
-      kind: 'path',
-      d: `M ${cx - 5 * s} ${headCy + 7 * s} Q ${cx} ${headCy + 11 * s}, ${cx + 5 * s} ${headCy + 7 * s}`,
-      stroke: FACE,
-      strokeWidth: 1.4 * s,
-    },
-  ]
-
-  const children: CPart[] = [
-    ...legs,
-    ...shoes,
-    ...clothing,
-    ...leftArmParts,
-    rightArm,
-    { kind: 'circle', cx, cy: headCy, r: headR, fill: skin },
-    ...hairShapes(style, cx, headCy, headR, hairColor),
-    ...face,
-  ]
-
-  // A per-instance delay so multiple people on screen (team, boardroom)
-  // don't breathe in perfect lockstep — see the CPart.motionDelay comment.
-  return withSkin(
-    [{ kind: 'group', motion: 'breathe', motionDelay: rng() * 3.2, children }],
-    skin
-  )[0]
-}
-
-// ---------------------------------------------------------------------------
-// Chibi character v1 — hand-authored bezier silhouette, used ONLY by
-// sceneWave() for now. Rects/circles stacked at odd proportions read as
-// "programmatic" rather than a real character; this replaces the torso and
-// limbs with smooth tapered <path> shapes and bigger, more expressive
-// chibi/mascot proportions (big head, small body). Kept separate from
-// person() so the other 6 scenes are untouched until this one is approved
-// and the geometry is rolled out to them.
-
-/** A tapered limb silhouette — wider at the joint end, narrower at the
- * extremity, with a slight outward belly instead of straight sides so it
- * reads as a limb rather than a ruler. */
-function taperedLimb(
-  x: number,
-  topY: number,
-  botY: number,
-  topHalfW: number,
-  botHalfW: number,
-  bulge: number,
-  fill: Paint
-): CPart {
-  const midY = topY + (botY - topY) * 0.55
-  return {
-    kind: 'path',
-    d: `M ${x - topHalfW} ${topY}
-        C ${x - topHalfW - bulge} ${midY}, ${x - botHalfW - bulge} ${botY - (botY - midY) * 0.6}, ${x - botHalfW} ${botY}
-        L ${x + botHalfW} ${botY}
-        C ${x + botHalfW + bulge} ${botY - (botY - midY) * 0.6}, ${x + topHalfW + bulge} ${midY}, ${x + topHalfW} ${topY}
-        Z`,
-    fill,
-  }
-}
-
-interface ChibiPersonOptions {
-  cx: number
-  groundY: number
-  scale: number
-  skin: string
-  style: PersonStyle
-  outfit: Paint
-  accent: Paint
-  rng: Rng
-}
-
-/** A chibi/mascot-proportioned figure with a soft bezier torso, tapered
- * limbs, an expressive face (big eyes, eyebrows, filled smile, blush) and a
- * blink loop — v1 of the illustration-quality rework, waving hello. */
-function personChibi(opts: ChibiPersonOptions): CPart {
-  const { cx, groundY, scale: s, skin, style, outfit, accent, rng } = opts
-
-  // Research note: genuine chibi/mascot proportions read as ~3 "heads tall"
-  // total, not the ~2-heads-tall blob this v1 first shipped with — head
-  // diameter (2*headR) should be roughly a third of the full figure height
-  // (2*headR + neckH + torsoH + legH). These numbers hit that ratio while
-  // keeping the same overall figure height (so the arc/hand clearance
-  // math in sceneWave() below still holds).
-  const headR = 18 * s
-  const neckH = 3 * s
-  const neckHalfW = 5 * s
-  const torsoH = 34 * s
-  const shoulderHalfW = 19 * s
-  const waistHalfW = 14 * s
-  const legH = 28 * s
-  const torsoTop = groundY - legH - torsoH
-  const torsoBottom = torsoTop + torsoH
-  const headCy = torsoTop - neckH - headR
-  const hairColor = rng() > 0.65 ? HAIR_ALT : HAIR
-
-  const torsoOuter: CPart = {
-    kind: 'path',
-    d: `M ${cx - shoulderHalfW} ${torsoTop + 6 * s}
-        C ${cx - shoulderHalfW} ${torsoTop + 1 * s}, ${cx - shoulderHalfW * 0.5} ${torsoTop - 2 * s}, ${cx - neckHalfW} ${torsoTop - 1 * s}
-        L ${cx + neckHalfW} ${torsoTop - 1 * s}
-        C ${cx + shoulderHalfW * 0.5} ${torsoTop - 2 * s}, ${cx + shoulderHalfW} ${torsoTop + 1 * s}, ${cx + shoulderHalfW} ${torsoTop + 6 * s}
-        C ${cx + shoulderHalfW + 2 * s} ${torsoTop + torsoH * 0.45}, ${cx + waistHalfW + 3 * s} ${torsoTop + torsoH * 0.75}, ${cx + waistHalfW} ${torsoBottom - 4 * s}
-        Q ${cx + waistHalfW * 0.6} ${torsoBottom + 3 * s}, ${cx} ${torsoBottom + 3 * s}
-        Q ${cx - waistHalfW * 0.6} ${torsoBottom + 3 * s}, ${cx - waistHalfW} ${torsoBottom - 4 * s}
-        C ${cx - waistHalfW - 3 * s} ${torsoTop + torsoH * 0.75}, ${cx - shoulderHalfW - 2 * s} ${torsoTop + torsoH * 0.45}, ${cx - shoulderHalfW} ${torsoTop + 6 * s}
-        Z`,
-    fill: outfit,
-  }
-  const shirtInsert: CPart = {
-    kind: 'path',
-    d: `M ${cx - neckHalfW * 0.9} ${torsoTop + 1 * s}
-        L ${cx + neckHalfW * 0.9} ${torsoTop + 1 * s}
-        L ${cx + neckHalfW * 0.5} ${torsoTop + 10 * s}
-        Q ${cx} ${torsoTop + 13 * s}, ${cx - neckHalfW * 0.5} ${torsoTop + 10 * s}
-        Z`,
-    fill: SHIRT,
-  }
-  const clothing: CPart[] = [torsoOuter, shirtInsert]
-  if (style === 'masculine' && rng() > 0.35) {
-    clothing.push({
-      kind: 'path',
-      d: `M ${cx - 1.6 * s} ${torsoTop + 9 * s} L ${cx + 1.6 * s} ${torsoTop + 9 * s} L ${cx + 1 * s} ${torsoTop + 22 * s} L ${cx} ${torsoTop + 25 * s} L ${cx - 1 * s} ${torsoTop + 22 * s} Z`,
-      fill: accent,
-    })
-  }
-
-  const legGap = 6 * s
-  const legs: CPart[] = [
-    taperedLimb(cx - legGap, torsoBottom - 2 * s, groundY - 4 * s, 6 * s, 4.5 * s, 1 * s, accent),
-    taperedLimb(cx + legGap, torsoBottom - 2 * s, groundY - 4 * s, 6 * s, 4.5 * s, 1 * s, accent),
-  ]
-  const shoes: CPart[] = [
-    { kind: 'circle', cx: cx - legGap, cy: groundY - 3 * s, r: 4.5 * s, fill: SHOE },
-    { kind: 'circle', cx: cx + legGap, cy: groundY - 3 * s, r: 4.5 * s, fill: SHOE },
-  ]
-
-  const leftShoulderX = cx - shoulderHalfW * 0.85
-  const rightShoulderX = cx + shoulderHalfW * 0.85
-  const armTop = torsoTop + 5 * s
-
-  const leftArm: CPart = {
-    kind: 'group',
-    children: [
-      taperedLimb(leftShoulderX, armTop, armTop + 22 * s, 5 * s, 3.6 * s, 0.6 * s, outfit),
-      {
-        kind: 'circle',
-        cx: leftShoulderX,
-        cy: armTop + 24 * s,
-        r: 3.6 * s,
-        fill: SKIN_PLACEHOLDER,
-      },
-    ],
-  }
-  // The waving arm gets its own motion key (not the shared "wave" every
-  // other scene's gestureArm uses) so its easing can be tuned without
-  // touching those scenes before this rework is approved.
-  const rightArm: CPart = {
-    kind: 'group',
-    motion: 'waveSmooth',
-    originX: rightShoulderX,
-    originY: armTop,
-    children: [
-      taperedLimb(rightShoulderX, armTop - 20 * s, armTop, 3.6 * s, 5 * s, 0.6 * s, outfit),
-      { kind: 'circle', cx: rightShoulderX, cy: armTop - 22 * s, r: 4 * s, fill: SKIN_PLACEHOLDER },
-    ],
-  }
-
-  const eyeDy = -1 * s
-  const eyeDx = 7 * s
-  const eyeRy = 3.4 * s
-  const eyeRx = 2.6 * s
-  const face: CPart[] = [
-    // big filled eyes read as friendly/expressive rather than dot-like
-    { kind: 'circle', cx: cx - eyeDx, cy: headCy + eyeDy, r: eyeRy, fill: FACE },
-    { kind: 'circle', cx: cx + eyeDx, cy: headCy + eyeDy, r: eyeRy, fill: FACE },
-    // eyebrows
-    {
-      kind: 'path',
-      d: `M ${cx - eyeDx - eyeRx} ${headCy + eyeDy - eyeRy - 2 * s} q ${eyeRx} -2, ${eyeRx * 2} 0`,
-      stroke: FACE,
-      strokeWidth: 1.4 * s,
-    },
-    {
-      kind: 'path',
-      d: `M ${cx + eyeDx - eyeRx} ${headCy + eyeDy - eyeRy - 2 * s} q ${eyeRx} -2, ${eyeRx * 2} 0`,
-      stroke: FACE,
-      strokeWidth: 1.4 * s,
-    },
-    // filled open smile — a wave/greeting expression, not a thin stroke arc
-    {
-      kind: 'path',
-      d: `M ${cx - 6 * s} ${headCy + 8 * s} Q ${cx} ${headCy + 15 * s}, ${cx + 6 * s} ${headCy + 8 * s} Q ${cx} ${headCy + 12 * s}, ${cx - 6 * s} ${headCy + 8 * s} Z`,
-      fill: FACE,
-    },
-    // blush
-    {
-      kind: 'circle',
-      cx: cx - eyeDx - 1 * s,
-      cy: headCy + 6 * s,
-      r: 2.6 * s,
-      fill: BLUSH,
-      opacity: 0.4,
-    },
-    {
-      kind: 'circle',
-      cx: cx + eyeDx + 1 * s,
-      cy: headCy + 6 * s,
-      r: 2.6 * s,
-      fill: BLUSH,
-      opacity: 0.4,
+      strokeWidth: 1 * s,
     },
   ]
 
   // Eyelids sit over the eyes, normally scaled to nothing and periodically
   // scaling up to cover them — a cheap, high-life-to-effort periodic blink.
+  const lidR = 2.6 * s
   const blink: CPart = {
     kind: 'group',
     motion: 'blink',
@@ -689,18 +394,18 @@ function personChibi(opts: ChibiPersonOptions): CPart {
     children: [
       {
         kind: 'rect',
-        x: cx - eyeDx - eyeRy,
-        y: headCy + eyeDy - eyeRy,
-        w: eyeRy * 2,
-        h: eyeRy * 2,
+        x: cx - 4 * s - lidR,
+        y: headCy - lidR,
+        w: lidR * 2,
+        h: lidR * 2,
         fill: skin,
       },
       {
         kind: 'rect',
-        x: cx + eyeDx - eyeRy,
-        y: headCy + eyeDy - eyeRy,
-        w: eyeRy * 2,
-        h: eyeRy * 2,
+        x: cx + 4 * s - lidR,
+        y: headCy - lidR,
+        w: lidR * 2,
+        h: lidR * 2,
         fill: skin,
       },
     ],
@@ -709,7 +414,7 @@ function personChibi(opts: ChibiPersonOptions): CPart {
   const children: CPart[] = [
     ...legs,
     ...shoes,
-    ...clothing,
+    torso,
     leftArm,
     rightArm,
     { kind: 'circle', cx, cy: headCy, r: headR, fill: skin },
@@ -718,6 +423,8 @@ function personChibi(opts: ChibiPersonOptions): CPart {
     blink,
   ]
 
+  // A per-instance delay so multiple people on screen (team, boardroom)
+  // don't breathe in perfect lockstep — see the CPart.motionDelay comment.
   return withSkin(
     [{ kind: 'group', motion: 'breathe', motionDelay: rng() * 3.2, children }],
     skin
@@ -746,7 +453,7 @@ function sceneWave(
   style: PersonStyle,
   colors: [ColorKey, ColorKey]
 ): CPart[] {
-  const p = personChibi({
+  const p = person({
     cx: 185,
     groundY: 195,
     scale: 1.5,
@@ -754,9 +461,10 @@ function sceneWave(
     style,
     outfit: colors[0],
     accent: colors[1],
+    pose: 'wave',
     rng,
   })
-  return [p, greetingArcs(260, 65, colors[1])]
+  return [p, greetingArcs(255, 42, colors[1])]
 }
 
 function chartScreen(
@@ -971,9 +679,10 @@ function sceneHandshake(
     outfit: colors[1],
     accent: colors[0],
     pose: 'reach',
+    mirror: true,
     rng,
   })
-  const clasp: CPart = { kind: 'circle', cx: 200, cy: 152, r: 6, fill: skin, opacity: 0.9 }
+  const clasp: CPart = { kind: 'circle', cx: 218, cy: 128, r: 6, fill: skin, opacity: 0.9 }
   return [left, right, clasp]
 }
 
