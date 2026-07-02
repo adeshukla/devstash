@@ -282,28 +282,31 @@ function person(opts: PersonOptions): CPart {
   const headR = 14 * s
   const neckH = 3 * s
   const torsoH = 40 * s
-  const shoulderHalfW = 19 * s
-  const hipHalfW = 23 * s
+  const shoulderHalfW = 18 * s
+  const hipHalfW = 20 * s
   const torsoBottom = groundY - legH
   const torsoTop = torsoBottom - torsoH
   const headCy = torsoTop - neckH - headR
   const hairColor = rng() > 0.65 ? HAIR_ALT : HAIR
 
-  const neckHalfW = 6 * s
+  // Narrow neckline, straight diagonal tapers to the hips, one rounded
+  // bottom hem (a true semicircle since the arc radius equals half the
+  // chord width) — the trailing Z draws the left taper as a plain straight
+  // line back to the start point. Deliberately NOT a hand-tuned multi-point
+  // bezier: every segment here is a shape whose direction is unambiguous
+  // (a line, or an arc between two known points), so there's no room for a
+  // curve to bulge the wrong way.
   const torso: CPart = {
     kind: 'path',
-    d: `M ${cx - neckHalfW} ${torsoTop}
-        Q ${cx} ${torsoTop - 3 * s}, ${cx + neckHalfW} ${torsoTop}
-        C ${cx + shoulderHalfW * 0.7} ${torsoTop + 2 * s}, ${cx + shoulderHalfW} ${torsoTop + 10 * s}, ${cx + shoulderHalfW * 0.9} ${torsoTop + 18 * s}
-        C ${cx + hipHalfW * 1.02} ${torsoTop + torsoH * 0.55}, ${cx + hipHalfW} ${torsoBottom - 8 * s}, ${cx + hipHalfW * 0.65} ${torsoBottom}
-        Q ${cx} ${torsoBottom + 5 * s}, ${cx - hipHalfW * 0.65} ${torsoBottom}
-        C ${cx - hipHalfW} ${torsoBottom - 8 * s}, ${cx - hipHalfW * 1.02} ${torsoTop + torsoH * 0.55}, ${cx - shoulderHalfW * 0.9} ${torsoTop + 18 * s}
-        C ${cx - shoulderHalfW} ${torsoTop + 10 * s}, ${cx - shoulderHalfW * 0.7} ${torsoTop + 2 * s}, ${cx - neckHalfW} ${torsoTop}
+    d: `M ${cx - shoulderHalfW} ${torsoTop}
+        Q ${cx} ${torsoTop - 4 * s}, ${cx + shoulderHalfW} ${torsoTop}
+        L ${cx + hipHalfW} ${torsoBottom}
+        A ${hipHalfW} ${hipHalfW} 0 0 1 ${cx - hipHalfW} ${torsoBottom}
         Z`,
     fill: outfit,
   }
 
-  const shoulderY = torsoTop + 13 * s
+  const shoulderY = torsoTop + 10 * s
   const leftShoulderX = cx - shoulderHalfW * 0.75
   const rightShoulderX = cx + shoulderHalfW * 0.75
 
@@ -358,10 +361,18 @@ function person(opts: PersonOptions): CPart {
               outfit
             )
 
+  // The torso's rounded hip hem bulges down by hipHalfW at its very center,
+  // so starting the legs right at torsoBottom would mean the torso paints
+  // over most (or all) of the leg before it ever pokes out — reading as a
+  // gap between two disconnected shapes. Starting a few px inside the
+  // hem's actual curve (computed from the circle it traces, not guessed)
+  // guarantees the leg begins exactly where the hip silhouette ends.
   const legGap = 7 * s
+  const hipHemAtLeg = Math.sqrt(Math.max(hipHalfW * hipHalfW - legGap * legGap, 0))
+  const legTop = torsoBottom + hipHemAtLeg - 4 * s
   const legs: CPart[] = [
-    limb(cx - legGap, torsoBottom - 2 * s, cx - legGap, groundY - 4 * s, 7 * s, 5 * s, accent),
-    limb(cx + legGap, torsoBottom - 2 * s, cx + legGap, groundY - 4 * s, 7 * s, 5 * s, accent),
+    limb(cx - legGap, legTop, cx - legGap, groundY - 4 * s, 6 * s, 5 * s, accent),
+    limb(cx + legGap, legTop, cx + legGap, groundY - 4 * s, 6 * s, 5 * s, accent),
   ]
   const shoes: CPart[] = seated
     ? []

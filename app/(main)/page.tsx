@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildWebSiteSchema, buildPersonSchema } from '@/lib/schema/builders'
 import { HeroSection } from '@/components/sections/HeroSection'
 import { ProjectsGrid } from '@/components/sections/ProjectsGrid'
 import { FeaturedPosts } from '@/components/sections/FeaturedPosts'
-import { Reveal } from '@/components/ui'
+import { Reveal, Button } from '@/components/ui'
+import { Icon } from '@/components/icons/Icon'
 import { getAllProjects, getFeaturedProjects } from '@/lib/markdown/projects'
 import { getAllPosts, getFeaturedPosts } from '@/lib/markdown/blog'
 
@@ -50,20 +50,19 @@ export default function HomePage() {
               question? I&apos;d love to hear about it.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
-              <Link
-                href="/contact"
-                className="bg-ds-accent focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg inline-flex h-12 items-center justify-center rounded-xl px-6 text-[15px] font-semibold text-white transition-colors hover:bg-blue-400 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-              >
+              <Button href="/contact" size="lg" className="font-semibold">
                 Get in touch
-              </Link>
-              <a
+              </Button>
+              <Button
                 href="/resume-adesh-shukla.pdf"
                 download
                 data-analytics-event="cv_viewed"
-                className="border-ds-accent text-ds-accent hover:bg-ds-accent focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg inline-flex h-12 items-center justify-center gap-2.5 rounded-xl border px-6 text-[15px] font-medium transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                variant="outline"
+                size="lg"
+                iconRight={<Icon name="download" className="h-4 w-4" />}
               >
-                Download résumé ↓
-              </a>
+                Download résumé
+              </Button>
             </div>
           </div>
         </section>

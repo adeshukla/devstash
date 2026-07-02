@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils/cn'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { Button } from '@/components/ui/Button'
 
 interface NavItem {
   label: string
@@ -166,12 +167,9 @@ export function MobileNav({ items }: MobileNavProps) {
             >
               Download résumé ↓
             </a>
-            <Link
-              href="/contact"
-              className="bg-ds-accent flex h-11 w-full items-center justify-center rounded-lg text-[14px] font-semibold text-white transition-colors hover:bg-blue-400"
-            >
+            <Button href="/contact" className="w-full font-semibold">
               Contact
-            </Link>
+            </Button>
           </div>
         </div>
 

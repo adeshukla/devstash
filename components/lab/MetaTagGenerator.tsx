@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { Button } from '@/components/ui'
 import { CssCodeBlock } from './CssCodeBlock'
 import { draftFromContent } from './metaDraftEngine'
 
@@ -163,14 +164,15 @@ ${imageLines}<meta name="twitter:card" content="summary_large_image" />
             Local analysis + phrase composition, not an AI model call — drafts several options,
             cycle them with Shuffle.
           </p>
-          <button
+          <Button
             type="button"
             onClick={handleDraft}
             disabled={!content.trim()}
-            className="bg-ds-accent w-full shrink-0 rounded-lg px-4 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-40 sm:w-auto"
+            size="sm"
+            className="w-full sm:w-auto"
           >
             Draft title &amp; description
-          </button>
+          </Button>
         </div>
       </div>
 

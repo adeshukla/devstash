@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/Button'
 
 interface DeletePostButtonProps {
   slug: string
@@ -33,13 +34,16 @@ export function DeletePostButton({ slug }: DeletePostButtonProps) {
   }
 
   return (
-    <button
+    <Button
       type="button"
       onClick={handleDelete}
       disabled={pending}
-      className="border-ds-border text-ds-error hover:border-ds-error hover:bg-ds-error/10 focus-visible:ring-ds-error focus-visible:ring-offset-ds-bg inline-flex h-9 shrink-0 items-center justify-center rounded-lg border px-4 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-60"
+      loading={pending}
+      variant="danger"
+      size="sm"
+      className="shrink-0"
     >
       {pending ? 'Deleting…' : 'Delete'}
-    </button>
+    </Button>
   )
 }

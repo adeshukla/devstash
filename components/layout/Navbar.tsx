@@ -4,6 +4,7 @@ import { NavbarLinks } from './NavbarLinks'
 import { MobileNav } from './MobileNav'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { LogoMark } from '@/components/ui/LogoMark'
+import { Button } from '@/components/ui/Button'
 
 // ── Logo Mark ─────────────────────────────────────────────────
 function NavLogo() {
@@ -56,12 +57,9 @@ export function Navbar() {
           >
             Résumé ↓
           </a>
-          <Link
-            href="/contact"
-            className="bg-ds-accent ml-2 inline-flex h-9 items-center rounded-lg px-4 text-[13px] font-semibold text-white transition-colors hover:bg-blue-400"
-          >
+          <Button href="/contact" size="sm" className="ml-2 font-semibold">
             Contact
-          </Link>
+          </Button>
         </div>
 
         {/* Right — Mobile trigger (Client Component) */}

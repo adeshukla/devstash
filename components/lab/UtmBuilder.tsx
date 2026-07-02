@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Input } from '@/components/ui'
+import { Input, Button } from '@/components/ui'
 
 interface FieldState {
   url: string
@@ -134,14 +134,9 @@ export function UtmBuilder() {
             Fill in the URL and at least a source to see the tagged link here.
           </p>
         )}
-        <button
-          type="button"
-          onClick={handleCopy}
-          disabled={!result}
-          className="bg-ds-accent focus-visible:ring-ds-accent mt-4 inline-flex h-10 items-center justify-center rounded-lg px-5 text-sm font-medium text-white transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
-        >
+        <Button type="button" onClick={handleCopy} disabled={!result} className="mt-4">
           {copied ? 'Copied ✓' : 'Copy link'}
-        </button>
+        </Button>
       </div>
     </div>
   )

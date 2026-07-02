@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LogoMark } from '@/components/ui/LogoMark'
+import { Button } from '@/components/ui/Button'
 
 // ─── Monitor SVG Illustration ─────────────────────────────────
 function MonitorIllustration() {
@@ -346,58 +347,37 @@ export default function NotFound() {
 
             {/* Buttons */}
             <div className="flex flex-wrap gap-3 sm:flex-nowrap">
-              <Link
+              <Button
                 href="/"
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg text-sm font-medium text-white transition-colors"
-                style={{ background: '#3B82F6', fontFamily: 'var(--font-sans)', padding: '1rem' }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLAnchorElement).style.background = '#60A5FA')
-                }
-                onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLAnchorElement).style.background = '#3B82F6')
+                className="flex-1"
+                iconLeft={
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path
+                      d="M2 6.5L8 2l6 4.5V14a1 1 0 01-1 1H3a1 1 0 01-1-1V6.5z"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M6 15v-5h4v5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 }
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path
-                    d="M2 6.5L8 2l6 4.5V14a1 1 0 01-1 1H3a1 1 0 01-1-1V6.5z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M6 15v-5h4v5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                  />
-                </svg>
                 Go home
-              </Link>
+              </Button>
 
-              <button
+              <Button
+                type="button"
                 onClick={() => window.history.back()}
-                className="flex flex-1 items-center justify-center rounded-lg border px-5 py-[11px] text-sm transition-colors"
-                style={{
-                  background: 'transparent',
-                  borderColor: 'rgba(59,130,246,0.25)',
-                  color: '#9CA3AF',
-                  fontFamily: 'var(--font-mono)',
-                  cursor: 'pointer',
-                  padding: '1rem',
-                }}
-                onMouseEnter={(e) => {
-                  const btn = e.currentTarget
-                  btn.style.color = '#60A5FA'
-                  btn.style.borderColor = 'rgba(59,130,246,0.5)'
-                }}
-                onMouseLeave={(e) => {
-                  const btn = e.currentTarget
-                  btn.style.color = '#9CA3AF'
-                  btn.style.borderColor = 'rgba(59,130,246,0.25)'
-                }}
+                variant="outline"
+                className="flex-1 font-mono"
               >
                 ← go back
-              </button>
+              </Button>
             </div>
           </div>
         </div>
