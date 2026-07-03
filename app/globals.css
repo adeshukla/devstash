@@ -465,6 +465,14 @@ body {
   box-shadow: 0 10px 26px -8px color-mix(in srgb, var(--color-ds-error) 50%, transparent);
 }
 
+/* reCAPTCHA v3's floating badge is redundant with the visible disclosure
+   text ContactForm renders next to the submit button — Google's terms
+   allow hiding the badge as long as that text is shown, so this only
+   matters once NEXT_PUBLIC_RECAPTCHA_SITE_KEY is actually set. */
+.grecaptcha-badge {
+  visibility: hidden;
+}
+
 /* ── Respect users who prefer reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   *,

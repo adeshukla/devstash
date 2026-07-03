@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { Resend } from 'resend'
+import { verifyRecaptcha } from '@/lib/security/recaptcha'
+
+// Must match the `action` name grecaptcha.execute() is called with client-side.
+const RECAPTCHA_ACTION = 'contact_form'
 
 // ─── Zod schema ───────────────────────────────────────────────────────────────
 
@@ -15,6 +19,9 @@ const ContactSchema = z.object({
     .string()
     .min(20, 'Message must be at least 20 characters.')
     .max(5000, 'Message is too long.'),
+  // Absent until the client-side widget is wired up with a real site key —
+  // verifyRecaptcha() no-ops when RECAPTCHA_SECRET_KEY isn't set either way.
+  recaptchaToken: z.string().optional(),
 })
 
 // ─── Resend client (lazy init — only on server) ───────────────────────────────
@@ -52,7 +59,16 @@ export async function POST(request: Request) {
     )
   }
 
-  const { name, email, subject, message } = parsed.data
+  const { name, email, subject, message, recaptchaToken } = parsed.data
+
+  const recaptcha = await verifyRecaptcha(recaptchaToken, RECAPTCHA_ACTION)
+  if (!recaptcha.ok) {
+    console.warn('[contact/route] reCAPTCHA rejected submission:', recaptcha.reason)
+    return NextResponse.json(
+      { error: 'Could not verify you are human. Please try again.' },
+      { status: 403 }
+    )
+  }
 
   try {
     const resend = getResend()

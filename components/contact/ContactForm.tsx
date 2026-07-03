@@ -4,6 +4,28 @@ import { useState } from 'react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { trackAndLog, ANALYTICS_EVENTS } from '@/lib/analytics/events'
 
+// reCAPTCHA v3 (invisible) — the <Script> tag that loads the widget lives on
+// the contact page itself (mounts regardless of this form's internal state);
+// this just reads the already-loaded window.grecaptcha at submit time.
+// Resolves to undefined when no site key is configured yet, or the script
+// hasn't loaded — verifyRecaptcha() server-side no-ops in that case too.
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+const RECAPTCHA_ACTION = 'contact_form'
+
+async function getRecaptchaToken(): Promise<string | undefined> {
+  if (!RECAPTCHA_SITE_KEY || typeof window === 'undefined' || !window.grecaptcha) {
+    return undefined
+  }
+  return new Promise((resolve) => {
+    window.grecaptcha!.ready(() => {
+      window
+        .grecaptcha!.execute(RECAPTCHA_SITE_KEY, { action: RECAPTCHA_ACTION })
+        .then(resolve)
+        .catch(() => resolve(undefined))
+    })
+  })
+}
+
 interface FormState {
   status: 'idle' | 'loading' | 'success' | 'error'
   message: string
@@ -89,10 +111,11 @@ export function ContactForm() {
     setFormState({ status: 'loading', message: '' })
 
     try {
+      const recaptchaToken = await getRecaptchaToken()
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, recaptchaToken }),
       })
 
       const data = (await res.json()) as { message?: string; error?: string }
@@ -227,6 +250,32 @@ export function ContactForm() {
       >
         {isLoading ? 'Sending…' : 'Send Message'}
       </Button>
+
+      {/* Required by Google's reCAPTCHA terms whenever the badge is hidden
+          via CSS (see globals.css) instead of left visible. */}
+      {RECAPTCHA_SITE_KEY && (
+        <p className="text-ds-muted text-xs">
+          This site is protected by reCAPTCHA and the Google{' '}
+          <a
+            href="https://policies.google.com/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link-underline hover:text-ds-accent"
+          >
+            Privacy Policy
+          </a>{' '}
+          and{' '}
+          <a
+            href="https://policies.google.com/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link-underline hover:text-ds-accent"
+          >
+            Terms of Service
+          </a>{' '}
+          apply.
+        </p>
+      )}
     </form>
   )
 }

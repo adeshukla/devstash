@@ -1,10 +1,18 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { siteConfig } from '@/content/metadata/site.config'
 import { Breadcrumb } from '@/components/layout'
 import { ContactForm } from '@/components/contact/ContactForm'
 import { Reveal, Card, Separator } from '@/components/ui'
+
+// reCAPTCHA v3 site key is public by design (it's meant to be embedded in
+// client JS) — only renders once a real key is set, so the form works
+// exactly as before until then. afterInteractive (not lazyOnload) because
+// the token needs to be ready by the time someone submits, not just
+// eventually — unlike GA/Clarity this isn't fire-and-forget instrumentation.
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
 
 const title = 'Contact Adesh Shukla — Frontend Developer'
 const description =
@@ -45,6 +53,13 @@ const SOCIAL_LINKS = [
 export default function ContactPage() {
   return (
     <main>
+      {RECAPTCHA_SITE_KEY ? (
+        <Script
+          src={`https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`}
+          strategy="afterInteractive"
+        />
+      ) : null}
+
       {/* ── Header ── */}
       {/* Breadcrumb handles its own buildBreadcrumbSchema JsonLd internally */}
       <section className="border-ds-border border-b py-16">
