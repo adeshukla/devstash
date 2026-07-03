@@ -473,6 +473,24 @@ body {
   visibility: hidden;
 }
 
+/* AI Content Pipeline tour (components/lab/AiPipelineTour.tsx) — the slide
+   wrapper is keyed on step index so React remounts it on every step change,
+   which re-triggers this animation each time. Covered automatically by the
+   prefers-reduced-motion block below (animation-duration override). */
+.tour-slide-enter {
+  animation: tour-fade-in 200ms ease-out;
+}
+@keyframes tour-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ── Respect users who prefer reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   *,

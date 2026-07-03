@@ -9,7 +9,7 @@ import { useState } from 'react'
  * card here. No syntax highlighting library — this is plain CSS, a few
  * lines, monospace is enough.
  */
-export function CssCodeBlock({ code }: { code: string }) {
+export function CssCodeBlock({ code, label = 'CSS' }: { code: string; label?: string }) {
   const [copied, setCopied] = useState(false)
 
   async function handleCopy() {
@@ -21,7 +21,7 @@ export function CssCodeBlock({ code }: { code: string }) {
   return (
     <div className="border-ds-border bg-ds-surface2 relative overflow-hidden rounded-lg border">
       <div className="border-ds-border flex items-center justify-between border-b px-3 py-1.5">
-        <span className="text-ds-muted font-mono text-[11px] tracking-wide uppercase">CSS</span>
+        <span className="text-ds-muted font-mono text-[11px] tracking-wide uppercase">{label}</span>
         <button
           type="button"
           onClick={handleCopy}

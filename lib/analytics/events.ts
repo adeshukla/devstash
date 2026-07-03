@@ -12,6 +12,8 @@ export const ANALYTICS_EVENTS = {
   githubLinkClicked: 'github_link_clicked',
   blogPostRead: 'blog_post_read',
   resourceClicked: 'resource_clicked',
+  aiPipelineRun: 'ai_pipeline_run',
+  aiPipelineTourCompleted: 'ai_pipeline_tour_completed',
 } as const
 
 export type AnalyticsEvent = (typeof ANALYTICS_EVENTS)[keyof typeof ANALYTICS_EVENTS]
