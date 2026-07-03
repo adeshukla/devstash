@@ -491,6 +491,22 @@ body {
   }
 }
 
+/* Exit-intent offer (components/layout/ExitIntentOffer.tsx) — corner slide-in,
+   covered automatically by the prefers-reduced-motion block below. */
+.exit-offer-enter {
+  animation: exit-offer-slide-in 300ms ease-out;
+}
+@keyframes exit-offer-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ── Respect users who prefer reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   *,
