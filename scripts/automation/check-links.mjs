@@ -21,6 +21,7 @@ import matter from 'gray-matter'
 // --- Paths ------------------------------------------------------------------
 
 const CWD = process.cwd()
+const APP_DIR = path.join(CWD, 'app')
 const BLOG_DIR = path.join(CWD, 'content', 'blogs')
 const PROJECTS_DIR = path.join(CWD, 'content', 'projects')
 const PUBLIC_DIR = path.join(CWD, 'public')
@@ -30,19 +31,39 @@ const PUBLIC_DIR = path.join(CWD, 'public')
 const CHECK_EXTERNAL = process.argv.slice(2).includes('--external')
 const EXTERNAL_TIMEOUT_MS = 10_000
 
-// --- Known static routes (mirror of app/(main) route tree) ------------------
+// --- Static routes, derived from the app/ directory (never hand-maintained) -
 
-const STATIC_ROUTES = [
-  '/',
-  '/about',
-  '/projects',
-  '/blog',
-  '/resources',
-  '/tools',
-  '/contact',
-  '/privacy',
-  '/terms',
-]
+/**
+ * Walk app/ and collect every route that resolves from a literal (non-dynamic)
+ * page.{tsx,jsx,mdx}. Route groups ("(main)", "(lab)", etc.) are stripped, as
+ * are api/ and any segment containing "[" (dynamic — those are enumerated
+ * separately from content, e.g. blog/project slugs).
+ */
+function discoverStaticRoutes(dir = APP_DIR, segments = []) {
+  const routes = []
+  if (!fs.existsSync(dir)) return routes
+
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue
+    if (entry.name === 'api') continue
+    if (entry.name.includes('[')) continue
+
+    const isGroup = entry.name.startsWith('(') && entry.name.endsWith(')')
+    const nextSegments = isGroup ? segments : [...segments, entry.name]
+    const childDir = path.join(dir, entry.name)
+
+    const hasPage = ['page.tsx', 'page.jsx', 'page.mdx'].some((f) =>
+      fs.existsSync(path.join(childDir, f))
+    )
+    if (hasPage) routes.push('/' + nextSegments.join('/'))
+
+    routes.push(...discoverStaticRoutes(childDir, nextSegments))
+  }
+
+  return routes
+}
+
+const STATIC_ROUTES = ['/', ...discoverStaticRoutes()]
 
 // --- Minimal ANSI helpers (no dependency) -----------------------------------
 
@@ -124,16 +145,26 @@ function buildRouteSet() {
 }
 
 /**
+ * Strip fenced code blocks (```...```) and inline code (`...`) so example
+ * syntax like `href="your-hero-image.webp"` in a code sample isn't mistaken
+ * for a real link.
+ */
+function stripCode(content) {
+  return content.replace(/```[\s\S]*?```/g, '').replace(/`[^`\n]*`/g, '')
+}
+
+/**
  * Extract all candidate hrefs from a post body (markdown links + html href="").
  */
 function extractLinks(content) {
   const hrefs = []
+  const prose = stripCode(content)
   const markdown = /\[[^\]]*\]\(([^)\s]+)\)/g
   const htmlHref = /href=["']([^"']+)["']/g
 
   let m
-  while ((m = markdown.exec(content)) !== null) hrefs.push(m[1])
-  while ((m = htmlHref.exec(content)) !== null) hrefs.push(m[1])
+  while ((m = markdown.exec(prose)) !== null) hrefs.push(m[1])
+  while ((m = htmlHref.exec(prose)) !== null) hrefs.push(m[1])
 
   return hrefs
 }

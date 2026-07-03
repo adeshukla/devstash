@@ -9,6 +9,8 @@
     "lint": "echo 'Lint configured in Phase 1'",
     "lint:content": "node scripts/seo/check-metadata.mjs",
     "check:links": "node scripts/automation/check-links.mjs",
+    "check:env-example": "node scripts/security/check-env-example.mjs",
+    "audit:deps": "pnpm audit --audit-level=high",
     "prepare": "husky"
   },
   "dependencies": {

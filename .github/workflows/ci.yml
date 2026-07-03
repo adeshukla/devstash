@@ -50,6 +50,39 @@ jobs:
       - name: Check internal links
         run: pnpm check:links
 
+  security:
+    name: Security Checks
+    runs-on: ubuntu-latest
+    steps:
+      # Shallow checkout (default depth) on purpose: gitleaks scans the git
+      # history it can see. Known-old, already-rotated secrets from before
+      # this job existed live deeper in history (see CLAUDE.md Known Issues);
+      # re-flagging those forever without a history rewrite isn't useful, so
+      # this job is scoped to catching *new* leaks in the current commit.
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: .env.example must not contain real secrets
+        run: pnpm check:env-example
+
+      - name: Dependency vulnerability audit (high/critical)
+        run: pnpm audit:deps
+
+      - name: Scan for leaked secrets (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build:
     name: Build Check
     runs-on: ubuntu-latest
