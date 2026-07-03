@@ -17,6 +17,7 @@ export interface StepMetrics {
   promptTokens: number
   completionTokens: number
   latencyMs: number
+  provider: string
 }
 
 export interface PipelineMetrics {

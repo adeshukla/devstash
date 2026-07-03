@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { z } from 'zod'
-import { callGroq, GroqCallError } from '@/lib/ai/groq'
+import { callGroq, callWithFallback, hasAnyProviderConfigured, GroqCallError } from '@/lib/ai/groq'
 import { AI_TELL_PHRASES, countAiTellPhrases } from '@/lib/ai/aiTellPhrases'
 import { BLOG_CATEGORIES } from '@/types/blog'
 import type { PipelineMetrics, DemoFrontmatter } from '@/types/aiPipeline'
@@ -133,19 +133,25 @@ export async function POST(request: Request) {
     )
   }
 
-  const apiKey = userApiKey ?? process.env.GROQ_API_KEY
-  if (!apiKey) {
-    // Server has no key configured and the visitor didn't supply one — same
-    // signal as the cap being hit, since the free tier is simply unavailable.
+  if (!userApiKey && !hasAnyProviderConfigured()) {
+    // Server has no provider configured and the visitor didn't supply a key —
+    // same signal as the cap being hit, since the free tier is unavailable.
     return NextResponse.json(
       { error: 'This demo needs a Groq API key. Paste your own to try it.', requiresByok: true },
       { status: 409 }
     )
   }
 
+  // BYOK always targets Groq directly with the visitor's key; the free tier
+  // tries each configured provider in order, falling back automatically.
+  const runStep = (
+    messages: Parameters<typeof callGroq>[1],
+    options?: Parameters<typeof callGroq>[2]
+  ) => (userApiKey ? callGroq(userApiKey, messages, options) : callWithFallback(messages, options))
+
   try {
     // ── Step 1: draft ──
-    const draftResult = await callGroq(apiKey, [
+    const draftResult = await runStep([
       {
         role: 'system',
         content: 'You are a technical writer producing a blog post draft for developers.',
@@ -162,7 +168,7 @@ Output plain text only, no markdown frontmatter, no JSON.`,
     ])
 
     // ── Step 2: humanize ──
-    const humanizeResult = await callGroq(apiKey, [
+    const humanizeResult = await runStep([
       {
         role: 'system',
         content:
@@ -184,8 +190,7 @@ ${draftResult.content}
     ])
 
     // ── Step 3: SEO frontmatter JSON (with deterministic fallback) ──
-    const frontmatterResult = await callGroq(
-      apiKey,
+    const frontmatterResult = await runStep(
       [
         {
           role: 'system',
@@ -226,16 +231,19 @@ ${humanizeResult.content}
         promptTokens: draftResult.promptTokens,
         completionTokens: draftResult.completionTokens,
         latencyMs: draftResult.latencyMs,
+        provider: draftResult.provider,
       },
       humanize: {
         promptTokens: humanizeResult.promptTokens,
         completionTokens: humanizeResult.completionTokens,
         latencyMs: humanizeResult.latencyMs,
+        provider: humanizeResult.provider,
       },
       frontmatter: {
         promptTokens: frontmatterResult.promptTokens,
         completionTokens: frontmatterResult.completionTokens,
         latencyMs: frontmatterResult.latencyMs,
+        provider: frontmatterResult.provider,
       },
       totalLatencyMs:
         draftResult.latencyMs + humanizeResult.latencyMs + frontmatterResult.latencyMs,

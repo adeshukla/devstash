@@ -27,12 +27,24 @@ function highlightAiTellPhrases(text: string) {
   )
 }
 
-function MetricCard({ label, tokens, ms }: { label: string; tokens: number; ms: number }) {
+function MetricCard({
+  label,
+  tokens,
+  ms,
+  provider,
+}: {
+  label: string
+  tokens: number
+  ms: number
+  provider: string
+}) {
   return (
     <div className="border-ds-border bg-ds-surface2 rounded-lg border p-3">
       <p className="text-ds-muted mb-1 font-mono text-[11px] tracking-wide uppercase">{label}</p>
       <p className="text-ds-text text-sm font-medium">{tokens} tokens</p>
-      <p className="text-ds-muted text-xs">{ms}ms</p>
+      <p className="text-ds-muted text-xs">
+        {ms}ms · via {provider}
+      </p>
     </div>
   )
 }
@@ -50,16 +62,19 @@ export function AiPipelineResults({ result }: { result: PipelineResponse }) {
             label="Draft"
             tokens={metrics.draft.promptTokens + metrics.draft.completionTokens}
             ms={metrics.draft.latencyMs}
+            provider={metrics.draft.provider}
           />
           <MetricCard
             label="Humanize"
             tokens={metrics.humanize.promptTokens + metrics.humanize.completionTokens}
             ms={metrics.humanize.latencyMs}
+            provider={metrics.humanize.provider}
           />
           <MetricCard
             label="Frontmatter"
             tokens={metrics.frontmatter.promptTokens + metrics.frontmatter.completionTokens}
             ms={metrics.frontmatter.latencyMs}
+            provider={metrics.frontmatter.provider}
           />
         </div>
         <p className="text-ds-muted mt-3 text-xs">
