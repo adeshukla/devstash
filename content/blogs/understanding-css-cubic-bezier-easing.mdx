@@ -1,20 +1,26 @@
 ---
 title: 'Understanding CSS cubic-bezier(): A Visual Guide'
-slug: 'understanding-css-cubic-bezier-easing'
-description: 'What cubic-bezier() actually controls, why the built-in easing keywords look different from each other, and how to read or build your own custom curve.'
-author: 'Adesh Shukla'
+slug: understanding-css-cubic-bezier-easing
+description: >-
+  What cubic-bezier() actually controls, why the built-in easing keywords look
+  different from each other, and how to read or build your own custom curve.
+author: Adesh Shukla
 createdAt: '2026-07-03'
-updatedAt: '2026-07-03'
-category: 'tutorials'
-tags: ['css', 'animation', 'easing', 'tutorials']
-featuredImage: '/images/blog/understanding-css-cubic-bezier-easing.webp'
+updatedAt: '2026-07-07'
+category: tutorials
+tags:
+  - css
+  - animation
+  - easing
+  - tutorials
+featuredImage: ''
 readingTime: 6
 canonical: 'https://devstash.me/blog/understanding-css-cubic-bezier-easing'
 draft: false
 featured: false
 ---
 
-Every `transition` and `animation` you've written has a timing function attached to it, even if you never typed one — `ease` is the default. Most of the time that's fine and you move on. But the moment you need something that feels less generic — a button that overshoots slightly before settling, a card that snaps in fast and eases out slow — `ease-in-out` stops being enough, and `cubic-bezier(x1, y1, x2, y2)` is the only built-in way to get there without a library.
+Every `transition` and `animation` you've written has a timing function attached to it, even if you never typed one — `ease` is the default. Most of the time that's fine and you move on. But the moment you need something that feels less generic — a button that overshoots slightly before settling, or a card that snaps in fast and eases out slowly — `ease-in-out` stops being can start to feel limiting. For many UI transitions, `cubic-bezier(x1, y1, x2, y2)` gives you direct control over how the motion accelerates and decelerates without reaching for an animation library.
 
 ## What the four numbers actually are
 
@@ -38,9 +44,9 @@ That's the exact curve `ease-in-out` expands to. Here's what the five built-in k
 
 Reading these directly is genuinely hard — nobody looks at `0.25, 0.1, 0.25, 1` and pictures the curve. That's what a visual editor is for: drag the two control points and watch the curve (and the animation it drives) change in real time. I built one into this site's [CSS Shapes & Animation Playground](/lab/css-shapes-playground) for exactly that reason — every animated demo on that page lets you pick a preset easing or drag your own curve and see the `cubic-bezier()` output update live.
 
-## The x-axis is clamped, the y-axis isn't
+## The x-axis is restricted, the y-axis isn't
 
-This is the detail that trips people up: **x1 and x2 must be between 0 and 1** — CSS will clamp or reject values outside that range, because x represents time, and time can't run backwards or past the end of the animation. **y1 and y2 have no such limit.** A y value greater than 1 or less than 0 is completely valid, and it's how you get overshoot.
+This is the detail that trips people up: x1 and x2 must stay between 0 and 1. Values outside that range make the `cubic-bezier()` easing function invalid. The reason is that the x-axis represents input progress through time, so the curve needs to map each moment in the animation to a single progress value. **y1 and y2 have no such limit.** A y value greater than 1 or less than 0 is completely valid, and it's how you get overshoot.
 
 ```css
 /* "Back" easing — overshoots past 100% before settling */
@@ -63,12 +69,13 @@ If you're staring at four numbers and need a rough mental model without opening 
 None of that replaces actually looking at the curve, but it's usually enough to guess whether you want to nudge a value up or down.
 
 <Callout type="info" title="When to reach for something other than cubic-bezier()">
-  A single cubic bezier curve is monotonic in the sense that it's one continuous easing shape for
-  the whole transition — it can't express a real spring (bounce that settles over multiple
-  oscillations) or a curve that depends on velocity at interrupt time. For that, you're looking at
-  the Web Animations API, `linear()` (the newer CSS function that accepts a list of stops for
-  piecewise easing), or a JS animation library. `cubic-bezier()` covers the large majority of UI
-  easing needs — bounce/spring effects are the actual edge case.
+  A single `cubic-bezier()` gives you one continuous easing curve for the whole transition. It can create acceleration, deceleration, anticipation, and overshoot, but it cannot model a true physics-based spring that reacts dynamically to velocity or interruption.
+<br />
+
+For more complex motion, you might use CSS keyframes, the Web Animations API, `linear()` for multi-point easing curves, or a JavaScript animation library with spring physics.
+<br />
+
+For most everyday UI transitions — buttons, cards, menus, modals, and hover states — `cubic-bezier()` is often more than enough. True spring behavior and interruption-aware motion are different problems and usually need a different approach.
 </Callout>
 
 ## A few curves worth keeping around
