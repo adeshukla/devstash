@@ -68,11 +68,9 @@ export default function AboutPage() {
             <div>
               <p className="text-ds-accent mb-3 font-mono text-sm">{'// about'}</p>
               <h1 className="text-ds-text text-4xl font-bold tracking-tight sm:text-5xl">
-                {/* TODO: Finalise headline */}
                 Hey, I&apos;m Adesh.
               </h1>
               <div className="text-ds-muted mt-6 flex max-w-2xl flex-col gap-4 text-lg leading-relaxed">
-                {/* TODO: Update bio with final copy */}
                 <p>
                   Frontend developer with a designer&apos;s eye and an automation enthusiast&apos;s
                   brain. I&apos;ve been building for the web for 6+ years — from Figma mockups to

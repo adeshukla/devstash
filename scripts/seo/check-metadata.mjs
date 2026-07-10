@@ -29,7 +29,9 @@ const REQUIRED = [
   'updatedAt',
   'category',
   'tags',
-  'featuredImage',
+  // featuredImage is intentionally optional: when absent (or pointing at a
+  // missing file) the blog card + post page fall back to a generated,
+  // on-brand CategoryIllustration. Existence is still warned on below when set.
   'readingTime',
   'canonical',
   'draft',

@@ -7,7 +7,10 @@ export const siteConfig = {
   title: 'DevStash — Modern Developer Ecosystem',
   description:
     'A modern developer ecosystem showcasing engineering, automation, AI workflows, frontend systems, and developer resources.',
-  ogImage: '/og/default.png',
+  // Dynamic, branded default OG card (edge route). No static /og/default.png
+  // exists — every page builds its own via buildOgImageUrl(), so this is only
+  // a last-resort fallback and must point at something that actually resolves.
+  ogImage: '/api/og',
   twitterHandle: '@devstash_me',
   author: {
     name: 'Adesh Shukla',
