@@ -95,7 +95,7 @@ export function HeroSection() {
                 {(
                   [
                     { label: 'Years Frontend Eng', value: '6+' },
-                    { label: 'Landing Pages Shipped', value: '200+' },
+                    { label: 'Live Projects', value: '8' },
                     { label: 'Lighthouse Avg Score', value: '90+' },
                   ] as const
                 ).map(({ label, value }) => (
