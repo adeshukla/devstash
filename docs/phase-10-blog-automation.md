@@ -163,6 +163,12 @@ Add a Slack/Telegram/email node: "📝 Draft ready: `<slug>` — review at
 
 ## 4. The Groq prompt (paste into the LLM node)
 
+> **Upgrade available:** the single-call prompt below has no web access, so any
+> "trending"/version/stat claim is a guess. For a research-grounded version that
+> adds a `groq/compound` web-search step + a `gpt-oss-120b` QA pass before the
+> post is written, see **`docs/phase-10-research-grounded-pipeline.md`**. It
+> keeps this same JSON contract and `/api/admin/posts` target.
+
 **System message:**
 
 ```
