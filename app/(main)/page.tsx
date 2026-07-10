@@ -38,6 +38,29 @@ export default function HomePage() {
       {/* Latest writing (renders nothing if there are no posts) — cards reveal individually */}
       <FeaturedPosts posts={posts} />
 
+      {/* Lab teaser — surfaces the interactive demos (the strongest differentiator) */}
+      <Reveal>
+        <section className="border-ds-border border-t py-20">
+          <div className="mx-auto max-w-5xl px-6">
+            <div className="border-ds-border bg-ds-surface flex flex-col items-start gap-6 rounded-2xl border p-8 sm:flex-row sm:items-center sm:justify-between sm:p-10">
+              <div className="max-w-xl">
+                <p className="text-ds-accent font-mono text-sm">{'// lab'}</p>
+                <h2 className="text-ds-text mt-2 text-2xl font-bold tracking-tight">
+                  Play with what I&apos;ve built
+                </h2>
+                <p className="text-ds-muted mt-3 leading-relaxed">
+                  A live AI content pipeline, CSS &amp; SVG generators, SEO tooling, and
+                  conversion-focused landing-page samples — all running in your browser, no signup.
+                </p>
+              </div>
+              <Button href="/lab" size="lg" className="shrink-0 font-semibold">
+                Explore the Lab →
+              </Button>
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
       {/* Closing CTA */}
       <Reveal>
         <section className="border-ds-border bg-ds-surface border-t py-20">

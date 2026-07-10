@@ -9,10 +9,10 @@ export default function LabLayout({ children }: { children: ReactNode }) {
       {children}
       <div className="fixed bottom-4 left-4 z-50">
         <Link
-          href="/projects"
+          href="/lab"
           className="border-ds-border bg-ds-surface/90 text-ds-muted hover:border-ds-accent hover:text-ds-accent inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-xs backdrop-blur transition-colors"
         >
-          ← devstash.me sample
+          ← devstash.me/lab
         </Link>
       </div>
     </>

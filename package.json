@@ -11,6 +11,7 @@
     "check:links": "node scripts/automation/check-links.mjs",
     "check:env-example": "node scripts/security/check-env-example.mjs",
     "audit:deps": "pnpm audit --audit-level=high",
+    "submit:sitemap": "node scripts/indexing/submit-sitemap.mjs",
     "prepare": "husky"
   },
   "dependencies": {

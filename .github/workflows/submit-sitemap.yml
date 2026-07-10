@@ -1,0 +1,39 @@
+name: Submit Sitemap
+
+# Runs on every push to main (i.e. every production deploy) and nudges Google
+# Search Console to re-crawl the sitemap. Also runnable on demand.
+#
+# Requires two repo secrets (Settings → Secrets and variables → Actions):
+#   GSC_SERVICE_ACCOUNT_JSON  — the full service-account JSON key
+#   GSC_PROPERTY              — sc-domain:devstash.me  (or https://devstash.me/)
+# See scripts/indexing/submit-sitemap.mjs for the one-time setup steps.
+# Without the secrets the job still runs and simply skips (never fails).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  submit:
+    name: Submit sitemap to Search Console
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Give Vercel's production deploy time to go live so the sitemap Google
+      # fetches reflects the URLs from this push. Sitemap fetch is async anyway,
+      # so this just improves the odds it sees the newest content first pass.
+      - name: Wait for production deploy
+        run: sleep 90
+
+      - name: Submit sitemap
+        run: node scripts/indexing/submit-sitemap.mjs
+        env:
+          NEXT_PUBLIC_SITE_URL: https://devstash.me
+          GSC_PROPERTY: ${{ secrets.GSC_PROPERTY }}
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
