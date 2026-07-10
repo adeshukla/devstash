@@ -12,6 +12,8 @@
     "check:env-example": "node scripts/security/check-env-example.mjs",
     "audit:deps": "pnpm audit --audit-level=high",
     "submit:sitemap": "node scripts/indexing/submit-sitemap.mjs",
+    "submit:indexnow": "node scripts/indexing/submit-indexnow.mjs",
+    "test:smoke": "playwright test",
     "prepare": "husky"
   },
   "dependencies": {
@@ -34,6 +36,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
     "@next/eslint-plugin-next": "^16.2.9",
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4.3.1",
     "@types/mdx": "^2.0.14",
     "@types/node": "^20.19.43",

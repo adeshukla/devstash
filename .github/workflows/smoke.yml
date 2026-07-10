@@ -1,0 +1,54 @@
+name: Smoke Tests
+
+# Runs after a successful *production* Vercel deployment and smoke-tests the live
+# production domain. Catches runtime failures a green build can still ship — a
+# route that 500s, a page that throws on render, a missing API route.
+#
+# Why production only: preview/staging deployments sit behind Vercel Deployment
+# Protection (an auth wall that answers 200 with a login page), so smoke tests
+# there would test the wall, not the site. Production (devstash.me) is public.
+# To smoke a protected preview instead, set up a Vercel "Protection Bypass for
+# Automation" token and send it as an x-vercel-protection-bypass header.
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'URL to smoke test'
+        required: false
+        default: 'https://devstash.me'
+
+jobs:
+  smoke:
+    name: Post-deploy smoke
+    # Manual dispatch, or a successful Production deployment only.
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+      (github.event.deployment_status.environment == 'Production' ||
+      github.event.deployment_status.environment == 'production')) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright (chromium)
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run smoke tests
+        run: pnpm test:smoke
+        env:
+          # Test the stable, unprotected production domain (not the ephemeral,
+          # possibly-protected deployment target_url). For manual runs, honor the
+          # dispatch input.
+          SMOKE_BASE_URL: ${{ inputs.base_url || 'https://devstash.me' }}

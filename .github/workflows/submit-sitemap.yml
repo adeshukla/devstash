@@ -1,13 +1,15 @@
-name: Submit Sitemap
+name: Notify Search Engines
 
-# Runs on every push to main (i.e. every production deploy) and nudges Google
-# Search Console to re-crawl the sitemap. Also runnable on demand.
+# Runs on every push to main (i.e. every production deploy) and notifies search
+# engines the site changed: Google via the Search Console API, and everyone else
+# (Bing, Yandex, Seznam, …) via IndexNow. Also runnable on demand.
 #
-# Requires two repo secrets (Settings → Secrets and variables → Actions):
+# IndexNow needs nothing — its key is public (public/<key>.txt).
+# Google needs two repo secrets (Settings → Secrets and variables → Actions):
 #   GSC_SERVICE_ACCOUNT_JSON  — the full service-account JSON key
 #   GSC_PROPERTY              — sc-domain:devstash.me  (or https://devstash.me/)
 # See scripts/indexing/submit-sitemap.mjs for the one-time setup steps.
-# Without the secrets the job still runs and simply skips (never fails).
+# Without the secrets the Google step simply skips (never fails).
 
 on:
   push:
@@ -31,9 +33,14 @@ jobs:
       - name: Wait for production deploy
         run: sleep 90
 
-      - name: Submit sitemap
+      - name: Submit sitemap to Google Search Console
         run: node scripts/indexing/submit-sitemap.mjs
         env:
           NEXT_PUBLIC_SITE_URL: https://devstash.me
           GSC_PROPERTY: ${{ secrets.GSC_PROPERTY }}
           GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+
+      - name: Notify IndexNow (Bing, Yandex, …)
+        run: node scripts/indexing/submit-indexnow.mjs
+        env:
+          NEXT_PUBLIC_SITE_URL: https://devstash.me
