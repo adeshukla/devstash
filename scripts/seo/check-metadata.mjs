@@ -147,12 +147,18 @@ function validate(data, { errors, warnings, seenSlugs }) {
     }
   }
 
-  // featuredImage file existence under /public.
+  // featuredImage file existence under /public. Normalize the same way
+  // lib/markdown/blog.ts resolvePublicImage() does (tolerate a leading slash,
+  // a missing one, or a `public/` prefix) so the linter agrees with what the
+  // site will actually render. http(s) URLs are skipped — unsupported anyway.
   if (typeof data.featuredImage === 'string' && data.featuredImage.trim()) {
-    const rel = data.featuredImage.replace(/^\//, '')
-    const abs = path.join(PUBLIC_DIR, rel)
-    if (!fs.existsSync(abs)) {
-      warnings.push(`featuredImage not found under /public: ${data.featuredImage}`)
+    const raw = data.featuredImage.trim()
+    if (!/^https?:\/\//i.test(raw)) {
+      const rel = raw.replace(/^\/+/, '').replace(/^public\//, '')
+      const abs = path.join(PUBLIC_DIR, rel)
+      if (!fs.existsSync(abs)) {
+        warnings.push(`featuredImage not found under /public: ${data.featuredImage}`)
+      }
     }
   }
 }

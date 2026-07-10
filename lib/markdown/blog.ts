@@ -6,11 +6,29 @@ import { type BlogPost, type BlogCategory } from '@/types/blog'
 
 const BLOGS_DIR = path.join(process.cwd(), 'content/blogs')
 
-/** Returns the path only if the file actually exists in /public. */
+/**
+ * Normalize a frontmatter `featuredImage` into a valid, public-relative URL —
+ * or '' if it can't be resolved (callers then fall back to the generated
+ * CategoryIllustration).
+ *
+ * Tolerates the common ways the path gets written by hand or by the admin
+ * editor: a leading slash, a missing leading slash, or a `public/` prefix all
+ * resolve to the same `/images/...` URL. This matters because next/image
+ * throws when a local `src` doesn't start with a leading slash, so returning
+ * the raw string unchanged (as this used to) turned a small typo into a
+ * render-time crash on the blog list / homepage.
+ *
+ * External http(s) URLs return '' on purpose: no next/image remote host is
+ * configured, so the illustration fallback is safer than a src next/image
+ * would reject.
+ */
 function resolvePublicImage(imagePath: string): string {
-  if (!imagePath) return ''
-  const abs = path.join(process.cwd(), 'public', imagePath.replace(/^\//, ''))
-  return fs.existsSync(abs) ? imagePath : ''
+  const raw = imagePath.trim()
+  if (!raw) return ''
+  if (/^https?:\/\//i.test(raw)) return ''
+  const normalized = raw.replace(/^\/+/, '').replace(/^public\//, '')
+  const abs = path.join(process.cwd(), 'public', normalized)
+  return fs.existsSync(abs) ? `/${normalized}` : ''
 }
 
 function parsePost(fileName: string): BlogPost | null {
