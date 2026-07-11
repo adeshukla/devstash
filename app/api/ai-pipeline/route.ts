@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { z } from 'zod'
 import { callGroq, callWithFallback, hasAnyProviderConfigured, GroqCallError } from '@/lib/ai/groq'
 import { AI_TELL_PHRASES, countAiTellPhrases } from '@/lib/ai/aiTellPhrases'
+import { countHumanInputMarkers } from '@/lib/ai/humanInputMarkers'
 import { BLOG_CATEGORIES } from '@/types/blog'
 import type { PipelineMetrics, DemoFrontmatter } from '@/types/aiPipeline'
 
@@ -150,36 +151,61 @@ export async function POST(request: Request) {
   ) => (userApiKey ? callGroq(userApiKey, messages, options) : callWithFallback(messages, options))
 
   try {
-    // ── Step 1: draft ──
+    // ── Step 1: scaffold (honest first draft) ──
+    // NOT a "write the whole post" pass. An 8B model asked to "use real code
+    // examples" will happily hallucinate code that doesn't run and invent
+    // metrics/anecdotes — which reads as AI AND is dishonest (violates the
+    // project's no-hallucination rule). So the scaffold writes only what it can
+    // be correct about (accurate concept prose + standard, verifiable code) and
+    // leaves [TODO: ...] placeholders wherever the post needs the author's real,
+    // first-hand substance. The human fills those in before publishing.
     const draftResult = await runStep([
       {
         role: 'system',
-        content: 'You are a technical writer producing a blog post draft for developers.',
+        content:
+          'You are a technical writer producing an honest first-draft scaffold of a blog post for developers. You never fabricate code, benchmarks, metrics, results, opinions, or personal experience.',
       },
       {
         role: 'user',
-        content: `Write a technical blog post for developers about "${topic}".
-Target keywords to naturally include: ${keywords.join(', ') || 'none specified'}.
+        content: `Write a first-draft scaffold of a technical blog post for developers about "${topic}".
+Target keywords to include naturally: ${keywords.join(', ') || 'none specified'}.
 Tone: ${tone}.
 Target length: approximately ${targetLength} words.
-Use real, concrete code examples where relevant. No fluff, no generic filler intros.
-Output plain text only, no markdown frontmatter, no JSON.`,
+
+Rules:
+- Explain the real concepts accurately. General, verifiable technical knowledge is welcome and should be genuinely useful — not filler.
+- Include a code example only when it is short, standard, and you are confident it is correct and runnable exactly as written (e.g. documented usage of a well-known library, or a basic language feature). Keep snippets minimal and idiomatic.
+- NEVER invent code that depends on the author's own project, private APIs, results, or setup, and never write code you are not sure runs. Where a real example from the author's own work would be more valuable, insert a placeholder on its own line instead: [TODO: your real, tested code — what it should show].
+- NEVER fabricate performance numbers, benchmarks, metrics, personal anecdotes, opinions, or results. Insert a placeholder instead: [TODO: the real number / experience needed].
+- Use [TODO: ...] placeholders wherever the post would be stronger with the author's first-hand substance. An honest placeholder is always better than an invented fact.
+- No generic filler intros or outros, no empty hedging.
+
+Output plain text only. No markdown frontmatter, no JSON.`,
       },
     ])
 
-    // ── Step 2: humanize ──
+    // ── Step 2: de-cliché copy-edit ──
+    // NOT a "pretend to be a person" pass. It strips AI-writing tics and tightens
+    // rhythm WITHOUT inventing opinions, anecdotes, or first-hand experience —
+    // fabricated voice both reads as fake and still trips AI detectors, and it
+    // would violate the project's no-hallucination rule. Genuine voice is added
+    // by a human editing step afterwards, not manufactured here.
     const humanizeResult = await runStep([
       {
         role: 'system',
         content:
-          'You rewrite AI-drafted technical content so it reads like a real developer wrote it.',
+          'You are a copy-editor that removes AI-writing tics from technical content without changing its meaning or inventing anything new.',
       },
       {
         role: 'user',
-        content: `Rewrite the following draft so it sounds like a real developer wrote it, not an AI.
-Avoid these phrases entirely: ${AI_TELL_PHRASES.join(', ')}.
-Add natural opinions, real-world frustration, or dry humor where it fits organically.
-Keep every code example intact and technically accurate. Do not shorten the post materially.
+        content: `Edit the following draft so it reads less like AI-generated text. Do only these things:
+- Remove or plainly replace these cliché phrases: ${AI_TELL_PHRASES.join(', ')}.
+- Cut filler intros/outros and empty hedging (e.g. "only time will tell", "in this article we will", "in today's world").
+- Vary sentence length and rhythm so the prose isn't uniformly even.
+- Tighten wordy or redundant phrasing.
+Do NOT invent opinions, personal anecdotes, first-hand experience, frustration, humor, metrics, or any fact that is not already in the draft — fabricated voice reads as fake and is dishonest.
+Preserve every [TODO: ...] placeholder EXACTLY as written — never remove, rephrase, fill in, or comment on them. They mark where the author will add real content.
+Keep every code example intact and technically accurate, and preserve all real information. Do not shorten the post materially.
 Output plain text only.
 
 Draft:
@@ -205,6 +231,7 @@ Return ONLY a JSON object with exactly these keys: title, slug, description, cat
 - category: one of ${CATEGORY_VALUES.join(', ')}
 - tags: array of 3-6 lowercase strings
 - readingTime: integer estimate at 200 words per minute
+Ignore any [TODO: ...] placeholders in the post — never include their text in any field.
 
 Post:
 """
@@ -251,6 +278,7 @@ ${humanizeResult.content}
         beforeCount: countAiTellPhrases(draftResult.content),
         afterCount: countAiTellPhrases(humanizeResult.content),
       },
+      humanInputMarkers: countHumanInputMarkers(humanizeResult.content),
     }
 
     let remainingFreeRuns = DAILY_CAP - counter.count

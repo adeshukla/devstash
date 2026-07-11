@@ -40,5 +40,15 @@
       "alt": "Movies List screen"
     },
     { "src": "/images/projects/netflix-gpt/netflix-gpt-gpt-search.png", "alt": "GPT Search screen" }
-  ]
+  ],
+  "caseStudy": {
+    "problem": "The base curriculum project (Namaste React by Akshay Saini) stops at browsing a movie catalog behind Firebase auth — a solid clone, but not something that demonstrates shipping a real feature end-to-end or getting a production build actually deployed cleanly.",
+    "approach": "Extended it in two directions: added a genuine AI feature on top of the clone — a GPT-style search where you describe a mood or a vague prompt and Gemini returns real movie recommendations — and treated deployment as part of the build, not an afterthought, wiring up GitHub Actions CI/CD (TypeScript check + build on every PR) rather than shipping straight from a local machine.",
+    "decisions": [
+      "Used Redux Toolkit for global state (auth, movie data, GPT results) instead of scattering fetches across components, since the GPT search results needed to be readable from multiple screens.",
+      "Integrated Gemini 2.5 Flash Lite specifically for the mood-based search, rather than keeping the project as a plain catalog browser — this is the one feature that isn't in the base curriculum project.",
+      "Hit and fixed a real CRLF line-ending issue breaking the Linux-based Vercel build (the project was developed on Windows) — normalized it via .gitattributes instead of a one-off workaround."
+    ],
+    "outcome": "// TODO: Coursework-derived project with custom extensions, not a production app with real traffic — no usage metrics to report."
+  }
 }

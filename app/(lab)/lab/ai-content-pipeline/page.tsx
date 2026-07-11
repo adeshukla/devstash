@@ -3,9 +3,9 @@ import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { AiContentPipeline } from '@/components/lab/AiContentPipeline'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'AI Content Pipeline Demo — Draft, Humanize, SEO Frontmatter',
+  title: 'AI Content Pipeline Demo — Scaffold, Copy-edit, SEO Frontmatter',
   description:
-    'A live 3-step LLM pipeline: generate a draft, run a humanizing pass to strip AI-tell phrases, and produce SEO frontmatter — with real token usage and latency shown for every step.',
+    'A live 3-step LLM pipeline: scaffold an honest draft that marks where you add real code and numbers, run a copy-edit pass to strip AI-tell phrases, and produce SEO frontmatter — with real token usage and latency for every step.',
   canonical: '/lab/ai-content-pipeline',
   noIndex: true,
 })
@@ -20,9 +20,10 @@ export default function AiContentPipelinePage() {
             Watch an agent write, rewrite, and ship its own frontmatter.
           </h1>
           <p className="text-ds-muted mt-6 text-lg leading-relaxed">
-            A real 3-step Groq LLM chain, not a mockup: draft generation, a humanizing pass that
-            strips AI-tell phrases, and SEO frontmatter generation — with token usage, latency, and
-            a live before/after eval shown for every step.
+            A real 3-step Groq LLM chain, not a mockup: an honest scaffold that marks where you add
+            real code and numbers instead of faking them, a copy-edit pass that strips AI-tell
+            phrases, and SEO frontmatter generation — with token usage, latency, and a live eval
+            shown for every step.
           </p>
         </div>
       </section>
@@ -53,9 +54,12 @@ export default function AiContentPipelinePage() {
           <p className="text-ds-muted leading-relaxed">
             Your topic, keywords, tone, and length go to a Next.js route handler, which makes three
             sequential calls to Groq’s <code className="text-ds-accent">llama-3.1-8b-instant</code>{' '}
-            model — draft, humanize, then a JSON frontmatter call matching this blog’s real
-            frontmatter shape. Nothing is saved anywhere; the output only exists in your browser for
-            this run.
+            model — scaffold, copy-edit, then a JSON frontmatter call matching this blog’s real
+            frontmatter shape. The scaffold step is told to leave{' '}
+            <code className="text-ds-accent">[TODO: …]</code> placeholders wherever it would
+            otherwise have to invent code, a benchmark, or personal experience — an honest draft you
+            finish, not fake content you publish. Nothing is saved anywhere; the output only exists
+            in your browser for this run.
           </p>
         </div>
       </section>

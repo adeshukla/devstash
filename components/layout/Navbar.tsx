@@ -5,6 +5,8 @@ import { MobileNav } from './MobileNav'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { LogoMark } from '@/components/ui/LogoMark'
 import { Button } from '@/components/ui/Button'
+import { Icon } from '@/components/icons/Icon'
+import { siteConfig } from '@/content/metadata/site.config'
 
 // ── Logo Mark ─────────────────────────────────────────────────
 function NavLogo() {
@@ -49,6 +51,15 @@ export function Navbar() {
         {/* Center/Right — Desktop links (Client island) */}
         <div className="hidden items-center gap-1 md:flex">
           <NavbarLinks items={navItems} />
+          <a
+            href={siteConfig.author.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub"
+            className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent ml-2 flex h-9 w-9 items-center justify-center rounded-lg border transition-colors"
+          >
+            <Icon name="github" className="h-4 w-4" />
+          </a>
           <ThemeToggle className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent ml-2 flex h-9 w-9 items-center justify-center rounded-lg border transition-colors" />
           <a
             href="/resume-adesh-shukla.pdf"

@@ -7,6 +7,8 @@ import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils/cn'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { Button } from '@/components/ui/Button'
+import { Icon } from '@/components/icons/Icon'
+import { siteConfig } from '@/content/metadata/site.config'
 
 interface NavItem {
   label: string
@@ -109,6 +111,15 @@ export function MobileNav({ items }: MobileNavProps) {
               <span className="text-ds-accent">Dev</span>Stash
             </span>
             <div className="flex items-center gap-2">
+              <a
+                href={siteConfig.author.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+                className="text-ds-muted hover:text-ds-text flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
+              >
+                <Icon name="github" className="h-4 w-4" />
+              </a>
               <ThemeToggle className="text-ds-muted hover:text-ds-text flex h-8 w-8 items-center justify-center rounded-lg transition-colors" />
               <button
                 onClick={() => setOpen(false)}

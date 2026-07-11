@@ -29,6 +29,10 @@ export interface PipelineMetrics {
     beforeCount: number
     afterCount: number
   }
+  // How many [TODO: ...] placeholders the scaffold left for the author to fill
+  // with real, first-hand substance (tested code, a real metric, an anecdote)
+  // instead of fabricating them.
+  humanInputMarkers: number
 }
 
 // Subset of BlogFrontmatter (types/blog.ts) — the demo only generates these

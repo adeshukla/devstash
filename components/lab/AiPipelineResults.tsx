@@ -3,28 +3,40 @@
 import { Fragment } from 'react'
 import { CssCodeBlock } from '@/components/lab/CssCodeBlock'
 import { AI_TELL_PHRASES } from '@/lib/ai/aiTellPhrases'
+import { HUMAN_INPUT_MARKER_SOURCE, isHumanInputMarker } from '@/lib/ai/humanInputMarkers'
 import type { PipelineResponse } from '@/types/aiPipeline'
 
-// Case-insensitive alternation of every AI-tell phrase, used only for the
-// visual <mark> highlight here — the actual pass/fail count comes from the
-// server (lib/ai/aiTellPhrases.ts's countAiTellPhrases), this just re-finds
-// the same phrases in the already-returned text to show where they are.
-const HIGHLIGHT_PATTERN = new RegExp(
-  `(${AI_TELL_PHRASES.map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`,
-  'gi'
-)
+// One combined case-insensitive pattern that captures both AI-tell phrases and
+// [TODO: ...] human-input markers, so a single split() pass can highlight each
+// kind differently. The actual counts come from the server (countAiTellPhrases
+// / countHumanInputMarkers); this just re-finds the same shapes to show where
+// they are in the already-returned text.
+const AI_TELL_ALT = AI_TELL_PHRASES.map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')
+const HIGHLIGHT_PATTERN = new RegExp(`(${HUMAN_INPUT_MARKER_SOURCE}|${AI_TELL_ALT})`, 'gi')
 
-function highlightAiTellPhrases(text: string) {
+function highlight(text: string) {
   const parts = text.split(HIGHLIGHT_PATTERN)
-  return parts.map((part, i) =>
-    AI_TELL_PHRASES.some((p) => p.toLowerCase() === part.toLowerCase()) ? (
-      <mark key={i} className="bg-ds-warning/30 text-ds-text rounded px-0.5">
-        {part}
-      </mark>
-    ) : (
-      <Fragment key={i}>{part}</Fragment>
-    )
-  )
+  return parts.map((part, i) => {
+    if (!part) return <Fragment key={i} />
+    if (isHumanInputMarker(part)) {
+      return (
+        <mark
+          key={i}
+          className="border-ds-accent/40 bg-ds-accent/15 text-ds-accent rounded border border-dashed px-1 font-mono text-[13px]"
+        >
+          {part}
+        </mark>
+      )
+    }
+    if (AI_TELL_PHRASES.some((p) => p.toLowerCase() === part.toLowerCase())) {
+      return (
+        <mark key={i} className="bg-ds-warning/30 text-ds-text rounded px-0.5">
+          {part}
+        </mark>
+      )
+    }
+    return <Fragment key={i}>{part}</Fragment>
+  })
 }
 
 function MetricCard({
@@ -84,19 +96,36 @@ export function AiPipelineResults({ result }: { result: PipelineResponse }) {
         </p>
       </div>
 
-      {/* Draft (with AI-tell phrases highlighted) */}
+      {/* Human-input callout — the honest part: the scaffold marks what it
+          won't fabricate, so the author knows exactly what to fill in. */}
+      {metrics.humanInputMarkers > 0 && (
+        <div className="border-ds-accent/30 bg-ds-accent/10 rounded-lg border p-4">
+          <p className="text-ds-text text-sm font-medium">
+            {metrics.humanInputMarkers}{' '}
+            {metrics.humanInputMarkers === 1 ? 'spot needs' : 'spots need'} your real input
+          </p>
+          <p className="text-ds-muted mt-1 text-xs leading-relaxed">
+            The scaffold left <span className="text-ds-accent font-mono">[TODO: …]</span>{' '}
+            placeholders instead of inventing code, metrics, or experience it doesn&apos;t have.
+            Fill these with your own tested code and real numbers before publishing — that&apos;s
+            what makes a post genuine (and what no humanizing pass can fake).
+          </p>
+        </div>
+      )}
+
+      {/* Draft (AI-tell phrases + human-input markers highlighted) */}
       <div>
-        <h3 className="text-ds-text mb-2 text-sm font-semibold">Raw draft</h3>
+        <h3 className="text-ds-text mb-2 text-sm font-semibold">Raw scaffold</h3>
         <div className="border-ds-border bg-ds-surface2 max-h-64 overflow-y-auto rounded-lg border p-4 text-sm leading-relaxed whitespace-pre-wrap">
-          {highlightAiTellPhrases(draft)}
+          {highlight(draft)}
         </div>
       </div>
 
       {/* Humanized */}
       <div>
-        <h3 className="text-ds-text mb-2 text-sm font-semibold">After humanizing pass</h3>
+        <h3 className="text-ds-text mb-2 text-sm font-semibold">After copy-edit pass</h3>
         <div className="border-ds-border bg-ds-surface2 max-h-64 overflow-y-auto rounded-lg border p-4 text-sm leading-relaxed whitespace-pre-wrap">
-          {highlightAiTellPhrases(humanized)}
+          {highlight(humanized)}
         </div>
       </div>
 
