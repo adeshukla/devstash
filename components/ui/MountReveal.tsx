@@ -1,6 +1,4 @@
-'use client'
-
-import { useEffect, useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils/cn'
 
 interface MountRevealProps {
@@ -11,25 +9,21 @@ interface MountRevealProps {
 }
 
 /**
- * Fades + slides its children in once on mount — the same `.reveal` CSS as
- * `Reveal`, but triggered by a mount timer instead of IntersectionObserver.
- * For above-the-fold content (hero, page headers) that's already in the
- * viewport on load, so a scroll trigger would never fire.
+ * Fades + slides its children in once at first paint — for above-the-fold
+ * content (hero, page headers) that's already in the viewport on load.
+ *
+ * Pure CSS (`animate-fade-up`) rather than a JS mount trigger on purpose:
+ * content wrapped in this is usually the page's LCP element, and the previous
+ * hydration-gated version (`.reveal` + useEffect) kept it at opacity 0 until
+ * the whole JS bundle loaded — a measured 5.5s mobile LCP on the homepage
+ * hero. A CSS animation starts the moment styles apply, with no JS in the
+ * critical path; reduced-motion users see the content immediately.
  */
 export function MountReveal({ children, delay = 0, className }: MountRevealProps) {
-  const [visible, setVisible] = useState(false)
-
-  useEffect(() => {
-    // Next tick, not immediate — lets the initial (pre-reveal) styles paint
-    // first so the transition actually has something to animate from.
-    const id = requestAnimationFrame(() => setVisible(true))
-    return () => cancelAnimationFrame(id)
-  }, [])
-
   return (
     <div
-      className={cn('reveal', visible && 'is-visible', className)}
-      style={delay ? { transitionDelay: `${delay}ms` } : undefined}
+      className={cn('animate-fade-up motion-reduce:animate-none', className)}
+      style={delay ? { animationDelay: `${delay}ms` } : undefined}
     >
       {children}
     </div>
