@@ -120,6 +120,26 @@
   --color-ds-error: #dc2626;
 }
 
+/* Explicit dark re-override — REQUIRED for nested theme scoping. Without this,
+   a `data-theme="dark"` element inside a light page (e.g. the Lab illustration
+   generator's side-by-side dark/light previews) inherits the light custom
+   properties from <html> and has nothing to reset them, so the "Dark" panel
+   renders light. The values mirror the @theme defaults above. */
+[data-theme='dark'] {
+  --color-ds-bg: #0b0f19;
+  --color-ds-surface: #111827;
+  --color-ds-surface2: #161f2e;
+  --color-ds-accent: #3b82f6;
+  --color-ds-purple: #8b5cf6;
+  --color-ds-text: #f3f4f6;
+  --color-ds-muted: #9ca3af;
+  --color-ds-border: #1f2937;
+  --color-ds-border2: #2a3649;
+  --color-ds-success: #10b981;
+  --color-ds-warning: #f59e0b;
+  --color-ds-error: #ef4444;
+}
+
 @media (prefers-color-scheme: light) {
   :root:not([data-theme='dark']) {
     --color-ds-bg: #ffffff;

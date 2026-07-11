@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { copyText } from '@/lib/utils/clipboard'
 
 /**
  * Shows a real CSS snippet with a working copy button — same
@@ -13,7 +14,7 @@ export function CssCodeBlock({ code, label = 'CSS' }: { code: string; label?: st
   const [copied, setCopied] = useState(false)
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(code)
+    if (!(await copyText(code))) return
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }

@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 import { Icon } from '@/components/icons/Icon'
 import { cn } from '@/lib/utils/cn'
+import { copyText } from '@/lib/utils/clipboard'
 
 /**
  * Sits inside the `pre` wrapper rendered by MDXComponents. Reads the sibling
@@ -19,7 +20,7 @@ export function CopyCodeButton() {
     const text = pre?.textContent ?? ''
     if (!text) return
 
-    await navigator.clipboard.writeText(text)
+    if (!(await copyText(text))) return
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }

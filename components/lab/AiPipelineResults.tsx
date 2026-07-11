@@ -1,7 +1,8 @@
 'use client'
 
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import { CssCodeBlock } from '@/components/lab/CssCodeBlock'
+import { copyText } from '@/lib/utils/clipboard'
 import { AI_TELL_PHRASES } from '@/lib/ai/aiTellPhrases'
 import { HUMAN_INPUT_MARKER_SOURCE, isHumanInputMarker } from '@/lib/ai/humanInputMarkers'
 import type { PipelineResponse } from '@/types/aiPipeline'
@@ -37,6 +38,33 @@ function highlight(text: string) {
     }
     return <Fragment key={i}>{part}</Fragment>
   })
+}
+
+/** Same clipboard pattern as CssCodeBlock's copy button — this one copies the
+ * raw pipeline text (scaffold / copy-edited output) rather than a code block. */
+function CopyTextButton({ text, label }: { text: string; label: string }) {
+  const [copied, setCopied] = useState(false)
+
+  async function handleCopy() {
+    if (!(await copyText(text))) return
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      aria-label={label}
+      className={
+        copied
+          ? 'text-ds-success font-mono text-xs'
+          : 'text-ds-muted hover:text-ds-accent font-mono text-xs transition-colors'
+      }
+    >
+      {copied ? 'Copied ✓' : 'Copy'}
+    </button>
+  )
 }
 
 function MetricCard({
@@ -115,7 +143,10 @@ export function AiPipelineResults({ result }: { result: PipelineResponse }) {
 
       {/* Draft (AI-tell phrases + human-input markers highlighted) */}
       <div>
-        <h3 className="text-ds-text mb-2 text-sm font-semibold">Raw scaffold</h3>
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="text-ds-text text-sm font-semibold">Raw scaffold</h3>
+          <CopyTextButton text={draft} label="Copy raw scaffold text" />
+        </div>
         <div className="border-ds-border bg-ds-surface2 max-h-64 overflow-y-auto rounded-lg border p-4 text-sm leading-relaxed whitespace-pre-wrap">
           {highlight(draft)}
         </div>
@@ -123,7 +154,10 @@ export function AiPipelineResults({ result }: { result: PipelineResponse }) {
 
       {/* Humanized */}
       <div>
-        <h3 className="text-ds-text mb-2 text-sm font-semibold">After copy-edit pass</h3>
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="text-ds-text text-sm font-semibold">After copy-edit pass</h3>
+          <CopyTextButton text={humanized} label="Copy copy-edited text" />
+        </div>
         <div className="border-ds-border bg-ds-surface2 max-h-64 overflow-y-auto rounded-lg border p-4 text-sm leading-relaxed whitespace-pre-wrap">
           {highlight(humanized)}
         </div>

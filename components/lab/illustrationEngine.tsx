@@ -392,12 +392,35 @@ const ANIMATION_NAME: Record<Exclude<AnimationKey, 'none'>, string> = {
   drift: 'igDrift',
 }
 
+// Per-animation easing — a generic `ease-in-out` makes every shape hit its
+// extremes with the same mechanical rhythm. Sine-like curves (float/drift)
+// read as organic bobbing; pulse gets a slightly snappier curve so the scale
+// beat feels intentional rather than mushy.
+const ANIMATION_EASING: Record<Exclude<AnimationKey, 'none'>, string> = {
+  float: 'cubic-bezier(0.37, 0, 0.63, 1)',
+  pulse: 'cubic-bezier(0.45, 0, 0.4, 1)',
+  drift: 'cubic-bezier(0.37, 0, 0.63, 1)',
+}
+
+/** One timing source for BOTH the live preview and the exported SVG string —
+ * if these ever diverge, the copied code stops matching what was previewed.
+ * Durations use a fractional 4-step spread (3.2/4.1/5/5.9s) instead of flat
+ * 3/4/5s so neighboring shapes don't sync up into a visible group beat. */
+function animationTiming(index: number, animation: Exclude<AnimationKey, 'none'>) {
+  return {
+    name: ANIMATION_NAME[animation],
+    duration: `${(3.2 + (index % 4) * 0.9).toFixed(1)}s`,
+    easing: ANIMATION_EASING[animation],
+    delay: `${((index * 0.35) % 2.1).toFixed(2)}s`,
+  }
+}
+
 function shapeStyle(index: number, animation: AnimationKey): React.CSSProperties | undefined {
   if (animation === 'none') return undefined
-  const delay = ((index * 0.18) % 1.6).toFixed(2)
+  const t = animationTiming(index, animation)
   return {
-    animation: `${ANIMATION_NAME[animation]} ${3 + (index % 3)}s ease-in-out infinite`,
-    animationDelay: `${delay}s`,
+    animation: `${t.name} ${t.duration} ${t.easing} infinite`,
+    animationDelay: t.delay,
     transformBox: 'fill-box',
     transformOrigin: 'center',
   } as React.CSSProperties
@@ -460,10 +483,15 @@ export function renderComposition(comp: Composition, animation: AnimationKey): R
   )
 }
 
+// Float gets a mid-keyframe so the bob isn't a straight up-down metronome;
+// pulse breathes opacity along with scale; drift traces a small arc instead of
+// a straight diagonal. The reduced-motion guard ships in the exported SVG too,
+// so a pasted illustration respects the OS setting wherever it lands.
 const KEYFRAMES_SOURCE = `
-@keyframes igFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-@keyframes igPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
-@keyframes igDrift { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(4px, -6px) rotate(4deg); } }
+@keyframes igFloat { 0%, 100% { transform: translateY(0); } 35% { transform: translateY(-7px); } 65% { transform: translateY(-9px); } }
+@keyframes igPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.09); opacity: 0.82; } }
+@keyframes igDrift { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 33% { transform: translate(3px, -5px) rotate(2.5deg); } 66% { transform: translate(-2px, -3px) rotate(-1.5deg); } }
+@media (prefers-reduced-motion: reduce) { circle, rect, path, line { animation: none !important; } }
 `.trim()
 
 export function illustrationKeyframes(): string {
@@ -471,10 +499,11 @@ export function illustrationKeyframes(): string {
 }
 
 function shapeToSvgTag(s: Shape, i: number, animation: AnimationKey, theme: Theme): string {
-  const style =
-    animation === 'none'
-      ? ''
-      : ` style="animation: ${ANIMATION_NAME[animation]} ${3 + (i % 3)}s ease-in-out infinite; animation-delay: ${((i * 0.18) % 1.6).toFixed(2)}s; transform-box: fill-box; transform-origin: center;"`
+  let style = ''
+  if (animation !== 'none') {
+    const t = animationTiming(i, animation)
+    style = ` style="animation: ${t.name} ${t.duration} ${t.easing} infinite; animation-delay: ${t.delay}; transform-box: fill-box; transform-origin: center;"`
+  }
   const opacity = s.opacity !== undefined ? ` opacity="${s.opacity}"` : ''
   if (s.kind === 'circle') {
     return `<circle cx="${s.cx.toFixed(1)}" cy="${s.cy.toFixed(1)}" r="${s.r.toFixed(1)}" fill="${resolveToken(s.fill, theme)}"${opacity}${style} />`

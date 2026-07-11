@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { Input, Button } from '@/components/ui'
+import { copyText } from '@/lib/utils/clipboard'
 
 interface FieldState {
   url: string
@@ -63,7 +64,7 @@ export function UtmBuilder() {
 
   async function handleCopy() {
     if (!result) return
-    await navigator.clipboard.writeText(result)
+    if (!(await copyText(result))) return
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }

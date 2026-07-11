@@ -1,6 +1,7 @@
 // app/(main)/blog/[slug]/page.tsx
 import { notFound } from 'next/navigation'
 import { type Metadata } from 'next'
+import Image from 'next/image'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import remarkGfm from 'remark-gfm'
 import rehypeSlug from 'rehype-slug'
@@ -103,8 +104,22 @@ export default async function BlogPostPage({ params }: Props) {
         {/* ── Hero ── */}
         <header className="mt-6 mb-10">
           <MountReveal>
-            <div className="border-ds-border bg-ds-surface2 mb-8 h-56 max-w-3xl overflow-hidden rounded-2xl border sm:h-64">
-              <CategoryIllustration category={post.category} kind="blog" seed={post.slug} />
+            {/* Same image the listing card shows — featuredImage when the file
+                really exists (lib/markdown/blog.ts guarantees it), otherwise
+                the generated illustration. Keeps list → post consistent. */}
+            <div className="border-ds-border bg-ds-surface2 relative mb-8 h-56 max-w-3xl overflow-hidden rounded-2xl border sm:h-64">
+              {post.featuredImage ? (
+                <Image
+                  src={post.featuredImage}
+                  alt={post.title}
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="(min-width: 768px) 768px, 100vw"
+                />
+              ) : (
+                <CategoryIllustration category={post.category} kind="blog" seed={post.slug} />
+              )}
             </div>
           </MountReveal>
 
