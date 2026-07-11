@@ -22,6 +22,11 @@ export function getAllProjects(): Project[] {
 }
 
 export function getProjectBySlug(slug: string): Project | null {
+  // The slug arrives straight from the URL when a request misses the
+  // statically generated params, so gate it before it touches the
+  // filesystem — otherwise "../../something" becomes a path-traversal read.
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) return null
+
   const fullPath = path.join(PROJECTS_DIR, `${slug}.json`)
   if (!fs.existsSync(fullPath)) return null
 

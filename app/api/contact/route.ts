@@ -36,6 +36,17 @@ function getResend() {
 const FROM_EMAIL = 'DevStash Contact <hello@devstash.me>'
 const TO_EMAIL = 'hello@devstash.me'
 
+/** Escape a user-supplied string for interpolation into the HTML email.
+ * Every field goes through this — the email renders in a mail client, and an
+ * unescaped name/subject like `<img onerror=...>` is stored XSS there. */
+function escapeHtml(input: string): string {
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
 // ─── POST handler ─────────────────────────────────────────────────────────────
 
 export async function POST(request: Request) {
@@ -59,7 +70,9 @@ export async function POST(request: Request) {
     )
   }
 
-  const { name, email, subject, message, recaptchaToken } = parsed.data
+  const { name, email, subject: rawSubject, message, recaptchaToken } = parsed.data
+  // Strip line breaks so nothing can smuggle extra lines into the subject.
+  const subject = rawSubject.replace(/[\r\n]+/g, ' ').trim()
 
   const recaptcha = await verifyRecaptcha(recaptchaToken, RECAPTCHA_ACTION)
   if (!recaptcha.ok) {
@@ -95,12 +108,12 @@ Sent via devstash.me/contact
   <h2 style="color:#3b82f6;margin-bottom:4px">New contact form submission</h2>
   <p style="color:#9ca3af;font-size:13px;margin:0 0 24px">via devstash.me</p>
   <table style="width:100%;border-collapse:collapse;font-size:14px">
-    <tr><td style="padding:8px 0;color:#9ca3af;width:80px">Name</td><td style="color:#f3f4f6">${name}</td></tr>
-    <tr><td style="padding:8px 0;color:#9ca3af">Email</td><td style="color:#f3f4f6"><a href="mailto:${email}" style="color:#3b82f6">${email}</a></td></tr>
-    <tr><td style="padding:8px 0;color:#9ca3af">Subject</td><td style="color:#f3f4f6">${subject}</td></tr>
+    <tr><td style="padding:8px 0;color:#9ca3af;width:80px">Name</td><td style="color:#f3f4f6">${escapeHtml(name)}</td></tr>
+    <tr><td style="padding:8px 0;color:#9ca3af">Email</td><td style="color:#f3f4f6"><a href="mailto:${escapeHtml(email)}" style="color:#3b82f6">${escapeHtml(email)}</a></td></tr>
+    <tr><td style="padding:8px 0;color:#9ca3af">Subject</td><td style="color:#f3f4f6">${escapeHtml(subject)}</td></tr>
   </table>
   <hr style="border:none;border-top:1px solid #1f2937;margin:16px 0"/>
-  <p style="color:#f3f4f6;white-space:pre-wrap;font-size:14px;line-height:1.6">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+  <p style="color:#f3f4f6;white-space:pre-wrap;font-size:14px;line-height:1.6">${escapeHtml(message)}</p>
 </div>
       `.trim(),
     })

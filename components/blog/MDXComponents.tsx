@@ -110,11 +110,14 @@ export const mdxComponents: MDXComponents = {
     )
   },
 
-  // Inline code — rehype-pretty-code handles fenced blocks; this handles `backticks`
+  // Inline code — rehype-pretty-code handles fenced blocks; this handles `backticks`.
+  // overflow-wrap:anywhere — inline code is often one long unbreakable token (a
+  // function signature, a URL); without it, it forces horizontal overflow on
+  // very narrow screens (caught by tests/qa/responsive.spec.ts at 200px).
   code: ({ children, className }) => {
     if (className) return <code className={className}>{children}</code>
     return (
-      <code className="bg-ds-surface2 text-ds-accent rounded px-1.5 py-0.5 font-mono text-[0.85em]">
+      <code className="bg-ds-surface2 text-ds-accent rounded px-1.5 py-0.5 font-mono text-[0.85em] [overflow-wrap:anywhere]">
         {children}
       </code>
     )

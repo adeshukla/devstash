@@ -46,7 +46,7 @@ export function AuthorBio({ author }: AuthorBioProps) {
       <div className="min-w-0 flex-1">
         <p className="text-ds-text mb-0.5 font-semibold">{data.name}</p>
         <p className="text-ds-muted mb-2 text-sm leading-relaxed">{data.bio}</p>
-        <div className="text-ds-muted flex gap-3 text-xs">
+        <div className="text-ds-muted flex flex-wrap gap-x-3 gap-y-1 text-xs">
           <Link
             href={data.github}
             target="_blank"

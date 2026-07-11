@@ -7,9 +7,15 @@ export const runtime = 'edge'
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
 
-  const title = searchParams.get('title') ?? 'DevStash'
-  const description = searchParams.get('description') ?? 'A modern developer ecosystem'
-  const category = searchParams.get('category') ?? ''
+  // Length-capped: these are attacker-controllable query params on a public
+  // edge function, and rendering an unbounded string into an ImageResponse is
+  // free compute amplification. Real titles/descriptions fit well within this.
+  const title = (searchParams.get('title') ?? 'DevStash').slice(0, 150)
+  const description = (searchParams.get('description') ?? 'A modern developer ecosystem').slice(
+    0,
+    250
+  )
+  const category = (searchParams.get('category') ?? '').slice(0, 40)
 
   // Constrain `type` to the three supported values; fall back to `website`.
   const typeParam = searchParams.get('type')

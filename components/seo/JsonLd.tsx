@@ -14,7 +14,9 @@ interface JsonLdProps {
  * <JsonLd data={buildBlogPostingSchema(post)} />
  */
 export function JsonLd({ data }: JsonLdProps) {
-  return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
-  )
+  // Escape "<" so a content string containing "</script>" can never break out
+  // of this tag and inject markup. "<" is valid JSON and parses back to
+  // "<", so search engines read identical structured data.
+  const json = JSON.stringify(data).replace(/</g, '\\u003c')
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: json }} />
 }

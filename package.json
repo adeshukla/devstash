@@ -14,7 +14,10 @@
     "submit:sitemap": "node scripts/indexing/submit-sitemap.mjs",
     "submit:indexnow": "node scripts/indexing/submit-indexnow.mjs",
     "test:smoke": "playwright test",
-    "prepare": "husky"
+    "prepare": "husky",
+    "qa:security": "node scripts/qa/security-audit.mjs",
+    "qa:responsive": "playwright test -c playwright.qa.config.ts",
+    "qa": "pnpm qa:security && pnpm qa:responsive"
   },
   "dependencies": {
     "@vercel/speed-insights": "^2.0.0",
