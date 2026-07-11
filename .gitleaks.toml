@@ -1,0 +1,21 @@
+# gitleaks config — extends the default ruleset, then allowlists values that
+# LOOK like secrets but are public/by-design. Used by the "Scan for leaked
+# secrets" step in .github/workflows/ci.yml.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Public-by-design values and secret-shaped patterns that are not real secrets"
+paths = [
+  # IndexNow verification key: a 32-char hex string that IS the site's public
+  # verification token, committed on purpose and served at
+  # https://devstash.me/<key>.txt so Bing/Yandex can confirm ownership — the
+  # whole point is that it's public. Path-pattern (not a fixed name) so a future
+  # key rotation (which renames the file to the new key) stays covered.
+  '''public/[a-f0-9]{32}\.txt''',
+  # The security audit script is itself a secret scanner — it necessarily
+  # contains key-shaped regex patterns (AKIA…, -----BEGIN … PRIVATE KEY-----,
+  # gsk_/sk_ prefixes). Those are detection patterns, not real credentials.
+  '''scripts/qa/security-audit\.mjs''',
+]

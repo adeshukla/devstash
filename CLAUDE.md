@@ -53,6 +53,7 @@ Each content type (projects, blogs, experience, resources, tools) must:
 
 NEVER invent project metrics, fake clients, fake testimonials, fake SEO data.
 If info missing: mark as TODO or ask.
+Applies to AI-generated content too: never fabricate code, benchmarks, or "human" anecdotes to sound authentic or evade AI detectors — use `[TODO: ...]` placeholders instead (see Phase 10). Google does not penalize AI content; fabrication does break RULE 5.
 
 ### RULE 6 — DESIGN SYSTEM CONSISTENCY
 
@@ -76,20 +77,21 @@ Never mix concerns between modules.
 
 ## SECTION 3 — TECH STACK (HARD CONSTRAINTS)
 
-| Layer           | Choice                                | Notes                                                    |
-| --------------- | ------------------------------------- | -------------------------------------------------------- |
-| Framework       | Next.js 16.2.6 App Router             | Turbopack DISABLED (Windows crashes)                     |
-| UI Library      | React 19.2.4 (exact pin)              | react-dom 19.2.4 — pinned, not caret-ranged              |
-| Language        | TypeScript strict mode                | noUnusedLocals, noUnusedParameters                       |
-| Styling         | Tailwind CSS v4                       | Tokens in globals.css @theme (NOT tailwind.config.ts)    |
-| Package manager | pnpm ONLY                             | Never suggest npm or yarn                                |
-| Fonts           | next/font/google                      | DM Sans (sans) + JetBrains Mono (mono)                   |
-| Images          | next/image                            | @next/next/no-img-element ESLint rule (config pending)   |
-| Deployment      | Vercel                                | pnpm build, pnpm install commands                        |
-| DNS             | Cloudflare                            | DNS Only mode (grey cloud) — no proxy with Vercel        |
-| Content         | MDX + JSON                            | File-based, CMS-ready (next-mdx-remote ^6.0.0)           |
-| CI/CD           | GitHub Actions                        | .github/workflows/ci.yml                                 |
-| Analytics       | GA4 + Search Console + Speed Insights | lazyOnload strategy; @vercel/speed-insights ^2.0.0 wired |
+| Layer           | Choice                                | Notes                                                                                                                                    |
+| --------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework       | Next.js 16.2.6 App Router             | Turbopack DISABLED (Windows crashes)                                                                                                     |
+| UI Library      | React 19.2.4 (exact pin)              | react-dom 19.2.4 — pinned, not caret-ranged                                                                                              |
+| Language        | TypeScript strict mode                | noUnusedLocals, noUnusedParameters                                                                                                       |
+| Styling         | Tailwind CSS v4                       | Tokens in globals.css @theme (NOT tailwind.config.ts)                                                                                    |
+| Package manager | pnpm ONLY                             | Never suggest npm or yarn                                                                                                                |
+| Fonts           | next/font/google                      | DM Sans (sans) + JetBrains Mono (mono)                                                                                                   |
+| Images          | next/image                            | @next/next/no-img-element ESLint rule (config pending)                                                                                   |
+| Deployment      | Vercel                                | pnpm build, pnpm install commands                                                                                                        |
+| DNS             | Cloudflare                            | DNS Only mode (grey cloud) — no proxy with Vercel                                                                                        |
+| Content         | MDX + JSON                            | File-based, CMS-ready (next-mdx-remote ^6.0.0)                                                                                           |
+| CI/CD           | GitHub Actions                        | .github/workflows/ci.yml                                                                                                                 |
+| Testing/QA      | Playwright ^1.61                      | `pnpm qa` = static security audit + 200–1440px responsive suite (scripts/qa/, tests/qa/). `pnpm test:smoke` = post-deploy checks vs prod |
+| Analytics       | GA4 + Search Console + Speed Insights | lazyOnload strategy; @vercel/speed-insights ^2.0.0 wired                                                                                 |
 
 ---
 
@@ -405,10 +407,18 @@ components/admin/{PostEditor,LoginForm,LogoutButton}.tsx, app/admin/**, app/api/
 
 **Note:** `/admin` is noindex and excluded from the sitemap. Not reachable in prod.
 
-### ⬜ Phase 10 — AI Blog Automation + Humanizing (NOT IN ORIGINAL PLAN — Proposed)
+### 🟡 Phase 10 — AI Blog Automation + Humanizing (PARTIALLY SHIPPED)
 
-> **Status:** Not in any existing docs. Completely new feature. Referenced in project discussions but never documented.
-> **Why needed:** Speeds up content creation. AI drafts → humanizing pass removes robotic patterns → developer voice applied → lands in admin as a draft for final review.
+> **Shipped to production (2026-07):** `/lab/ai-content-pipeline` — a real 3-step Groq chain
+> (scaffold → copy-edit → frontmatter) in `app/api/ai-pipeline/route.ts`. Design principle: it
+> NEVER fabricates code, metrics, or "human voice" to sound authentic or beat AI detectors — the
+> scaffold leaves `[TODO: ...]` placeholders (`lib/ai/humanInputMarkers.ts`) wherever only the
+> author's real experience belongs. Do NOT reintroduce a "sound human"/"beat the detector"
+> instruction here — that path was tried, fabricates content, and still fails detectors. Groq has an
+> automatic Cerebras fallback (`lib/ai/groq.ts`). The copy-edit pass strips AI-tell phrases
+> (`lib/ai/aiTellPhrases.ts`).
+>
+> **Still just a proposal (NOT built):** the n8n → Admin API workflow described below.
 
 **Stack:** n8n (already running at localhost:5678) + Groq API (already used in cold email workflow, `llama-3.1-8b-instant`) + DevStash Admin API (Phase 9).
 
@@ -517,21 +527,27 @@ featured: false
 
 ## SECTION 10 — KNOWN ISSUES & FIXES
 
-| Issue                                                   | Fix Applied                                                                                                                                                                          |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Turbopack crashes on Windows                            | Removed --turbopack flag from package.json dev script                                                                                                                                |
-| Hydration mismatch (Grammarly/Dark Reader)              | suppressHydrationWarning on <body> in layout.tsx                                                                                                                                     |
-| ESLint 9 + Next.js 16 flat config not yet wired up      | ESLint deferred — only Prettier via lint-staged. Packages ARE installed (eslint ^9, eslint-config-next 16.2.6); `lint` script is a placeholder echo until configured                 |
-| CRLF line endings on Windows                            | git config --global core.autocrlf true + .gitattributes                                                                                                                              |
-| pnpm approve-builds (sharp/unrs-resolver)               | Added to .npmrc: onlyBuiltDependencies                                                                                                                                               |
-| Tailwind v4 @theme warning in VS Code                   | .vscode/settings.json: "css.validate": false                                                                                                                                         |
-| bg-ds-\* classes not working                            | Tokens in @theme in globals.css (v4 syntax), NOT tailwind.config.ts                                                                                                                  |
-| .env\* in .gitignore blocking .env.example              | Changed to explicit: .env, .env.local, .env.\*.local                                                                                                                                 |
-| @next/mdx Turbopack serialization error                 | Switched to next-mdx-remote — works with App Router + Turbopack off                                                                                                                  |
-| TypeScript errors: canonical vs path in MetadataOptions | Field is `canonical` (NOT `path`), and it takes a RELATIVE path — buildMetadata prepends siteConfig.url. MetadataOptions lives in types/seo.ts                                       |
-| buildMetadata `type` union                              | Only `'website' \| 'article'` (NO `'profile'`). Article pages may also pass publishedTime/modifiedTime/authors/section/tags                                                          |
-| BreadcrumbItem fields                                   | Fields are `name` and `url` (NOT `label`/`href`) — verified in types/seo.ts                                                                                                          |
-| JsonLd prop                                             | Prop is `data` (NOT `schema`) — verified in components/seo/JsonLd.tsx. The `<Breadcrumb>` component emits its own BreadcrumbList JSON-LD, so don't add a manual one on the same page |
+| Issue                                                      | Fix Applied                                                                                                                                                                                                              |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| gitleaks CI step fails on public/secret-shaped files       | IndexNow key (`public/<32hex>.txt`) + the security-audit script's regex patterns look like secrets. Allowlisted in `.gitleaks.toml` (extend.useDefault + allowlist.paths). Add new by-design "secret-shaped" files there |
+| `main` branch protection (docs say PR-required)            | NOT actually enforced as of 2026-07 — a direct `git push origin main` succeeded. Verify in GitHub Settings → Branches before assuming a PR gate                                                                          |
+| `gh` CLI not installed in this dev env                     | Use local `git merge` + `git push` for dev→main, not `gh pr create`                                                                                                                                                      |
+| Playwright `waitUntil:'networkidle'` hangs vs `next dev`   | HMR websocket never idles — use `domcontentloaded` + explicit wait. And `documentElement.scrollWidth` gives false overflow (scrollbars/fixed els); assert `window.scrollX` after `scrollTo()`                            |
+| Phantom tsc errors in `.next/dev/types/routes.d.ts`        | Stale generated file — `rm -rf .next/dev/types` and re-run `pnpm tsc --noEmit`                                                                                                                                           |
+| Lighthouse CI referenced in Phase 7 but no workflow exists | `.github/workflows/lighthouse.yml` + `lighthouserc.cjs` are NOT in the repo. Only CI workflows: `ci.yml`, `smoke.yml` (deploy-triggered), `submit-sitemap.yml`                                                           |
+| Turbopack crashes on Windows                               | Removed --turbopack flag from package.json dev script                                                                                                                                                                    |
+| Hydration mismatch (Grammarly/Dark Reader)                 | suppressHydrationWarning on <body> in layout.tsx                                                                                                                                                                         |
+| ESLint 9 + Next.js 16 flat config not yet wired up         | ESLint deferred — only Prettier via lint-staged. Packages ARE installed (eslint ^9, eslint-config-next 16.2.6); `lint` script is a placeholder echo until configured                                                     |
+| CRLF line endings on Windows                               | git config --global core.autocrlf true + .gitattributes                                                                                                                                                                  |
+| pnpm approve-builds (sharp/unrs-resolver)                  | Added to .npmrc: onlyBuiltDependencies                                                                                                                                                                                   |
+| Tailwind v4 @theme warning in VS Code                      | .vscode/settings.json: "css.validate": false                                                                                                                                                                             |
+| bg-ds-\* classes not working                               | Tokens in @theme in globals.css (v4 syntax), NOT tailwind.config.ts                                                                                                                                                      |
+| .env\* in .gitignore blocking .env.example                 | Changed to explicit: .env, .env.local, .env.\*.local                                                                                                                                                                     |
+| @next/mdx Turbopack serialization error                    | Switched to next-mdx-remote — works with App Router + Turbopack off                                                                                                                                                      |
+| TypeScript errors: canonical vs path in MetadataOptions    | Field is `canonical` (NOT `path`), and it takes a RELATIVE path — buildMetadata prepends siteConfig.url. MetadataOptions lives in types/seo.ts                                                                           |
+| buildMetadata `type` union                                 | Only `'website' \| 'article'` (NO `'profile'`). Article pages may also pass publishedTime/modifiedTime/authors/section/tags                                                                                              |
+| BreadcrumbItem fields                                      | Fields are `name` and `url` (NOT `label`/`href`) — verified in types/seo.ts                                                                                                                                              |
+| JsonLd prop                                                | Prop is `data` (NOT `schema`) — verified in components/seo/JsonLd.tsx. The `<Breadcrumb>` component emits its own BreadcrumbList JSON-LD, so don't add a manual one on the same page                                     |
 
 ---
 
@@ -562,7 +578,10 @@ zod ^4.4.3                     # BREAKING from v3 — different API (e.g. error 
                                 # Never write Zod v3-style code. Verify schema syntax against v4 docs.
 
 # ✅ Phase 7 (installed)
-@lhci/cli ^0.15.1               # devDep
+@lhci/cli ^0.15.1               # devDep — NOTE: lighthouserc.cjs + lighthouse.yml workflow are NOT actually in the repo (see Known Issues)
+
+# ✅ QA/security automation (installed 2026-07) — portable to other repos
+@playwright/test ^1.61.1        # devDep — pnpm qa:responsive + pnpm test:smoke
 
 # ✅ Phase 9 (installed) — Blog Admin auth
 iron-session ^8.0.4
@@ -634,7 +653,7 @@ Current task: [what you want to do]
 
 **Update this file after each phase completes.**
 
-**Current Status:** Phase 9 complete (Blog Admin Panel — local-only). Next: Phase 10 — AI Blog Automation.
+**Current Status (2026-07):** Phase 9 complete. Phase 10 partially shipped — honest-scaffold AI pipeline (`/lab/ai-content-pipeline`) live in prod; n8n workflow still proposal-only. `/lab` hub + recruiter-facing home/case-studies/nav shipped to `main`. `pnpm qa` security/responsive automation added. Sitemap/IndexNow auto-submission wired (IndexNow live; GSC step skips until `GSC_SERVICE_ACCOUNT_JSON` + `GSC_PROPERTY` repo secrets are set). Pending on user: GSC secrets, Groq key rotation, real quotes for social-proof section.
 
 **Version note (Jun 2026):** This file's tech stack was corrected against the live `package.json` —
 Next.js is **16.2.6** (not 15), React is pinned at **19.2.4**, Zod is **^4.4.3** (v4 API, breaking
