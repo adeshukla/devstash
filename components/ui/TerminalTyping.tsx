@@ -1,13 +1,15 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { cn } from '@/lib/utils/cn'
 
 interface TerminalTypingProps {
   /** Phrases cycled through, typed then deleted. */
   phrases: string[]
-  /** Mono prompt shown before the typed text, e.g. "adesh@devstash:~$". */
-  prompt?: string
+  /** Mono prompt shown before the typed text, e.g. "adesh@devstash:~$".
+   * Accepts JSX so callers can hide parts of it responsively (the full
+   * host prefix doesn't fit a 375px viewport next to the longest phrase). */
+  prompt?: ReactNode
   className?: string
   typeSpeed?: number
   deleteSpeed?: number
@@ -70,7 +72,10 @@ export function TerminalTyping({
   }, [text, phase, index, phrases, typeSpeed, deleteSpeed, pause])
 
   return (
-    <span className={cn('inline-flex items-center font-mono', className)} aria-hidden="true">
+    <span
+      className={cn('inline-flex items-center font-mono whitespace-nowrap', className)}
+      aria-hidden="true"
+    >
       <span className="text-ds-accent">{prompt}</span>
       <span className="text-ds-text ml-2">{text}</span>
       <span className="animate-blink text-ds-accent ml-0.5">▮</span>

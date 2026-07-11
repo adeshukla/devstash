@@ -36,7 +36,14 @@ export function HeroSection() {
             <MountReveal>
               <div className="border-ds-border bg-ds-surface/60 inline-flex w-fit items-center rounded-lg border px-3 py-1.5 text-sm backdrop-blur">
                 <TerminalTyping
-                  prompt="adesh@devstash:~$"
+                  // Full host prefix + longest phrase don't fit a 375px
+                  // viewport on one line — drop the host on tiny screens
+                  // and keep the "~$" so it still reads as a prompt.
+                  prompt={
+                    <>
+                      <span className="max-[479px]:hidden">adesh@devstash:</span>~$
+                    </>
+                  }
                   phrases={[
                     'building developer tools',
                     'shipping Next.js apps',

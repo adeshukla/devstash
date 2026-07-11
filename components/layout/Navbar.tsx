@@ -48,8 +48,11 @@ export function Navbar() {
         {/* Left — Logo */}
         <NavLogo />
 
-        {/* Center/Right — Desktop links (Client island) */}
-        <div className="hidden items-center gap-1 md:flex">
+        {/* Center/Right — Desktop links (Client island). lg, not md: with six
+            links + GitHub + theme + résumé + contact the row overflows and the
+            résumé button wraps between 768–1024px, so tablets get the mobile
+            nav instead. */}
+        <div className="hidden items-center gap-1 lg:flex">
           <NavbarLinks items={navItems} />
           <a
             href={siteConfig.author.github}
@@ -65,7 +68,7 @@ export function Navbar() {
             href="/resume-adesh-shukla.pdf"
             download
             data-analytics-event="cv_viewed"
-            className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent ml-3 inline-flex h-9 items-center rounded-lg border px-3 text-[13px] font-medium transition-colors"
+            className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent ml-3 inline-flex h-9 items-center rounded-lg border px-3 text-[13px] font-medium whitespace-nowrap transition-colors"
           >
             Résumé ↓
           </a>
@@ -75,7 +78,7 @@ export function Navbar() {
         </div>
 
         {/* Right — Mobile trigger (Client Component) */}
-        <div className="flex md:hidden">
+        <div className="flex lg:hidden">
           <MobileNav items={navItems} />
         </div>
       </nav>
