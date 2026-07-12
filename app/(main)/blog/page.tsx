@@ -71,12 +71,20 @@ export default async function BlogPage({ searchParams }: Props) {
         {/* Header */}
         <Breadcrumb items={[{ name: 'Blog', url: 'https://devstash.me/blog' }]} />
 
-        <div className="mt-6 mb-10">
-          <h1 className="text-ds-text mb-3 font-sans text-4xl font-bold tracking-tight">Blog</h1>
-          <p className="text-ds-muted max-w-xl">
-            Writing about frontend systems, automation, AI workflows, and things I figure out while
-            building.
-          </p>
+        <div className="mt-6 mb-10 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-ds-text mb-3 font-sans text-4xl font-bold tracking-tight">Blog</h1>
+            <p className="text-ds-muted max-w-xl">
+              Writing about frontend systems, automation, AI workflows, and things I figure out
+              while building.
+            </p>
+          </div>
+          <a
+            href="/feed.xml"
+            className="text-ds-muted hover:text-ds-accent border-ds-border hover:border-ds-accent mt-1 flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 font-mono text-xs transition-colors"
+          >
+            RSS
+          </a>
         </div>
 
         {/* Layout: filter sidebar + post grid */}

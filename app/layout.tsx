@@ -35,6 +35,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
   alternates: {
     canonical: '/',
+    types: {
+      'application/rss+xml': '/feed.xml',
+    },
   },
   openGraph: {
     type: 'website',
