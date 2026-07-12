@@ -4,9 +4,9 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
 import { Card, Badge } from '@/components/ui'
 
-const title = 'Uses — Tools, Stack & Setup'
+const title = 'Uses — Stack & Tools'
 const description =
-  "The languages, frameworks, dev tools, and hardware Adesh Shukla actually uses day to day — not a wishlist, what's really in the toolchain."
+  'The languages, frameworks, and tools Adesh Shukla actually builds with — the real toolchain behind this site and its projects, not a wishlist.'
 
 export const metadata: Metadata = buildMetadata({
   title,
@@ -20,8 +20,9 @@ interface UsesSection {
   items: { name: string; note: string }[]
 }
 
-// Confirmed from this repo's own package.json / CLAUDE.md — not a guess.
-const CONFIRMED: UsesSection[] = [
+// Every entry is confirmed from this repo's own package.json / CLAUDE.md —
+// nothing here is a guess or a generic dev-blog default (RULE 5).
+const STACK: UsesSection[] = [
   {
     heading: 'Languages & Framework',
     items: [
@@ -58,36 +59,6 @@ const CONFIRMED: UsesSection[] = [
   },
 ]
 
-// [TODO: Adesh — fill these in with your real setup. Don't guess/reuse
-// generic dev-blog answers; only list what you actually use.]
-const TODO: UsesSection[] = [
-  {
-    heading: 'Editor & Terminal',
-    items: [
-      { name: '[TODO: editor, e.g. VS Code / theme / key extensions]', note: '' },
-      { name: '[TODO: terminal app + shell]', note: '' },
-    ],
-  },
-  {
-    heading: 'Design',
-    items: [{ name: '[TODO: Figma plugins / workflow you actually use]', note: '' }],
-  },
-  {
-    heading: 'Hardware',
-    items: [
-      { name: '[TODO: machine — laptop/desktop, specs]', note: '' },
-      { name: '[TODO: monitor / keyboard / mouse if worth mentioning]', note: '' },
-    ],
-  },
-  {
-    heading: 'Browser & Everyday Apps',
-    items: [
-      { name: '[TODO: browser + key extensions]', note: '' },
-      { name: '[TODO: notes app, todo app, anything else you rely on]', note: '' },
-    ],
-  },
-]
-
 export default function UsesPage() {
   return (
     <main>
@@ -100,9 +71,10 @@ export default function UsesPage() {
             ]}
           />
           <p className="text-ds-accent mt-4 font-mono text-sm">/uses</p>
-          <h1 className="text-ds-text mt-2 text-4xl font-bold">What I actually use</h1>
+          <h1 className="text-ds-text mt-2 text-4xl font-bold">The stack I build with</h1>
           <p className="text-ds-muted mt-3 max-w-lg">
-            Stack, tools, and setup — kept current, not a wishlist. Inspired by{' '}
+            The real toolchain behind this site and its projects — every tool here is one I actually
+            ship with. Inspired by{' '}
             <a
               href="https://uses.tech"
               target="_blank"
@@ -117,8 +89,8 @@ export default function UsesPage() {
       </section>
 
       <section className="py-16">
-        <div className="mx-auto flex max-w-3xl flex-col gap-10 px-6">
-          {CONFIRMED.map((section) => (
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 px-6 md:grid-cols-2">
+          {STACK.map((section) => (
             <Card key={section.heading} padding="lg">
               <h2 className="text-ds-text mb-4 text-lg font-semibold">{section.heading}</h2>
               <ul className="flex flex-col gap-3">
@@ -126,19 +98,6 @@ export default function UsesPage() {
                   <li key={item.name} className="flex flex-wrap items-baseline gap-2">
                     <Badge variant="blue">{item.name}</Badge>
                     {item.note ? <span className="text-ds-muted text-sm">{item.note}</span> : null}
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          ))}
-
-          {TODO.map((section) => (
-            <Card key={section.heading} padding="lg" className="border-dashed">
-              <h2 className="text-ds-muted mb-4 text-lg font-semibold">{section.heading}</h2>
-              <ul className="flex flex-col gap-3">
-                {section.items.map((item) => (
-                  <li key={item.name} className="text-ds-muted font-mono text-sm">
-                    {item.name}
                   </li>
                 ))}
               </ul>

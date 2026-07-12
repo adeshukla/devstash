@@ -14,7 +14,6 @@ const navLinks = [
   { label: 'Contact', href: '/contact' },
   { label: 'Work With Me', href: '/services' },
   { label: 'Uses', href: '/uses' },
-  { label: 'Now', href: '/now' },
 ]
 
 const legalLinks = [
