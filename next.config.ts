@@ -38,9 +38,12 @@ const nextConfig: NextConfig = {
    * fixed, developer-authored strings, not user input.
    */
   async headers() {
+    // React dev mode calls eval() for debugging (stack-frame reconstruction);
+    // it never does in production. Scoped to dev only so prod script-src stays strict.
+    const devEval = process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''
     const csp = `
       default-src 'self';
-      script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms https://www.google.com https://www.gstatic.com;
+      script-src 'self' 'unsafe-inline'${devEval} https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms https://www.google.com https://www.gstatic.com;
       style-src 'self' 'unsafe-inline';
       img-src 'self' data:;
       font-src 'self' data:;
