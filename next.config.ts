@@ -22,12 +22,39 @@ const nextConfig: NextConfig = {
 
   /**
    * Security headers on every response. HSTS is intentionally absent — Vercel
-   * sets Strict-Transport-Security itself on HTTPS custom domains. A full
-   * Content-Security-Policy is a future task: it needs nonces for the inline
-   * JSON-LD scripts and allowances for GA/Clarity before it can be strict
-   * enough to be worth shipping.
+   * sets Strict-Transport-Security itself on HTTPS custom domains.
+   *
+   * CSP is a static, allowlist-based policy rather than the nonce +
+   * 'strict-dynamic' pattern from the Next.js docs. Nonces require every
+   * component that renders an inline <script> to call headers() from
+   * next/headers, which opts the *entire route* out of static rendering —
+   * that would force every blog/project page (currently statically
+   * generated) to render on every request, which conflicts with RULE 7
+   * (perf budget is non-negotiable) for a marginal hardening gain here.
+   * `<script type="application/ld+json">` is exempt from script-src by spec
+   * (browsers never parse it as JS), so JSON-LD needs no allowance at all.
+   * 'unsafe-inline' in script-src covers only the 3 first-party analytics
+   * bootstrap snippets (GTM/GA/Clarity in components/layout/Analytics.tsx) —
+   * fixed, developer-authored strings, not user input.
    */
   async headers() {
+    const csp = `
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms https://www.google.com https://www.gstatic.com;
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data:;
+      font-src 'self' data:;
+      connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://*.clarity.ms;
+      frame-src https://www.google.com;
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self';
+      frame-ancestors 'none';
+      upgrade-insecure-requests;
+    `
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+
     return [
       {
         source: '/(.*)',
@@ -43,6 +70,7 @@ const nextConfig: NextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), payment=()',
           },
+          { key: 'Content-Security-Policy', value: csp },
         ],
       },
     ]
