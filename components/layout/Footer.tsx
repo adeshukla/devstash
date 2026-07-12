@@ -65,7 +65,7 @@ export function Footer() {
 
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         {/* Top row */}
-        <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
           {/* Brand */}
           <div className="max-w-xs">
             <Link
