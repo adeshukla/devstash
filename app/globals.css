@@ -283,12 +283,21 @@ body {
 }
 
 /* Aurora background blob */
+/* NOTE on the infinite animations below (.animate-aurora, .text-gradient-animate,
+   .animate-float, .gradient-border-animated): these are decorative and, in the
+   case of the gradient ones, animate `background-position` — a PAINT-triggering
+   property that is NOT GPU-composited, so it repaints on the main thread every
+   frame. On the homepage `.gradient-border-animated` alone runs on 10+ cards at
+   once. On a throttled mobile CPU that constant repaint inflates LCP (the hero
+   H1 uses .text-gradient-animate and never "settles") and Speed Index. So the
+   BASE rules render a STATIC gradient (still on-brand), and the animation is
+   layered back on only at >=768px with motion allowed — see the @media block
+   right after. Mobile/watch stay static and cheap. */
 .animate-aurora {
-  animation: auroraDrift 18s ease-in-out infinite;
   will-change: transform;
 }
 
-/* Blue→purple animated gradient text (hero accent word, etc.) */
+/* Blue→purple gradient text (hero accent word, etc.) — static by default */
 .text-gradient-animate {
   background-image: linear-gradient(
     100deg,
@@ -301,17 +310,12 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: gradientShift 6s ease infinite;
-}
-
-.animate-float {
-  animation: floatY 5s ease-in-out infinite;
 }
 
 /* Animated accent→purple gradient border — same gradient as
    .text-gradient-animate, applied as a 2px ring via the padding-box/
    border-box double-background trick so it works regardless of what's
-   rendered inside. Used on every Card variant. */
+   rendered inside. Used on every Card variant. Static by default. */
 .gradient-border-animated {
   border: 2px solid transparent;
   background-image:
@@ -328,7 +332,24 @@ body {
   background-size:
     100% 100%,
     250% 100%;
-  animation: gradientShift 8s ease infinite;
+}
+
+/* Layer the infinite decorative motion back on only where it's affordable:
+   larger screens, and only when the user hasn't asked for reduced motion.
+   Small screens (phones/watches) keep the cheap static gradients above. */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .animate-aurora {
+    animation: auroraDrift 18s ease-in-out infinite;
+  }
+  .text-gradient-animate {
+    animation: gradientShift 6s ease infinite;
+  }
+  .animate-float {
+    animation: floatY 5s ease-in-out infinite;
+  }
+  .gradient-border-animated {
+    animation: gradientShift 8s ease infinite;
+  }
 }
 
 /* Card hover lift + accent glow — pair with the `group`/hover utilities */

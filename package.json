@@ -61,5 +61,14 @@
     "*.{ts,tsx,js,mjs,json,md,css}": [
       "prettier --write"
     ]
-  }
+  },
+  "//browserslist": "Modern targets so Next/SWC stops shipping ES2019-2022 polyfills (Array.prototype.at, Object.hasOwn, String.prototype.trimEnd, …) flagged by Lighthouse's 'legacy JavaScript' audit. Safari 15.4 (Mar 2022) is the binding constraint for those features; covers ~all active users.",
+  "browserslist": [
+    "chrome >= 108",
+    "edge >= 108",
+    "firefox >= 108",
+    "safari >= 15.4",
+    "ios_saf >= 15.4",
+    "not dead"
+  ]
 }
