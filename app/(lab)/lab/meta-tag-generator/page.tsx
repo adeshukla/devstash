@@ -40,8 +40,8 @@ export default function MetaTagGeneratorPage() {
           <p className="text-ds-muted leading-relaxed">
             Google truncates title tags around 50–60 characters and meta descriptions around 130–160
             — go past that and search engines cut your copy off mid-sentence or rewrite it entirely.
-            These are the same ranges this site's own pages are built against, so the counters here
-            aren't arbitrary — they're the actual thresholds this tool's own{' '}
+            These are the same ranges this site&apos;s own pages are built against, so the counters
+            here aren&apos;t arbitrary — they&apos;re the actual thresholds this tool&apos;s own{' '}
             <code className="text-ds-accent">buildMetadata()</code> helper is written to respect.
           </p>
         </div>
@@ -53,14 +53,15 @@ export default function MetaTagGeneratorPage() {
             What &quot;draft from your content&quot; actually does
           </h2>
           <p className="text-ds-muted leading-relaxed">
-            It's real, but it's not AI. Pasted text is split into sentences, each sentence is scored
-            by how much its words overlap with the rest of the text (extractive summarization — the
-            same family of technique search engines have used for snippet generation for years), and
-            the highest-scoring sentence becomes the description. A short list of common filler
-            phrases (&quot;in today's fast-paced world&quot;, &quot;leverage&quot;,
-            &quot;utilize&quot;) gets cleaned up along the way. There's no model call, nothing
-            leaves your browser, and it won't invent facts that aren't in what you pasted — because
-            it isn't writing anything, just picking and trimming what's already there.
+            It&apos;s real, but it&apos;s not AI. Pasted text is split into sentences, each sentence
+            is scored by how much its words overlap with the rest of the text (extractive
+            summarization — the same family of technique search engines have used for snippet
+            generation for years), and the highest-scoring sentence becomes the description. A short
+            list of common filler phrases (&quot;in today&apos;s fast-paced world&quot;,
+            &quot;leverage&quot;, &quot;utilize&quot;) gets cleaned up along the way. There&apos;s
+            no model call, nothing leaves your browser, and it won&apos;t invent facts that
+            aren&apos;t in what you pasted — because it isn&apos;t writing anything, just picking
+            and trimming what&apos;s already there.
           </p>
         </div>
       </section>

@@ -36,10 +36,10 @@ export default function UtmBuilderPage() {
         <div className="mx-auto max-w-2xl">
           <h2 className="text-ds-text mb-4 text-xl font-bold">Why term and content matter</h2>
           <p className="text-ds-muted leading-relaxed">
-            Source, medium, and campaign get filled in on almost every tagged link — they're the
-            three fields every analytics dashboard groups by default. Term and content are the ones
-            people skip, and they're exactly the fields that answer the question that actually
-            matters after a campaign runs: which specific ad variant or keyword drove this
+            Source, medium, and campaign get filled in on almost every tagged link — they&apos;re
+            the three fields every analytics dashboard groups by default. Term and content are the
+            ones people skip, and they&apos;re exactly the fields that answer the question that
+            actually matters after a campaign runs: which specific ad variant or keyword drove this
             particular click, not just which platform it came from.
           </p>
         </div>

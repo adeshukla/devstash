@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "echo 'Lint configured in Phase 1'",
+    "lint": "eslint .",
     "lint:content": "node scripts/seo/check-metadata.mjs",
     "check:links": "node scripts/automation/check-links.mjs",
     "check:env-example": "node scripts/security/check-env-example.mjs",

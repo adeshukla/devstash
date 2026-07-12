@@ -317,7 +317,7 @@ function GenerateTab() {
           </button>
         </div>
         <p className="text-ds-muted mt-2 text-xs">
-          Click a preview to switch the copyable code below to that theme's actual colors.
+          Click a preview to switch the copyable code below to that theme&apos;s actual colors.
         </p>
       </div>
 

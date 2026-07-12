@@ -26,7 +26,7 @@ export default function IllustrationGeneratorPage() {
             with real clothing — a figure waving hello, presenting to a growing chart, a full
             boardroom presentation, a team, a handshake, a celebration, or an idea moment — with
             your own skin tone, masculine/feminine figure style, and outfit palette. Click either
-            preview to make the copied SVG use that theme's real colors.
+            preview to make the copied SVG use that theme&apos;s real colors.
           </p>
         </div>
       </section>
@@ -49,14 +49,15 @@ export default function IllustrationGeneratorPage() {
             instead of one fixed drawing — with a real blazer, lapels, collar, optional tie, cuffed
             sleeves, and shoes, plus a masculine/feminine style control that swaps the hairstyle and
             silhouette. These are deliberately flat, stylized figures, not an attempt at
-            photorealism — that isn't something hand-authored SVG can credibly deliver. Every
-            shape's color resolves through a shared token system that can be evaluated for either
-            theme, which is what lets clicking the light or dark preview switch the copied code to
-            that theme's actual literal colors instead of one generic export. Same input always
-            produces the same layout; hitting "Shuffle" changes the seed for a new arrangement
-            without touching your text. No image-generation API, no external calls — it's all local
-            geometry. The second tab ("Match a site scene") is the older, separate tool that maps a
-            topic to one of the 16 hand-built scenes this site's own blog/project cards use.
+            photorealism — that isn&apos;t something hand-authored SVG can credibly deliver. Every
+            shape&apos;s color resolves through a shared token system that can be evaluated for
+            either theme, which is what lets clicking the light or dark preview switch the copied
+            code to that theme&apos;s actual literal colors instead of one generic export. Same
+            input always produces the same layout; hitting &quot;Shuffle&quot; changes the seed for
+            a new arrangement without touching your text. No image-generation API, no external calls
+            — it&apos;s all local geometry. The second tab (&quot;Match a site scene&quot;) is the
+            older, separate tool that maps a topic to one of the 16 hand-built scenes this
+            site&apos;s own blog/project cards use.
           </p>
         </div>
       </section>

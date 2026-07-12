@@ -27,6 +27,9 @@ jobs:
       - name: TypeScript type check
         run: pnpm tsc --noEmit
 
+      - name: ESLint
+        run: pnpm lint
+
   content-checks:
     name: Content Checks
     runs-on: ubuntu-latest

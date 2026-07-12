@@ -178,8 +178,8 @@ export default function CssShapesPlaygroundPage() {
           <h2 className="text-ds-text mb-2 text-2xl font-bold">Customize it yourself</h2>
           <p className="text-ds-muted mb-8">
             11 presets, 4 independent corner-radius sliders, or drag actual points on a polygon to
-            build a shape that doesn't exist anywhere else — then add an animation and copy the
-            exact CSS for what's on screen.
+            build a shape that doesn&apos;t exist anywhere else — then add an animation and copy the
+            exact CSS for what&apos;s on screen.
           </p>
           <ShapeCustomizer />
         </div>
