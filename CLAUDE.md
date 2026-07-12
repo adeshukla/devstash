@@ -2,7 +2,7 @@
 
 # Paste this at the start of every new Claude conversation
 
-# Last updated: Phase 9 complete — versions verified against package.json (Jun 2026)
+# Last updated: 2026-07-12 — Phase 10 partially shipped (honest AI pipeline live), recruiter-facing home/case-studies/lab/nav on prod, QA+security automation (pnpm qa), mobile-perf pass. See Section 13 for current status.
 
 ---
 
