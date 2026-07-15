@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
-import { Card, Button } from '@/components/ui'
+import { Button } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
 import type { IconName } from '@/components/icons/Icon'
 
@@ -73,21 +73,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      <section className="border-ds-border border-t py-16">
-        <div className="mx-auto max-w-3xl px-6">
-          <Card padding="lg" className="border-dashed">
-            <h2 className="text-ds-muted mb-3 text-lg font-semibold">Engagement details</h2>
-            <p className="text-ds-muted font-mono text-sm leading-relaxed">
-              [TODO: Adesh — add whatever you actually want to commit to publicly: typical project
-              types/scope, how you price (hourly / fixed / retainer), and your usual process. Leave
-              this section out entirely rather than publish vague promises if you&apos;d rather keep
-              pricing conversations 1:1.]
-            </p>
-          </Card>
-        </div>
-      </section>
-
-      <section className="py-16 text-center">
+      <section className="border-ds-border border-t py-16 text-center">
         <div className="mx-auto max-w-md px-6">
           <h2 className="text-ds-text mb-3 text-xl font-bold">
             Let&apos;s talk about your project

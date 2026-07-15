@@ -6,6 +6,8 @@ import { siteConfig } from '@/content/metadata/site.config'
 import { Breadcrumb } from '@/components/layout'
 import { ContactForm } from '@/components/contact/ContactForm'
 import { Reveal, Card, Separator } from '@/components/ui'
+import { Icon } from '@/components/icons/Icon'
+import type { IconName } from '@/components/icons/Icon'
 
 // reCAPTCHA v3 site key is public by design (it's meant to be embedded in
 // client JS) — only renders once a real key is set, so the form works
@@ -27,26 +29,26 @@ export const metadata: Metadata = buildMetadata({
 
 // ─── Social links (single source: content/metadata/site.config.ts) ─────────────
 
-const SOCIAL_LINKS = [
+const SOCIAL_LINKS: { label: string; href: string; handle: string; icon: IconName }[] = [
   {
     label: 'GitHub',
     href: siteConfig.author.github,
     handle: '@adeshukla',
-    icon: '⌥',
+    icon: 'github',
   },
   {
     label: 'LinkedIn',
     href: siteConfig.author.linkedin,
     handle: 'Adesh Shukla',
-    icon: '⌘',
+    icon: 'linkedin',
   },
   {
     label: 'Twitter / X',
     href: siteConfig.author.x,
     handle: '@adeshukla',
-    icon: '𝕏',
+    icon: 'x',
   },
-] as const
+]
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -128,10 +130,10 @@ export default function ContactPage() {
                           className="group text-ds-muted hover:text-ds-text flex items-center gap-3 text-sm transition-colors"
                         >
                           <span
-                            className="border-ds-border bg-ds-surface2 text-ds-muted group-hover:border-ds-accent group-hover:text-ds-accent flex h-8 w-8 items-center justify-center rounded-lg border font-mono text-xs transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_8px_18px_-8px_color-mix(in_srgb,var(--color-ds-accent)_45%,transparent)]"
+                            className="border-ds-border bg-ds-surface2 text-ds-muted group-hover:border-ds-accent group-hover:text-ds-accent flex h-8 w-8 items-center justify-center rounded-lg border transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_8px_18px_-8px_color-mix(in_srgb,var(--color-ds-accent)_45%,transparent)]"
                             aria-hidden="true"
                           >
-                            {link.icon}
+                            <Icon name={link.icon} className="h-4 w-4" />
                           </span>
                           <span className="flex flex-col">
                             <span className="text-ds-text font-medium">{link.label}</span>

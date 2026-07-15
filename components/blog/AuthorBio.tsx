@@ -4,6 +4,7 @@ import path from 'path'
 import Image from 'next/image'
 import Link from 'next/link'
 import { siteConfig } from '@/content/metadata/site.config'
+import { Icon } from '@/components/icons/Icon'
 
 interface AuthorBioProps {
   author: string
@@ -51,8 +52,9 @@ export function AuthorBio({ author }: AuthorBioProps) {
             href={data.github}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-ds-accent transition-colors"
+            className="hover:text-ds-accent flex items-center gap-1.5 transition-colors"
           >
+            <Icon name="github" className="h-3.5 w-3.5" />
             GitHub
           </Link>
           {data.twitter && (
@@ -60,8 +62,9 @@ export function AuthorBio({ author }: AuthorBioProps) {
               href={data.twitter}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-ds-accent transition-colors"
+              className="hover:text-ds-accent flex items-center gap-1.5 transition-colors"
             >
+              <Icon name="x" className="h-3.5 w-3.5" />
               Twitter / X
             </Link>
           )}

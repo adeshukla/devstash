@@ -210,8 +210,13 @@ export default function AboutPage() {
               >
                 Download résumé
               </Button>
-              <Button href={siteConfig.author.github} variant="ghost" size="lg">
-                GitHub →
+              <Button
+                href={siteConfig.author.github}
+                variant="ghost"
+                size="lg"
+                iconLeft={<Icon name="github" className="h-4 w-4" />}
+              >
+                GitHub
               </Button>
             </div>
           </Reveal>
