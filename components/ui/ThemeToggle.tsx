@@ -35,31 +35,21 @@ function MoonIcon() {
 
 /**
  * Toggles `data-theme` on <html> between 'light' and 'dark' and persists the
- * choice to localStorage. First paint is handled purely by CSS — a
- * `prefers-color-scheme` media query in globals.css sets the right token
- * values with no JS involved, so there's no FOUC and nothing to crash. On
- * mount, this reconciles any *explicit* saved preference (which can differ
- * from system preference) into the `data-theme` attribute so it's consistent
- * from then on.
+ * choice to localStorage. The actual first-paint theme is decided by a
+ * beforeInteractive inline script in app/layout.tsx (THEME_INIT_SCRIPT) that
+ * runs before the browser paints anything — this component just reads
+ * whatever `data-theme` that script already applied, to sync React state.
+ * Do not re-resolve/re-apply the theme here; that was the old approach and
+ * it caused a flash whenever the saved theme differed from OS preference
+ * (paint happens with the OS theme, then this useEffect — which only runs
+ * post-hydration — would flip it visibly).
  */
 export function ThemeToggle({ className }: { className?: string }) {
   const [theme, setTheme] = useState<Theme | null>(null)
 
   useEffect(() => {
-    let resolved: Theme = 'dark'
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      resolved =
-        stored === 'light' || stored === 'dark'
-          ? stored
-          : window.matchMedia('(prefers-color-scheme: light)').matches
-            ? 'light'
-            : 'dark'
-    } catch {
-      // localStorage/matchMedia unavailable — default to dark.
-    }
-    document.documentElement.setAttribute('data-theme', resolved)
-    setTheme(resolved)
+    const applied = document.documentElement.getAttribute('data-theme')
+    setTheme(applied === 'light' ? 'light' : 'dark')
   }, [])
 
   function toggle() {

@@ -1,10 +1,22 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { DM_Sans, JetBrains_Mono } from 'next/font/google'
 import { siteConfig } from '@/content/metadata/site.config'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Analytics, GtmNoScript } from '@/components/layout/Analytics'
 import { AnalyticsClicks } from '@/components/layout/AnalyticsClicks'
 import './globals.css'
+
+// Must match components/ui/ThemeToggle.tsx's STORAGE_KEY exactly.
+const THEME_STORAGE_KEY = 'devstash-theme'
+
+// Runs before the browser paints anything (beforeInteractive), so an
+// explicit saved theme that differs from the OS preference is applied on
+// the very first paint. Without this, the CSS prefers-color-scheme
+// fallback paints the OS theme first, then ThemeToggle's useEffect
+// (which only runs post-hydration) flips it — a visible flash on every
+// reload whenever the saved choice and system preference disagree.
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('${THEME_STORAGE_KEY}');var d=t==='light'||t==='dark'?t:(window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',d)}catch(e){}})()`
 
 const dmSans = DM_Sans({
   variable: '--font-sans',
@@ -85,6 +97,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <body className="bg-ds-bg text-ds-text min-h-screen antialiased" suppressHydrationWarning>
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+        />
         <GtmNoScript />
         {children}
         <Analytics />
