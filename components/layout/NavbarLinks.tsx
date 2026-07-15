@@ -28,7 +28,7 @@ export function NavbarLinks({ items }: NavbarLinksProps) {
             <Link
               href={href}
               className={cn(
-                'gradient-ring-hover relative inline-flex h-9 items-center px-3 text-[13px] font-medium',
+                'relative inline-flex h-9 items-center px-3 text-[13px] font-medium',
                 'rounded-lg transition-colors duration-200',
                 'hover:text-ds-text hover:bg-ds-text/5',
                 isActive ? 'text-ds-text' : 'text-ds-muted'
@@ -36,10 +36,11 @@ export function NavbarLinks({ items }: NavbarLinksProps) {
               aria-current={isActive ? 'page' : undefined}
             >
               {label}
-              {/* Active indicator dot */}
+              {/* Active indicator — animated accent→purple gradient, not a
+                  flat color, so the current page still reads as "alive". */}
               {isActive && (
                 <span
-                  className="bg-ds-accent absolute bottom-1 left-1/2 h-1 w-2/3 -translate-x-1/2 rounded-full"
+                  className="active-nav-gradient absolute bottom-1 left-1/2 h-1 w-2/3 -translate-x-1/2 rounded-full"
                   aria-hidden="true"
                 />
               )}

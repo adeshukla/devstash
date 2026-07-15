@@ -148,7 +148,7 @@ export function MobileNav({ items }: MobileNavProps) {
                   key={href}
                   href={href}
                   className={cn(
-                    'gradient-ring-hover flex items-center gap-3 rounded-lg px-4 py-3 text-[14px] font-medium',
+                    'flex items-center gap-3 rounded-lg px-4 py-3 text-[14px] font-medium',
                     'transition-colors duration-200',
                     isActive
                       ? 'bg-ds-accent/10 text-ds-accent'
@@ -158,7 +158,7 @@ export function MobileNav({ items }: MobileNavProps) {
                 >
                   {isActive && (
                     <span
-                      className="bg-ds-accent h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                      className="active-nav-gradient h-1.5 w-1.5 flex-shrink-0 rounded-full"
                       aria-hidden="true"
                     />
                   )}

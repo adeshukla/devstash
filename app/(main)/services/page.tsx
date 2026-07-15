@@ -51,8 +51,8 @@ export default function ServicesPage() {
             Need a frontend built, or a workflow automated?
           </h1>
           <p className="text-ds-muted mt-3 max-w-lg">
-            Open to freelance and contract frontend work — Noida / Delhi NCR or remote. Immediate to
-            ~20 days notice.
+            Open to freelance and contract frontend work — Noida / Gurugram or remote/hybrid.
+            Immediate to ~20 days notice.
           </p>
         </div>
       </section>

@@ -50,7 +50,7 @@ const CURRENTLY = [
   '🔨 Building DevStash — personal developer ecosystem',
   `📚 Deep-diving into ${stack.next} App Router & RSC patterns`,
   '🤖 Automating workflows with n8n and local LLMs (Ollama)',
-  '🔍 Open to frontend roles · Noida / Delhi NCR · immediate–20 days notice',
+  '🔍 Open to frontend roles · Noida / Gurugram · immediate–20 days notice',
   // TODO: Keep this section updated
 ]
 
