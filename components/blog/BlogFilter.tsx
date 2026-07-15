@@ -4,6 +4,7 @@
 import { useRouter, usePathname } from 'next/navigation'
 import { type BlogCategory, BLOG_CATEGORIES } from '@/types/blog'
 import { cn } from '@/lib/utils/cn'
+import { CardTilt } from '@/components/ui/CardTilt'
 
 interface BlogFilterProps {
   categories: { category: BlogCategory; count: number }[]
@@ -42,33 +43,38 @@ export function BlogFilter({ categories, tags, selectedCategory, selectedTag }: 
           Category
         </p>
         <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setParam('category', null)}
-            className={cn(
-              'rounded-full border px-3 py-1 text-sm transition-colors',
-              !selectedCategory
-                ? 'border-ds-accent bg-ds-accent text-white'
-                : 'border-ds-border bg-ds-surface text-ds-muted hover:border-ds-border2 hover:text-ds-text'
-            )}
-          >
-            All
-          </button>
+          <CardTilt>
+            <button
+              onClick={() => setParam('category', null)}
+              aria-current={!selectedCategory ? 'true' : undefined}
+              className={cn(
+                'gradient-ring-hover rounded-full border px-3 py-1 text-sm transition-colors',
+                !selectedCategory
+                  ? 'border-ds-accent bg-ds-accent text-white'
+                  : 'border-ds-border bg-ds-surface text-ds-muted hover:border-ds-border2 hover:text-ds-text'
+              )}
+            >
+              All
+            </button>
+          </CardTilt>
           {BLOG_CATEGORIES.filter(({ value }) => categories.some((c) => c.category === value)).map(
             ({ label, value }) => {
               const count = categories.find((c) => c.category === value)?.count ?? 0
               return (
-                <button
-                  key={value}
-                  onClick={() => setParam('category', selectedCategory === value ? null : value)}
-                  className={cn(
-                    'rounded-full border px-3 py-1 text-sm transition-colors',
-                    selectedCategory === value
-                      ? 'border-ds-accent bg-ds-accent text-white'
-                      : 'border-ds-border bg-ds-surface text-ds-muted hover:border-ds-border2 hover:text-ds-text'
-                  )}
-                >
-                  {label} <span className="text-xs opacity-60">({count})</span>
-                </button>
+                <CardTilt key={value}>
+                  <button
+                    onClick={() => setParam('category', selectedCategory === value ? null : value)}
+                    aria-current={selectedCategory === value ? 'true' : undefined}
+                    className={cn(
+                      'gradient-ring-hover rounded-full border px-3 py-1 text-sm transition-colors',
+                      selectedCategory === value
+                        ? 'border-ds-accent bg-ds-accent text-white'
+                        : 'border-ds-border bg-ds-surface text-ds-muted hover:border-ds-border2 hover:text-ds-text'
+                    )}
+                  >
+                    {label} <span className="text-xs opacity-60">({count})</span>
+                  </button>
+                </CardTilt>
               )
             }
           )}
@@ -84,8 +90,9 @@ export function BlogFilter({ categories, tags, selectedCategory, selectedTag }: 
               <button
                 key={tag}
                 onClick={() => setParam('tag', selectedTag === tag ? null : tag)}
+                aria-current={selectedTag === tag ? 'true' : undefined}
                 className={cn(
-                  'rounded border px-2.5 py-0.5 font-mono text-xs transition-colors',
+                  'gradient-ring-hover rounded border px-2.5 py-0.5 font-mono text-xs transition-colors',
                   selectedTag === tag
                     ? 'border-ds-accent bg-ds-accent/10 text-ds-accent'
                     : 'border-ds-border bg-ds-surface2 text-ds-muted hover:border-ds-border2 hover:text-ds-text'

@@ -15,42 +15,60 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
   const [activeIndex, setActiveIndex] = useState(0)
   const drag = useRef<{ startX: number; startScrollLeft: number; moved: boolean } | null>(null)
 
-  // Scrolls the track element directly (never the outer page) — deliberately
-  // NOT card.scrollIntoView(), which was scrolling the whole homepage down to
-  // the testimonials section on load: with block:'nearest' it still lets the
-  // browser adjust the page's vertical scroll if it judges the card isn't
-  // fully in the viewport, which it often isn't during entrance animation.
+  // Scrolls the track element directly (never the outer page) using a
+  // PROPORTIONAL target rather than each card's own offsetLeft. With N cards
+  // wider than container/N (a "peek" carousel — 2+ cards visible at once),
+  // the last card's own offsetLeft often exceeds the track's actual maximum
+  // scrollLeft, so targeting it directly clamps to the same position as the
+  // second-to-last card — clicking Next did nothing at that boundary, and
+  // the last dot could never become active. Mapping index proportionally
+  // across [0, maxScrollLeft] guarantees every index is independently
+  // reachable and dot N always corresponds to genuinely scrolling further.
   function scrollToIndex(index: number) {
     const el = trackRef.current
-    const card = el?.querySelectorAll<HTMLElement>('[data-testimonial-card]')[index]
-    if (!el || !card) return
-    el.scrollTo({ left: card.offsetLeft - el.offsetLeft, behavior: 'smooth' })
+    if (!el) return
+    const max = el.scrollWidth - el.clientWidth
+    if (max <= 0) return
+    const clamped = Math.min(Math.max(index, 0), testimonials.length - 1)
+    const target = testimonials.length > 1 ? (clamped / (testimonials.length - 1)) * max : 0
+    el.scrollTo({ left: target, behavior: 'smooth' })
   }
 
   function scrollByCard(direction: 1 | -1) {
     scrollToIndex(Math.min(Math.max(activeIndex + direction, 0), testimonials.length - 1))
   }
 
-  // Track which card is centered/leading in the viewport, to drive the dots —
-  // works for scroll, drag, and swipe alike since it just observes position.
+  // Derives the active dot from actual scroll position using the same
+  // proportional mapping scrollToIndex targets, instead of IntersectionObserver
+  // ratio comparisons — those tied whenever 2+ cards were simultaneously
+  // fully visible (the normal case in a peek carousel), which made the
+  // last dot never win the tie and never light up.
+  //
+  // Debounced via setTimeout, not requestAnimationFrame: rAF callbacks are
+  // throttled/paused entirely while the tab is backgrounded (not just this
+  // dev sandbox — any real visitor who switches tabs mid-scroll hits the
+  // same stall), so the dots would silently stop updating. setTimeout still
+  // fires in a background tab.
   useEffect(() => {
     const el = trackRef.current
-    if (!el) return
-    const cards = [...el.querySelectorAll<HTMLElement>('[data-testimonial-card]')]
+    if (!el || testimonials.length < 2) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const mostVisible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
-        if (mostVisible) {
-          setActiveIndex(cards.indexOf(mostVisible.target as HTMLElement))
-        }
-      },
-      { root: el, threshold: [0.6] }
-    )
-    cards.forEach((c) => observer.observe(c))
-    return () => observer.disconnect()
+    let timeout: ReturnType<typeof setTimeout>
+    function onScroll() {
+      clearTimeout(timeout)
+      timeout = setTimeout(() => {
+        const max = el!.scrollWidth - el!.clientWidth
+        if (max <= 0) return
+        const ratio = el!.scrollLeft / max
+        const idx = Math.round(ratio * (testimonials.length - 1))
+        setActiveIndex(Math.min(Math.max(idx, 0), testimonials.length - 1))
+      }, 50)
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      el.removeEventListener('scroll', onScroll)
+      clearTimeout(timeout)
+    }
   }, [testimonials.length])
 
   // Autoplay — off entirely under prefers-reduced-motion, and paused for a
@@ -102,19 +120,32 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
 
   return (
     <div className="relative">
+      {/* No CSS scroll-snap here — deliberately. Snap points are defined by
+          each card's own position (snap-start), so with cards wider than
+          container/N (2 cards visible at once, only 3 cards total), any
+          intermediate target scrollToIndex computes gets silently pulled to
+          whichever real card boundary is nearest — true under EITHER
+          snap-mandatory or snap-proximity, since both still snap toward
+          actual child positions, not arbitrary JS-computed offsets. With
+          only 2 genuinely independent snap positions reachable at this
+          card:container ratio, every "middle" dot target got overridden
+          back to 0 or the max. Free (non-snapping) scroll lets the
+          proportional math in scrollToIndex reach the position it actually
+          asked for; native touch/trackpad momentum scroll still works fine
+          without snap. */}
       <div
         ref={trackRef}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerUp}
-        className="flex snap-x snap-mandatory [scrollbar-width:none] gap-6 overflow-x-auto pb-4 [-ms-overflow-style:none] active:cursor-grabbing sm:cursor-grab [&::-webkit-scrollbar]:hidden"
+        className="flex [scrollbar-width:none] gap-6 overflow-x-auto pb-4 [-ms-overflow-style:none] active:cursor-grabbing sm:cursor-grab [&::-webkit-scrollbar]:hidden"
       >
         {testimonials.map((t) => (
           <article
             key={t.linkedinUrl + t.name}
             data-testimonial-card
-            className="border-ds-border bg-ds-surface gradient-border-animated flex w-[85vw] shrink-0 snap-start flex-col gap-6 rounded-2xl border p-7 shadow-sm select-none sm:w-[400px]"
+            className="border-ds-border bg-ds-surface gradient-border-animated flex w-[85vw] shrink-0 flex-col gap-6 rounded-2xl border p-7 shadow-sm select-none sm:w-[400px]"
           >
             <svg
               viewBox="0 0 24 24"

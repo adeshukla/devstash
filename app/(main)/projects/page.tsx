@@ -6,6 +6,7 @@ import { Breadcrumb } from '@/components/layout'
 import { getAllProjects } from '@/lib/markdown/projects'
 import { ProjectsGrid } from '@/components/sections'
 import { Badge } from '@/components/ui'
+import { cn } from '@/lib/utils/cn'
 import type { ProjectCategory } from '@/types/project'
 
 const CATEGORY_LABELS: Record<ProjectCategory, string> = {
@@ -78,7 +79,10 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                 >
                   <Badge
                     variant={isActive ? 'blue' : 'default'}
-                    className="hover:border-ds-accent hover:text-ds-accent cursor-pointer transition-colors"
+                    className={cn(
+                      'gradient-ring-hover hover:border-ds-accent hover:text-ds-accent cursor-pointer transition-colors',
+                      isActive && 'gradient-ring-active'
+                    )}
                   >
                     {label}
                   </Badge>

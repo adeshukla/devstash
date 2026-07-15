@@ -148,7 +148,7 @@ export function MobileNav({ items }: MobileNavProps) {
                   key={href}
                   href={href}
                   className={cn(
-                    'flex items-center gap-3 rounded-lg px-4 py-3 text-[14px] font-medium',
+                    'gradient-ring-hover flex items-center gap-3 rounded-lg px-4 py-3 text-[14px] font-medium',
                     'transition-colors duration-200',
                     isActive
                       ? 'bg-ds-accent/10 text-ds-accent'

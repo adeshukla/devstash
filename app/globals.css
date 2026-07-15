@@ -364,6 +364,58 @@ body {
   box-shadow: 0 12px 32px -8px color-mix(in srgb, var(--color-ds-accent) 25%, transparent);
 }
 
+/* Gradient ring on hover/active — for elements that aren't cards (nav tabs,
+   filter pills) but should still pick up the site's signature accent→purple
+   motion on interaction. Uses a masked ::before ring (not the background
+   double-layer trick .gradient-border-animated uses) specifically so it
+   never needs to know or match the element's own background color — it
+   only ever paints the 2px ring itself, so it drops onto any surface
+   (translucent header, filter pill, anything) without a visible seam.
+   Invisible at rest (opacity:0, GPU-only), so idle nav costs nothing. */
+.gradient-ring-hover {
+  position: relative;
+}
+.gradient-ring-hover::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 2px;
+  background-image: linear-gradient(
+    100deg,
+    var(--color-ds-accent),
+    var(--color-ds-purple),
+    var(--color-ds-accent),
+    var(--color-ds-purple)
+  );
+  background-size: 250% 100%;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.gradient-ring-hover:hover::before,
+.gradient-ring-hover[aria-current='page']::before,
+.gradient-ring-hover[aria-current='true']::before,
+.gradient-ring-hover[aria-selected='true']::before,
+.gradient-ring-hover.gradient-ring-active::before {
+  opacity: 1;
+}
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .gradient-ring-hover:hover::before,
+  .gradient-ring-hover[aria-current='page']::before,
+  .gradient-ring-hover[aria-current='true']::before,
+  .gradient-ring-hover[aria-selected='true']::before,
+  .gradient-ring-hover.gradient-ring-active::before {
+    animation: gradientShift 6s ease infinite;
+  }
+}
+
 /* Growing accent→purple underline for plain text links (footer nav, contact
    social links) — same gradient duo as everywhere else, so a "quiet" link
    still picks up the site's signature motion on hover. */
