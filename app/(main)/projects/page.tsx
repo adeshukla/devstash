@@ -6,6 +6,15 @@ import { Breadcrumb } from '@/components/layout'
 import { getAllProjects } from '@/lib/markdown/projects'
 import { ProjectsGrid } from '@/components/sections'
 import { Badge } from '@/components/ui'
+import type { ProjectCategory } from '@/types/project'
+
+const CATEGORY_LABELS: Record<ProjectCategory, string> = {
+  'web-app': 'Web App',
+  automation: 'Automation',
+  tool: 'Tool',
+  clone: 'Clone',
+  'open-source': 'Open Source',
+}
 
 const title = 'Projects — Frontend, Automation & Web Apps'
 const description =
@@ -22,20 +31,15 @@ interface ProjectsPageProps {
   searchParams: Promise<{ category?: string }>
 }
 
-const CATEGORIES = [
-  'all',
-  'frontend',
-  'automation',
-  'tooling',
-  'fullstack',
-  // TODO: Keep in sync with your actual project categories
-] as const
-
 export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
   const { category } = await searchParams
   const activeCategory = category ?? 'all'
 
   const allProjects = await getAllProjects()
+  // Derived from the actual project data rather than a hand-typed list, so
+  // the filter can never drift out of sync with real ProjectCategory values
+  // again — every button shown is guaranteed to match at least one project.
+  const categories = ['all', ...new Set(allProjects.map((p) => p.category))] as const
   const filtered =
     activeCategory === 'all'
       ? allProjects
@@ -61,9 +65,10 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
           {/* Category filter */}
           <div className="mt-8 flex flex-wrap gap-2" role="list" aria-label="Filter by category">
-            {CATEGORIES.map((cat) => {
+            {categories.map((cat) => {
               const isActive = cat === activeCategory
               const href = cat === 'all' ? '/projects' : `/projects?category=${cat}`
+              const label = cat === 'all' ? 'All' : CATEGORY_LABELS[cat]
               return (
                 <Link
                   key={cat}
@@ -73,9 +78,9 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                 >
                   <Badge
                     variant={isActive ? 'blue' : 'default'}
-                    className="hover:border-ds-accent hover:text-ds-accent cursor-pointer capitalize transition-colors"
+                    className="hover:border-ds-accent hover:text-ds-accent cursor-pointer transition-colors"
                   >
-                    {cat}
+                    {label}
                   </Badge>
                 </Link>
               )

@@ -15,10 +15,16 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
   const [activeIndex, setActiveIndex] = useState(0)
   const drag = useRef<{ startX: number; startScrollLeft: number; moved: boolean } | null>(null)
 
+  // Scrolls the track element directly (never the outer page) — deliberately
+  // NOT card.scrollIntoView(), which was scrolling the whole homepage down to
+  // the testimonials section on load: with block:'nearest' it still lets the
+  // browser adjust the page's vertical scroll if it judges the card isn't
+  // fully in the viewport, which it often isn't during entrance animation.
   function scrollToIndex(index: number) {
     const el = trackRef.current
     const card = el?.querySelectorAll<HTMLElement>('[data-testimonial-card]')[index]
-    card?.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' })
+    if (!el || !card) return
+    el.scrollTo({ left: card.offsetLeft - el.offsetLeft, behavior: 'smooth' })
   }
 
   function scrollByCard(direction: 1 | -1) {
@@ -102,7 +108,7 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerUp}
-        className="flex snap-x snap-mandatory [scrollbar-width:none] gap-6 overflow-x-auto [mask-image:linear-gradient(to_right,transparent,black_24px,black_calc(100%-24px),transparent)] pb-4 [-ms-overflow-style:none] active:cursor-grabbing sm:cursor-grab [&::-webkit-scrollbar]:hidden"
+        className="flex snap-x snap-mandatory [scrollbar-width:none] gap-6 overflow-x-auto pb-4 [-ms-overflow-style:none] active:cursor-grabbing sm:cursor-grab [&::-webkit-scrollbar]:hidden"
       >
         {testimonials.map((t) => (
           <article
