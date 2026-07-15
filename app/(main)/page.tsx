@@ -5,6 +5,7 @@ import { buildWebSiteSchema, buildPersonSchema } from '@/lib/schema/builders'
 import { HeroSection } from '@/components/sections/HeroSection'
 import { ProjectsGrid } from '@/components/sections/ProjectsGrid'
 import { FeaturedPosts } from '@/components/sections/FeaturedPosts'
+import { Testimonials } from '@/components/sections/Testimonials'
 import { Reveal, Button, Badge } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
 import { getAllProjects, getFeaturedProjects } from '@/lib/markdown/projects'
@@ -180,6 +181,9 @@ export default function HomePage() {
           </div>
         </section>
       </Reveal>
+
+      {/* Social proof — sits right before the ask, classic placement */}
+      <Testimonials />
 
       {/* Closing CTA */}
       <Reveal>
