@@ -1,0 +1,23 @@
+[
+  {
+    "quote": "[TODO: Adesh — paste a real LinkedIn recommendation quote here, verbatim or lightly trimmed for length.]",
+    "name": "[Name 1]",
+    "role": "[Role]",
+    "company": "[Company]",
+    "linkedinUrl": "https://www.linkedin.com/in/PLACEHOLDER-1"
+  },
+  {
+    "quote": "[TODO: Adesh — second real LinkedIn recommendation.]",
+    "name": "[Name 2]",
+    "role": "[Role]",
+    "company": "[Company]",
+    "linkedinUrl": "https://www.linkedin.com/in/PLACEHOLDER-2"
+  },
+  {
+    "quote": "[TODO: Adesh — third real LinkedIn recommendation, optional.]",
+    "name": "[Name 3]",
+    "role": "[Role]",
+    "company": "[Company]",
+    "linkedinUrl": "https://www.linkedin.com/in/PLACEHOLDER-3"
+  }
+]
