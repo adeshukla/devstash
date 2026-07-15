@@ -9,7 +9,7 @@
   "category": "web-app",
   "tech": ["Next.js", "TypeScript", "Tailwind CSS"],
   "liveUrl": "/lab/real-estate-listing",
-  "image": "/images/projects/real-estate-listing.png",
+  "image": "/images/projects/real-estate-listing.webp",
   "startDate": "2026-06-15",
   "year": 2026,
   "highlights": [
