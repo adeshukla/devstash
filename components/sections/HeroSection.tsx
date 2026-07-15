@@ -21,11 +21,15 @@ export function HeroSection() {
       <MouseParallax strength={-18} className="pointer-events-none absolute inset-0 -z-10">
         <div
           aria-hidden="true"
-          className="animate-aurora bg-ds-accent absolute -top-40 left-1/4 h-[460px] w-[460px] -translate-x-1/2 rounded-full opacity-[0.10] blur-3xl"
+          className="animate-aurora bg-ds-accent absolute -top-40 left-1/4 h-[460px] w-[460px] -translate-x-1/2 rounded-full opacity-[0.12] blur-3xl"
         />
         <div
           aria-hidden="true"
-          className="animate-aurora bg-ds-purple absolute -top-20 right-0 h-[380px] w-[380px] rounded-full opacity-[0.08] blur-3xl [animation-delay:-7s]"
+          className="animate-aurora bg-ds-purple absolute -top-20 right-0 h-[380px] w-[380px] rounded-full opacity-[0.1] blur-3xl [animation-delay:-7s]"
+        />
+        <div
+          aria-hidden="true"
+          className="animate-aurora bg-ds-accent absolute top-32 left-0 h-[320px] w-[320px] rounded-full opacity-[0.07] blur-3xl [animation-delay:-12s]"
         />
       </MouseParallax>
 
