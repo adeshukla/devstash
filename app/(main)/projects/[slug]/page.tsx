@@ -1,6 +1,9 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
@@ -11,6 +14,15 @@ import { Badge, Button, ImageGallery, Reveal, MountReveal, Separator } from '@/c
 import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
 import { Icon } from '@/components/icons/Icon'
 import { TECH_ICONS } from '@/lib/utils/techIcons'
+
+// Mirrors components/sections/ProjectsGrid.tsx's hasRealImage() — checks for
+// an actual file on disk rather than trusting the JSON field, so a project
+// with only a placeholder path still falls back to CategoryIllustration.
+function hasRealImage(imagePath: string | undefined): imagePath is string {
+  if (!imagePath) return false
+  const abs = path.join(process.cwd(), 'public', imagePath.replace(/^\//, ''))
+  return fs.existsSync(abs)
+}
 
 // ─── Static generation ────────────────────────────────────────────────────────
 
@@ -92,17 +104,28 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               />
             </MountReveal>
 
-            {/* Hero illustration — only when there's no real screenshot gallery
-                (projects with `interface` already show real UI, no need for a
-                decorative stand-in on top of that). */}
+            {/* Hero — prefers a real screenshot (project.image) over the
+                generated illustration; skipped entirely when a full
+                interface gallery already shows real UI below. */}
             {(!project.interface || project.interface.length === 0) && (
               <MountReveal delay={80}>
-                <div className="border-ds-border bg-ds-surface2 mt-6 h-56 overflow-hidden rounded-2xl border sm:h-64">
-                  <CategoryIllustration
-                    category={project.category}
-                    kind="project"
-                    seed={project.slug}
-                  />
+                <div className="border-ds-border bg-ds-surface2 relative mt-6 h-56 overflow-hidden rounded-2xl border sm:h-64">
+                  {hasRealImage(project.image) ? (
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      fill
+                      className="object-cover"
+                      sizes="(min-width: 768px) 896px, 100vw"
+                      priority
+                    />
+                  ) : (
+                    <CategoryIllustration
+                      category={project.category}
+                      kind="project"
+                      seed={project.slug}
+                    />
+                  )}
                 </div>
               </MountReveal>
             )}
