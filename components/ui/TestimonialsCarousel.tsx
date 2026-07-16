@@ -13,6 +13,7 @@ const AUTOPLAY_MS = 5000
 export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps) {
   const trackRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [hasInteracted, setHasInteracted] = useState(false)
   const drag = useRef<{ startX: number; startScrollLeft: number; moved: boolean } | null>(null)
 
   // Scrolls the track element directly (never the outer page) using a
@@ -97,6 +98,7 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
   // Desktop mouse-drag — native scroll-snap already gets touch/trackpad
   // swipe for free, but a plain mouse has no built-in drag-to-scroll.
   function onPointerDown(e: ReactPointerEvent<HTMLDivElement>) {
+    setHasInteracted(true)
     if (e.pointerType === 'touch') return
     const el = trackRef.current
     if (!el) return
@@ -185,11 +187,25 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
         ))}
       </div>
 
+      {/* Drag hint — see .drag-hint-icon in globals.css for why this exists
+          instead of relying on the native cursor:grab glyph. Sits over the
+          boundary between the first two cards, fades out permanently after
+          the first real drag/click. */}
+      {testimonials.length > 1 && !hasInteracted && (
+        <div
+          className="drag-hint-icon pointer-events-none absolute top-1/2 left-1/2 hidden h-9 w-9 -translate-x-1/2 -translate-y-1/2 sm:block"
+          aria-hidden="true"
+        />
+      )}
+
       {testimonials.length > 1 && (
         <div className="mt-6 flex items-center justify-center gap-5">
           <button
             type="button"
-            onClick={() => scrollByCard(-1)}
+            onClick={() => {
+              setHasInteracted(true)
+              scrollByCard(-1)
+            }}
             aria-label="Previous testimonial"
             className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors"
           >
@@ -215,7 +231,10 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
                 role="tab"
                 aria-selected={i === activeIndex}
                 aria-label={`Go to testimonial ${i + 1}`}
-                onClick={() => scrollToIndex(i)}
+                onClick={() => {
+                  setHasInteracted(true)
+                  scrollToIndex(i)
+                }}
                 className={`h-2 rounded-full transition-all ${
                   i === activeIndex ? 'bg-ds-accent w-6' : 'bg-ds-border hover:bg-ds-muted w-2'
                 }`}
@@ -225,7 +244,10 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
 
           <button
             type="button"
-            onClick={() => scrollByCard(1)}
+            onClick={() => {
+              setHasInteracted(true)
+              scrollByCard(1)
+            }}
             aria-label="Next testimonial"
             className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors"
           >
