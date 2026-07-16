@@ -141,7 +141,7 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerUp}
-        className="flex [scrollbar-width:none] gap-6 overflow-x-auto pb-4 [-ms-overflow-style:none] active:cursor-grabbing sm:cursor-grab [&::-webkit-scrollbar]:hidden"
+        className="slider-cursor flex [scrollbar-width:none] gap-6 overflow-x-auto pb-4 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
         {testimonials.map((t) => (
           <article

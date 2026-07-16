@@ -488,6 +488,25 @@ body {
   }
 }
 
+/* Custom colored grab/grabbing cursor for draggable carousels — the native
+   OS cursor:grab glyph is browser/OS-drawn and can't be recolored; it
+   rendered as a near-white hand that vanished against the light-theme card
+   background (and against the equally-white .drag-hint-icon while
+   hovering). Solid accent-blue fill with a thin white inner stroke reads
+   against light AND dark surfaces, so no per-theme swap is needed. */
+.slider-cursor {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24'%3E%3Cpath d='M9 12V6a1.5 1.5 0 0 1 3 0v5M12 11V4.5a1.5 1.5 0 0 1 3 0V11M15 11V6.5a1.5 1.5 0 0 1 3 0V13c0 4-2.7 7-6.5 7-2.2 0-3.8-.9-5-2.6l-2.3-3.3a1.4 1.4 0 0 1 .4-2 1.4 1.4 0 0 1 1.8.3L9 15' fill='none' stroke='%233b82f6' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M9 12V6a1.5 1.5 0 0 1 3 0v5M12 11V4.5a1.5 1.5 0 0 1 3 0V11M15 11V6.5a1.5 1.5 0 0 1 3 0V13c0 4-2.7 7-6.5 7-2.2 0-3.8-.9-5-2.6l-2.3-3.3a1.4 1.4 0 0 1 .4-2 1.4 1.4 0 0 1 1.8.3L9 15' fill='none' stroke='white' stroke-width='0.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      12 4,
+    grab;
+}
+.slider-cursor:active {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24'%3E%3Cpath d='M7 12c0-3 2-5 5-5s5 2 5 5v3c0 3-2 5-5 5s-5-2-5-5v-3Z' fill='none' stroke='%233b82f6' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M7 12c0-3 2-5 5-5s5 2 5 5v3c0 3-2 5-5 5s-5-2-5-5v-3Z' fill='none' stroke='white' stroke-width='0.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      12 12,
+    grabbing;
+}
+
 /* Growing accent→purple underline for plain text links (footer nav, contact
    social links) — same gradient duo as everywhere else, so a "quiet" link
    still picks up the site's signature motion on hover. */
