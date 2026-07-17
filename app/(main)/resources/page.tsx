@@ -82,7 +82,7 @@ export default function ResourcesPage() {
               { name: 'Resources', url: 'https://devstash.me/resources' },
             ]}
           />
-          <h1 className="text-ds-text mt-4 text-4xl font-bold">Resources</h1>
+          <h1 className="text-ds-text mt-6 text-4xl font-bold">Resources</h1>
           <p className="text-ds-muted mt-3 max-w-xl">
             Docs, articles, and references I keep coming back to. No SEO filler — just the stuff
             that actually helps.

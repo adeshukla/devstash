@@ -40,7 +40,12 @@ export function Reveal({ children, className, delay = 0, as: Tag = 'div' }: Reve
           }
         }
       },
-      { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
+      // A section that starts a few px below the fold was staying invisible
+      // until the user scrolled it 8-12% into view — read as "page still
+      // loading" rather than a scroll animation. Trigger the moment any
+      // sliver crosses the viewport (and slightly before, via the positive
+      // bottom margin) so content already close to the fold isn't hidden.
+      { threshold: 0.01, rootMargin: '0px 0px 120px 0px' }
     )
 
     observer.observe(el)

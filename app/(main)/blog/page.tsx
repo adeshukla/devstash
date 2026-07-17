@@ -87,10 +87,13 @@ export default async function BlogPage({ searchParams }: Props) {
           </a>
         </div>
 
-        {/* Layout: filter sidebar + post grid */}
-        <div className="lg:grid lg:grid-cols-[240px_1fr] lg:gap-10">
-          {/* Sidebar filter */}
-          <aside className="mb-8 lg:mb-0">
+        {/* Layout: filter bar + post grid. BlogFilter is compact on mobile
+            (horizontal-scroll category strip, tags collapsed) so it can sit
+            at the top — like every major filter UI — without pushing cards
+            out of the first fold. Becomes the left sidebar at lg. */}
+        <div className="flex flex-col lg:grid lg:grid-cols-[240px_1fr] lg:gap-10">
+          {/* Filter bar / sidebar */}
+          <aside className="mb-6 lg:mb-0">
             <Suspense>
               <BlogFilter
                 categories={categories}

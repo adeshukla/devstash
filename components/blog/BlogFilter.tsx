@@ -1,6 +1,7 @@
 // components/blog/BlogFilter.tsx
 'use client'
 
+import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { type BlogCategory, BLOG_CATEGORIES } from '@/types/blog'
 import { cn } from '@/lib/utils/cn'
@@ -16,6 +17,10 @@ interface BlogFilterProps {
 export function BlogFilter({ categories, tags, selectedCategory, selectedTag }: BlogFilterProps) {
   const router = useRouter()
   const pathname = usePathname()
+  // Tags stay collapsed on mobile by default — category is the primary filter,
+  // tags are a secondary refinement most visitors won't need immediately.
+  // Always expanded at lg where they live in the sidebar with room to spare.
+  const [tagsOpen, setTagsOpen] = useState(false)
 
   function setParam(key: string, value: string | null) {
     const params = new URLSearchParams()
@@ -37,18 +42,25 @@ export function BlogFilter({ categories, tags, selectedCategory, selectedTag }: 
 
   return (
     <div className="space-y-4">
-      {/* Categories */}
+      {/* Categories — a horizontally-scrolling single-row chip strip on
+          mobile (Airbnb/YouTube-style category bar), same wrapped grid as
+          before at lg where it sits in the sidebar with vertical room. */}
       <div>
         <p className="text-ds-muted mb-2 text-xs font-semibold tracking-widest uppercase">
           Category
         </p>
-        <div className="flex flex-wrap gap-2">
+        {/* `overflow-x-auto` forces overflow-y to `auto` too (CSS spec: if
+            one axis isn't `visible`, the other can't stay `visible` either),
+            which was clipping the top of .gradient-ring-hover's -2px ::before
+            ring. `-m-1 p-1` gives it room on every side, not just left/right/
+            bottom, while keeping the row's visual position unchanged. */}
+        <div className="-m-1 flex [scrollbar-width:none] gap-2 overflow-x-auto p-1 lg:m-0 lg:flex-wrap lg:overflow-visible lg:p-0 [&::-webkit-scrollbar]:hidden">
           <CardTilt>
             <button
               onClick={() => setParam('category', null)}
               aria-current={!selectedCategory ? 'true' : undefined}
               className={cn(
-                'gradient-ring-hover rounded-full border px-3 py-1 text-sm transition-colors',
+                'gradient-ring-hover shrink-0 rounded-full border px-3 py-1 text-sm whitespace-nowrap transition-colors',
                 !selectedCategory
                   ? 'border-ds-accent bg-ds-accent text-white'
                   : 'border-ds-border bg-ds-surface text-ds-muted hover:border-ds-border2 hover:text-ds-text'
@@ -66,7 +78,7 @@ export function BlogFilter({ categories, tags, selectedCategory, selectedTag }: 
                     onClick={() => setParam('category', selectedCategory === value ? null : value)}
                     aria-current={selectedCategory === value ? 'true' : undefined}
                     className={cn(
-                      'gradient-ring-hover rounded-full border px-3 py-1 text-sm transition-colors',
+                      'gradient-ring-hover shrink-0 rounded-full border px-3 py-1 text-sm whitespace-nowrap transition-colors',
                       selectedCategory === value
                         ? 'border-ds-accent bg-ds-accent text-white'
                         : 'border-ds-border bg-ds-surface text-ds-muted hover:border-ds-border2 hover:text-ds-text'
@@ -81,11 +93,35 @@ export function BlogFilter({ categories, tags, selectedCategory, selectedTag }: 
         </div>
       </div>
 
-      {/* Tags */}
+      {/* Tags — secondary refinement, collapsed by default on mobile so the
+          filter block stays compact and post cards stay in the first fold;
+          always open at lg where it lives in the sidebar. */}
       {tags.length > 0 && (
         <div>
-          <p className="text-ds-muted mb-2 text-xs font-semibold tracking-widest uppercase">Tags</p>
-          <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setTagsOpen((o) => !o)}
+            className="text-ds-muted hover:text-ds-text mb-2 flex items-center gap-1.5 text-xs font-semibold tracking-widest uppercase lg:pointer-events-none"
+            aria-expanded={tagsOpen}
+          >
+            Tags
+            <svg
+              width="10"
+              height="10"
+              viewBox="0 0 10 10"
+              fill="none"
+              aria-hidden="true"
+              className={cn('transition-transform lg:hidden', tagsOpen && 'rotate-180')}
+            >
+              <path
+                d="M2 3.5L5 6.5L8 3.5"
+                stroke="currentColor"
+                strokeWidth="1.25"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+          <div className={cn('flex flex-wrap gap-2', !tagsOpen && 'hidden lg:flex')}>
             {tags.slice(0, 20).map(({ tag, count }) => (
               <button
                 key={tag}

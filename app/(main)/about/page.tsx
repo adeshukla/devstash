@@ -63,14 +63,14 @@ export default function AboutPage() {
 
       <main>
         {/* ── Hero ── */}
-        <section className="border-ds-border border-b py-20">
+        <section className="border-ds-border border-b py-10 sm:py-20">
           <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-10 px-6 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
             <div>
-              <p className="text-ds-accent mb-3 font-mono text-sm">{'// about'}</p>
-              <h1 className="text-ds-text text-4xl font-bold tracking-tight sm:text-5xl">
+              <p className="text-ds-accent mb-2 font-mono text-sm sm:mb-3">{'// about'}</p>
+              <h1 className="text-ds-text text-3xl font-bold tracking-tight sm:text-5xl">
                 Hey, I&apos;m Adesh.
               </h1>
-              <div className="text-ds-muted mt-6 flex max-w-2xl flex-col gap-4 text-lg leading-relaxed">
+              <div className="text-ds-muted mt-4 flex max-w-2xl flex-col gap-3 text-base leading-relaxed sm:mt-6 sm:gap-4 sm:text-lg">
                 <p>
                   Frontend developer with a designer&apos;s eye and an automation enthusiast&apos;s
                   brain. I&apos;ve been building for the web for 6+ years — from Figma mockups to
@@ -82,7 +82,7 @@ export default function AboutPage() {
                   more developer ecosystem than portfolio.
                 </p>
               </div>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-5 flex flex-wrap gap-3 sm:mt-8">
                 <Button href="/projects">See my work</Button>
                 <Button href="/contact" variant="outline">
                   Let&apos;s connect

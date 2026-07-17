@@ -125,8 +125,8 @@ export default function LabPage() {
               { name: 'Lab', url: 'https://devstash.me/lab' },
             ]}
           />
-          <p className="text-ds-accent mt-4 font-mono text-sm">{'// lab'}</p>
-          <h1 className="text-ds-text mt-2 text-4xl font-bold tracking-tight">Lab</h1>
+          <p className="text-ds-accent mt-6 font-mono text-sm">{'// lab'}</p>
+          <h1 className="text-ds-text mt-3 text-4xl font-bold tracking-tight">Lab</h1>
           <p className="text-ds-muted mt-3 max-w-2xl text-lg leading-relaxed">
             Real, interactive things I&apos;ve built — running live in your browser, no signup.
             Break them, copy from them, view the source. Everything here is client-side unless it

@@ -58,7 +58,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
               { name: 'Projects', url: 'https://devstash.me/projects' },
             ]}
           />
-          <h1 className="text-ds-text mt-4 text-4xl font-bold">Projects</h1>
+          <h1 className="text-ds-text mt-6 text-4xl font-bold">Projects</h1>
           <p className="text-ds-muted mt-3 max-w-xl">
             Things I&apos;ve designed, built, and shipped — open source repos, automation tools, and
             web apps.

@@ -40,7 +40,7 @@ export function NavbarLinks({ items }: NavbarLinksProps) {
                   flat color, so the current page still reads as "alive". */}
               {isActive && (
                 <span
-                  className="active-nav-gradient absolute bottom-1 left-1/2 h-1 w-2/3 -translate-x-1/2 rounded-full"
+                  className="active-nav-gradient absolute bottom-1 left-1/2 h-0.75 w-2/3 -translate-x-1/2 rounded-full"
                   aria-hidden="true"
                 />
               )}

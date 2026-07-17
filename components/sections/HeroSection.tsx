@@ -10,7 +10,7 @@ import {
 // Server Component — no 'use client'
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden py-24 sm:py-32">
+    <section className="relative overflow-hidden py-12 sm:py-24 lg:py-32">
       {/* Subtle grid background */}
       <div
         aria-hidden="true"
@@ -35,7 +35,7 @@ export function HeroSection() {
 
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid gap-10 xl:grid-cols-[1.6fr_1fr] xl:items-center xl:gap-16">
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4 sm:gap-6">
             {/* Terminal typing kicker */}
             <MountReveal>
               <div className="border-ds-border bg-ds-surface/60 inline-flex w-fit items-center rounded-lg border px-3 py-1.5 text-sm backdrop-blur">
@@ -73,7 +73,7 @@ export function HeroSection() {
 
             {/* Main heading */}
             <MountReveal delay={160}>
-              <h1 className="text-ds-text text-4xl leading-tight font-bold tracking-tight sm:text-5xl lg:text-6xl xl:text-5xl">
+              <h1 className="text-ds-text text-3xl leading-[1.15] font-bold tracking-tight sm:text-5xl sm:leading-tight lg:text-6xl xl:text-5xl">
                 Web interfaces that ship —{' '}
                 <span className="text-gradient-animate">fast, accessible, built to last.</span>
               </h1>
@@ -81,7 +81,7 @@ export function HeroSection() {
 
             {/* Sub-copy */}
             <MountReveal delay={240}>
-              <p className="text-ds-muted max-w-2xl text-lg leading-relaxed">
+              <p className="text-ds-muted max-w-2xl text-base leading-relaxed sm:text-lg">
                 I&apos;m Adesh Shukla — a frontend developer with a designer&apos;s eye. I build
                 with React and Next.js, turn Figma into high-performance, SEO-ready products, and
                 automate the repetitive parts of the workflow.
@@ -102,7 +102,7 @@ export function HeroSection() {
 
             {/* Quick stats */}
             <MountReveal delay={400}>
-              <div className="border-ds-border mt-6 flex flex-wrap gap-10 border-t pt-8">
+              <div className="border-ds-border mt-4 flex flex-wrap gap-6 border-t pt-6 sm:mt-6 sm:gap-10 sm:pt-8">
                 {(
                   [
                     { label: 'Years Frontend Eng', value: '6+' },

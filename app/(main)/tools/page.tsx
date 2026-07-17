@@ -84,7 +84,7 @@ export default function ToolsPage() {
               { name: 'Tools', url: 'https://devstash.me/tools' },
             ]}
           />
-          <h1 className="text-ds-text mt-4 text-4xl font-bold">Tools</h1>
+          <h1 className="text-ds-text mt-6 text-4xl font-bold">Tools</h1>
           <p className="text-ds-muted mt-3 max-w-xl">
             What&apos;s actually running on my machine. No affiliate links, no sponsored picks —
             just the stack I reach for every day.

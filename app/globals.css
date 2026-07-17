@@ -205,6 +205,10 @@
 html {
   height: 100%;
   scroll-behavior: smooth;
+  /* Reserve the scrollbar gutter permanently so toggling body overflow
+     (mobile nav, any future modal) never shifts layout width mid-animation —
+     that width jump was the real cause of the "jittery" mobile-nav open. */
+  scrollbar-gutter: stable;
 }
 
 body {

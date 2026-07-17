@@ -46,8 +46,8 @@ export default function ServicesPage() {
               { name: 'Work With Me', url: 'https://devstash.me/services' },
             ]}
           />
-          <p className="text-ds-accent mt-4 font-mono text-sm">Work with me</p>
-          <h1 className="text-ds-text mt-2 text-4xl font-bold">
+          <p className="text-ds-accent mt-6 font-mono text-sm">Work with me</p>
+          <h1 className="text-ds-text mt-3 text-4xl font-bold">
             Need a frontend built, or a workflow automated?
           </h1>
           <p className="text-ds-muted mt-3 max-w-lg">
