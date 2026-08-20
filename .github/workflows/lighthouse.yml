@@ -11,7 +11,7 @@ jobs:
     name: Performance Budget (RULE 7)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v3
         with:

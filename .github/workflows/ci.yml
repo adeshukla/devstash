@@ -11,7 +11,7 @@ jobs:
     name: TypeScript Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v3
         with:
@@ -34,7 +34,7 @@ jobs:
     name: Content Checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v3
         with:
@@ -68,7 +68,7 @@ jobs:
       # this job existed live deeper in history (see CLAUDE.md Known Issues);
       # re-flagging those forever without a history rewrite isn't useful, so
       # this job is scoped to catching *new* leaks in the current commit.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v3
         with:
@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: typecheck
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v3
         with:
