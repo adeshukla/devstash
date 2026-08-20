@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui'
-import { trackEvent, ANALYTICS_EVENTS } from '@/lib/analytics/events'
+import { trackAndLog, ANALYTICS_EVENTS } from '@/lib/analytics/events'
 
 interface TourSlide {
   title: string
@@ -45,7 +45,9 @@ export function AiPipelineTour({ open, step, onStepChange, onClose }: AiPipeline
   if (!open) return null
 
   function finish() {
-    trackEvent(ANALYTICS_EVENTS.aiPipelineTourCompleted)
+    // trackAndLog, not trackEvent — this also reaches /api/track, which
+    // emails a notification for this event (see NOTIFY_EVENTS there).
+    trackAndLog(ANALYTICS_EVENTS.aiPipelineTourCompleted)
     onClose()
   }
 

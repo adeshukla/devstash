@@ -1,3 +1,4 @@
 pnpm lint-staged
 pnpm lint:content
+pnpm check:project-mdx
 pnpm check:env-example

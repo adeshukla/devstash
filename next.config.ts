@@ -3,6 +3,13 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
 
+  images: {
+    // AVIF first — next/image already serves WebP, but AVIF is typically
+    // 20-30% smaller again on modern browsers; it falls back to WebP/original
+    // automatically per the client's Accept header, so this is free.
+    formats: ['image/avif', 'image/webp'],
+  },
+
   /**
    * Permanent (308) redirects. Add an entry here whenever you rename a slug or
    * move a route, so you don't lose SEO equity or hand visitors a 404.
@@ -43,9 +50,9 @@ const nextConfig: NextConfig = {
     const devEval = process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''
     const csp = `
       default-src 'self';
-      script-src 'self' 'unsafe-inline'${devEval} https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms https://www.google.com https://www.gstatic.com;
+      script-src 'self' 'unsafe-inline'${devEval} https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms https://*.clarity.ms https://www.google.com https://www.gstatic.com;
       style-src 'self' 'unsafe-inline';
-      img-src 'self' data:;
+      img-src 'self' data: https://*.clarity.ms;
       font-src 'self' data:;
       connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://*.clarity.ms;
       frame-src https://www.google.com;

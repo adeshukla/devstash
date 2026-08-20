@@ -15,10 +15,16 @@ interface BadgeProps {
 
 const variantStyles: Record<BadgeVariant, string> = {
   default: 'bg-ds-surface   border-ds-border  text-ds-muted',
-  blue: 'bg-ds-accent/10 border-ds-accent/25 text-ds-accent',
+  // text-ds-accent-strong, not text-ds-accent — on this pale accent/10 tint,
+  // light theme's accent blue only clears ~4.31:1 against the ~4.5:1 AA
+  // needs at this font size (caught by the a11y Playwright suite); the
+  // -strong token is a theme-aware darker blue for exactly this case.
+  blue: 'bg-ds-accent/10 border-ds-accent/25 text-ds-accent-strong',
   purple: 'bg-ds-purple/10 border-ds-purple/25 text-ds-purple',
   green: 'bg-ds-success/10 border-ds-success/25 text-ds-success',
-  warn: 'bg-ds-warning/10 border-ds-warning/25 text-ds-warning',
+  // Same reasoning as the blue variant above — measured ~4.18:1 in light
+  // theme against the ~4.5:1 needed.
+  warn: 'bg-ds-warning/10 border-ds-warning/25 text-ds-warning-strong',
   error: 'bg-ds-error/10  border-ds-error/25  text-ds-error',
   muted: 'bg-ds-text/5    border-ds-text/10   text-ds-muted',
 }

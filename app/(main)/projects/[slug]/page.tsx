@@ -1,6 +1,11 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { MDXRemote } from 'next-mdx-remote/rsc'
+import remarkGfm from 'remark-gfm'
+import rehypeSlug from 'rehype-slug'
+import rehypePrettyCode from 'rehype-pretty-code'
+import type { PluggableList } from 'unified'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
@@ -11,6 +16,20 @@ import { Badge, Button, ImageGallery, Reveal, MountReveal, Separator } from '@/c
 import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
 import { Icon } from '@/components/icons/Icon'
 import { TECH_ICONS } from '@/lib/utils/techIcons'
+import { mdxComponents } from '@/components/blog/MDXComponents'
+
+// Same plugin set as the blog post route (app/(main)/blog/[slug]/page.tsx) —
+// longDescription is plain prose today, but authoring it as markdown (bold,
+// inline code, a link to the repo) shouldn't require a new content pipeline.
+// rehype-pretty-code types aren't fully compatible with PluggableList yet.
+const remarkPlugins: PluggableList = [remarkGfm]
+const rehypePlugins: PluggableList = [
+  rehypeSlug,
+  [
+    rehypePrettyCode,
+    { theme: { dark: 'github-dark-dimmed', light: 'github-light' }, defaultLang: 'plaintext' },
+  ],
+]
 
 // ─── Static generation ────────────────────────────────────────────────────────
 
@@ -173,8 +192,6 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         {/* ── Body ── */}
         <section className="py-16">
           <Reveal className="mx-auto max-w-4xl px-6">
-            {/* TODO: Replace with MDX rendered content in Phase 5 */}
-
             {project.interface && project.interface.length > 0 && (
               <>
                 <h2 className="text-ds-text text-2xl font-bold">Interface</h2>
@@ -200,8 +217,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <div className="flex flex-col gap-12">
               {project.longDescription && (
                 <div className="prose prose-invert max-w-none">
-                  {/* TODO: Render MDX in Phase 5 */}
-                  <p className="text-ds-muted">{project.longDescription}</p>
+                  <MDXRemote
+                    source={project.longDescription}
+                    components={mdxComponents}
+                    options={{ mdxOptions: { remarkPlugins, rehypePlugins } }}
+                  />
                 </div>
               )}
 

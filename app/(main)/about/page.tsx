@@ -148,19 +148,17 @@ export default function AboutPage() {
             </Reveal>
             <ol className="flex flex-col gap-0">
               {TIMELINE.map((item, i) => (
-                <Reveal key={item.company} delay={i * 80}>
-                  <li className="group flex gap-6">
-                    <div className="flex flex-col items-center">
-                      <div className="bg-ds-accent ring-ds-bg mt-1 h-3 w-3 shrink-0 rounded-full ring-4 transition-transform group-hover:scale-125" />
-                      {i < TIMELINE.length - 1 && <div className="bg-ds-border mt-1 w-px flex-1" />}
-                    </div>
-                    <div className="border-ds-border hover:border-ds-accent hover:bg-ds-surface -ml-px flex-1 rounded-lg border-l-2 py-1 pb-10 pl-4 transition-colors">
-                      <p className="text-ds-muted font-mono text-xs">{item.year}</p>
-                      <h3 className="text-ds-text mt-1 font-semibold">{item.role}</h3>
-                      <p className="text-ds-accent text-sm">{item.company}</p>
-                      <p className="text-ds-muted mt-2 text-sm">{item.desc}</p>
-                    </div>
-                  </li>
+                <Reveal key={item.company} delay={i * 80} as="li" className="group flex gap-6">
+                  <div className="flex flex-col items-center">
+                    <div className="bg-ds-accent ring-ds-bg mt-1 h-3 w-3 shrink-0 rounded-full ring-4 transition-transform group-hover:scale-125" />
+                    {i < TIMELINE.length - 1 && <div className="bg-ds-border mt-1 w-px flex-1" />}
+                  </div>
+                  <div className="border-ds-border hover:border-ds-accent hover:bg-ds-surface -ml-px flex-1 rounded-lg border-l-2 py-1 pb-10 pl-4 transition-colors">
+                    <p className="text-ds-muted font-mono text-xs">{item.year}</p>
+                    <h3 className="text-ds-text mt-1 font-semibold">{item.role}</h3>
+                    <p className="text-ds-accent text-sm">{item.company}</p>
+                    <p className="text-ds-muted mt-2 text-sm">{item.desc}</p>
+                  </div>
                 </Reveal>
               ))}
             </ol>
@@ -178,8 +176,8 @@ export default function AboutPage() {
             </Reveal>
             <ul className="flex flex-col gap-3">
               {CURRENTLY.map((item, i) => (
-                <Reveal key={item} delay={i * 60}>
-                  <li className="text-ds-muted">{item}</li>
+                <Reveal key={item} delay={i * 60} as="li" className="text-ds-muted">
+                  {item}
                 </Reveal>
               ))}
             </ul>

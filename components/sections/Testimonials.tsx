@@ -2,7 +2,14 @@ import testimonialsData from '@/content/testimonials/testimonials.json'
 import { TestimonialsCarousel } from '@/components/ui/TestimonialsCarousel'
 import type { Testimonial } from '@/types/testimonial'
 
-const testimonials = testimonialsData as Testimonial[]
+// Filters out placeholder entries (content/testimonials/testimonials.json
+// ships with `[TODO: ...]` quotes and `PLACEHOLDER-*` LinkedIn URLs until
+// real recommendations are pasted in) so the section self-gates on its own
+// data — merge freely, it stays invisible in production until the JSON has
+// real quotes, then appears automatically with no flag to remember to flip.
+const testimonials = (testimonialsData as Testimonial[]).filter(
+  (t) => !t.quote.includes('[TODO') && !t.linkedinUrl.includes('PLACEHOLDER')
+)
 
 // Server Component — data loads at build time, carousel interactivity is
 // isolated to the client-only TestimonialsCarousel.

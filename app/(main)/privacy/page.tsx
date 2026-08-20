@@ -15,8 +15,7 @@ export const metadata: Metadata = buildMetadata({
   ogImage: buildOgImageUrl({ title, description, type: 'website' }),
 })
 
-// TODO: Review before launch. Update LAST_UPDATED.
-const LAST_UPDATED = '2025-06-01'
+const LAST_UPDATED = '2026-07-19'
 
 export default function PrivacyPage() {
   return (
@@ -63,10 +62,6 @@ export default function PrivacyPage() {
                     sources, and device information via Google Analytics 4 (anonymised IP). No
                     cross-site tracking.
                   </li>
-                  <li>
-                    <strong className="text-ds-text">Email newsletter</strong> — email address only,
-                    via Formspree, if you subscribed during our coming-soon period.
-                  </li>
                 </ul>
                 <p>
                   We do <strong className="text-ds-text">not</strong> collect payment information,
@@ -78,9 +73,6 @@ export default function PrivacyPage() {
                 <ul>
                   <li>To respond to your contact form inquiries.</li>
                   <li>To understand how visitors use our website (analytics).</li>
-                  <li>
-                    To send occasional email updates if you opted in (you can unsubscribe any time).
-                  </li>
                 </ul>
                 <p>We do not sell, rent, or share your data with third parties for marketing.</p>
               </PolicySection>

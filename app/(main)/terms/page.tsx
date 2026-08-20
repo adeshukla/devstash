@@ -16,8 +16,7 @@ export const metadata: Metadata = buildMetadata({
   ogImage: buildOgImageUrl({ title, description, type: 'website' }),
 })
 
-// TODO: Review before launch. Update LAST_UPDATED.
-const LAST_UPDATED = '2025-06-01'
+const LAST_UPDATED = '2026-07-19'
 
 export default function TermsPage() {
   return (
@@ -115,7 +114,6 @@ export default function TermsPage() {
 
               <TermsSection title="8. Governing Law">
                 <p>
-                  {/* TODO: Confirm jurisdiction */}
                   These Terms are governed by the laws of India. Any disputes shall be subject to
                   the jurisdiction of courts in Ghaziabad, Uttar Pradesh.
                 </p>

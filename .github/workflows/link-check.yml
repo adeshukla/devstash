@@ -1,0 +1,32 @@
+name: External Link Check
+
+# The ci.yml `content-checks` job already runs `pnpm check:links` (internal
+# links only, fast) on every push/PR. External links point at other people's
+# sites and rot independently of anything in this repo, so they need their
+# own clock, not a push trigger — a weekly cron catches link rot without
+# adding an external-network dependency to every single PR/push.
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Monday 06:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  external-links:
+    name: Check External Blog Links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Check internal + external links
+        run: pnpm check:links --external

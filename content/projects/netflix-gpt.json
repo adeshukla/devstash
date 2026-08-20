@@ -30,13 +30,13 @@
     "CRLF normalization fix for Vercel Linux deployment"
   ],
   "interface": [
-    { "src": "/images/projects/netflix-gpt/netflix-gpt-login.png", "alt": "Sign-in screen" },
+    { "src": "/images/projects/netflix-gpt/netflix-gpt-login.webp", "alt": "Sign-in screen" },
     {
-      "src": "/images/projects/netflix-gpt/netflix-gpt-browse.png",
+      "src": "/images/projects/netflix-gpt/netflix-gpt-browse.webp",
       "alt": "Browse screen with AI picks"
     },
     {
-      "src": "/images/projects/netflix-gpt/netflix-gpt-movies-list.png",
+      "src": "/images/projects/netflix-gpt/netflix-gpt-movies-list.webp",
       "alt": "Movies List screen"
     },
     { "src": "/images/projects/netflix-gpt/netflix-gpt-gpt-search.png", "alt": "GPT Search screen" }

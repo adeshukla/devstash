@@ -6,6 +6,14 @@
   --color-ds-surface: #111827;
   --color-ds-surface2: #161f2e;
   --color-ds-accent: #3b82f6;
+  /* Same blue as --color-ds-accent in dark mode (already AA-compliant there),
+     but a token of its own so the light-theme override below can darken it
+     independently — text-ds-accent on a solid/dark background is fine, but
+     on the pale accent/10 tint used by Badge's "blue" variant, light theme's
+     #2563eb only hits ~4.31:1 against ~#4.5:1 needed (caught by the a11y
+     Playwright suite). Use this token instead of text-ds-accent anywhere
+     accent-colored text sits on a light accent-tinted background. */
+  --color-ds-accent-strong: #3b82f6;
   --color-ds-purple: #8b5cf6;
   --color-ds-text: #f3f4f6;
   --color-ds-muted: #9ca3af;
@@ -13,6 +21,10 @@
   --color-ds-border2: #2a3649;
   --color-ds-success: #10b981;
   --color-ds-warning: #f59e0b;
+  /* Same pattern/reason as --color-ds-accent-strong above: Badge's "warn"
+     variant on its pale warning/10 tint measured ~4.18:1 in light theme —
+     also under AA's 4.5:1. */
+  --color-ds-warning-strong: #f59e0b;
   --color-ds-error: #ef4444;
 
   /* ── Fonts ── */
@@ -110,6 +122,10 @@
   --color-ds-surface: #f8fafc;
   --color-ds-surface2: #eef1f6;
   --color-ds-accent: #2563eb;
+  /* Tailwind blue-700 — darker than --color-ds-accent specifically so text
+     on the pale accent/10 badge tint clears WCAG AA (measured ~5.6:1 vs the
+     ~4.3:1 #2563eb produced there). See the @theme block above for context. */
+  --color-ds-accent-strong: #1d4ed8;
   --color-ds-purple: #7c3aed;
   --color-ds-text: #0f172a;
   --color-ds-muted: #586375;
@@ -117,6 +133,9 @@
   --color-ds-border2: #94a3b8;
   --color-ds-success: #047857;
   --color-ds-warning: #b45309;
+  /* Tailwind amber-800 — darker than --color-ds-warning for the same reason
+     --color-ds-accent-strong exists (measured ~5.9:1 vs ~4.2:1). */
+  --color-ds-warning-strong: #92400e;
   --color-ds-error: #dc2626;
 }
 
@@ -130,6 +149,7 @@
   --color-ds-surface: #111827;
   --color-ds-surface2: #161f2e;
   --color-ds-accent: #3b82f6;
+  --color-ds-accent-strong: #3b82f6;
   --color-ds-purple: #8b5cf6;
   --color-ds-text: #f3f4f6;
   --color-ds-muted: #9ca3af;
@@ -137,6 +157,7 @@
   --color-ds-border2: #2a3649;
   --color-ds-success: #10b981;
   --color-ds-warning: #f59e0b;
+  --color-ds-warning-strong: #f59e0b;
   --color-ds-error: #ef4444;
 }
 
@@ -146,6 +167,7 @@
     --color-ds-surface: #f8fafc;
     --color-ds-surface2: #eef1f6;
     --color-ds-accent: #2563eb;
+    --color-ds-accent-strong: #1d4ed8;
     --color-ds-purple: #7c3aed;
     --color-ds-text: #0f172a;
     --color-ds-muted: #586375;
@@ -153,6 +175,7 @@
     --color-ds-border2: #94a3b8;
     --color-ds-success: #047857;
     --color-ds-warning: #b45309;
+    --color-ds-warning-strong: #92400e;
     --color-ds-error: #dc2626;
   }
 }

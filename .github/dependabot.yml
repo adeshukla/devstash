@@ -1,0 +1,50 @@
+version: 2
+
+updates:
+  # npm deps — weekly, grouped into one PR for minor/patch so CI runs once
+  # instead of once per package. Majors on the framework/toolchain core are
+  # ignored here on purpose: next, react, react-dom, and eslint-config-next
+  # are exact-pinned in package.json (see CLAUDE.md — "EXACT pin, not ^16")
+  # and get bumped deliberately together with a manual verification pass,
+  # not as a routine automated PR. typescript is pinned to the 5.x line
+  # until the TS 7 / Next 16.3 compatibility gap closes (see CLAUDE.md
+  # Known Issues) — a Dependabot PR jumping straight to 7.x would break
+  # `next build`. eslint 9→10 is also held back pending a deliberate check.
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+    open-pull-requests-limit: 10
+    groups:
+      minor-and-patch:
+        update-types:
+          - 'minor'
+          - 'patch'
+    ignore:
+      - dependency-name: 'next'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'react'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'react-dom'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'eslint-config-next'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'eslint'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
+    commit-message:
+      prefix: 'chore(deps)'
+
+  # GitHub Actions versions (actions/checkout@v4, etc.) — same weekly cadence,
+  # low-risk, keeps CI runners on maintained action versions.
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+    commit-message:
+      prefix: 'chore(ci)'

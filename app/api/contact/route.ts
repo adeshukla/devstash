@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { Resend } from 'resend'
 import { verifyRecaptcha } from '@/lib/security/recaptcha'
+import { renderNotificationEmail, escapeHtml } from '@/lib/email/renderNotificationEmail'
 
 // Must match the `action` name grecaptcha.execute() is called with client-side.
 const RECAPTCHA_ACTION = 'contact_form'
@@ -33,19 +34,8 @@ function getResend() {
 }
 
 // Resend sender + recipient. FROM must be on your verified Resend domain.
-const FROM_EMAIL = 'DevStash Contact <hello@devstash.me>'
+const FROM_EMAIL = 'DevStash <hello@devstash.me>'
 const TO_EMAIL = 'hello@devstash.me'
-
-/** Escape a user-supplied string for interpolation into the HTML email.
- * Every field goes through this — the email renders in a mail client, and an
- * unescaped name/subject like `<img onerror=...>` is stored XSS there. */
-function escapeHtml(input: string): string {
-  return input
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-}
 
 // ─── POST handler ─────────────────────────────────────────────────────────────
 
@@ -86,36 +76,26 @@ export async function POST(request: Request) {
   try {
     const resend = getResend()
 
+    const { html, text } = renderNotificationEmail({
+      icon: '📬',
+      heading: 'New contact form submission',
+      bodyHtml: escapeHtml(message),
+      bodyText: message,
+      fields: [
+        { label: 'Name', value: name },
+        { label: 'Email', value: email, href: `mailto:${email}` },
+        { label: 'Subject', value: subject },
+      ],
+      footerNote: 'Sent via devstash.me/contact — reply to this email to respond directly.',
+    })
+
     const { error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [TO_EMAIL],
       replyTo: email,
       subject: `[DevStash Contact] ${subject}`,
-      text: `
-Name: ${name}
-Email: ${email}
-Subject: ${subject}
-
-Message:
-${message}
-
----
-Sent via devstash.me/contact
-      `.trim(),
-      // Optional HTML version
-      html: `
-<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px">
-  <h2 style="color:#3b82f6;margin-bottom:4px">New contact form submission</h2>
-  <p style="color:#9ca3af;font-size:13px;margin:0 0 24px">via devstash.me</p>
-  <table style="width:100%;border-collapse:collapse;font-size:14px">
-    <tr><td style="padding:8px 0;color:#9ca3af;width:80px">Name</td><td style="color:#f3f4f6">${escapeHtml(name)}</td></tr>
-    <tr><td style="padding:8px 0;color:#9ca3af">Email</td><td style="color:#f3f4f6"><a href="mailto:${escapeHtml(email)}" style="color:#3b82f6">${escapeHtml(email)}</a></td></tr>
-    <tr><td style="padding:8px 0;color:#9ca3af">Subject</td><td style="color:#f3f4f6">${escapeHtml(subject)}</td></tr>
-  </table>
-  <hr style="border:none;border-top:1px solid #1f2937;margin:16px 0"/>
-  <p style="color:#f3f4f6;white-space:pre-wrap;font-size:14px;line-height:1.6">${escapeHtml(message)}</p>
-</div>
-      `.trim(),
+      html,
+      text,
     })
 
     if (error) {

@@ -50,8 +50,14 @@ jobs:
       - name: Lint MDX frontmatter
         run: pnpm lint:content
 
+      - name: Check project longDescription compiles as MDX
+        run: pnpm check:project-mdx
+
       - name: Check internal links
         run: pnpm check:links
+
+      - name: Guard against unoptimized images
+        run: pnpm check:images
 
   security:
     name: Security Checks

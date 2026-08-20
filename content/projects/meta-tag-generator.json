@@ -2,7 +2,7 @@
   "slug": "meta-tag-generator",
   "title": "Meta Tags & Social Preview Generator",
   "description": "A free tool that previews a title/description as a Google result, an X/Twitter card, and a Facebook/OG card — with live character counts and copyable meta tags.",
-  "longDescription": "Type a title, description, URL, and OG image — see exactly how it renders as a Google search result, an X/Twitter summary card, and a Facebook/OG card, side by side, with character counters against the 50–60 / 130–160 ranges search engines actually truncate at. Or paste real content first: a local extractive-summarization pass (word-frequency sentence scoring plus a filler-phrase cleanup — not an AI model call) drafts a starting title and description for you to edit. Copy the finished <title>/<meta>/og:*/twitter:* block when it looks right. Unlike the other /lab samples, this one isn't a portfolio demo — it's a genuinely useful tool for anyone shipping a page.",
+  "longDescription": "Type a title, description, URL, and OG image — see exactly how it renders as a Google search result, an X/Twitter summary card, and a Facebook/OG card, side by side, with character counters against the 50–60 / 130–160 ranges search engines actually truncate at. Or paste real content first: a local extractive-summarization pass (word-frequency sentence scoring plus a filler-phrase cleanup — not an AI model call) drafts a starting title and description for you to edit. Copy the finished `<title>`/`<meta>`/`og:*`/`twitter:*` block when it looks right. Unlike the other /lab samples, this one isn't a portfolio demo — it's a genuinely useful tool for anyone shipping a page.",
   "status": "live",
   "featured": true,
   "order": 8,
