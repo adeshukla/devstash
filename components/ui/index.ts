@@ -8,7 +8,6 @@ export { Skeleton, CardSkeleton, BlogCardSkeleton, TextSkeleton } from './Skelet
 export { Pagination } from './Pagination'
 export { Reveal } from './Reveal'
 export { MountReveal } from './MountReveal'
-export { AnimatedCounter } from './AnimatedCounter'
 export { TerminalTyping } from './TerminalTyping'
 export { ImageGallery } from './ImageGallery'
 export type { GalleryImage } from './ImageGallery'

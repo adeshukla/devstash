@@ -6,40 +6,17 @@ import { HeroSection } from '@/components/sections/HeroSection'
 import { ProjectsGrid } from '@/components/sections/ProjectsGrid'
 import { FeaturedPosts } from '@/components/sections/FeaturedPosts'
 import { Testimonials } from '@/components/sections/Testimonials'
+import { WhatIDoBento } from '@/components/sections/WhatIDoBento'
 import { Reveal, Button, Badge } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
 import { getAllProjects, getFeaturedProjects } from '@/lib/markdown/projects'
 import { getAllPosts, getFeaturedPosts } from '@/lib/markdown/blog'
-import type { IconName } from '@/components/icons/Icon'
 
 // Home metadata — canonical defaults to the site root (no trailing slash).
 export const metadata: Metadata = buildMetadata({
   description:
     'The developer ecosystem of Adesh Shukla — frontend engineering, automation, AI workflows, and developer resources. Projects, writing, and tools in one place.',
 })
-
-// ─── "What I do" — client-facing framing, each line backed by something this
-// site itself demonstrably does (perf budget, own SEO system, own automation).
-const WHAT_I_DO: { icon: IconName; title: string; description: string }[] = [
-  {
-    icon: 'frontend',
-    title: 'Frontend Engineering',
-    description:
-      'React and Next.js apps built to a real performance budget — Lighthouse 90+, tight Core Web Vitals, accessible by default.',
-  },
-  {
-    icon: 'performance',
-    title: 'SEO-Ready by Default',
-    description:
-      "Structured data, metadata, and sitemaps wired in from day one on every page — this site's own search visibility runs on the same system.",
-  },
-  {
-    icon: 'automation',
-    title: 'Workflow Automation',
-    description:
-      'n8n and LLM pipelines that handle the repetitive parts — from deploy-triggered search-engine notifications to AI-assisted content workflows.',
-  },
-]
 
 // ─── Flagship build — the AI Content Pipeline demo (/lab/ai-content-pipeline):
 // a real 3-step Groq LLM chain, not a mockup. Facts below match the demo's own
@@ -83,27 +60,7 @@ export default function HomePage() {
 
       {/* What I do — client-facing framing between the hero and the project grid */}
       <Reveal>
-        <section className="py-16">
-          <div className="mx-auto max-w-5xl px-6">
-            <div className="mb-10 max-w-2xl">
-              <p className="text-ds-accent font-mono text-sm">{'// what i do'}</p>
-              <h2 className="text-ds-text mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
-                Frontend, SEO, and the automation that ties it together
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
-              {WHAT_I_DO.map(({ icon, title, description }) => (
-                <div key={title}>
-                  <div className="border-ds-border bg-ds-surface text-ds-accent flex h-10 w-10 items-center justify-center rounded-lg border">
-                    <Icon name={icon} className="h-5 w-5" />
-                  </div>
-                  <h3 className="text-ds-text mt-4 font-semibold">{title}</h3>
-                  <p className="text-ds-muted mt-2 text-sm leading-relaxed">{description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <WhatIDoBento />
       </Reveal>
 
       {/* Featured projects (preview — links to /projects) — cards reveal individually */}
@@ -112,7 +69,7 @@ export default function HomePage() {
       {/* Flagship build — the AI Content Pipeline demo, the strongest single proof point */}
       <Reveal>
         <section className="border-ds-border border-t py-16">
-          <div className="mx-auto max-w-5xl px-6">
+          <div className="mx-auto max-w-6xl px-6">
             <div className="border-ds-border bg-ds-surface overflow-hidden rounded-2xl border">
               <div className="grid grid-cols-1 gap-10 p-8 sm:p-10 lg:grid-cols-[1.2fr_1fr] lg:gap-16">
                 <div>
@@ -121,7 +78,7 @@ export default function HomePage() {
                       Flagship build
                     </Badge>
                   </div>
-                  <h2 className="text-ds-text text-2xl font-bold tracking-tight sm:text-3xl">
+                  <h2 className="text-ds-text text-3xl font-bold tracking-tight sm:text-4xl">
                     A real AI pipeline, not a mockup
                   </h2>
                   <p className="text-ds-muted mt-4 leading-relaxed">
@@ -162,11 +119,11 @@ export default function HomePage() {
       {/* Lab teaser — surfaces the interactive demos (the strongest differentiator) */}
       <Reveal>
         <section className="border-ds-border border-t py-20">
-          <div className="mx-auto max-w-5xl px-6">
+          <div className="mx-auto max-w-6xl px-6">
             <div className="border-ds-border bg-ds-surface flex flex-col items-start gap-6 rounded-2xl border p-8 sm:flex-row sm:items-center sm:justify-between sm:p-10">
               <div className="max-w-xl">
                 <p className="text-ds-accent font-mono text-sm">{'// lab'}</p>
-                <h2 className="text-ds-text mt-2 text-2xl font-bold tracking-tight">
+                <h2 className="text-ds-text mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
                   Play with what I&apos;ve built
                 </h2>
                 <p className="text-ds-muted mt-3 leading-relaxed">
@@ -189,7 +146,7 @@ export default function HomePage() {
       <Reveal>
         <section className="border-ds-border bg-ds-surface border-t py-20">
           <div className="mx-auto max-w-3xl px-6 text-center">
-            <h2 className="text-ds-text text-3xl font-bold tracking-tight">
+            <h2 className="text-ds-text text-3xl font-bold tracking-tight sm:text-4xl">
               Let&apos;s build something
             </h2>
             <p className="text-ds-muted mt-3 text-lg">

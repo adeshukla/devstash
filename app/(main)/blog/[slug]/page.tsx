@@ -132,7 +132,7 @@ export default async function BlogPostPage({ params }: Props) {
             </MountReveal>
 
             <MountReveal delay={160}>
-              <h1 className="text-ds-text mb-4 font-sans text-3xl leading-tight font-bold tracking-tight md:text-4xl">
+              <h1 className="text-ds-text mb-4 font-sans text-4xl leading-tight font-bold tracking-tight sm:text-5xl">
                 {post.title}
               </h1>
             </MountReveal>

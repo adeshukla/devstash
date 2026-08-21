@@ -27,7 +27,9 @@ export default function TermsPage() {
         <section className="border-ds-border border-b py-16">
           <div className="mx-auto max-w-3xl px-6">
             <p className="text-ds-accent font-mono text-sm">Legal</p>
-            <h1 className="text-ds-text mt-2 text-4xl font-bold">Terms of Service</h1>
+            <h1 className="text-ds-text mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
+              Terms of Service
+            </h1>
             <p className="text-ds-muted mt-3 font-mono text-sm">
               Last updated:{' '}
               <time dateTime={LAST_UPDATED}>

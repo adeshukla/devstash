@@ -4,7 +4,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils/cn'
-import { CardTilt } from '@/components/ui/CardTilt'
 
 interface NavItem {
   label: string
@@ -24,28 +23,27 @@ export function NavbarLinks({ items }: NavbarLinksProps) {
         const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href)
 
         return (
-          <CardTilt key={href}>
-            <Link
-              href={href}
-              className={cn(
-                'relative inline-flex h-9 items-center px-3 text-[13px] font-medium',
-                'rounded-lg transition-colors duration-200',
-                'hover:text-ds-text hover:bg-ds-text/5',
-                isActive ? 'text-ds-text' : 'text-ds-muted'
-              )}
-              aria-current={isActive ? 'page' : undefined}
-            >
-              {label}
-              {/* Active indicator — animated accent→purple gradient, not a
-                  flat color, so the current page still reads as "alive". */}
-              {isActive && (
-                <span
-                  className="active-nav-gradient absolute bottom-1 left-1/2 h-0.75 w-2/3 -translate-x-1/2 rounded-full"
-                  aria-hidden="true"
-                />
-              )}
-            </Link>
-          </CardTilt>
+          <Link
+            key={href}
+            href={href}
+            className={cn(
+              'relative inline-flex h-10 items-center px-3.5 text-sm font-medium',
+              'rounded-lg transition-colors duration-200',
+              'hover:text-ds-text hover:bg-ds-text/5',
+              isActive ? 'text-ds-text' : 'text-ds-muted'
+            )}
+            aria-current={isActive ? 'page' : undefined}
+          >
+            {label}
+            {/* Active indicator — animated accent→purple gradient, not a
+                flat color, so the current page still reads as "alive". */}
+            {isActive && (
+              <span
+                className="active-nav-gradient absolute bottom-1 left-1/2 h-0.75 w-2/3 -translate-x-1/2 rounded-full"
+                aria-hidden="true"
+              />
+            )}
+          </Link>
         )
       })}
     </>

@@ -8,7 +8,7 @@ const STORAGE_KEY = 'devstash-theme'
 
 function SunIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <svg width="19" height="19" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <circle cx="8" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.4" />
       <path
         d="M8 1v1.4M8 13.6V15M15 8h-1.4M2.4 8H1M12.7 3.3l-1 1M4.3 11.7l-1 1M12.7 12.7l-1-1M4.3 4.3l-1-1"
@@ -22,7 +22,7 @@ function SunIcon() {
 
 function MoonIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <svg width="19" height="19" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path
         d="M14 9.2A6 6 0 116.8 2a4.8 4.8 0 007.2 7.2z"
         stroke="currentColor"

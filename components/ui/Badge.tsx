@@ -68,7 +68,9 @@ export function Badge({
           aria-hidden="true"
         />
       )}
-      {icon && <span className="h-3 w-3 flex-shrink-0 [&>svg]:h-full [&>svg]:w-full">{icon}</span>}
+      {icon && (
+        <span className="h-3.5 w-3.5 flex-shrink-0 [&>svg]:h-full [&>svg]:w-full">{icon}</span>
+      )}
       {children}
     </span>
   )

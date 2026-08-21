@@ -67,7 +67,7 @@ export default function AboutPage() {
           <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-10 px-6 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
             <div>
               <p className="text-ds-accent mb-2 font-mono text-sm sm:mb-3">{'// about'}</p>
-              <h1 className="text-ds-text text-3xl font-bold tracking-tight sm:text-5xl">
+              <h1 className="text-ds-text text-4xl font-bold tracking-tight sm:text-5xl">
                 Hey, I&apos;m Adesh.
               </h1>
               <div className="text-ds-muted mt-4 flex max-w-2xl flex-col gap-3 text-base leading-relaxed sm:mt-6 sm:gap-4 sm:text-lg">

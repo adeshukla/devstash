@@ -68,7 +68,7 @@ export default async function CategoryPage({ params }: Props) {
 
         <div className="mt-6 mb-10">
           <p className="text-ds-muted mb-2 font-mono text-sm">Category</p>
-          <h1 className="text-ds-text mb-3 font-sans text-4xl font-bold tracking-tight">
+          <h1 className="text-ds-text mb-3 font-sans text-4xl font-bold tracking-tight sm:text-5xl">
             {validCategory.label}
           </h1>
           <p className="text-ds-muted">

@@ -3,6 +3,17 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
 
+  // `next dev` rejects cross-origin requests to its own assets/HMR socket by
+  // default (CSRF hardening) unless the requesting origin is allowlisted here
+  // — without this, tunneling localhost through ngrok/similar to test on a
+  // real phone loads a broken/incomplete page (JS/CSS/HMR silently blocked),
+  // not an error you'd otherwise see. Dev-only: this key is a no-op outside
+  // `next dev`, but scoped explicitly anyway to match the devEval pattern
+  // below rather than relying on that alone.
+  ...(process.env.NODE_ENV === 'development' && {
+    allowedDevOrigins: ['*.ngrok-free.app', '*.ngrok-free.dev', '*.ngrok.io', '*.ngrok.app'],
+  }),
+
   images: {
     // AVIF first — next/image already serves WebP, but AVIF is typically
     // 20-30% smaller again on modern browsers; it falls back to WebP/original

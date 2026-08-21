@@ -65,7 +65,7 @@ export default async function TagPage({ params }: Props) {
 
         <div className="mt-6 mb-10">
           <p className="text-ds-muted mb-2 font-mono text-sm">Tag</p>
-          <h1 className="text-ds-text mb-3 font-sans text-4xl font-bold tracking-tight">
+          <h1 className="text-ds-text mb-3 font-sans text-4xl font-bold tracking-tight sm:text-5xl">
             <span className="text-ds-muted">#</span>
             {tag}
           </h1>

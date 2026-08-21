@@ -47,7 +47,7 @@ export default function ServicesPage() {
             ]}
           />
           <p className="text-ds-accent mt-6 font-mono text-sm">Work with me</p>
-          <h1 className="text-ds-text mt-3 text-4xl font-bold">
+          <h1 className="text-ds-text mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
             Need a frontend built, or a workflow automated?
           </h1>
           <p className="text-ds-muted mt-3 max-w-lg">

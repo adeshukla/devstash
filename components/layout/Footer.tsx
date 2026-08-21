@@ -33,10 +33,14 @@ export function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer
-      className="border-ds-border bg-ds-surface relative w-full overflow-hidden border-t"
-      aria-label="Site footer"
-    >
+    <footer className="bg-ds-surface relative w-full overflow-hidden" aria-label="Site footer">
+      {/* Gradient hairline instead of a flat border-t — same accent→purple
+          duo as the navbar's own top-of-page border, so the chrome reads as
+          one system top and bottom instead of a plain rule closing it out. */}
+      <div
+        aria-hidden="true"
+        className="from-ds-accent/40 via-ds-purple/40 absolute inset-x-0 top-0 h-px bg-gradient-to-r to-transparent"
+      />
       {/* Same subtle grid + aurora-glow treatment as the hero, toned down —
           fills the empty margin outside the centered content wrapper on wide
           desktop screens instead of leaving flat, empty background there. */}
@@ -46,28 +50,41 @@ export function Footer() {
       />
       <div
         aria-hidden="true"
-        className="bg-ds-accent absolute -bottom-32 left-1/2 -z-10 h-[420px] w-[420px] -translate-x-1/2 rounded-full opacity-[0.06] blur-3xl"
+        className="bg-ds-accent absolute -top-32 left-1/2 -z-10 h-[460px] w-[460px] -translate-x-1/2 rounded-full opacity-[0.12] blur-3xl"
+      />
+      <div
+        aria-hidden="true"
+        className="bg-ds-purple absolute right-0 -bottom-24 -z-10 h-[360px] w-[360px] rounded-full opacity-[0.09] blur-3xl"
       />
 
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+      <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         {/* Top row */}
-        <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
+        <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
           {/* Brand */}
           <div className="max-w-xs">
             <Link
               href="/"
-              className="mb-3 inline-flex items-center gap-2.5 no-underline"
+              className="mb-4 inline-flex items-center gap-3 no-underline"
               aria-label="DevStash home"
             >
-              <LogoMark size={28} />
+              {/* Same subtle mark glow as the navbar logo — kept consistent
+                  across both ends of the page chrome. */}
               <span
-                className="text-ds-text text-[16px] font-bold"
+                style={{
+                  filter:
+                    'drop-shadow(0 0 6px color-mix(in srgb, var(--color-ds-accent) 25%, transparent))',
+                }}
+              >
+                <LogoMark size={44} />
+              </span>
+              <span
+                className="text-ds-text text-[24px] font-bold"
                 style={{ letterSpacing: '-0.04em' }}
               >
                 <span className="text-ds-accent">Dev</span>Stash
               </span>
             </Link>
-            <p className="text-ds-muted text-[13px] leading-[1.7]">
+            <p className="text-ds-muted text-[14px] leading-[1.7]">
               A modern developer ecosystem for engineering, automation, AI workflows, and frontend
               systems.
             </p>
@@ -75,7 +92,7 @@ export function Footer() {
             <address className="mt-4 not-italic">
               <a
                 href={`mailto:${siteConfig.author.email}`}
-                className="link-underline text-ds-muted hover:text-ds-accent font-mono text-[13px] transition-colors"
+                className="link-underline text-ds-muted hover:text-ds-accent font-mono text-[14px] transition-colors"
               >
                 {siteConfig.author.email}
               </a>
@@ -84,16 +101,16 @@ export function Footer() {
 
           {/* Nav links */}
           <div>
-            <p className="text-ds-muted mb-3 font-mono text-[11px] tracking-widest uppercase">
+            <p className="text-ds-accent mb-4 font-mono text-xs font-semibold tracking-widest uppercase">
               Navigation
             </p>
             <nav aria-label="Footer navigation">
-              <ul className="m-0 grid list-none grid-cols-2 gap-x-10 gap-y-3 p-0">
+              <ul className="m-0 grid list-none grid-cols-2 gap-x-12 gap-y-3.5 p-0">
                 {navLinks.map(({ label, href }) => (
                   <li key={href}>
                     <Link
                       href={href}
-                      className="link-underline text-ds-muted hover:text-ds-text text-[13px] transition-colors"
+                      className="link-underline text-ds-muted hover:text-ds-text text-[14px] transition-colors"
                     >
                       {label}
                     </Link>
@@ -105,23 +122,23 @@ export function Footer() {
 
           {/* Social links */}
           <div>
-            <p className="text-ds-muted mb-3 font-mono text-[11px] tracking-widest uppercase">
+            <p className="text-ds-accent mb-4 font-mono text-xs font-semibold tracking-widest uppercase">
               Connect
             </p>
-            <ul className="m-0 flex list-none flex-col gap-2 p-0">
+            <ul className="m-0 flex list-none flex-col gap-3 p-0">
               {socialLinks.map(({ label, href, icon }) => (
                 <li key={label}>
                   <a
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group text-ds-muted hover:text-ds-text flex items-center gap-2.5 text-[13px] transition-colors"
+                    className="group text-ds-muted hover:text-ds-text flex items-center gap-3 text-[14px] transition-colors"
                   >
                     <span
-                      className="border-ds-border bg-ds-bg/40 group-hover:border-ds-accent flex h-7 w-7 items-center justify-center rounded-md border transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_6px_16px_-6px_color-mix(in_srgb,var(--color-ds-accent)_45%,transparent)]"
+                      className="border-ds-border bg-ds-bg/40 group-hover:border-ds-accent flex h-10 w-10 items-center justify-center rounded-lg border transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_8px_18px_-6px_color-mix(in_srgb,var(--color-ds-accent)_45%,transparent),0_4px_12px_-6px_color-mix(in_srgb,var(--color-ds-purple)_40%,transparent)]"
                       aria-hidden="true"
                     >
-                      <Icon name={icon} className="h-4 w-4" />
+                      <Icon name={icon} className="h-5 w-5" />
                     </span>
                     {label}
                   </a>
@@ -132,7 +149,7 @@ export function Footer() {
         </div>
 
         {/* Bottom row */}
-        <div className="border-ds-border mt-10 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="border-ds-border mt-12 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-ds-muted font-mono text-[12px]">
             © {year} {siteConfig.name} · crafted with ☕ in Ghaziabad
           </p>

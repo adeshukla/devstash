@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
-import { Badge, Card, Reveal } from '@/components/ui'
+import { Badge, Card, CardTilt, Reveal } from '@/components/ui'
 
 const title = 'Lab — Interactive Tools & Live Demos'
 const description =
@@ -90,25 +90,27 @@ const SAMPLES: Demo[] = [
 
 function DemoCard({ demo }: { demo: Demo }) {
   return (
-    <Link
-      href={`/lab/${demo.slug}`}
-      className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-    >
-      <Card variant="hover" className="h-full">
-        <div className="flex h-full flex-col gap-3 p-6">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="text-ds-text group-hover:text-ds-accent font-semibold transition-colors">
-              {demo.name}
-            </h3>
-            <Badge variant={demo.flagship ? 'purple' : 'muted'}>
-              {demo.flagship ? 'Flagship' : demo.tag}
-            </Badge>
+    <CardTilt>
+      <Link
+        href={`/lab/${demo.slug}`}
+        className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+      >
+        <Card variant="spotlight" className="h-full">
+          <div className="flex h-full flex-col gap-3 p-6">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-ds-text group-hover:text-ds-accent font-semibold transition-colors">
+                {demo.name}
+              </h3>
+              <Badge variant={demo.flagship ? 'purple' : 'muted'}>
+                {demo.flagship ? 'Flagship' : demo.tag}
+              </Badge>
+            </div>
+            <p className="text-ds-muted flex-1 text-sm leading-relaxed">{demo.blurb}</p>
+            <span className="text-ds-accent mt-1 text-sm font-medium">Try it live →</span>
           </div>
-          <p className="text-ds-muted flex-1 text-sm leading-relaxed">{demo.blurb}</p>
-          <span className="text-ds-accent mt-1 text-sm font-medium">Try it live →</span>
-        </div>
-      </Card>
-    </Link>
+        </Card>
+      </Link>
+    </CardTilt>
   )
 }
 
@@ -126,7 +128,7 @@ export default function LabPage() {
             ]}
           />
           <p className="text-ds-accent mt-6 font-mono text-sm">{'// lab'}</p>
-          <h1 className="text-ds-text mt-3 text-4xl font-bold tracking-tight">Lab</h1>
+          <h1 className="text-ds-text mt-3 text-4xl font-bold tracking-tight sm:text-5xl">Lab</h1>
           <p className="text-ds-muted mt-3 max-w-2xl text-lg leading-relaxed">
             Real, interactive things I&apos;ve built — running live in your browser, no signup.
             Break them, copy from them, view the source. Everything here is client-side unless it

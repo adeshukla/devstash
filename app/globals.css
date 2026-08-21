@@ -119,19 +119,36 @@
       effect corrects it — an acceptable tradeoff for removing the crash. */
 [data-theme='light'] {
   --color-ds-bg: #ffffff;
-  --color-ds-surface: #f8fafc;
+  /* Was #f8fafc/#eef1f6 — nearly indistinguishable from --color-ds-bg
+     (white), so every bordered card/panel read as flat and barely
+     separated from the page ("boring" light theme). Dark theme's bg→surface
+     step is a real jump (#0b0f19→#111827); this brings light theme's step
+     up to match instead of leaning on the border alone to define edges. */
+  --color-ds-surface: #f1f5f9;
+  /* Kept at its original value — #e2e8f0 (slate-200) pushed accent/purple
+     text on top of it (or its /10 tints) under 4.5:1 AA contrast in a few
+     places (SERP-preview text, badge tints). The bg→surface step above is
+     what actually fixed the "boring/flat" look; surface2 didn't need to
+     move as much and this value was already proven passing. */
   --color-ds-surface2: #eef1f6;
   --color-ds-accent: #2563eb;
   /* Tailwind blue-700 — darker than --color-ds-accent specifically so text
      on the pale accent/10 badge tint clears WCAG AA (measured ~5.6:1 vs the
      ~4.3:1 #2563eb produced there). See the @theme block above for context. */
   --color-ds-accent-strong: #1d4ed8;
-  --color-ds-purple: #7c3aed;
+  /* Tailwind violet-800 — darkened from violet-600 (#7c3aed); the purple/10
+     badge tint measured 4.49:1, just under AA's 4.5:1, same class of issue
+     as accent-strong/success/warning-strong above. */
+  --color-ds-purple: #5b21b6;
   --color-ds-text: #0f172a;
   --color-ds-muted: #586375;
   --color-ds-border: #cbd5e1;
   --color-ds-border2: #94a3b8;
-  --color-ds-success: #047857;
+  /* Tailwind emerald-800 — darkened from #047857 after the surface tokens
+     above got a step darker (see the --color-ds-surface comment); the
+     "Live" status badge's success/10 tint composited over the new surface
+     color dropped just under AA (4.35:1) at the old value. */
+  --color-ds-success: #065f46;
   --color-ds-warning: #b45309;
   /* Tailwind amber-800 — darker than --color-ds-warning for the same reason
      --color-ds-accent-strong exists (measured ~5.9:1 vs ~4.2:1). */
@@ -164,16 +181,20 @@
 @media (prefers-color-scheme: light) {
   :root:not([data-theme='dark']) {
     --color-ds-bg: #ffffff;
-    --color-ds-surface: #f8fafc;
+    --color-ds-surface: #f1f5f9;
     --color-ds-surface2: #eef1f6;
     --color-ds-accent: #2563eb;
     --color-ds-accent-strong: #1d4ed8;
-    --color-ds-purple: #7c3aed;
+    --color-ds-purple: #5b21b6;
     --color-ds-text: #0f172a;
     --color-ds-muted: #586375;
     --color-ds-border: #cbd5e1;
     --color-ds-border2: #94a3b8;
-    --color-ds-success: #047857;
+    /* Tailwind emerald-800 — darkened from #047857 after the surface tokens
+     above got a step darker (see the --color-ds-surface comment); the
+     "Live" status badge's success/10 tint composited over the new surface
+     color dropped just under AA (4.35:1) at the old value. */
+    --color-ds-success: #065f46;
     --color-ds-warning: #b45309;
     --color-ds-warning-strong: #92400e;
     --color-ds-error: #dc2626;
@@ -229,9 +250,18 @@ html {
   height: 100%;
   scroll-behavior: smooth;
   /* Reserve the scrollbar gutter permanently so toggling body overflow
-     (mobile nav, any future modal) never shifts layout width mid-animation —
-     that width jump was the real cause of the "jittery" mobile-nav open. */
+     (mobile nav, any future modal) never shifts layout width mid-animation. */
   scrollbar-gutter: stable;
+  /* This is a fixed single-column layout — nothing at the document level is
+     ever meant to scroll horizontally (internal wide content like code
+     blocks scrolls itself via its own overflow-x). A real device showed a
+     horizontal scrollbar flashing on briefly while the mobile nav's panel
+     sits in its off-screen closed position (`right: -{width}px`, deliberately
+     past the right edge) — whatever engine-specific reason that off-screen
+     box was counted into the page's scrollable width, an unconditional
+     overflow-x:hidden here removes the entire question rather than chasing
+     the exact mechanism further. */
+  overflow-x: hidden;
 }
 
 body {
@@ -309,6 +339,42 @@ body {
   }
 }
 
+/* A small dot traveling along a fixed-length connector line (pipeline
+   diagrams) — transform + opacity only, so it's cheap enough to run
+   unconditionally on mobile too (unlike the badge/gradient animations
+   below, which are desktop-only for perf reasons). Two orientations: nodes
+   stack in a column on mobile (connector runs top-to-bottom, h-8/32px) and
+   sit in a row from sm up (connector runs left-to-right, sm:w-12/48px) —
+   see FlowConnector in WhatIDoBento.tsx. */
+@keyframes flowDotVertical {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(32px);
+    opacity: 0;
+  }
+}
+@keyframes flowDot {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(48px);
+    opacity: 0;
+  }
+}
+
 /* Aurora background blob */
 /* NOTE on the infinite animations below (.animate-aurora, .text-gradient-animate,
    .animate-float, .gradient-border-animated): these are decorative and, in the
@@ -322,6 +388,22 @@ body {
    right after. Mobile/watch stay static and cheap. */
 .animate-aurora {
   will-change: transform;
+}
+
+/* Runs at all breakpoints (transform/opacity only, not gated like the
+   badge/gradient animations below — see the perf note above). Vertical by
+   default (mobile stack), switches to the horizontal keyframe from sm up —
+   animation-name only, same duration/easing both ways so the swap itself
+   is invisible. */
+@media (prefers-reduced-motion: no-preference) {
+  .pipeline-dot {
+    animation: flowDotVertical 1.8s ease-in-out infinite;
+  }
+  @media (min-width: 640px) {
+    .pipeline-dot {
+      animation-name: flowDot;
+    }
+  }
 }
 
 /* Blue→purple gradient text (hero accent word, etc.) — static by default */
@@ -379,16 +461,133 @@ body {
   }
 }
 
-/* Card hover lift + accent glow — pair with the `group`/hover utilities */
+/* Card hover lift + accent glow — pair with the `group`/hover utilities.
+   Tried a heavier dual-color (accent+purple) version here — read as a loud,
+   heavy shadow rather than a lift. Back to a single soft accent tint, low
+   opacity, tight blur, and the same smooth easing token the rest of the
+   site's hover motion uses (--ds-ease-smooth, see the CTA button section
+   below) instead of a linear `ease` — that's the actual "heavy" vs
+   "smooth" difference, not just the color count. */
 .card-glow {
   transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    border-color 0.2s ease;
+    transform 0.4s var(--ds-ease-smooth),
+    box-shadow 0.4s var(--ds-ease-smooth),
+    border-color 0.3s var(--ds-ease-smooth);
 }
-.card-glow:hover {
+.card-glow:hover,
+[data-touched] .card-glow {
   transform: translateY(-3px);
-  box-shadow: 0 12px 32px -8px color-mix(in srgb, var(--color-ds-accent) 25%, transparent);
+  box-shadow: 0 10px 24px -13px color-mix(in srgb, var(--color-ds-accent) 32%, transparent);
+}
+/* Light theme: a REST-state ambient shadow on every rounded-card surface
+   (Card.tsx, WhatIDoBento's card divs) — not just on hover. Dark theme's
+   surface color already separates a card from the page at rest; light
+   theme's surface/bg gap is still much smaller by design (barely-there
+   grays, not a wall of visible gray blocks), so cards need a soft shadow to
+   actually read as raised panels instead of leaning on the 1px border
+   alone. This was the biggest single contributor to light theme reading as
+   flat/"boring". */
+[data-theme='light'] .rounded-card {
+  box-shadow:
+    0 1px 2px -1px rgb(15 23 42 / 0.06),
+    0 8px 20px -12px rgb(15 23 42 / 0.1);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) .rounded-card {
+    box-shadow:
+      0 1px 2px -1px rgb(15 23 42 / 0.06),
+      0 8px 20px -12px rgb(15 23 42 / 0.1);
+  }
+}
+/* A tinted shadow this soft all but disappears against a white/near-white
+   surface — dark backgrounds give a colored glow contrast for free, light
+   ones don't, so it needs a stronger mix to read as the same felt effect
+   rather than "no hover happened". Covers both an explicit light-theme
+   choice and the system-preference default, matching the pattern the
+   color tokens above already use. */
+[data-theme='light'] .card-glow:hover,
+[data-theme='light'] [data-touched] .card-glow {
+  box-shadow:
+    0 14px 26px -14px color-mix(in srgb, var(--color-ds-accent) 38%, transparent),
+    0 2px 10px -4px color-mix(in srgb, var(--color-ds-accent) 20%, transparent);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) .card-glow:hover,
+  :root:not([data-theme='dark']) [data-touched] .card-glow {
+    box-shadow:
+      0 14px 26px -14px color-mix(in srgb, var(--color-ds-accent) 38%, transparent),
+      0 2px 10px -4px color-mix(in srgb, var(--color-ds-accent) 20%, transparent);
+  }
+}
+
+/* Registering --spot-x/--spot-y as real <percentage> custom properties (not
+   just untyped strings) is what lets the `transition` below actually
+   interpolate the radial-gradient's position instead of snapping it on
+   every mousemove tick — the glow visibly glides toward the cursor rather
+   than teleporting. Unsupported browsers (older Firefox) just keep the old
+   snap behavior; no functional loss, only a smoothness downgrade. */
+@property --spot-x {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 50%;
+}
+@property --spot-y {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 50%;
+}
+
+/* Cursor-tracking border glow ("Praxis-style" card hover) — no border at
+   rest; on hover, a soft radial gradient traces the cursor position but is
+   masked to a 1px ring at the card's own edge (same content-box/border-box
+   + mask-composite:exclude technique as .gradient-ring-hover above, just a
+   radial gradient instead of a rotating linear one). Reads as a glow
+   following the cursor around the card, brightest near whichever edge/
+   corner it's closest to — not a flat wash across the whole face. Position
+   comes from --spot-x/--spot-y, written by CardTilt on mousemove (a
+   per-event style write, not a running animation, so it doesn't carry the
+   background-position perf cost noted above .animate-aurora). inset:0 (not
+   negative) on purpose — Card's root has overflow-hidden for its image
+   slot, and a ring extending past the box would get clipped by that.
+
+   Touch has no cursor, so `:hover` never meaningfully fires there —
+   CardTilt sets [data-touched] on tap, and also automatically as a card
+   scrolls through the viewport center (see CardTilt.tsx), so the
+   glow still shows, briefly, as real feedback instead of the card going
+   completely inert on mobile. */
+.card-spotlight {
+  position: relative;
+  border: 1px solid transparent;
+}
+.card-spotlight::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    260px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    var(--color-ds-accent),
+    var(--color-ds-purple) 55%,
+    transparent 75%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  /* --spot-x/--spot-y are NOT transitioned here — CardTilt already eases
+     them via a per-frame RAF lerp before writing the custom property, so a
+     second CSS-level transition here would just double-smooth (and lag)
+     the same motion. Only opacity (show/hide) needs a transition. */
+  transition: opacity 0.35s var(--ds-ease-smooth);
+  pointer-events: none;
+}
+.card-spotlight:hover::before,
+[data-touched] .card-spotlight::before {
+  opacity: 0.85;
 }
 
 /* Gradient ring on hover/active — for elements that aren't cards (nav tabs,

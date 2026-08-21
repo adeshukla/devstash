@@ -139,7 +139,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       <span className="text-ds-muted font-mono text-xs">{project.year}</span>
                     )}
                   </div>
-                  <h1 className="text-ds-text text-4xl font-bold">{project.title}</h1>
+                  <h1 className="text-ds-text text-4xl font-bold tracking-tight sm:text-5xl">
+                    {project.title}
+                  </h1>
                   <p className="text-ds-muted mt-4 max-w-2xl text-lg">{project.description}</p>
                 </div>
               </MountReveal>

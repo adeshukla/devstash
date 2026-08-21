@@ -50,8 +50,8 @@ export function BlogCard({ post, featured = false, className }: BlogCardProps) {
     <CardTilt>
       <article
         className={cn(
-          'group border-ds-border bg-ds-surface flex flex-col overflow-hidden rounded-xl border',
-          'card-glow hover:border-ds-accent/50',
+          'group bg-ds-surface flex flex-col overflow-hidden rounded-xl',
+          'card-spotlight card-glow shadow-sm',
           featured && 'md:flex-row',
           className
         )}

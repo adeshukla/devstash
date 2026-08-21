@@ -73,7 +73,9 @@ export default async function BlogPage({ searchParams }: Props) {
 
         <div className="mt-6 mb-10 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-ds-text mb-3 font-sans text-4xl font-bold tracking-tight">Blog</h1>
+            <h1 className="text-ds-text mb-3 font-sans text-4xl font-bold tracking-tight sm:text-5xl">
+              Blog
+            </h1>
             <p className="text-ds-muted max-w-xl">
               Writing about frontend systems, automation, AI workflows, and things I figure out
               while building.

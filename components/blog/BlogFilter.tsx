@@ -5,7 +5,6 @@ import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { type BlogCategory, BLOG_CATEGORIES } from '@/types/blog'
 import { cn } from '@/lib/utils/cn'
-import { CardTilt } from '@/components/ui/CardTilt'
 
 interface BlogFilterProps {
   categories: { category: BlogCategory; count: number }[]
@@ -55,38 +54,35 @@ export function BlogFilter({ categories, tags, selectedCategory, selectedTag }: 
             ring. `-m-1 p-1` gives it room on every side, not just left/right/
             bottom, while keeping the row's visual position unchanged. */}
         <div className="-m-1 flex [scrollbar-width:none] gap-2 overflow-x-auto p-1 lg:m-0 lg:flex-wrap lg:overflow-visible lg:p-0 [&::-webkit-scrollbar]:hidden">
-          <CardTilt>
-            <button
-              onClick={() => setParam('category', null)}
-              aria-current={!selectedCategory ? 'true' : undefined}
-              className={cn(
-                'gradient-ring-hover shrink-0 rounded-full border px-3 py-1 text-sm whitespace-nowrap transition-colors',
-                !selectedCategory
-                  ? 'border-ds-accent bg-ds-accent text-white'
-                  : 'border-ds-border bg-ds-surface text-ds-muted hover:border-ds-border2 hover:text-ds-text'
-              )}
-            >
-              All
-            </button>
-          </CardTilt>
+          <button
+            onClick={() => setParam('category', null)}
+            aria-current={!selectedCategory ? 'true' : undefined}
+            className={cn(
+              'gradient-ring-hover shrink-0 rounded-full border px-3 py-1 text-sm whitespace-nowrap transition-colors',
+              !selectedCategory
+                ? 'border-ds-accent bg-ds-accent text-white'
+                : 'border-ds-border bg-ds-surface text-ds-muted hover:border-ds-border2 hover:text-ds-text'
+            )}
+          >
+            All
+          </button>
           {BLOG_CATEGORIES.filter(({ value }) => categories.some((c) => c.category === value)).map(
             ({ label, value }) => {
               const count = categories.find((c) => c.category === value)?.count ?? 0
               return (
-                <CardTilt key={value}>
-                  <button
-                    onClick={() => setParam('category', selectedCategory === value ? null : value)}
-                    aria-current={selectedCategory === value ? 'true' : undefined}
-                    className={cn(
-                      'gradient-ring-hover shrink-0 rounded-full border px-3 py-1 text-sm whitespace-nowrap transition-colors',
-                      selectedCategory === value
-                        ? 'border-ds-accent bg-ds-accent text-white'
-                        : 'border-ds-border bg-ds-surface text-ds-muted hover:border-ds-border2 hover:text-ds-text'
-                    )}
-                  >
-                    {label} <span className="text-xs opacity-60">({count})</span>
-                  </button>
-                </CardTilt>
+                <button
+                  key={value}
+                  onClick={() => setParam('category', selectedCategory === value ? null : value)}
+                  aria-current={selectedCategory === value ? 'true' : undefined}
+                  className={cn(
+                    'gradient-ring-hover shrink-0 rounded-full border px-3 py-1 text-sm whitespace-nowrap transition-colors',
+                    selectedCategory === value
+                      ? 'border-ds-accent bg-ds-accent text-white'
+                      : 'border-ds-border bg-ds-surface text-ds-muted hover:border-ds-border2 hover:text-ds-text'
+                  )}
+                >
+                  {label} <span className="text-xs opacity-60">({count})</span>
+                </button>
               )
             }
           )}

@@ -72,7 +72,9 @@ export default function ContactPage() {
               { name: 'Contact', url: 'https://devstash.me/contact' },
             ]}
           />
-          <h1 className="text-ds-text mt-6 text-4xl font-bold">Get in touch</h1>
+          <h1 className="text-ds-text mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
+            Get in touch
+          </h1>
           <p className="text-ds-muted mt-3 max-w-lg">
             Open to frontend roles in Noida / Gurugram, freelance projects, or just a chat about
             code, automation, or bikes.

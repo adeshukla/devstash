@@ -2,7 +2,7 @@
 import { cn } from '@/lib/utils/cn'
 import type { ReactNode } from 'react'
 
-type CardVariant = 'default' | 'hover' | 'accent'
+type CardVariant = 'default' | 'hover' | 'accent' | 'spotlight'
 
 interface CardProps {
   variant?: CardVariant
@@ -26,6 +26,11 @@ const variantStyles: Record<CardVariant, string> = {
     'bg-ds-surface gradient-border-animated shadow-sm',
     'shadow-[0_0_0_1px] shadow-ds-accent/5',
   ].join(' '),
+  // No border/animated gradient at rest — a cursor-tracked radial glow
+  // (see .card-spotlight in globals.css) fades in on hover instead, traced
+  // only along the card's own edge. Pair with <CardTilt>, which is what
+  // actually supplies --spot-x/--spot-y.
+  spotlight: ['bg-ds-surface card-spotlight shadow-sm', 'card-glow cursor-pointer'].join(' '),
 }
 
 const paddingStyles = {

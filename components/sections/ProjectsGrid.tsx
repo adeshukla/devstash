@@ -37,11 +37,13 @@ export function ProjectsGrid({ projects, showAll = false }: ProjectsGridProps) {
 
   return (
     <section className="py-16">
-      <div className="mx-auto max-w-5xl px-6">
+      <div className="mx-auto max-w-6xl px-6">
         {!showAll && (
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-ds-text text-3xl font-bold">Projects</h2>
+              <h2 className="text-ds-text text-3xl font-bold tracking-tight sm:text-4xl">
+                Projects
+              </h2>
               <p className="text-ds-muted mt-1">Things I&apos;ve built and shipped</p>
             </div>
             <Button
@@ -74,7 +76,7 @@ export function ProjectsGrid({ projects, showAll = false }: ProjectsGridProps) {
                         can hold REAL links (Try it live / GitHub) without
                         nesting <a> inside <a>. Footer sits above it via z-index. */}
                     <Card
-                      variant="hover"
+                      variant="spotlight"
                       className="group relative flex h-full flex-col"
                       padding="none"
                     >

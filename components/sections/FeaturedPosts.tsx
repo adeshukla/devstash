@@ -14,10 +14,12 @@ export function FeaturedPosts({ posts }: FeaturedPostsProps) {
 
   return (
     <section className="border-ds-border border-t py-16">
-      <div className="mx-auto max-w-5xl px-6">
+      <div className="mx-auto max-w-6xl px-6">
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-ds-text text-3xl font-bold">Latest Writing</h2>
+            <h2 className="text-ds-text text-3xl font-bold tracking-tight sm:text-4xl">
+              Latest Writing
+            </h2>
             <p className="text-ds-muted mt-1">
               Thoughts on frontend, automation, and developer tooling
             </p>
@@ -40,7 +42,7 @@ export function FeaturedPosts({ posts }: FeaturedPostsProps) {
                   href={`/blog/${post.slug}`}
                   className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                 >
-                  <Card variant="hover" className="flex h-full flex-col" padding="none">
+                  <Card variant="spotlight" className="flex h-full flex-col" padding="none">
                     <div className="relative h-56 w-full overflow-hidden">
                       {post.featuredImage ? (
                         <Image

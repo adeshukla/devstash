@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
-import { Badge, Card, Reveal } from '@/components/ui'
+import { Badge, Card, CardTilt, Reveal } from '@/components/ui'
 import { Icon, type IconName } from '@/components/icons/Icon'
 import toolsData from '@/content/tools/tools.json'
 
@@ -84,7 +84,7 @@ export default function ToolsPage() {
               { name: 'Tools', url: 'https://devstash.me/tools' },
             ]}
           />
-          <h1 className="text-ds-text mt-6 text-4xl font-bold">Tools</h1>
+          <h1 className="text-ds-text mt-6 text-4xl font-bold tracking-tight sm:text-5xl">Tools</h1>
           <p className="text-ds-muted mt-3 max-w-xl">
             What&apos;s actually running on my machine. No affiliate links, no sponsored picks —
             just the stack I reach for every day.
@@ -105,35 +105,37 @@ export default function ToolsPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {grouped[cat]?.map((tool, i) => (
                   <Reveal key={tool.id} delay={(i % 6) * 60}>
-                    <Link
-                      href={tool.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                    >
-                      <Card variant="hover" className="h-full">
-                        <div className="flex flex-col gap-3 p-5">
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-ds-text group-hover:text-ds-accent font-semibold transition-colors">
-                              {tool.name}
-                            </h3>
-                            {tool.free ? (
-                              <Badge variant="green">Free</Badge>
-                            ) : (
-                              <Badge variant="muted">Paid</Badge>
-                            )}
+                    <CardTilt>
+                      <Link
+                        href={tool.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                      >
+                        <Card variant="spotlight" className="h-full">
+                          <div className="flex flex-col gap-3 p-5">
+                            <div className="flex items-center justify-between">
+                              <h3 className="text-ds-text group-hover:text-ds-accent font-semibold transition-colors">
+                                {tool.name}
+                              </h3>
+                              {tool.free ? (
+                                <Badge variant="green">Free</Badge>
+                              ) : (
+                                <Badge variant="muted">Paid</Badge>
+                              )}
+                            </div>
+                            <p className="text-ds-muted text-sm">{tool.description}</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {tool.tags.map((t) => (
+                                <span key={t} className="text-ds-muted font-mono text-xs">
+                                  #{t}
+                                </span>
+                              ))}
+                            </div>
                           </div>
-                          <p className="text-ds-muted text-sm">{tool.description}</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {tool.tags.map((t) => (
-                              <span key={t} className="text-ds-muted font-mono text-xs">
-                                #{t}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </Card>
-                    </Link>
+                        </Card>
+                      </Link>
+                    </CardTilt>
                   </Reveal>
                 ))}
               </div>

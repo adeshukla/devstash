@@ -1,16 +1,9 @@
-import {
-  Button,
-  AnimatedCounter,
-  TerminalTyping,
-  HeroGraphic,
-  MouseParallax,
-  MountReveal,
-} from '@/components/ui'
+import { Button, TerminalTyping, HeroGraphic, MouseParallax, MountReveal } from '@/components/ui'
 
 // Server Component — no 'use client'
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden py-12 sm:py-24 lg:py-32">
+    <section className="relative overflow-hidden py-16 sm:py-28 lg:py-40">
       {/* Subtle grid background */}
       <div
         aria-hidden="true"
@@ -21,20 +14,20 @@ export function HeroSection() {
       <MouseParallax strength={-18} className="pointer-events-none absolute inset-0 -z-10">
         <div
           aria-hidden="true"
-          className="animate-aurora bg-ds-accent absolute -top-40 left-1/4 h-[460px] w-[460px] -translate-x-1/2 rounded-full opacity-[0.12] blur-3xl"
+          className="animate-aurora bg-ds-accent absolute -top-40 left-1/4 h-[460px] w-[460px] -translate-x-1/2 rounded-full opacity-[0.16] blur-3xl"
         />
         <div
           aria-hidden="true"
-          className="animate-aurora bg-ds-purple absolute -top-20 right-0 h-[380px] w-[380px] rounded-full opacity-[0.1] blur-3xl [animation-delay:-7s]"
+          className="animate-aurora bg-ds-purple absolute -top-20 right-0 h-[380px] w-[380px] rounded-full opacity-[0.14] blur-3xl [animation-delay:-7s]"
         />
         <div
           aria-hidden="true"
-          className="animate-aurora bg-ds-accent absolute top-32 left-0 h-[320px] w-[320px] rounded-full opacity-[0.07] blur-3xl [animation-delay:-12s]"
+          className="animate-aurora bg-ds-accent absolute top-32 left-0 h-[320px] w-[320px] rounded-full opacity-[0.1] blur-3xl [animation-delay:-12s]"
         />
       </MouseParallax>
 
       <div className="mx-auto max-w-7xl px-6">
-        <div className="grid gap-10 xl:grid-cols-[1.6fr_1fr] xl:items-center xl:gap-16">
+        <div className="grid gap-10 xl:grid-cols-[1.35fr_1.1fr] xl:items-center xl:gap-16">
           <div className="flex flex-col gap-4 sm:gap-6">
             {/* Terminal typing kicker */}
             <MountReveal>
@@ -73,7 +66,7 @@ export function HeroSection() {
 
             {/* Main heading */}
             <MountReveal delay={160}>
-              <h1 className="text-ds-text text-3xl leading-[1.15] font-bold tracking-tight sm:text-5xl sm:leading-tight lg:text-6xl xl:text-5xl">
+              <h1 className="text-ds-text text-4xl leading-tight font-bold tracking-tight sm:text-5xl">
                 Web interfaces that ship —{' '}
                 <span className="text-gradient-animate">fast, accessible, built to last.</span>
               </h1>
@@ -99,28 +92,10 @@ export function HeroSection() {
                 </Button>
               </div>
             </MountReveal>
-
-            {/* Quick stats */}
-            <MountReveal delay={400}>
-              <div className="border-ds-border mt-4 flex flex-wrap gap-6 border-t pt-6 sm:mt-6 sm:gap-10 sm:pt-8">
-                {(
-                  [
-                    { label: 'Years Frontend Eng', value: '6+' },
-                    { label: 'Live Projects', value: '8' },
-                    { label: 'Lighthouse Avg Score', value: '90+' },
-                  ] as const
-                ).map(({ label, value }) => (
-                  <div key={label} className="flex flex-col gap-0.5">
-                    <AnimatedCounter value={value} className="text-ds-text text-2xl font-bold" />
-                    <span className="text-ds-muted text-sm">{label}</span>
-                  </div>
-                ))}
-              </div>
-            </MountReveal>
           </div>
 
           <MountReveal delay={200} className="xl:mx-0">
-            <MouseParallax strength={14} className="mx-auto w-full max-w-md xl:mx-0 xl:max-w-none">
+            <MouseParallax strength={14} className="mx-auto w-full max-w-lg xl:mx-0 xl:max-w-none">
               <HeroGraphic />
             </MouseParallax>
           </MountReveal>

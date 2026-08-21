@@ -1,75 +1,67 @@
-// A decorative "code window" illustration for the hero section. Pure SVG +
-// the existing `animate-float`/`animate-blink` CSS classes (see globals.css) —
-// no new animation infra, no client JS, no network request. Desktop-only
-// (`hidden lg:block` on the wrapper in HeroSection) so it never affects
-// mobile LCP/CLS. Uses `fill-ds-*`/`stroke-ds-*` utilities (not raw CSS
-// custom properties) so it repaints correctly if the user switches themes.
+// The hero's secondary visual — a small "build status" terminal window.
+// Previously a fake syntax-highlighted code snippet (random colored bars
+// standing in for "code"): decoration with no relationship to Adesh
+// specifically, the single most recognizable "generic AI-template portfolio"
+// tell. Replaced with something true instead of decorative: the actual
+// checks this site's own CI pipeline runs on every push (see
+// .github/workflows/ci.yml — typecheck, lint, build) and the same claims
+// already made in the hero's own stat row and across the site (Lighthouse
+// 90+, structured data on every page, WCAG-audited a11y). Nothing here is
+// invented — it's a themed readout of facts stated elsewhere on the site.
+//
+// Pure CSS stagger (animate-fade-up + per-line delay, same primitive
+// MountReveal already uses) — no client JS, so this stays a Server
+// Component and never touches hero LCP.
 
-const CODE_LINES: { x: number; width: number; color: string }[] = [
-  { x: 48, width: 56, color: 'fill-ds-purple/70' },
-  { x: 48, width: 150, color: 'fill-ds-muted/50' },
-  { x: 64, width: 36, color: 'fill-ds-accent/70' },
-  { x: 80, width: 96, color: 'fill-ds-muted/50' },
-  { x: 80, width: 64, color: 'fill-ds-accent/70' },
-  { x: 64, width: 48, color: 'fill-ds-purple/70' },
-  { x: 48, width: 110, color: 'fill-ds-muted/50' },
-  { x: 48, width: 28, color: 'fill-ds-accent/70' },
+const CHECKS: { label: string; detail: string }[] = [
+  { label: 'TypeScript', detail: 'strict mode, 0 errors' },
+  { label: 'Lighthouse', detail: '90+ every route' },
+  { label: 'WCAG AA', detail: 'audited' },
+  { label: 'Structured data', detail: 'every page' },
 ]
 
 export function HeroGraphic() {
   return (
-    <div aria-hidden="true" className="animate-float">
-      <svg
-        viewBox="0 0 400 260"
-        className="border-ds-border fill-ds-surface w-full rounded-xl border shadow-2xl shadow-black/40"
-      >
-        {/* Window chrome */}
-        <rect x="0" y="0" width="400" height="260" rx="14" className="fill-ds-surface" />
-        <line x1="0" y1="34" x2="400" y2="34" className="stroke-ds-border" strokeWidth="1" />
-        <circle cx="20" cy="17" r="5" className="fill-ds-error/80" />
-        <circle cx="37" cy="17" r="5" className="fill-ds-warning/80" />
-        <circle cx="54" cy="17" r="5" className="fill-ds-success/80" />
-        <rect x="80" y="10" width="88" height="14" rx="4" className="fill-ds-surface2" />
-        <text
-          x="90"
-          y="20"
-          className="fill-ds-muted"
-          fontFamily="var(--font-mono)"
-          fontSize="9"
-          letterSpacing="0.02em"
+    <div
+      aria-hidden="true"
+      className="border-ds-border bg-ds-surface animate-float w-full overflow-hidden rounded-xl border shadow-2xl shadow-black/40"
+    >
+      {/* Window chrome */}
+      <div className="border-ds-border flex h-12 items-center gap-3 border-b px-5">
+        <div className="flex gap-2">
+          <span className="bg-ds-error/80 h-3 w-3 rounded-full" />
+          <span className="bg-ds-warning/80 h-3 w-3 rounded-full" />
+          <span className="bg-ds-success/80 h-3 w-3 rounded-full" />
+        </div>
+        <span className="text-ds-muted font-mono text-xs tracking-wide">devstash — pnpm build</span>
+      </div>
+
+      <div className="flex flex-col gap-4 px-6 py-8 font-mono text-[15px]">
+        <p
+          className="text-ds-muted animate-fade-up motion-reduce:animate-none"
+          style={{ animationDelay: '80ms' }}
         >
-          hero.tsx
-        </text>
-
-        {/* Code lines */}
-        {CODE_LINES.map((line, i) => {
-          const y = 56 + i * 22
-          return (
-            <g key={i}>
-              <text
-                x="30"
-                y={y + 8}
-                textAnchor="end"
-                className="fill-ds-muted/60"
-                fontFamily="var(--font-mono)"
-                fontSize="8"
-              >
-                {i + 1}
-              </text>
-              <rect x={line.x} y={y} width={line.width} height="8" rx="4" className={line.color} />
-            </g>
-          )
-        })}
-
-        {/* Blinking cursor at the end of the last line */}
-        <rect
-          x={CODE_LINES[CODE_LINES.length - 1].x + CODE_LINES[CODE_LINES.length - 1].width + 8}
-          y={56 + (CODE_LINES.length - 1) * 22}
-          width="8"
-          height="10"
-          className="fill-ds-accent animate-blink"
-        />
-      </svg>
+          <span className="text-ds-accent">$</span> pnpm build
+        </p>
+        {CHECKS.map(({ label, detail }, i) => (
+          <p
+            key={label}
+            className="animate-fade-up flex items-baseline gap-2 motion-reduce:animate-none"
+            style={{ animationDelay: `${240 + i * 160}ms` }}
+          >
+            <span className="text-ds-success">✓</span>
+            <span className="text-ds-text">{label}</span>
+            <span className="text-ds-muted">— {detail}</span>
+          </p>
+        ))}
+        <p
+          className="text-ds-accent animate-fade-up mt-1 flex items-baseline gap-2 motion-reduce:animate-none"
+          style={{ animationDelay: `${240 + CHECKS.length * 160 + 120}ms` }}
+        >
+          Ready on devstash.me
+          <span className="bg-ds-accent animate-blink inline-block h-4 w-2" />
+        </p>
+      </div>
     </div>
   )
 }

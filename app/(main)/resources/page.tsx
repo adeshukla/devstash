@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
-import { Badge, Card, Reveal } from '@/components/ui'
+import { Badge, Card, CardTilt, Reveal } from '@/components/ui'
 import { Icon, type IconName } from '@/components/icons/Icon'
 import resourcesData from '@/content/resources/resources.json'
 
@@ -82,7 +82,9 @@ export default function ResourcesPage() {
               { name: 'Resources', url: 'https://devstash.me/resources' },
             ]}
           />
-          <h1 className="text-ds-text mt-6 text-4xl font-bold">Resources</h1>
+          <h1 className="text-ds-text mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
+            Resources
+          </h1>
           <p className="text-ds-muted mt-3 max-w-xl">
             Docs, articles, and references I keep coming back to. No SEO filler — just the stuff
             that actually helps.
@@ -102,37 +104,39 @@ export default function ResourcesPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {grouped[cat]?.map((resource, i) => (
                   <Reveal key={resource.id} delay={(i % 6) * 60}>
-                    <Link
-                      href={resource.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                    >
-                      <Card variant="hover" className="h-full">
-                        <div className="flex flex-col gap-3 p-5">
-                          <div className="flex items-center justify-between gap-2">
-                            <Badge
-                              variant={CATEGORY_VARIANTS[resource.category]}
-                              icon={<Icon name={CATEGORY_ICONS[resource.category]} />}
-                            >
-                              {CATEGORY_LABELS[resource.category]}
-                            </Badge>
-                            {resource.free && <Badge variant="muted">Free</Badge>}
+                    <CardTilt>
+                      <Link
+                        href={resource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                      >
+                        <Card variant="spotlight" className="h-full">
+                          <div className="flex flex-col gap-3 p-5">
+                            <div className="flex items-center justify-between gap-2">
+                              <Badge
+                                variant={CATEGORY_VARIANTS[resource.category]}
+                                icon={<Icon name={CATEGORY_ICONS[resource.category]} />}
+                              >
+                                {CATEGORY_LABELS[resource.category]}
+                              </Badge>
+                              {resource.free && <Badge variant="muted">Free</Badge>}
+                            </div>
+                            <h3 className="text-ds-text group-hover:text-ds-accent font-semibold transition-colors">
+                              {resource.title}
+                            </h3>
+                            <p className="text-ds-muted text-sm">{resource.description}</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {resource.tags.map((t) => (
+                                <span key={t} className="text-ds-muted font-mono text-xs">
+                                  #{t}
+                                </span>
+                              ))}
+                            </div>
                           </div>
-                          <h3 className="text-ds-text group-hover:text-ds-accent font-semibold transition-colors">
-                            {resource.title}
-                          </h3>
-                          <p className="text-ds-muted text-sm">{resource.description}</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {resource.tags.map((t) => (
-                              <span key={t} className="text-ds-muted font-mono text-xs">
-                                #{t}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </Card>
-                    </Link>
+                        </Card>
+                      </Link>
+                    </CardTilt>
                   </Reveal>
                 ))}
               </div>
