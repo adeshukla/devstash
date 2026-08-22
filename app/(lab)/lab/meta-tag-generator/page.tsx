@@ -7,7 +7,6 @@ export const metadata: Metadata = buildMetadata({
   description:
     'A free tool that drafts a title/description from your content and previews it as a Google result, an X/Twitter card, and a Facebook/OG card — with live character counts and copyable meta tags.',
   canonical: '/lab/meta-tag-generator',
-  noIndex: true,
 })
 
 export default function MetaTagGeneratorPage() {

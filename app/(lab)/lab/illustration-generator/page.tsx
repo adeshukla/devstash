@@ -3,11 +3,10 @@ import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { IllustrationGenerator } from '@/components/lab/IllustrationGenerator'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Illustration Generator — DevStash Sample Project',
+  title: 'AI Illustration Generator — Free SVG Tool',
   description:
     'A real tool that composes a unique, theme-aware animated SVG illustration from a description — procedural generation, not a fixed list of presets to pick from.',
   canonical: '/lab/illustration-generator',
-  noIndex: true,
 })
 
 export default function IllustrationGeneratorPage() {

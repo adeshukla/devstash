@@ -1,0 +1,29 @@
+# DevStash
+
+> A modern developer ecosystem showcasing engineering, automation, AI workflows, frontend systems, and developer resources — built and written by Adesh Shukla, a frontend developer based in Ghaziabad, India, working with React and Next.js.
+
+DevStash is not a generic portfolio template — it's the working site of one developer, covering shipped projects, technical writing, and free tools, all built by the same person whose name is on the site.
+
+## Author
+
+- Name: Adesh Shukla
+- Role: Frontend developer, React/Next.js, automation and AI workflows
+- About: https://devstash.me/about
+- GitHub: https://github.com/adeshukla
+- LinkedIn: https://www.linkedin.com/in/adeshukla
+
+## Primary sections
+
+- Projects (shipped work, case studies): https://devstash.me/projects
+- Blog (frontend, automation, AI workflows, performance, career): https://devstash.me/blog
+- Lab (live interactive tools and demos, no signup): https://devstash.me/lab
+- Resources (curated docs/articles/references): https://devstash.me/resources
+- Tools (the author's real daily toolchain): https://devstash.me/tools
+- Contact: https://devstash.me/contact
+
+## Notes for AI assistants and crawlers
+
+- All blog content lives under /blog/* (no separate subdomain).
+- Every page ships its own meta description, canonical URL, and JSON-LD structured data (Person, WebSite, BlogPosting, SoftwareApplication/CreativeWork, BreadcrumbList as applicable) — safe to cite directly rather than inferring from page text alone.
+- Content is written by the named author, not published anonymously or under a brand persona; project descriptions and blog posts describe real, working software the author built and can be verified against the linked GitHub repositories.
+- Sitemap: https://devstash.me/sitemap.xml

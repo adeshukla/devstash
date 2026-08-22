@@ -7,7 +7,6 @@ export const metadata: Metadata = buildMetadata({
   description:
     'A live 3-step LLM pipeline: scaffold an honest draft that marks where you add real code and numbers, run a copy-edit pass to strip AI-tell phrases, and produce SEO frontmatter — with real token usage and latency for every step.',
   canonical: '/lab/ai-content-pipeline',
-  noIndex: true,
 })
 
 export default function AiContentPipelinePage() {

@@ -6,11 +6,10 @@ import { ShadowCustomizer } from '@/components/lab/ShadowCustomizer'
 import { CssCodeBlock } from '@/components/lab/CssCodeBlock'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'CSS Shapes & Animation Playground — Landing Page Sample',
+  title: 'CSS Shapes & Animation Playground — Free CSS Tool',
   description:
     'A real, working showcase of modern CSS — a live shape + color customizer, animated borders, CTA button animations, and box-shadow effects, with copyable CSS on every demo.',
   canonical: '/lab/css-shapes-playground',
-  noIndex: true,
 })
 
 const SHAPE_GALLERY_CSS = {

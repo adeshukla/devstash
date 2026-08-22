@@ -3,11 +3,10 @@ import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { UtmBuilder } from '@/components/lab/UtmBuilder'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'UTM Builder — Landing Page Sample',
+  title: 'UTM Builder — Free Campaign URL Generator',
   description:
     'A real, working UTM link builder for PPC landing pages — built from actually tagging 200+ campaign URLs, not a mockup.',
   canonical: '/lab/utm-builder',
-  noIndex: true,
 })
 
 export default function UtmBuilderPage() {

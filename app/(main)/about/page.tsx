@@ -5,9 +5,8 @@ import { JsonLd } from '@/components/seo/JsonLd'
 import { buildPersonSchema } from '@/lib/schema/builders'
 import { siteConfig } from '@/content/metadata/site.config'
 import { stack } from '@/lib/site/stack'
-import { Badge, Button, Reveal, MouseParallax } from '@/components/ui'
-import { Icon } from '@/components/icons/Icon'
-import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
+import { Badge, Button, Reveal, MouseParallax, AboutProfileCard } from '@/components/ui'
+import { Icon, type IconName } from '@/components/icons/Icon'
 
 const title = 'About Adesh Shukla — Frontend Developer'
 const description =
@@ -31,6 +30,18 @@ const SKILLS: Record<string, string[]> = {
   Backend: ['Node.js', 'Next.js API Routes', 'Firebase Auth', 'REST APIs'],
 }
 
+// Reuses the site's existing drawn-icon set (same marks the /tools and
+// /resources category headers use) rather than adding new art — one icon
+// per category, not per pill, so coverage stays 100% instead of some skills
+// having a matching tech mark and others not.
+const CATEGORY_ICONS: Record<string, IconName> = {
+  Frontend: 'frontend',
+  Tooling: 'devtools',
+  Automation: 'automation',
+  Design: 'design',
+  Backend: 'terminal',
+}
+
 const TIMELINE = [
   {
     year: 'Jul 2021 – Present',
@@ -46,11 +57,16 @@ const TIMELINE = [
   },
 ]
 
-const CURRENTLY = [
-  '🔨 Building DevStash — personal developer ecosystem',
-  `📚 Deep-diving into ${stack.next} App Router & RSC patterns`,
-  '🤖 Automating workflows with n8n and local LLMs (Ollama)',
-  '🔍 Open to frontend roles · Noida / Gurugram · immediate–20 days notice',
+// Drawn icons, not emoji — emoji standing in for an icon system reads as
+// unfinished next to the rest of the site's hand-drawn 24x24 stroke set.
+const CURRENTLY: { icon: IconName; text: string }[] = [
+  { icon: 'devtools', text: 'Building DevStash — personal developer ecosystem' },
+  { icon: 'docs', text: `Deep-diving into ${stack.next} App Router & RSC patterns` },
+  { icon: 'automation', text: 'Automating workflows with n8n and local LLMs (Ollama)' },
+  {
+    icon: 'career',
+    text: 'Open to frontend roles · Noida / Gurugram · immediate–20 days notice',
+  },
   // TODO: Keep this section updated
 ]
 
@@ -100,9 +116,7 @@ export default function AboutPage() {
             </div>
 
             <MouseParallax strength={12} className="mx-auto w-full max-w-sm lg:mx-0">
-              <div className="border-ds-border bg-ds-surface2 aspect-[4/3] overflow-hidden rounded-2xl border">
-                <CategoryIllustration category="frontend" kind="blog" seed="about-hero" />
-              </div>
+              <AboutProfileCard />
             </MouseParallax>
           </div>
         </section>
@@ -116,11 +130,16 @@ export default function AboutPage() {
                 Tech I use
               </h2>
             </Reveal>
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {Object.entries(SKILLS).map(([category, items], i) => (
                 <Reveal key={category} delay={i * 60}>
-                  <div>
-                    <h3 className="text-ds-accent mb-3 font-mono text-sm font-medium">
+                  {/* Same gradient-ring treatment the desktop nav's icon
+                      buttons use on hover — reused here instead of a new
+                      hover system, so a category "card" that's really just
+                      a labeled group still gets a felt interaction. */}
+                  <div className="gradient-ring-hover border-ds-border bg-ds-surface/60 rounded-xl border p-5">
+                    <h3 className="text-ds-accent mb-3 flex items-center gap-2 font-mono text-sm font-medium">
+                      <Icon name={CATEGORY_ICONS[category]} className="h-4 w-4 flex-shrink-0" />
                       {category}
                     </h3>
                     <div className="flex flex-wrap gap-2">
@@ -150,10 +169,24 @@ export default function AboutPage() {
               {TIMELINE.map((item, i) => (
                 <Reveal key={item.company} delay={i * 80} as="li" className="group flex gap-6">
                   <div className="flex flex-col items-center">
-                    <div className="bg-ds-accent ring-ds-bg mt-1 h-3 w-3 shrink-0 rounded-full ring-4 transition-transform group-hover:scale-125" />
-                    {i < TIMELINE.length - 1 && <div className="bg-ds-border mt-1 w-px flex-1" />}
+                    <div className="relative mt-1 flex h-3 w-3 shrink-0 items-center justify-center">
+                      {/* The current role (first entry — TIMELINE is newest-first)
+                          gets the same live-status ping the hero's "Available
+                          for..." indicator uses, so "still here, ongoing" reads
+                          the same way it does everywhere else on the site. */}
+                      {i === 0 && (
+                        <span
+                          aria-hidden="true"
+                          className="bg-ds-accent absolute inline-flex h-full w-full animate-ping rounded-full opacity-60"
+                        />
+                      )}
+                      <div className="bg-ds-accent ring-ds-bg relative h-3 w-3 rounded-full ring-4 transition-transform group-hover:scale-125" />
+                    </div>
+                    {i < TIMELINE.length - 1 && (
+                      <div className="from-ds-accent to-ds-purple mt-1 w-px flex-1 bg-gradient-to-b" />
+                    )}
                   </div>
-                  <div className="border-ds-border hover:border-ds-accent hover:bg-ds-surface -ml-px flex-1 rounded-lg border-l-2 py-1 pb-10 pl-4 transition-colors">
+                  <div className="border-ds-border hover:border-ds-accent hover:bg-ds-surface mb-6 flex-1 rounded-lg border p-4 transition-colors">
                     <p className="text-ds-muted font-mono text-xs">{item.year}</p>
                     <h3 className="text-ds-text mt-1 font-semibold">{item.role}</h3>
                     <p className="text-ds-accent text-sm">{item.company}</p>
@@ -175,9 +208,20 @@ export default function AboutPage() {
               </h2>
             </Reveal>
             <ul className="flex flex-col gap-3">
-              {CURRENTLY.map((item, i) => (
-                <Reveal key={item} delay={i * 60} as="li" className="text-ds-muted">
-                  {item}
+              {CURRENTLY.map(({ icon, text }, i) => (
+                <Reveal
+                  key={text}
+                  delay={i * 60}
+                  as="li"
+                  className="group text-ds-muted flex items-center gap-3"
+                >
+                  <span
+                    className="border-ds-border bg-ds-surface2 text-ds-accent group-hover:border-ds-accent group-hover:bg-ds-accent/10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border transition-colors"
+                    aria-hidden="true"
+                  >
+                    <Icon name={icon} className="h-4 w-4" />
+                  </span>
+                  {text}
                 </Reveal>
               ))}
             </ul>

@@ -1,6 +1,6 @@
 {
   "slug": "netflix-gpt",
-  "title": "Netflix GPT",
+  "title": "Flix GPT",
   "description": "A Netflix clone powered by Gemini AI for smart movie recommendations. Browse, search, and get AI-driven suggestions based on your mood.",
   "longDescription": "A full-stack Netflix clone built with React, Vite, Redux Toolkit, and Firebase authentication. Integrated Google Gemini API to power a GPT search feature — type your mood or a vague prompt and get real movie recommendations. Built as part of the Namaste React curriculum by Akshay Saini, but extended with custom features and production-grade CI/CD via GitHub Actions.",
   "status": "live",

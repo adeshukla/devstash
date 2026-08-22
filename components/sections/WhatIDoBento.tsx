@@ -127,7 +127,7 @@ export function WhatIDoBento() {
                 devstash.me › projects › netflix-gpt
               </p>
               <p className="text-ds-accent mt-1.5 truncate text-base">
-                Netflix GPT — Case Study | DevStash
+                Flix GPT — Case Study | DevStash
               </p>
               <p className="text-ds-muted mt-1 line-clamp-2 text-sm leading-relaxed">
                 A full-stack Netflix clone powered by Gemini AI for smart movie recommendations —
