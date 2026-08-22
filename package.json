@@ -70,6 +70,23 @@
       "prettier --write"
     ]
   },
+  "//pnpm": "CI is pinned to pnpm 9 (.github/workflows/*.yml), which reads overrides/auditConfig from HERE, not pnpm-workspace.yaml — that's a 10+-only location. Overrides force patched versions of transitive deps pulled in only by devDependencies (@lhci/cli's inquirer/tmp/socks chain, eslint's own minimatch) that `pnpm audit --audit-level=high` flags high-severity; none are reachable from anything that ships. Each is upper-bounded to the major line already proven compatible, not just patched — an open '>=X' floor let pnpm jump brace-expansion to 5.x (broke `pnpm lint`: eslint's minimatch@3 calls it with the old v1.x shape) and js-yaml to 5.x (removed the safeLoad()/safeDump() API scripts/seo/check-metadata.mjs calls directly). extract-zip is deliberately NOT overridden and instead ignored via auditConfig: its advisory (GHSA-jmr9-qjv8-65gv) asks for >=2.0.2, but 2.0.1 is still the latest version actually published to npm — there's no real fix to pin to yet.",
+  "pnpm": {
+    "overrides": {
+      "tmp": ">=0.2.6",
+      "brace-expansion": ">=1.1.16 <2.0.0",
+      "ip-address": ">=10.3.1",
+      "js-yaml": ">=3.15.1 <4.0.0",
+      "postcss": ">=8.5.18",
+      "nanoid": ">=3.3.18 <4.0.0",
+      "sharp": ">=0.35.3"
+    },
+    "auditConfig": {
+      "ignoreGhsas": [
+        "GHSA-jmr9-qjv8-65gv"
+      ]
+    }
+  },
   "//browserslist": "Modern targets so Next/SWC stops shipping ES2019-2022 polyfills (Array.prototype.at, Object.hasOwn, String.prototype.trimEnd, …) flagged by Lighthouse's 'legacy JavaScript' audit. Safari 15.4 (Mar 2022) is the binding constraint for those features; covers ~all active users.",
   "browserslist": [
     "chrome >= 108",
