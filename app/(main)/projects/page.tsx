@@ -5,7 +5,7 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
 import { getAllProjects } from '@/lib/markdown/projects'
 import { ProjectsGrid } from '@/components/sections'
-import { Badge } from '@/components/ui'
+import { Badge, PageHeaderGlow } from '@/components/ui'
 import { cn } from '@/lib/utils/cn'
 import type { ProjectCategory } from '@/types/project'
 
@@ -50,7 +50,8 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     <main>
       {/* ── Page header ── */}
       {/* Breadcrumb handles its own buildBreadcrumbSchema JsonLd internally */}
-      <section className="border-ds-border border-b py-16">
+      <section className="border-ds-border relative overflow-hidden border-b py-16">
+        <PageHeaderGlow side="right" />
         <div className="mx-auto max-w-5xl px-6">
           <Breadcrumb
             items={[

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
-import { Card, Badge } from '@/components/ui'
+import { Card, Badge, PageHeaderGlow } from '@/components/ui'
 
 const title = 'Uses — Stack & Tools'
 const description =
@@ -62,7 +62,8 @@ const STACK: UsesSection[] = [
 export default function UsesPage() {
   return (
     <main>
-      <section className="border-ds-border border-b py-16">
+      <section className="border-ds-border relative overflow-hidden border-b py-16">
+        <PageHeaderGlow />
         <div className="mx-auto max-w-3xl px-6">
           <Breadcrumb
             items={[

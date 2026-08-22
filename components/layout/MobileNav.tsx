@@ -50,6 +50,7 @@ export function MobileNav({ items }: MobileNavProps) {
   const panelWidthRef = useRef(281)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const scrollYRef = useRef(0)
   const pathname = usePathname()
   const gradientId = useId()
   const closeGradientId = useId()
@@ -103,6 +104,16 @@ export function MobileNav({ items }: MobileNavProps) {
       const width = Math.round(Math.min(window.innerWidth * 0.75, 384))
       panelWidthRef.current = width
       if (panelRef.current) panelRef.current.style.width = `${width}px`
+      // `overflow: hidden` alone does NOT reliably stop background touch-
+      // scroll on iOS Safari — a well-known platform gap, not something
+      // this project introduced. Pinning body with `position: fixed` at its
+      // current scroll offset is the actual cross-browser lock; scrollTo()
+      // on close restores the exact position instead of jumping to the top.
+      scrollYRef.current = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollYRef.current}px`
+      document.body.style.left = '0'
+      document.body.style.right = '0'
       document.body.style.overflow = 'hidden'
       void document.body.offsetHeight
       // Paint fully off-screen (no transition yet) before the dialog is even
@@ -126,10 +137,19 @@ export function MobileNav({ items }: MobileNavProps) {
       return () => cancelAnimationFrame(raf)
     } else {
       dialog.close()
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.left = ''
+      document.body.style.right = ''
       document.body.style.overflow = ''
+      window.scrollTo(0, scrollYRef.current)
       html.style.scrollBehavior = prevScrollBehavior
     }
     return () => {
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.left = ''
+      document.body.style.right = ''
       document.body.style.overflow = ''
     }
   }, [open])
@@ -315,8 +335,13 @@ export function MobileNav({ items }: MobileNavProps) {
             transition: `opacity ${entered ? ENTER_MS : EXIT_MS}ms ${EASE}`,
           }}
         >
-          {/* Header */}
-          <div className="border-ds-border flex h-[84px] items-center justify-between border-b px-5 sm:px-6">
+          {/* Header — just the grid texture (same atmosphere every page
+              header carries), no blob. */}
+          <div className="border-ds-border relative flex h-[84px] shrink-0 items-center justify-between overflow-hidden border-b px-5 sm:px-6">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--color-ds-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-ds-border)_1px,transparent_1px)] bg-[size:32px_32px] opacity-25"
+            />
             <span
               className="text-ds-text text-[20px] font-bold tracking-tight"
               style={{ letterSpacing: '-0.04em' }}
@@ -370,57 +395,76 @@ export function MobileNav({ items }: MobileNavProps) {
             </div>
           </div>
 
-          {/* Nav links — no opacity animation of their own. They used to
-              fade in on top of the panel's own opacity fade (two 0→1
-              transitions compounding into one that reads slower and hazier
-              than either alone) — the panel's slide + fade is already the
-              one clean motion this drawer earns; header, nav, and footer
-              all just ride along with it as a single unit, not three. A
-              per-link stagger was tried before that too and read as busy/
-              jittery rather than polished — one motion beats a cascade. */}
-          <nav
-            className="flex flex-1 flex-col gap-1 overflow-y-auto p-4 sm:px-6"
-            aria-label="Mobile navigation"
-          >
-            {items.map(({ label, href }) => {
-              const isActive = pathname.startsWith(href)
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={cn(
-                    'flex items-center gap-3 rounded-lg px-4 py-3.5 text-base font-medium transition-colors',
-                    isActive
-                      ? 'bg-ds-accent/10 text-ds-accent'
-                      : 'text-ds-muted hover:text-ds-text hover:bg-ds-text/5 active:bg-ds-text/10 active:text-ds-text'
-                  )}
-                  aria-current={isActive ? 'page' : undefined}
-                >
-                  {isActive && (
+          {/* Nav links + footer, one scrollable region — simpler than
+              trying to rearrange the layout to fit short viewports (a 2-col
+              grid + side-by-side buttons was tried; the résumé button's
+              label wrapped to two lines once squeezed to half-width, which
+              looked worse than just scrolling). Nothing here changes size
+              or shape between portrait and landscape — if it doesn't fit,
+              this whole block scrolls, buttons included, instead of any
+              element being resized, rearranged, or cropped. */}
+          <div className="flex flex-1 flex-col overflow-y-auto">
+            {/* No MOUNT animation of its own (opacity or a per-link stagger
+                were both tried and read as compounding-with-the-panel-fade/
+                busy respectively — see git history; one motion on open beats
+                a cascade). What's here is purely interaction-driven, not
+                entrance-driven, so it can't reintroduce either problem: each
+                link grows an accent bar from its own center
+                (transform: scaleY, not opacity) on hover/press/active, the
+                same accent→purple the active-nav-tab dot used elsewhere on
+                the site already carries, plus a small press-nudge. Both are
+                GPU-only transforms fired by user interaction, not a timer,
+                so they cost nothing idle and don't fight the mobile-perf-
+                driven decision to keep continuous gradient-shift animation
+                desktop-only (see .active-nav-gradient in globals.css). */}
+            <nav className="flex flex-col gap-1 p-4 sm:px-6" aria-label="Mobile navigation">
+              {items.map(({ label, href }) => {
+                const isActive = pathname.startsWith(href)
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={cn(
+                      'group relative flex items-center gap-3 overflow-hidden rounded-lg px-4 py-3.5 pl-5 text-base font-medium transition-[color,background-color,transform] duration-200 active:scale-[0.98]',
+                      isActive
+                        ? 'bg-ds-accent/10 text-ds-accent'
+                        : 'text-ds-muted hover:text-ds-text hover:bg-ds-text/5 active:bg-ds-text/10 active:text-ds-text'
+                    )}
+                    aria-current={isActive ? 'page' : undefined}
+                  >
                     <span
-                      className="active-nav-gradient h-1.5 w-1.5 flex-shrink-0 rounded-full"
                       aria-hidden="true"
+                      className={cn(
+                        'from-ds-accent to-ds-purple absolute inset-y-2.5 left-1 w-[3px] origin-center scale-y-0 rounded-full bg-gradient-to-b transition-transform duration-300 ease-out group-hover:scale-y-100 group-active:scale-y-100',
+                        isActive && 'scale-y-100'
+                      )}
                     />
-                  )}
-                  {label}
-                </Link>
-              )
-            })}
-          </nav>
+                    {label}
+                  </Link>
+                )
+              })}
+            </nav>
 
-          {/* Contact CTA + Résumé */}
-          <div className="border-ds-border flex flex-col gap-2.5 border-t p-4 sm:px-6 sm:py-6">
-            <a
-              href="/resume-adesh-shukla.pdf"
-              download
-              data-analytics-event="cv_viewed"
-              className="border-ds-border text-ds-muted active:border-ds-accent active:text-ds-accent flex h-12 w-full items-center justify-center rounded-lg border text-[15px] font-medium transition-colors"
-            >
-              Download résumé ↓
-            </a>
-            <Button href="/contact" size="lg" className="w-full font-semibold">
-              Contact
-            </Button>
+            {/* Contact CTA + Résumé — `mt-auto` pins this to the bottom of
+                the scroll container when the link list doesn't fill it
+                (portrait, same as before the two blocks were merged into one
+                scroll region), but auto margins can't go negative, so when
+                content actually overflows (landscape) it just falls back to
+                sitting right after the nav in normal flow — still reachable
+                by scrolling, never forced off-screen either way. */}
+            <div className="border-ds-border mt-auto flex flex-col gap-2.5 border-t p-4 sm:px-6 sm:py-6">
+              <a
+                href="/resume-adesh-shukla.pdf"
+                download
+                data-analytics-event="cv_viewed"
+                className="border-ds-border text-ds-muted active:border-ds-accent active:text-ds-accent flex h-12 w-full items-center justify-center rounded-lg border text-[15px] font-medium transition-colors"
+              >
+                Download résumé ↓
+              </a>
+              <Button href="/contact" size="lg" className="w-full font-semibold">
+                Contact
+              </Button>
+            </div>
           </div>
         </div>
       </dialog>

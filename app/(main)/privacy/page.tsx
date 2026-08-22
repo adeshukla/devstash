@@ -3,6 +3,7 @@ import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildWebSiteSchema } from '@/lib/schema/builders'
+import { PageHeaderGlow } from '@/components/ui'
 
 const title = 'Privacy Policy — How DevStash Handles Your Data'
 const description =
@@ -23,7 +24,8 @@ export default function PrivacyPage() {
       <JsonLd data={buildWebSiteSchema()} />
 
       <main>
-        <section className="border-ds-border border-b py-16">
+        <section className="border-ds-border relative overflow-hidden border-b py-16">
+          <PageHeaderGlow />
           <div className="mx-auto max-w-3xl px-6">
             <p className="text-ds-accent font-mono text-sm">Legal</p>
             <h1 className="text-ds-text mt-2 text-4xl font-bold tracking-tight sm:text-5xl">

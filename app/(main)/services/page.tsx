@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
-import { Button } from '@/components/ui'
+import { Button, PageHeaderGlow } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
 import type { IconName } from '@/components/icons/Icon'
 
@@ -38,7 +38,8 @@ const OFFERINGS: { icon: IconName; title: string; body: string }[] = [
 export default function ServicesPage() {
   return (
     <main>
-      <section className="border-ds-border border-b py-16">
+      <section className="border-ds-border relative overflow-hidden border-b py-16">
+        <PageHeaderGlow />
         <div className="mx-auto max-w-3xl px-6">
           <Breadcrumb
             items={[

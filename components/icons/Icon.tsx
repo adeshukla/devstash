@@ -31,9 +31,13 @@ export type IconName =
   | 'external-link'
   | 'copy'
   | 'check'
+  | 'clock'
+  | 'location'
+  | 'calendar'
   | 'github'
   | 'linkedin'
   | 'x'
+  | 'rss'
   // Tech-stack marks (verified against content/projects/*.json `tech` values)
   | 'react'
   | 'nextjs'
@@ -189,6 +193,31 @@ const STROKE_ICONS: Record<Exclude<IconName, FilledIconName>, ReactNode> = {
     </>
   ),
   check: <path d="m5 12 5 5L20 7" />,
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3.5 2" />
+    </>
+  ),
+  location: (
+    <>
+      <path d="M12 21S5 14.4 5 9.5a7 7 0 0 1 14 0C19 14.4 12 21 12 21Z" />
+      <circle cx="12" cy="9.5" r="2.2" />
+    </>
+  ),
+  calendar: (
+    <>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4" />
+    </>
+  ),
+  rss: (
+    <>
+      <circle cx="6" cy="18" r="1.6" fill="currentColor" stroke="none" />
+      <path d="M6 12a6 6 0 0 1 6 6" />
+      <path d="M6 6a12 12 0 0 1 12 12" />
+    </>
+  ),
   // Tech-stack marks
   react: (
     <>

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
-import { Badge, Card, CardTilt, Reveal } from '@/components/ui'
+import { Badge, Card, CardTilt, Reveal, PageHeaderGlow } from '@/components/ui'
 
 const title = 'Lab — Interactive Tools & Live Demos'
 const description =
@@ -119,7 +119,8 @@ export default function LabPage() {
     <main>
       {/* ── Header ── */}
       {/* Breadcrumb emits its own BreadcrumbList JSON-LD */}
-      <section className="border-ds-border border-b py-16">
+      <section className="border-ds-border relative overflow-hidden border-b py-16">
+        <PageHeaderGlow side="right" />
         <div className="mx-auto max-w-5xl px-6">
           <Breadcrumb
             items={[

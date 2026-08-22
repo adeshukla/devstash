@@ -5,7 +5,14 @@ import { JsonLd } from '@/components/seo/JsonLd'
 import { buildPersonSchema } from '@/lib/schema/builders'
 import { siteConfig } from '@/content/metadata/site.config'
 import { stack } from '@/lib/site/stack'
-import { Badge, Button, Reveal, MouseParallax, AboutProfileCard } from '@/components/ui'
+import {
+  Badge,
+  Button,
+  Reveal,
+  MouseParallax,
+  AboutProfileCard,
+  PageHeaderGlow,
+} from '@/components/ui'
 import { Icon, type IconName } from '@/components/icons/Icon'
 
 const title = 'About Adesh Shukla — Frontend Developer'
@@ -79,7 +86,8 @@ export default function AboutPage() {
 
       <main>
         {/* ── Hero ── */}
-        <section className="border-ds-border border-b py-10 sm:py-20">
+        <section className="border-ds-border relative overflow-hidden border-b py-10 sm:py-20">
+          <PageHeaderGlow color="purple" side="right" />
           <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-10 px-6 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
             <div>
               <p className="text-ds-accent mb-2 font-mono text-sm sm:mb-3">{'// about'}</p>

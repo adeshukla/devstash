@@ -149,9 +149,36 @@ export function ContactForm() {
         aria-live="polite"
         className="border-ds-success/30 bg-ds-success/10 flex flex-col items-center gap-4 rounded-xl border px-8 py-12 text-center"
       >
-        <span className="text-4xl" aria-hidden="true">
-          ✓
-        </span>
+        {/* Self-drawing SVG, not a text glyph — the circle strokes in first,
+            the check follows once the circle's mostly settled. `pathLength`
+            normalizes each shape's real length to 1 so the same
+            animate-stroke-draw keyframe (stroke-dashoffset 1 -> 0) works for
+            both without hand-measuring pixel lengths. */}
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+          <circle
+            cx="28"
+            cy="28"
+            r="25"
+            className="text-ds-success animate-stroke-draw motion-reduce:animate-none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            pathLength="1"
+            strokeDasharray="1"
+            strokeDashoffset="1"
+          />
+          <path
+            d="M17 29.5 24.5 37 39 20"
+            className="text-ds-success animate-stroke-draw motion-reduce:animate-none"
+            stroke="currentColor"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            pathLength="1"
+            strokeDasharray="1"
+            strokeDashoffset="1"
+            style={{ animationDelay: '0.35s' }}
+          />
+        </svg>
         <p className="text-ds-success text-lg font-semibold">Message sent!</p>
         <p className="text-ds-muted text-sm">{formState.message}</p>
         <Button

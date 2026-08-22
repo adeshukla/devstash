@@ -5,7 +5,7 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { siteConfig } from '@/content/metadata/site.config'
 import { Breadcrumb } from '@/components/layout'
 import { ContactForm } from '@/components/contact/ContactForm'
-import { Reveal, Card, Separator } from '@/components/ui'
+import { Reveal, Separator, PageHeaderGlow } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
 import type { IconName } from '@/components/icons/Icon'
 
@@ -63,8 +63,13 @@ export default function ContactPage() {
       ) : null}
 
       {/* ── Header ── */}
-      {/* Breadcrumb handles its own buildBreadcrumbSchema JsonLd internally */}
-      <section className="border-ds-border border-b py-16">
+      {/* Breadcrumb handles its own buildBreadcrumbSchema JsonLd internally.
+          Same atmosphere every page header now shares (grid texture + one
+          cursor-parallax blob, not the homepage's full three) via
+          PageHeaderGlow — first introduced here, now extracted for
+          site-wide consistency. */}
+      <section className="border-ds-border relative overflow-hidden border-b py-16">
+        <PageHeaderGlow side="right" />
         <div className="mx-auto max-w-5xl px-6">
           <Breadcrumb
             items={[
@@ -88,10 +93,15 @@ export default function ContactPage() {
           <div className="grid grid-cols-1 gap-16 lg:grid-cols-3">
             {/* Left — meta info */}
             <Reveal as="aside" className="lg:col-span-1">
-              <Card padding="lg" className="flex flex-col gap-8">
+              {/* Same gradient-ring-hover treatment as the About page's
+                  skill cards — a labeled info group, not a link, so it gets
+                  a felt border glow rather than the card-glow lift+shadow
+                  the actually-clickable project/tool cards use. */}
+              <div className="gradient-ring-hover border-ds-border bg-ds-surface flex flex-col gap-8 rounded-2xl border p-6 sm:p-8">
                 {/* Response time */}
                 <div>
-                  <h2 className="text-ds-accent mb-2 font-mono text-sm font-medium">
+                  <h2 className="text-ds-accent mb-2 flex items-center gap-2 font-mono text-sm font-medium">
+                    <Icon name="clock" className="h-4 w-4 flex-shrink-0" />
                     Response time
                   </h2>
                   <p className="text-ds-muted text-sm">
@@ -101,16 +111,27 @@ export default function ContactPage() {
 
                 {/* Location */}
                 <div>
-                  <h2 className="text-ds-accent mb-2 font-mono text-sm font-medium">Location</h2>
+                  <h2 className="text-ds-accent mb-2 flex items-center gap-2 font-mono text-sm font-medium">
+                    <Icon name="location" className="h-4 w-4 flex-shrink-0" />
+                    Location
+                  </h2>
                   <p className="text-ds-muted text-sm">
                     Ghaziabad, UP — open to Noida / Gurugram roles and remote/hybrid.
                   </p>
                 </div>
 
-                {/* Availability */}
+                {/* Availability — same live-status ping the hero's
+                    "Available for..." indicator and the About page's current
+                    role use, so "actually open right now" reads the same
+                    way everywhere it's said on the site. */}
                 <div>
-                  <h2 className="text-ds-accent mb-2 font-mono text-sm font-medium">
+                  <h2 className="text-ds-accent mb-2 flex items-center gap-2 font-mono text-sm font-medium">
+                    <Icon name="calendar" className="h-4 w-4 flex-shrink-0" />
                     Availability
+                    <span className="relative flex h-2 w-2" aria-hidden="true">
+                      <span className="bg-ds-success absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
+                      <span className="bg-ds-success relative inline-flex h-2 w-2 rounded-full" />
+                    </span>
                   </h2>
                   <p className="text-ds-muted text-sm">
                     Immediate to ~20 days notice. Open to contract and full-time.
@@ -121,7 +142,10 @@ export default function ContactPage() {
 
                 {/* Social links */}
                 <div>
-                  <h2 className="text-ds-accent mb-4 font-mono text-sm font-medium">Elsewhere</h2>
+                  <h2 className="text-ds-accent mb-4 flex items-center gap-2 font-mono text-sm font-medium">
+                    <Icon name="external-link" className="h-4 w-4 flex-shrink-0" />
+                    Elsewhere
+                  </h2>
                   <ul className="flex flex-col gap-3">
                     {SOCIAL_LINKS.map((link) => (
                       <li key={link.label}>
@@ -146,7 +170,7 @@ export default function ContactPage() {
                     ))}
                   </ul>
                 </div>
-              </Card>
+              </div>
             </Reveal>
 
             {/* Right — form */}

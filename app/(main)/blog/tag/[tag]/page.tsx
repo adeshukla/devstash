@@ -6,6 +6,7 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildBreadcrumbSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
+import { PageHeaderGlow } from '@/components/ui'
 import { BlogList } from '@/components/blog/BlogList'
 import { getAllPosts, getPostsByTag, getAllTags } from '@/lib/markdown/blog'
 
@@ -55,27 +56,34 @@ export default async function TagPage({ params }: Props) {
     <>
       <JsonLd data={buildBreadcrumbSchema(breadcrumbs)} />
 
-      <div className="container mx-auto max-w-6xl px-4 py-12">
-        <Breadcrumb
-          items={[
-            { name: 'Blog', url: 'https://devstash.me/blog' },
-            { name: `#${tag}`, url: `https://devstash.me/blog/tag/${tag}` },
-          ]}
-        />
+      <section className="border-ds-border relative overflow-hidden border-b py-16">
+        <PageHeaderGlow />
+        <div className="mx-auto max-w-6xl px-6">
+          <Breadcrumb
+            items={[
+              { name: 'Blog', url: 'https://devstash.me/blog' },
+              { name: `#${tag}`, url: `https://devstash.me/blog/tag/${tag}` },
+            ]}
+          />
 
-        <div className="mt-6 mb-10">
-          <p className="text-ds-muted mb-2 font-mono text-sm">Tag</p>
-          <h1 className="text-ds-text mb-3 font-sans text-4xl font-bold tracking-tight sm:text-5xl">
-            <span className="text-ds-muted">#</span>
-            {tag}
-          </h1>
-          <p className="text-ds-muted">
-            {posts.length} post{posts.length !== 1 ? 's' : ''}
-          </p>
+          <div className="mt-6">
+            <p className="text-ds-muted mb-2 font-mono text-sm">Tag</p>
+            <h1 className="text-ds-text mb-3 font-sans text-4xl font-bold tracking-tight sm:text-5xl">
+              <span className="text-ds-muted">#</span>
+              {tag}
+            </h1>
+            <p className="text-ds-muted">
+              {posts.length} post{posts.length !== 1 ? 's' : ''}
+            </p>
+          </div>
         </div>
+      </section>
 
-        <BlogList posts={posts} emptyMessage={`No posts tagged #${tag} yet.`} />
-      </div>
+      <section className="py-16">
+        <div className="mx-auto max-w-6xl px-6">
+          <BlogList posts={posts} emptyMessage={`No posts tagged #${tag} yet.`} />
+        </div>
+      </section>
     </>
   )
 }

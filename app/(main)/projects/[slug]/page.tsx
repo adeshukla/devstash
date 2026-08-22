@@ -12,7 +12,15 @@ import { JsonLd } from '@/components/seo/JsonLd'
 import { buildProjectSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
 import { getAllProjects, getProjectBySlug } from '@/lib/markdown/projects'
-import { Badge, Button, ImageGallery, Reveal, MountReveal, Separator } from '@/components/ui'
+import {
+  Badge,
+  Button,
+  ImageGallery,
+  Reveal,
+  MountReveal,
+  Separator,
+  PageHeaderGlow,
+} from '@/components/ui'
 import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
 import { Icon } from '@/components/icons/Icon'
 import { TECH_ICONS } from '@/lib/utils/techIcons'
@@ -96,7 +104,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
       <main>
         {/* ── Header ── */}
-        <section className="border-ds-border border-b py-16">
+        <section className="border-ds-border relative overflow-hidden border-b py-16">
+          <PageHeaderGlow />
           <div className="mx-auto max-w-4xl px-6">
             <MountReveal>
               <Breadcrumb

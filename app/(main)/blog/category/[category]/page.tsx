@@ -6,6 +6,7 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildBreadcrumbSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
+import { PageHeaderGlow } from '@/components/ui'
 import { BlogList } from '@/components/blog/BlogList'
 import { getAllPosts, getPostsByCategory } from '@/lib/markdown/blog'
 import { type BlogCategory, BLOG_CATEGORIES } from '@/types/blog'
@@ -58,26 +59,33 @@ export default async function CategoryPage({ params }: Props) {
     <>
       <JsonLd data={buildBreadcrumbSchema(breadcrumbs)} />
 
-      <div className="container mx-auto max-w-6xl px-4 py-12">
-        <Breadcrumb
-          items={[
-            { name: 'Blog', url: 'https://devstash.me/blog' },
-            { name: validCategory.label, url: `https://devstash.me/blog/category/${category}` },
-          ]}
-        />
+      <section className="border-ds-border relative overflow-hidden border-b py-16">
+        <PageHeaderGlow />
+        <div className="mx-auto max-w-6xl px-6">
+          <Breadcrumb
+            items={[
+              { name: 'Blog', url: 'https://devstash.me/blog' },
+              { name: validCategory.label, url: `https://devstash.me/blog/category/${category}` },
+            ]}
+          />
 
-        <div className="mt-6 mb-10">
-          <p className="text-ds-muted mb-2 font-mono text-sm">Category</p>
-          <h1 className="text-ds-text mb-3 font-sans text-4xl font-bold tracking-tight sm:text-5xl">
-            {validCategory.label}
-          </h1>
-          <p className="text-ds-muted">
-            {posts.length} post{posts.length !== 1 ? 's' : ''}
-          </p>
+          <div className="mt-6">
+            <p className="text-ds-muted mb-2 font-mono text-sm">Category</p>
+            <h1 className="text-ds-text mb-3 font-sans text-4xl font-bold tracking-tight sm:text-5xl">
+              {validCategory.label}
+            </h1>
+            <p className="text-ds-muted">
+              {posts.length} post{posts.length !== 1 ? 's' : ''}
+            </p>
+          </div>
         </div>
+      </section>
 
-        <BlogList posts={posts} emptyMessage={`No posts in ${validCategory.label} yet.`} />
-      </div>
+      <section className="py-16">
+        <div className="mx-auto max-w-6xl px-6">
+          <BlogList posts={posts} emptyMessage={`No posts in ${validCategory.label} yet.`} />
+        </div>
+      </section>
     </>
   )
 }

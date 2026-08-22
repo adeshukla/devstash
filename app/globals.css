@@ -41,6 +41,11 @@
   --animate-fade-in: fadeIn 0.3s ease both;
   --animate-blink: blink 1.1s step-end infinite;
   --animate-pulse2: pulse2 2.4s ease infinite;
+  /* Self-drawing SVG stroke — paired with `pathLength="1"` on the path itself
+     (normalizes any path's real length to 1, so this one keyframe works for
+     a circle, a checkmark, or anything else without hand-measuring pixel
+     lengths). Used by the contact form's success checkmark. */
+  --animate-stroke-draw: strokeDraw 0.7s var(--ds-ease-smooth) forwards;
 
   @keyframes fadeUp {
     from {
@@ -88,6 +93,14 @@
     50% {
       opacity: 0.5;
       transform: scale(0.85);
+    }
+  }
+  @keyframes strokeDraw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
     }
   }
 }
