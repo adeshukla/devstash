@@ -87,7 +87,7 @@
       ]
     }
   },
-  "//browserslist": "Modern targets so Next/SWC stops shipping ES2019-2022 polyfills (Array.prototype.at, Object.hasOwn, String.prototype.trimEnd, …) flagged by Lighthouse's 'legacy JavaScript' audit. Safari 15.4 (Mar 2022) is the binding constraint for those features; covers ~all active users.",
+  "//browserslist": "Modern targets so Next/SWC stops shipping ES2019-2022 polyfills for OUR OWN source in transpiled-output-that-respects-this-config. Doesn't touch @next/polyfill-module specifically — confirmed by direct build test (2026-08) that it ships its fixed Array.at/flat/flatMap/Object.fromEntries/hasOwn/String.trimStart/trimEnd bundle regardless of this config; that's an open upstream Next.js limitation (vercel/next.js#86785), not something fixable from project config. ~14KiB, not worth chasing further.",
   "browserslist": [
     "chrome >= 108",
     "edge >= 108",
