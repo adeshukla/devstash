@@ -92,6 +92,15 @@ const SCENE_LABELS: Record<Scene, string> = {
   house: 'House',
   megaphone: 'Megaphone',
   design: 'Design',
+  trust: 'Trust',
+  decision: 'Decision',
+  'local-chip': 'Local Chip',
+  assistant: 'Assistant',
+  'agent-browser': 'Agent Browser',
+  calendar: 'Calendar',
+  'test-shield': 'Test Shield',
+  mainstream: 'Mainstream',
+  'agent-router': 'Agent Router',
 }
 
 const DENSITY_LABELS: Record<Density, string> = { 1: 'Minimal', 2: 'Balanced', 3: 'Rich' }

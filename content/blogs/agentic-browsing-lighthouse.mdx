@@ -1,0 +1,52 @@
+---
+title: 'Agentic Browsing and What It Means for How You Build Sites'
+slug: 'agentic-browsing-lighthouse'
+description: 'Lighthouse now scores sites for AI agents reading them, not just human visitors. Here is what the Agentic Browsing checks actually measure and how to pass them.'
+author: 'Adesh Shukla'
+createdAt: '2026-08-31'
+updatedAt: '2026-08-31'
+category: 'ai-workflows'
+tags: ['lighthouse', 'seo', 'ai-agents', 'llms-txt']
+readingTime: 6
+canonical: 'https://devstash.me/blog/agentic-browsing-lighthouse'
+draft: false
+featured: false
+---
+
+Lighthouse added an "Agentic Browsing" category alongside the familiar Performance, Accessibility, SEO, and Best Practices scores. That is a genuinely new kind of audience for a website to optimize for: not a human with a mouse, and not strictly a search-engine crawler, but an AI agent that navigates a page, reads its structure, and acts on what it finds — clicking, filling forms, extracting data — on behalf of a user who may never look at the raw page itself.
+
+## What the category actually checks
+
+As of the version I tested against, Agentic Browsing runs three checks, and they are narrower and more concrete than the category name suggests:
+
+1. **Accessibility tree well-formedness** — can an agent build a reliable structural map of the page from ARIA roles, labels, and semantic HTML, without ambiguity about what an element is or does. This is the same underlying tree screen readers use, which is not a coincidence — an agent navigating programmatically and a screen reader navigating for a blind user are solving a similar problem.
+2. **Cumulative Layout Shift stability** — a page that keeps shifting elements around is unreliable for an agent that clicked based on a coordinate or a snapshot taken a moment earlier. A human visually adjusts to shifted content without thinking about it; an agent's action can miss entirely if the target moved.
+3. **`llms.txt` validity** — a plain-text file at the site root describing the site's purpose and structure for AI systems. The check specifically verifies it contains real Markdown-formatted links (`[label](url)`), not bare URLs — bare URLs are harder for a language model to parse confidently as "this text names that destination."
+
+<Callout type="info" title="Why the accessibility overlap is not a coincidence">
+  Every one of these checks was already valuable for a completely different audience before agents
+  existed — a well-formed accessibility tree serves screen reader users, layout stability serves
+  anyone on a slow connection or older device, and a clear site map in plain language serves any new
+  visitor trying to understand what a site actually is. Agentic Browsing did not invent new work; it
+  gave existing good practice a second, concrete reason to exist.
+</Callout>
+
+## What this means in practice
+
+If your site already scores well on Accessibility, you likely already pass most of the Agentic Browsing checks — that is the actual relationship between the two categories, not a coincidence of naming. The genuinely new piece of work is `llms.txt`: a small file that did not need to exist before this category, and that no other Lighthouse category checks for at all.
+
+A minimal one just needs the shape a Markdown-link-parsing model can confidently read: a short description of what the site is, who runs it, and a set of real Markdown links to the primary sections. [Mine lives at devstash.me/llms.txt](https://devstash.me/llms.txt) if you want a working example of the shape.
+
+<Callout type="warning" title="A mistake worth naming directly">
+  A bare URL like `https://example.com/blog` in an `llms.txt` file is not obviously wrong to a human
+  reader, but it fails the Markdown-link check specifically — the Lighthouse audit is checking for
+  the `[text](url)` syntax, not just the presence of a URL string. If you generate this file with an
+  LLM, tell it explicitly to use real Markdown links, since a model asked for "a list of important
+  pages" will often default to plain URLs.
+</Callout>
+
+## The broader shift this signals
+
+Search engines built their own crawling and ranking logic over roughly two decades. Agentic Browsing is an early, narrow instance of a browser vendor building tooling for a *different* kind of automated visitor — one that acts on the page rather than just indexing it. The three checks that exist today are a reasonable starting set, not a finished spec, and I would expect this category to grow as agentic browsing itself becomes more common and its failure modes become better understood.
+
+For now, the practical takeaway is small and concrete: keep your accessibility tree clean, keep your layout stable, and give your site an actual `llms.txt` with real links in it. All three were good practice already. This category just gave them a number you can watch.

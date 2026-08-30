@@ -1,0 +1,53 @@
+---
+title: 'The One-Person Product Team: What Vibe Coding Actually Unlocks'
+slug: 'one-person-product-team-vibe-coding'
+description: 'AI-assisted development lets one developer credibly own product, design, frontend, and content. Here is what that actually requires versus what it removes.'
+author: 'Adesh Shukla'
+createdAt: '2026-08-31'
+updatedAt: '2026-08-31'
+category: 'career'
+tags: ['career', 'solo-development', 'ai-workflows', 'productivity']
+readingTime: 6
+canonical: 'https://devstash.me/blog/one-person-product-team-vibe-coding'
+draft: false
+featured: false
+---
+
+"One person can now do the work of a five-person team" is the kind of line that shows up in every AI-productivity thread, and it is doing a lot of unearned work when stated that plainly. The more accurate version is narrower and more useful: AI-assisted development removes a specific set of *execution* bottlenecks that used to require a dedicated specialist, while leaving the *judgment* bottlenecks — deciding what to build and whether it is actually good — exactly where they were.
+
+## What actually got removed
+
+The bottlenecks that AI assistance genuinely collapses are the ones that were mostly about execution speed, not expertise depth:
+
+- **Boilerplate and scaffolding.** Setting up a new page with the right metadata shape, a new component following an existing pattern, a new API route with the standard error handling — this used to be "know the pattern, then spend twenty minutes typing it out correctly." Now it is closer to "know the pattern, describe it, review the result."
+- **Cross-domain syntax lookup.** Needing to write a bit of CSS, then a bit of SQL, then a shell script, in the same afternoon used to mean context-switching into documentation for whichever language you touch less often. An assistant with broad training removes most of that friction.
+- **First-draft everything.** A first pass at copy, a first pass at a JSON-LD schema, a first pass at test cases — the blank-page problem for tasks with a well-understood target shape.
+
+## What did not go anywhere
+
+- **Product judgment** — deciding what is worth building at all, and whether a shipped feature actually solves the problem, still requires understanding your users and your own product in a way no assistant can substitute for. It can help you think through a decision; it cannot make the decision correctly on your behalf, because it does not have the context of why you are building this in the first place.
+- **Taste** — the difference between a design that technically follows the design system and one that actually feels right is still something you have to recognize, not generate. An assistant can produce fifty variations; picking the right one is still a human judgment call.
+- **Knowing when the assistant is wrong.** This is the actual skill that scales your leverage as a solo developer — not prompting better, but reviewing well enough to catch the confidently-wrong 10% before it ships. Everything in [the vibe coding trust gap](/blog/vibe-coding-trust-gap) applies here directly.
+
+<Callout type="info" title="The honest framing">
+  What changed is not "I can now be five specialists." What changed is "the execution cost of moving
+  between roles dropped enough that owning five roles stopped requiring five people's worth of
+  typing speed." The judgment each role requires is unchanged.
+</Callout>
+
+## What this actually requires from you
+
+Running solo across product, design, frontend, and content does not remove the need for competence in each area — it changes the bar from "can execute" to "can evaluate." You need enough design sense to know a generated layout is off, enough backend knowledge to know a suggested query pattern will not scale, enough SEO literacy to know when generated metadata is technically present but strategically weak. The assistant handles the typing; you are still the one who has to know what good looks like.
+
+<Callout type="tip" title="How I actually think about it">
+  I treat every domain I am not a specialist in — SEO, copywriting, some backend patterns — as an
+  area where I need enough working knowledge to review critically, not enough to have generated the
+  first draft myself. That is a meaningfully lower bar than full expertise, and it is the bar AI
+  assistance actually lets one person clear across many domains at once.
+</Callout>
+
+## Where this is genuinely different from before
+
+[TODO: add a concrete example from your own work at DevStash — a specific feature or page where you personally moved across roles (e.g. writing the SEO schema, then the frontend, then the copy) in one sitting, and roughly how long each part took, since a real example is more convincing than the general claim]
+
+The team did not get replaced by one person plus AI. The execution layer got compressed enough that the judgment layer — which was always the harder, less parallelizable part — is now the actual bottleneck on a solo developer's output, instead of typing speed and syntax recall.

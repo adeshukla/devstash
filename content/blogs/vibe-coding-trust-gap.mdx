@@ -1,0 +1,59 @@
+---
+title: 'The Vibe Coding Trust Gap: Why "It Runs" Isn''t "It Works"'
+slug: 'vibe-coding-trust-gap'
+description: 'Vibe coding gets code running fast, but running and correct are different claims. Here''s the gap I actually check before shipping AI-generated code.'
+author: 'Adesh Shukla'
+createdAt: '2026-08-31'
+updatedAt: '2026-08-31'
+category: 'ai-workflows'
+tags: ['vibe-coding', 'ai-workflows', 'code-review', 'ai-assistants']
+readingTime: 6
+canonical: 'https://devstash.me/blog/vibe-coding-trust-gap'
+draft: false
+featured: false
+---
+
+"Vibe coding" — describing what you want in plain English and letting an AI assistant write and run the code, mostly without reading it line by line — went from a niche term to something recruiters ask about in interviews inside about a year. And it's genuinely useful. I use it every day on this site. But there's a specific failure mode that doesn't show up until you've shipped a few dozen AI-generated changes, and it's worth naming precisely instead of waving at "AI can be wrong sometimes."
+
+## Running is not the same claim as correct
+
+When an AI assistant writes a function, runs it, and shows you output that looks reasonable, three separate things have happened, and only one of them is actually verified:
+
+1. The code compiles/parses. **Verified** — the tool ran it.
+2. The code executes without throwing. **Verified** — you saw output.
+3. The code does what you actually meant. **Not verified** — nobody checked the logic against your intent, they checked that a plausible-looking result appeared.
+
+The trust gap is the space between (2) and (3). It's widest exactly when the output looks right, because a wrong number that looks plausible gets far less scrutiny than a wrong number that looks obviously broken. A function that returns `undefined` gets caught immediately. A function that returns a number that's off by 8% because of an edge case in date math can sit in production for months.
+
+<Callout type="warning" title="The specific pattern to watch for">
+  If an AI assistant says something like "I've fixed the bug and verified the output" after running
+  a script once and eyeballing the result, that is not verification — it's a single anecdotal data
+  point being described with the confidence of a test suite. Ask what was actually checked, and
+  against what expected value.
+</Callout>
+
+## Where the gap actually bites
+
+In my own work, the trust gap shows up in the same few places every time:
+
+- **Boundary conditions the happy-path prompt never mentioned.** Empty arrays, zero, negative numbers, timezone edges. If I didn't say "handle the empty case," the assistant usually didn't think about it either — it optimized for the example I gave it, not the full input space.
+- **Silent type coercion.** JavaScript/TypeScript will happily let a string and a number interact in ways that produce a number-shaped result that's wrong. `tsc --noEmit` catches a lot of this, but not all of it — a value typed `any` or coming from an external API response can carry a wrong assumption straight through.
+- **Copy-pasted logic that almost matches an existing pattern.** When an assistant generalizes from one existing function in your codebase, "almost matches" is exactly the kind of near-miss that's hardest to spot in review, because it reads as familiar.
+
+## What I actually do differently now
+
+[TODO: describe your specific pre-merge checklist for AI-generated changes — e.g. what you always re-read manually, what test coverage you require before merging, any tooling you've added specifically for this]
+
+The general shape, regardless of the specifics: I stopped treating "the assistant ran it and it worked" as equivalent to "I reviewed it." Those are different levels of confidence, and conflating them is exactly how a plausible-looking bug reaches production. A quick pass reading the diff line by line, asking "what input would break this," takes a few minutes and catches most of what a single successful run doesn't.
+
+<Callout type="tip" title="A cheap habit that pays for itself">
+  Before accepting an AI-written fix, ask it directly: "what's the one input that would break this?"
+  Forcing the model to generate its own adversarial case surfaces gaps a plain "does this look
+  right?" review misses, and it costs one extra message.
+</Callout>
+
+## This isn't an argument against vibe coding
+
+It's an argument for being precise about what part of the process is actually trustworthy. The code-generation speedup is real and I'm not giving it up. The verification step is a separate job that doesn't go away just because the first job got faster — if anything, it matters more, because more code is moving through review per hour than before, and each unreviewed assumption compounds with the next AI-generated change built on top of it.
+
+Related reading if you want the other half of this: [why I still write tests for AI-generated code](/blog/why-i-still-test-ai-generated-code) goes into the specific testing habits that catch this gap in practice.

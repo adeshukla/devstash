@@ -1,0 +1,52 @@
+---
+title: 'Running Local LLMs with Ollama: When It Is Worth the Setup'
+slug: 'running-local-llms-with-ollama'
+description: 'Local LLMs via Ollama trade raw capability for privacy, cost, and offline access. Here is how I actually decide between local and API-based models.'
+author: 'Adesh Shukla'
+createdAt: '2026-08-31'
+updatedAt: '2026-08-31'
+category: 'ai-workflows'
+tags: ['ollama', 'local-llm', 'ai-workflows', 'privacy']
+readingTime: 6
+canonical: 'https://devstash.me/blog/running-local-llms-with-ollama'
+draft: false
+featured: false
+---
+
+Every automation I have written about on this site — the n8n workflows, the AI content pipeline — calls an external API (Groq, mostly). That is the right default for most tasks: cloud models are more capable, and Groq specifically is fast enough that latency is rarely the bottleneck. But "call an API" is not the only option, and there is a specific, narrow set of cases where running a model locally with something like Ollama is the better call. This is about where that line actually sits, not a general "local models are the future" pitch.
+
+## What Ollama actually is
+
+Ollama packages open-weight models (Llama, Mistral, Gemma, Qwen, and others) into a single local binary with a simple CLI and a local HTTP API that mirrors the shape of a hosted API. `ollama run llama3.1` pulls the model and drops you into a chat prompt; `ollama serve` exposes it as an endpoint your own code can call at `localhost:11434`, the same way you would call Groq or OpenAI, just pointed at your own machine instead of someone else's.
+
+<Callout type="info" title="What you are trading away">
+  A locally-runnable model, even a good one, is trading raw capability for the ability to run on
+  consumer hardware. It is not "GPT-4 for free" — it is a smaller, more efficient model that is good
+  enough for a meaningfully narrower set of tasks. Comparing it against a frontier hosted model on
+  open-ended reasoning is the wrong comparison to make when deciding whether to use it.
+</Callout>
+
+## The three reasons I would actually reach for it
+
+**Privacy of the input, not just the output.** If the text going into the prompt is something I would not want leaving my machine at all — regardless of any API provider's stated data policy — a local model removes the question entirely. There is no network call to audit, no terms-of-service to trust, no request log on someone else's server. This matters more for the *input* than the output, because the input is often the more sensitive half of the exchange.
+
+**No per-request cost at any volume.** Once the model is downloaded, running it is free in the API sense — you are spending your own compute and electricity, not per-token billing. For a task you run thousands of times against your own data, that changes the math in a way that is not close.
+
+**Offline and disconnected environments.** No cloud dependency means no outage risk from the provider's side and no requirement for a network connection at all. For anything running on a machine with an unreliable or restricted connection, this stops being a nice-to-have and becomes the actual reason to use it.
+
+## Where I still reach for Groq instead
+
+For anything genuinely open-ended — the kind of "draft this, then improve it, then extract structured data from it" chain I described in [my n8n + Groq patterns post](/blog/n8n-groq-workflow-patterns) — a hosted frontier-adjacent model is still doing meaningfully better work per attempt, and Groq's inference speed removes the latency argument that used to favor local models for interactive use. The gap has narrowed considerably as open-weight models have improved, but it has not closed for multi-step reasoning chains.
+
+[TODO: add your own hardware notes here — which model sizes you have actually run locally, what hardware, and what response latency you saw, since this varies enormously by machine and is the kind of specific number that is worse to guess than to state plainly as unverified]
+
+<Callout type="tip" title="A practical starting point">
+  If you are trying this for the first time, start with a small instruction-tuned model (the 7-8B
+  class) before assuming you need something larger — the setup and API-shape learning curve is the
+  same regardless of model size, and a smaller model is a faster way to find out whether local
+  inference fits your actual workflow before committing disk space and download time to a bigger one.
+</Callout>
+
+## The actual decision rule
+
+Local versus hosted is not a philosophical stance, it is a question about the specific task: how sensitive is the input, how many times will this run, and does the task need frontier-level reasoning or just competent pattern-matching on a narrow, well-defined job. Most of what I automate still fails the third test and stays on Groq. The exceptions are real, but they are exceptions.

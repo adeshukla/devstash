@@ -25,6 +25,15 @@ export type Scene =
   | 'house'
   | 'megaphone'
   | 'design'
+  | 'trust'
+  | 'decision'
+  | 'local-chip'
+  | 'assistant'
+  | 'agent-browser'
+  | 'calendar'
+  | 'test-shield'
+  | 'mainstream'
+  | 'agent-router'
 
 const BLOG_SCENE: Record<BlogCategory, Scene> = {
   frontend: 'frontend',
@@ -64,6 +73,20 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   'figma-to-production-handoff-workflow': 'design',
   'ppc-landing-page-conversion-lessons': 'megaphone',
   'n8n-groq-workflow-patterns': 'ai-workflows',
+  // Five of the new AI-trend posts all share the 'ai-workflows' bucket —
+  // without overrides they'd all render the identical node-graph scene on
+  // the /blog grid, the exact problem this map exists to solve.
+  'vibe-coding-trust-gap': 'trust',
+  'running-local-llms-with-ollama': 'local-chip',
+  'ai-coding-assistants-architecture-not-autocomplete': 'assistant',
+  'agentic-browsing-lighthouse': 'agent-browser',
+  'why-i-still-test-ai-generated-code': 'test-shield',
+  'ai-goes-mainstream-consumer-tools': 'mainstream',
+  // These two share 'automation' with the existing job-application post.
+  'what-i-actually-automate-and-what-i-dont': 'decision',
+  'ai-meeting-notes-calendar-automation': 'calendar',
+  // Shares 'frontend' with the existing App Router patterns post.
+  'nextjs-app-router-agent-driven-dev': 'agent-router',
 }
 
 interface CategoryIllustrationProps {
@@ -168,6 +191,24 @@ export function SceneContent({ scene }: { scene: Scene }) {
       return <MegaphoneScene />
     case 'design':
       return <DesignScene />
+    case 'trust':
+      return <TrustScene />
+    case 'decision':
+      return <DecisionScene />
+    case 'local-chip':
+      return <LocalChipScene />
+    case 'assistant':
+      return <AssistantScene />
+    case 'agent-browser':
+      return <AgentBrowserScene />
+    case 'calendar':
+      return <CalendarScene />
+    case 'test-shield':
+      return <TestShieldScene />
+    case 'mainstream':
+      return <MainstreamScene />
+    case 'agent-router':
+      return <AgentRouterScene />
   }
 }
 
@@ -190,6 +231,15 @@ export const ALL_SCENES: Scene[] = [
   'house',
   'megaphone',
   'design',
+  'trust',
+  'decision',
+  'local-chip',
+  'assistant',
+  'agent-browser',
+  'calendar',
+  'test-shield',
+  'mainstream',
+  'agent-router',
 ]
 
 // Keyword index — maps a scene to the words a topic string is checked
@@ -213,6 +263,15 @@ export const SCENE_KEYWORDS: Record<Scene, string[]> = {
   house: ['real estate', 'property', 'listing', 'house', 'home', 'rental'],
   megaphone: ['marketing', 'audit', 'campaign', 'ads', 'lead gen', 'announcement', 'conversion'],
   design: ['figma', 'design', 'handoff', 'artboard', 'mockup', 'ui design', 'prototype'],
+  trust: ['trust', 'verify', 'review', 'vibe coding', 'reliability', 'skepticism'],
+  decision: ['decide', 'when to automate', 'tradeoff', 'fork', 'choice', 'evaluate'],
+  'local-chip': ['ollama', 'local llm', 'self-hosted', 'offline', 'on-device', 'privacy'],
+  assistant: ['copilot', 'cursor', 'claude code', 'coding assistant', 'pair programming'],
+  'agent-browser': ['agentic browsing', 'ai agent', 'crawler', 'llms.txt', 'browsing'],
+  calendar: ['meeting', 'calendar', 'notes', 'scheduling', 'recap', 'transcription'],
+  'test-shield': ['testing', 'unit test', 'qa', 'coverage', 'verification', 'trust code'],
+  mainstream: ['consumer', 'mainstream', 'photo editor', 'video editor', 'finance app'],
+  'agent-router': ['app router', 'routing', 'agent-driven', 'next.js', 'navigation'],
 }
 
 // ── Frontend — browser window + a cursor click ripple ──────────────────────
@@ -747,6 +806,399 @@ function DesignScene() {
         className="fill-ds-accent/10 stroke-ds-accent/40"
         strokeDasharray="3 3"
       />
+    </g>
+  )
+}
+
+// ── Trust — AI output next to a floating "verify me" shield ────────────────
+function TrustScene() {
+  return (
+    <g>
+      <rect
+        x="100"
+        y="55"
+        width="140"
+        height="110"
+        rx="10"
+        className="fill-ds-surface stroke-ds-border"
+      />
+      <text x="118" y="90" className="fill-ds-accent" fontFamily="var(--font-mono)" fontSize="13">
+        {'<AI/>'}
+      </text>
+      <line x1="118" y1="106" x2="220" y2="106" className="stroke-ds-muted/40" strokeWidth="4" />
+      <line x1="118" y1="122" x2="200" y2="122" className="stroke-ds-muted/40" strokeWidth="4" />
+      <line x1="118" y1="138" x2="210" y2="138" className="stroke-ds-muted/40" strokeWidth="4" />
+      <g className="animate-float">
+        <path
+          d="M270 68a20 22 0 00-20 0v20c0 16 20 28 20 28s20-12 20-28V68a20 22 0 00-20 0z"
+          className="fill-ds-purple/15 stroke-ds-purple"
+          strokeWidth="2"
+        />
+        <text
+          x="263"
+          y="100"
+          className="fill-ds-purple"
+          fontFamily="var(--font-mono)"
+          fontSize="17"
+          fontWeight="700"
+        >
+          ?
+        </text>
+      </g>
+    </g>
+  )
+}
+
+// ── Decision — a fork: automate (gear) vs. don't (stop) ─────────────────────
+function DecisionScene() {
+  return (
+    <g>
+      <circle cx="140" cy="112" r="10" className="fill-ds-accent" />
+      <path
+        d="M150 108 C190 95, 210 80, 240 68"
+        className="stroke-ds-border"
+        strokeWidth="2"
+        fill="none"
+      />
+      <path
+        d="M150 116 C190 130, 210 145, 238 156"
+        className="stroke-ds-border"
+        strokeWidth="2"
+        fill="none"
+      />
+      <Gear
+        cx={264}
+        cy={58}
+        r={20}
+        className="[transform-origin:264px_58px] animate-spin [animation-duration:12s]"
+      />
+      <circle
+        cx="258"
+        cy="158"
+        r="16"
+        className="fill-ds-surface stroke-ds-error"
+        strokeWidth="2"
+      />
+      <path
+        d="M251 151l14 14M265 151l-14 14"
+        className="stroke-ds-error"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+    </g>
+  )
+}
+
+// ── Local chip — an on-device model, no cloud round-trip ────────────────────
+function LocalChipScene() {
+  return (
+    <g>
+      <rect
+        x="130"
+        y="72"
+        width="90"
+        height="90"
+        rx="8"
+        className="fill-ds-surface stroke-ds-border"
+        strokeWidth="2"
+      />
+      {[0, 1, 2].map((i) => (
+        <g key={i}>
+          <line
+            x1={150 + i * 20}
+            y1="72"
+            x2={150 + i * 20}
+            y2="58"
+            className="stroke-ds-muted/50"
+            strokeWidth="2"
+          />
+          <line
+            x1={150 + i * 20}
+            y1="162"
+            x2={150 + i * 20}
+            y2="176"
+            className="stroke-ds-muted/50"
+            strokeWidth="2"
+          />
+        </g>
+      ))}
+      <circle cx="175" cy="117" r="8" className="fill-ds-accent animate-pulse2" />
+      <circle cx="150" cy="140" r="4" className="fill-ds-purple/70" />
+      <circle cx="200" cy="95" r="4" className="fill-ds-purple/70" />
+      <g className="animate-float">
+        <path
+          d="M255 80c-10 0-18 8-18 17 0 1 0 2 .2 3-7 1-12 7-12 14 0 8 6 14 14 14h32c8 0 14-6 14-14 0-7-5-13-11-14 .1-1 .1-2 .1-3 0-9-8-17-19.2-17z"
+          className="fill-ds-muted/15 stroke-ds-muted/40"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M242 92l30 26M272 92l-30 26"
+          className="stroke-ds-error"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
+      </g>
+    </g>
+  )
+}
+
+// ── Assistant — code being stacked by an agent cursor ────────────────────────
+function AssistantScene() {
+  return (
+    <g>
+      <rect
+        x="90"
+        y="50"
+        width="150"
+        height="120"
+        rx="8"
+        className="fill-ds-surface stroke-ds-border"
+      />
+      <rect x="105" y="150" width="120" height="16" rx="3" className="fill-ds-accent/60" />
+      <rect x="105" y="128" width="90" height="14" rx="3" className="fill-ds-purple/50" />
+      <rect x="105" y="106" width="60" height="12" rx="3" className="fill-ds-accent" />
+      <g className="animate-float">
+        <circle cx="270" cy="90" r="22" className="fill-ds-purple/15" />
+        <path
+          d="M258 82l10 5 10-5-10 20-10-20z"
+          className="fill-ds-purple stroke-ds-purple"
+          strokeLinejoin="round"
+        />
+        <circle cx="285" cy="70" r="4" className="fill-ds-accent animate-blink" />
+      </g>
+    </g>
+  )
+}
+
+// ── Agent browser — a page being read by an agent, not a person ─────────────
+function AgentBrowserScene() {
+  return (
+    <g>
+      <rect
+        x="90"
+        y="50"
+        width="180"
+        height="120"
+        rx="8"
+        className="fill-ds-surface stroke-ds-border"
+      />
+      <line x1="90" y1="70" x2="270" y2="70" className="stroke-ds-border" strokeWidth="1" />
+      <circle cx="104" cy="60" r="3.5" className="fill-ds-error/70" />
+      <circle cx="116" cy="60" r="3.5" className="fill-ds-warning/70" />
+      <circle cx="128" cy="60" r="3.5" className="fill-ds-success/70" />
+      <rect x="106" y="86" width="100" height="10" rx="4" className="fill-ds-muted/40" />
+      <rect x="106" y="104" width="70" height="10" rx="4" className="fill-ds-muted/40" />
+      <rect x="106" y="130" width="60" height="20" rx="5" className="fill-ds-accent" />
+      <g className="animate-float">
+        <circle
+          cx="290"
+          cy="110"
+          r="24"
+          className="fill-ds-purple/15 stroke-ds-purple"
+          strokeWidth="2"
+        />
+        <circle cx="290" cy="110" r="8" className="fill-ds-purple animate-pulse2" />
+        <path d="M275 95a24 24 0 0130 0" className="stroke-ds-purple" strokeWidth="2" fill="none" />
+      </g>
+    </g>
+  )
+}
+
+// ── Calendar — an auto-generated recap next to a highlighted meeting ────────
+function CalendarScene() {
+  return (
+    <g>
+      <rect
+        x="110"
+        y="60"
+        width="140"
+        height="110"
+        rx="8"
+        className="fill-ds-surface stroke-ds-border"
+      />
+      <rect x="110" y="60" width="140" height="24" rx="8" className="fill-ds-accent/70" />
+      <line
+        x1="135"
+        y1="52"
+        x2="135"
+        y2="70"
+        className="stroke-ds-muted"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <line
+        x1="225"
+        y1="52"
+        x2="225"
+        y2="70"
+        className="stroke-ds-muted"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      {Array.from({ length: 12 }).map((_, i) => (
+        <rect
+          key={i}
+          x={122 + (i % 4) * 30}
+          y={98 + Math.floor(i / 4) * 22}
+          width="18"
+          height="14"
+          rx="3"
+          className={i === 5 ? 'fill-ds-purple' : 'fill-ds-muted/20'}
+        />
+      ))}
+      <g className="animate-float">
+        <rect
+          x="255"
+          y="120"
+          width="60"
+          height="46"
+          rx="6"
+          className="fill-ds-surface stroke-ds-border"
+        />
+        <path
+          d="M263 132l6 6 10-12"
+          className="stroke-ds-success"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+        <line x1="283" y1="134" x2="305" y2="134" className="stroke-ds-muted/50" strokeWidth="2" />
+        <path
+          d="M263 148l6 6 10-12"
+          className="stroke-ds-success"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+        <line x1="283" y1="150" x2="300" y2="150" className="stroke-ds-muted/50" strokeWidth="2" />
+      </g>
+    </g>
+  )
+}
+
+// ── Test shield — code, verified ─────────────────────────────────────────────
+function TestShieldScene() {
+  return (
+    <g>
+      <text
+        x="105"
+        y="132"
+        className="fill-ds-accent"
+        fontFamily="var(--font-mono)"
+        fontSize="42"
+        fontWeight="700"
+      >
+        {'</>'}
+      </text>
+      <g className="animate-float">
+        <path
+          d="M270 60c-14 0-26 6-26 6v28c0 22 14 36 26 42 12-6 26-20 26-42V66s-12-6-26-6z"
+          className="fill-ds-success/15 stroke-ds-success"
+          strokeWidth="2.5"
+        />
+        <path
+          d="M258 96l8 8 16-18"
+          className="stroke-ds-success"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      </g>
+      <circle cx="150" cy="160" r="5" className="fill-ds-muted/40 animate-pulse2" />
+      <circle
+        cx="220"
+        cy="165"
+        r="4"
+        className="fill-ds-muted/40 animate-pulse2"
+        style={{ animationDelay: '300ms' }}
+      />
+    </g>
+  )
+}
+
+// ── Mainstream — AI spreading across photo, video, and finance apps ────────
+function MainstreamScene() {
+  return (
+    <g>
+      <rect
+        x="100"
+        y="90"
+        width="56"
+        height="44"
+        rx="8"
+        className="fill-ds-surface stroke-ds-border"
+      />
+      <circle cx="128" cy="112" r="12" className="fill-ds-accent/70" />
+      <rect
+        x="118"
+        y="84"
+        width="20"
+        height="10"
+        rx="3"
+        className="fill-ds-surface stroke-ds-border"
+      />
+      <g className="animate-float">
+        <rect
+          x="172"
+          y="90"
+          width="48"
+          height="56"
+          rx="8"
+          className="fill-ds-surface stroke-ds-border"
+        />
+        <path d="M188 100l24 18-24 18z" className="fill-ds-purple" />
+      </g>
+      <g className="animate-float" style={{ animationDelay: '200ms' }}>
+        <circle
+          cx="270"
+          cy="118"
+          r="26"
+          className="fill-ds-warning/20 stroke-ds-warning"
+          strokeWidth="2"
+        />
+        <text
+          x="261"
+          y="126"
+          className="fill-ds-warning"
+          fontFamily="var(--font-mono)"
+          fontSize="18"
+          fontWeight="700"
+        >
+          $
+        </text>
+      </g>
+    </g>
+  )
+}
+
+// ── Agent router — a route tree navigated by an agent cursor ────────────────
+function AgentRouterScene() {
+  return (
+    <g>
+      <circle cx="140" cy="70" r="9" className="fill-ds-accent" />
+      <line x1="140" y1="79" x2="140" y2="105" className="stroke-ds-border" strokeWidth="2" />
+      <circle cx="140" cy="114" r="9" className="fill-ds-accent/80" />
+      <line x1="140" y1="123" x2="110" y2="150" className="stroke-ds-border" strokeWidth="2" />
+      <line x1="140" y1="123" x2="170" y2="150" className="stroke-ds-border" strokeWidth="2" />
+      <circle cx="105" cy="158" r="8" className="fill-ds-purple/70" />
+      <circle cx="175" cy="158" r="8" className="fill-ds-purple/70" />
+      <g className="animate-float">
+        <circle
+          cx="255"
+          cy="110"
+          r="22"
+          className="fill-ds-purple/15 stroke-ds-purple"
+          strokeWidth="2"
+        />
+        <path
+          d="M247 100l16 8-7 3-2 9-7-20z"
+          className="fill-ds-purple stroke-ds-purple"
+          strokeLinejoin="round"
+        />
+      </g>
     </g>
   )
 }

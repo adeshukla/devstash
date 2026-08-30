@@ -1,0 +1,49 @@
+---
+title: 'Why I Still Write Tests for AI-Generated Code'
+slug: 'why-i-still-test-ai-generated-code'
+description: 'AI writes implementations faster, but that raises the value of tests instead of lowering it. Here is the testing discipline I apply to AI-generated changes.'
+author: 'Adesh Shukla'
+createdAt: '2026-08-31'
+updatedAt: '2026-08-31'
+category: 'ai-workflows'
+tags: ['testing', 'ai-workflows', 'code-quality', 'playwright']
+readingTime: 6
+canonical: 'https://devstash.me/blog/why-i-still-test-ai-generated-code'
+draft: false
+featured: false
+---
+
+There is a version of the "AI writes code now" argument that concludes tests matter less — if the assistant is good enough to write correct code, why spend time verifying it. I have found the opposite to be true in practice, for a reason that is more about how AI-generated code fails than about AI capability: it fails in a way that is specifically harder for a human reviewer to catch by reading alone, which makes automated verification more valuable, not less.
+
+## Why AI-generated bugs are harder to spot by eye
+
+A human writing code slowly tends to make mistakes that look like mistakes — a typo, an obviously incomplete branch, a `TODO` left in place. An AI assistant generating a full, syntactically clean implementation in one pass tends to produce code that is internally consistent and confident-looking even when it is wrong, because the model is not distinguishing "I am sure this is correct" from "this is the most statistically likely continuation" — both produce the same fluent output. There is no visual tell for "this branch was generated with less certainty than that one."
+
+This is the same trust gap I described in [the vibe coding post](/blog/vibe-coding-trust-gap), specifically applied to why reading a diff is not sufficient review on its own: a diff that reads cleanly and a diff that is correct are not the same claim, and AI-generated diffs tend to read cleanly regardless of which one they actually are.
+
+<Callout type="info" title="The core argument, stated plainly">
+  A test does not care how confident the code looked while it was being written. It checks actual
+  behavior against an expected value, which is exactly the kind of check that a fluent, plausible-
+  looking implementation cannot fake its way past.
+</Callout>
+
+## What I actually test, and how
+
+- **Boundary conditions the prompt never mentioned.** If I asked for "a function that formats a date," I write a test for the empty string, an invalid date, a date at a timezone boundary — the inputs I did not explicitly describe when I asked for the implementation, because those are exactly the inputs the assistant had no signal to specifically handle.
+- **The specific bug class from this project's own history.** DevStash has real prior incidents — a canonical URL double-prefix bug, a duplicate JSON-LD schema being emitted, a metadata field named `path` when the actual type used `canonical`. When an assistant touches code in those areas again, I specifically re-check for that exact class of regression, because "the model made this mistake once" is a real prior, not paranoia.
+- **End-to-end checks for anything user-facing**, via the Playwright suite already wired into `pnpm qa` — responsive layout across breakpoints, and the static security audit. These catch a category of bug that unit tests structurally cannot: the assistant's code being individually correct but composing badly with an existing component in a way that only shows up when rendered together.
+
+<Callout type="tip" title="A habit that catches more than it should">
+  I ask the assistant itself to write the test cases for edge conditions *before* accepting its
+  implementation, in a separate step. A model reasoning about "what could break this" as an explicit
+  task surfaces cases it did not spontaneously handle while writing the original implementation —
+  the two tasks draw on different parts of its reasoning even though it is the same underlying model.
+</Callout>
+
+## This is not about distrust of the tool specifically
+
+I would apply the same discipline to code written by any contributor I had not personally watched write it line by line, AI or human. What changed is the volume: AI-assisted development means more code moves through review per hour than before, so the fixed cost of a solid test suite gets amortized over more changes, and the fixed cost of *not* having one compounds faster too. Faster code generation without a proportional increase in verification is the actual risk — not the code generation itself.
+
+[TODO: add a concrete example — a specific bug an AI assistant introduced on this site that a test or the QA suite actually caught before it shipped, since a real incident is more convincing than the general argument]
+
+The honest summary: tests were never really about catching mistakes a careful human reviewer would obviously spot. They were always about catching the ones that look fine on a read-through. AI-generated code raised the rate of exactly that failure mode, which is precisely why the tests matter more now, not less.

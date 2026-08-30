@@ -1,0 +1,53 @@
+---
+title: 'Claude Code, Cursor, Copilot: Architecture, Not Autocomplete'
+slug: 'ai-coding-assistants-architecture-not-autocomplete'
+description: 'AI coding assistants stopped being autocomplete once they could read a codebase and plan multi-file changes. Here is what actually changed in how I work.'
+author: 'Adesh Shukla'
+createdAt: '2026-08-31'
+updatedAt: '2026-08-31'
+category: 'ai-workflows'
+tags: ['ai-assistants', 'claude-code', 'developer-tools', 'ai-workflows']
+readingTime: 7
+canonical: 'https://devstash.me/blog/ai-coding-assistants-architecture-not-autocomplete'
+draft: false
+featured: false
+---
+
+The framing "AI coding assistant" still gets described, in a lot of writing, as a fancier version of autocomplete — a tool that finishes your current line or suggests the next few. That framing was accurate for GitHub Copilot's original 2021 release. It stopped being accurate once these tools could read an entire codebase, hold a multi-file plan in context, run commands, and check their own work against the actual result. That is a difference in kind, not degree, and it changes what the tool is actually useful for.
+
+## Autocomplete versus an agent loop
+
+Line-completion autocomplete has one job: predict what you were about to type. It has no model of your intent beyond the current file, no way to verify its own suggestion, and no way to act on anything beyond the cursor position.
+
+An agentic coding tool — this is the category Claude Code, current Cursor agent mode, and Copilot's workspace/agent features all sit in now — does something structurally different: it reads relevant files across the project, forms a plan that might touch several of them, makes the edits, runs a build or test command, reads the result, and iterates if something failed. The loop is read → plan → act → verify → repeat, not predict-the-next-token.
+
+<Callout type="info" title="Why this distinction matters for how you use it">
+  If you are still treating these tools as "better autocomplete," you are prompting them for
+  single-line completions and missing the part where they can plan and verify a change across ten
+  files. The tools that matter now are the ones you can hand a goal, not a completion.
+</Callout>
+
+## What "architecture, not autocomplete" looks like in practice
+
+The tasks that actually benefit from this shift are the ones autocomplete could never touch:
+
+- **Cross-file refactors** — renaming a concept that appears in a type definition, three components, and a test file, where the tool needs to understand what "the same concept" means across files with different local names.
+- **"Make the build pass"** as a goal rather than a single fix — the tool can run `tsc`, read the actual error, form a hypothesis, edit, and re-run, closing the loop itself instead of you pasting the error back in each time.
+- **Planning before acting** — a genuinely agentic tool can lay out a multi-step plan and let you approve or redirect it before any file changes, which is a fundamentally different interaction than accepting or rejecting a single inline suggestion.
+
+## What has not changed
+
+The tool is still generating output from patterns in its training and the context you give it — it does not have your accumulated understanding of *why* the codebase is shaped the way it is, and it will confidently produce a plausible-looking plan for a change that is subtly wrong for reasons only visible from project history it was never given. This is the same trust gap [I wrote about with vibe coding generally](/blog/vibe-coding-trust-gap), just operating at the scale of a multi-file plan instead of a single function.
+
+<Callout type="warning" title="The failure mode specific to agentic tools">
+  A tool that can verify its own work against a build or test suite will happily report success the
+  moment the build passes — but a build passing is not the same as the change being architecturally
+  correct. It only proves the code is syntactically and type-valid, which is a much lower bar than
+  "this was the right way to solve the problem."
+</Callout>
+
+## How this actually changed my day-to-day
+
+[TODO: describe your specific before/after — which parts of your workflow moved from manual multi-file editing to agent-driven, what you still do by hand, and any concrete example from a real DevStash change where this made a measurable difference]
+
+The honest summary, independent of specifics: the unit of work I hand off went from "finish this line" to "accomplish this goal, checking your own progress as you go." That is a real capability jump, and it is also exactly why the review discipline from [what I actually check before shipping AI code](/blog/why-i-still-test-ai-generated-code) matters more now, not less — a bigger unit of unreviewed work per interaction means a bigger blast radius per mistake.
