@@ -40,6 +40,18 @@ function highlight(text: string) {
   })
 }
 
+/** Client-side only — builds a Blob URL and triggers a download. Nothing is
+ * ever sent to or stored on the server for this. */
+function downloadHtml(html: string, slug: string) {
+  const blob = new Blob([html], { type: 'text/html' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${slug || 'landing-page'}.html`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 /** Same clipboard pattern as CssCodeBlock's copy button — this one copies the
  * raw pipeline text (scaffold / copy-edited output) rather than a code block. */
 function CopyTextButton({ text, label }: { text: string; label: string }) {
@@ -90,7 +102,7 @@ function MetricCard({
 }
 
 export function AiPipelineResults({ result }: { result: PipelineResponse }) {
-  const { draft, humanized, frontmatter, metrics } = result
+  const { draft, humanized, frontmatter, htmlPage, metrics } = result
 
   return (
     <div className="mt-8 flex flex-col gap-6">
@@ -116,6 +128,14 @@ export function AiPipelineResults({ result }: { result: PipelineResponse }) {
             ms={metrics.frontmatter.latencyMs}
             provider={metrics.frontmatter.provider}
           />
+          {metrics.htmlPage && (
+            <MetricCard
+              label="HTML page"
+              tokens={metrics.htmlPage.promptTokens + metrics.htmlPage.completionTokens}
+              ms={metrics.htmlPage.latencyMs}
+              provider={metrics.htmlPage.provider}
+            />
+          )}
         </div>
         <p className="text-ds-muted mt-3 text-xs">
           Total latency: {metrics.totalLatencyMs}ms · AI-tell phrases:{' '}
@@ -168,6 +188,41 @@ export function AiPipelineResults({ result }: { result: PipelineResponse }) {
         <h3 className="text-ds-text mb-2 text-sm font-semibold">SEO frontmatter</h3>
         <CssCodeBlock label="JSON" code={JSON.stringify(frontmatter, null, 2)} />
       </div>
+
+      {/* Standalone HTML landing page — only present when the consent
+          checkbox was checked. Sandboxed preview (no allow-same-origin, so
+          the generated page's script can't touch this site's storage/cookies),
+          plus a client-only download — nothing here ever touches the server. */}
+      {htmlPage && (
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-ds-text text-sm font-semibold">Generated HTML page</h3>
+            <div className="flex items-center gap-4">
+              <CopyTextButton text={htmlPage} label="Copy generated HTML" />
+              <button
+                type="button"
+                onClick={() => downloadHtml(htmlPage, frontmatter.slug)}
+                className="text-ds-muted hover:text-ds-accent font-mono text-xs transition-colors"
+              >
+                Download .html
+              </button>
+            </div>
+          </div>
+          <div className="border-ds-border overflow-hidden rounded-lg border">
+            <iframe
+              srcDoc={htmlPage}
+              title="Generated HTML page preview"
+              sandbox="allow-scripts"
+              className="h-[480px] w-full bg-white"
+            />
+          </div>
+          <p className="text-ds-muted mt-2 text-xs leading-relaxed">
+            A scaffold to review and finish — replace every{' '}
+            <span className="text-ds-accent font-mono">[Image placeholder]</span> with a real image
+            before shipping it anywhere.
+          </p>
+        </div>
+      )}
     </div>
   )
 }

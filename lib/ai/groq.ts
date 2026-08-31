@@ -10,7 +10,9 @@ interface ProviderConfig {
 const GROQ: ProviderConfig = {
   name: 'groq',
   url: 'https://api.groq.com/openai/v1/chat/completions',
-  model: 'llama-3.1-8b-instant',
+  // llama-3.1-8b-instant was deprecated by Groq on 2026-06-17; this is their
+  // own documented migration target (console.groq.com/docs/deprecations).
+  model: 'openai/gpt-oss-20b',
   apiKeyEnv: 'GROQ_API_KEY',
 }
 

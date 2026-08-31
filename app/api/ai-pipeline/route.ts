@@ -29,6 +29,7 @@ const PipelineRequestSchema = z.object({
     .min(150, 'Minimum 150 words.')
     .max(1200, 'Maximum 1200 words for this demo.'),
   userApiKey: z.string().trim().min(20).max(200).optional(),
+  generateHtmlPage: z.boolean().optional().default(false),
 })
 
 const FrontmatterFromLlmSchema = z.object({
@@ -103,6 +104,16 @@ function fallbackFrontmatter(
   }
 }
 
+// Models asked for "output only HTML" still sometimes wrap it in a ```html
+// fence despite instructions — same defensive-parse posture as the JSON step.
+function stripCodeFence(raw: string): string {
+  return raw
+    .trim()
+    .replace(/^```(?:html)?\s*/i, '')
+    .replace(/```\s*$/i, '')
+    .trim()
+}
+
 // ─── POST handler ───────────────────────────────────────────────────────────
 
 export async function POST(request: Request) {
@@ -121,7 +132,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const { topic, keywords, tone, targetLength, userApiKey } = parsed.data
+  const { topic, keywords, tone, targetLength, userApiKey, generateHtmlPage } = parsed.data
   const counter = await readRunCounter()
 
   if (!userApiKey && counter.count >= DAILY_CAP) {
@@ -253,6 +264,45 @@ ${humanizeResult.content}
       frontmatter = fallbackFrontmatter(topic, humanizeResult.content, keywords)
     }
 
+    // ── Step 4 (opt-in only): standalone HTML landing page ──
+    // Gated behind generateHtmlPage, which the UI only sets when the visitor
+    // has explicitly checked a consent checkbox — this step is a heavier,
+    // separate LLM call with its own token cost, not something that runs by
+    // default just because a topic was submitted.
+    let htmlPage: string | null = null
+    let htmlPageResult: Awaited<ReturnType<typeof runStep>> | null = null
+    if (generateHtmlPage) {
+      htmlPageResult = await runStep([
+        {
+          role: 'system',
+          content:
+            'You are a front-end developer producing a single self-contained HTML document. Output ONLY the raw HTML — no markdown fences, no commentary before or after.',
+        },
+        {
+          role: 'user',
+          content: `Build a single-page HTML landing page for the blog post below. This is a scaffold to be reviewed and finished by a human, not a finished production page.
+
+Post title: ${frontmatter.title}
+Post description: ${frontmatter.description}
+Content to summarize into landing-page sections (hero, a few feature/highlight blocks, closing CTA):
+"""
+${humanizeResult.content}
+"""
+
+Hard requirements:
+- One complete, valid HTML5 document: <!doctype html>, <html>, <head> with <meta charset> and <meta name="viewport" content="width=device-width, initial-scale=1">, <body>.
+- ALL CSS inline in a single <style> tag in <head>. ALL JavaScript inline in a single <script> tag before </body>. No external stylesheets, fonts, CDNs, or script tags with a src attribute — the page must render with zero network requests.
+- Mobile-first responsive layout that stays usable and unbroken all the way down to 300px viewport width — use relative units (%, rem, clamp()), flexbox/grid, and min-width:0 on flex/grid children so text can't force overflow. Never assume a minimum viewport wider than 300px.
+- Decorative gradient "blobs": a few large, soft, blurred radial-gradient circles (position:absolute, filter:blur(...), low opacity, behind content via z-index) in an accent/purple palette (blues and purples), NOT photographic images.
+- Every place a real photo or screenshot would normally go, use a placeholder block instead: a bordered/dashed div with a neutral background and centered label text literally reading "[Image placeholder]" — never a fake external image URL (e.g. never placeholder.com, unsplash, or any src pointing off-page) and never invented alt text describing a specific photo that doesn't exist.
+- At least one small piece of real interactivity in the inline <script> (e.g. a mobile nav toggle, a scroll-triggered reveal via IntersectionObserver, or a simple accordion) — vanilla JS only, no frameworks.
+- Use only the real title/description/content given above. Do not invent testimonials, pricing, company names, statistics, or any fact not present in the source content — where the page would normally need one, use a "[Image placeholder]"-style bracketed placeholder in the copy instead.
+- Semantic HTML (header/main/section/footer, one h1), and every interactive element keyboard-reachable.`,
+        },
+      ])
+      htmlPage = stripCodeFence(htmlPageResult.content)
+    }
+
     const metrics: PipelineMetrics = {
       draft: {
         promptTokens: draftResult.promptTokens,
@@ -272,8 +322,19 @@ ${humanizeResult.content}
         latencyMs: frontmatterResult.latencyMs,
         provider: frontmatterResult.provider,
       },
+      htmlPage: htmlPageResult
+        ? {
+            promptTokens: htmlPageResult.promptTokens,
+            completionTokens: htmlPageResult.completionTokens,
+            latencyMs: htmlPageResult.latencyMs,
+            provider: htmlPageResult.provider,
+          }
+        : null,
       totalLatencyMs:
-        draftResult.latencyMs + humanizeResult.latencyMs + frontmatterResult.latencyMs,
+        draftResult.latencyMs +
+        humanizeResult.latencyMs +
+        frontmatterResult.latencyMs +
+        (htmlPageResult?.latencyMs ?? 0),
       aiTellEval: {
         beforeCount: countAiTellPhrases(draftResult.content),
         afterCount: countAiTellPhrases(humanizeResult.content),
@@ -292,6 +353,7 @@ ${humanizeResult.content}
       draft: draftResult.content,
       humanized: humanizeResult.content,
       frontmatter,
+      htmlPage,
       metrics,
       remainingFreeRuns,
       usedByok: Boolean(userApiKey),

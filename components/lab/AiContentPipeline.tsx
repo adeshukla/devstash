@@ -34,6 +34,7 @@ export function AiContentPipeline() {
   const [tone, setTone] = useState<PipelineTone>('technical')
   const [targetLength, setTargetLength] = useState(600)
   const [topicError, setTopicError] = useState<string | undefined>()
+  const [generateHtmlPage, setGenerateHtmlPage] = useState(false)
 
   const [capReached, setCapReached] = useState(false)
   const [byokKey, setByokKey] = useState('')
@@ -92,6 +93,7 @@ export function AiContentPipeline() {
           tone,
           targetLength,
           userApiKey: capReached ? byokKey.trim() : undefined,
+          generateHtmlPage,
         }),
       })
 
@@ -113,6 +115,7 @@ export function AiContentPipeline() {
         tone,
         usedByok: String(pipelineResult.usedByok),
         remainingFreeRuns: pipelineResult.remainingFreeRuns,
+        generatedHtml: String(generateHtmlPage),
       })
     } catch (err) {
       setFormState({
@@ -196,6 +199,27 @@ export function AiContentPipeline() {
             </select>
           </div>
         </div>
+
+        <label className="border-ds-border bg-ds-surface2 has-[:checked]:border-ds-accent/50 flex items-start gap-3 rounded-lg border p-4">
+          <input
+            type="checkbox"
+            checked={generateHtmlPage}
+            onChange={(e) => setGenerateHtmlPage(e.target.checked)}
+            disabled={isLoading}
+            className="border-ds-border text-ds-accent mt-0.5 h-4 w-4 shrink-0 rounded"
+          />
+          <span>
+            <span className="text-ds-text block text-sm font-medium">
+              Also generate a standalone HTML landing page
+            </span>
+            <span className="text-ds-muted mt-0.5 block text-xs leading-relaxed">
+              Runs a 4th LLM call (extra tokens + latency) to turn this content into a
+              self-contained page — gradient blobs, image placeholders, responsive down to 300px.
+              It&apos;s a scaffold to review and finish, same as the rest of this pipeline&apos;s
+              output, not a production-ready page.
+            </span>
+          </span>
+        </label>
 
         {capReached && (
           <div className="border-ds-accent/30 bg-ds-accent/10 flex flex-col gap-3 rounded-lg border p-4">

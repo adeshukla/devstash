@@ -11,6 +11,11 @@ export interface PipelineRequest {
   tone: PipelineTone
   targetLength: number
   userApiKey?: string
+  // Explicit opt-in (a checkbox in the UI, unchecked by default) for a 4th
+  // LLM call that generates a standalone HTML landing page from the same
+  // content. Off by default because it's an extra step with its own token
+  // cost and latency, not because it's unsafe.
+  generateHtmlPage?: boolean
 }
 
 export interface StepMetrics {
@@ -24,6 +29,8 @@ export interface PipelineMetrics {
   draft: StepMetrics
   humanize: StepMetrics
   frontmatter: StepMetrics
+  // null unless generateHtmlPage was requested on this run.
+  htmlPage: StepMetrics | null
   totalLatencyMs: number
   aiTellEval: {
     beforeCount: number
@@ -51,6 +58,10 @@ export interface PipelineResponse {
   draft: string
   humanized: string
   frontmatter: DemoFrontmatter
+  // Standalone HTML document text, or null if generateHtmlPage wasn't checked
+  // for this run. Never persisted server-side — same "nothing saved" contract
+  // as the rest of the pipeline.
+  htmlPage: string | null
   metrics: PipelineMetrics
   remainingFreeRuns: number
   usedByok: boolean
