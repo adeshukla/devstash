@@ -7,7 +7,7 @@ createdAt: '2026-08-31'
 updatedAt: '2026-08-31'
 category: 'frontend'
 tags: ['nextjs', 'app-router', 'ai-workflows', 'frontend']
-readingTime: 6
+readingTime: 4
 canonical: 'https://devstash.me/blog/nextjs-app-router-agent-driven-dev'
 draft: false
 featured: false
@@ -21,7 +21,7 @@ An AI coding agent working on a task typically has to rediscover project structu
 
 - **The route is the folder path.** `app/blog/[slug]/page.tsx` tells an agent exactly where a dynamic blog route lives without needing to trace through a separate routing configuration file. On DevStash specifically, this is enforced further by [Section 6 of this project's own instructions](https://devstash.me/about) — file structure is fixed, and an agent that reads that constraint once does not need to re-derive it from exploration each time.
 - **Colocation reduces cross-file guessing.** `layout.tsx`, `page.tsx`, and route-specific components living in the same folder means an agent editing a route rarely has to jump across the codebase to find related pieces — the blast radius of "what else might this touch" is smaller and more visible from the folder alone.
-- **Server Components as the default** removes an entire class of ambiguity about where a piece of logic is allowed to run. An agent generating a new page does not have to infer client-vs-server boundaries from context; the framework's default answer is correct unless explicitly overridden with `'use client'`, which is itself a visible, greppable marker of the exception.
+- **Server Components as the default** — [confirmed in Next.js's own documentation](https://nextjs.org/docs/app/getting-started/server-and-client-components) — removes an entire class of ambiguity about where a piece of logic is allowed to run. An agent generating a new page does not have to infer client-vs-server boundaries from context; the framework's default answer is correct unless explicitly overridden with `'use client'`, which is itself a visible, greppable marker of the exception.
 
 <Callout type="info" title="This was already true for human contributors">
   None of this is specific to AI. A new human developer joining a well-conventioned App Router

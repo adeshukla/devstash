@@ -7,21 +7,21 @@ createdAt: '2026-08-31'
 updatedAt: '2026-08-31'
 category: 'ai-workflows'
 tags: ['lighthouse', 'seo', 'ai-agents', 'llms-txt']
-readingTime: 6
+readingTime: 4
 canonical: 'https://devstash.me/blog/agentic-browsing-lighthouse'
 draft: false
 featured: false
 ---
 
-Lighthouse added an "Agentic Browsing" category alongside the familiar Performance, Accessibility, SEO, and Best Practices scores. That is a genuinely new kind of audience for a website to optimize for: not a human with a mouse, and not strictly a search-engine crawler, but an AI agent that navigates a page, reads its structure, and acts on what it finds — clicking, filling forms, extracting data — on behalf of a user who may never look at the raw page itself.
+Lighthouse 13.3 (May 2026) added an "Agentic Browsing" category alongside the familiar Performance, Accessibility, SEO, and Best Practices scores — see the [official scoring reference](https://developer.chrome.com/docs/lighthouse/agentic-browsing/scoring) from the Chrome DevTools team. That is a genuinely new kind of audience for a website to optimize for: not a human with a mouse, and not strictly a search-engine crawler, but an AI agent that navigates a page, reads its structure, and acts on what it finds — clicking, filling forms, extracting data — on behalf of a user who may never look at the raw page itself.
 
 ## What the category actually checks
 
-As of the version I tested against, Agentic Browsing runs three checks, and they are narrower and more concrete than the category name suggests:
+Agentic Browsing runs three checks, and they are narrower and more concrete than the category name suggests:
 
-1. **Accessibility tree well-formedness** — can an agent build a reliable structural map of the page from ARIA roles, labels, and semantic HTML, without ambiguity about what an element is or does. This is the same underlying tree screen readers use, which is not a coincidence — an agent navigating programmatically and a screen reader navigating for a blind user are solving a similar problem.
+1. **Accessibility tree well-formedness** — every interactive element needs a programmatic name and label, roles and relationships in the tree have to be valid, and nothing can be interactive while hidden from the tree. This is the same underlying tree screen readers use, which is not a coincidence — an agent navigating programmatically and a screen reader navigating for a blind user are solving a similar problem.
 2. **Cumulative Layout Shift stability** — a page that keeps shifting elements around is unreliable for an agent that clicked based on a coordinate or a snapshot taken a moment earlier. A human visually adjusts to shifted content without thinking about it; an agent's action can miss entirely if the target moved.
-3. **`llms.txt` validity** — a plain-text file at the site root describing the site's purpose and structure for AI systems. The check specifically verifies it contains real Markdown-formatted links (`[label](url)`), not bare URLs — bare URLs are harder for a language model to parse confidently as "this text names that destination."
+3. **`llms.txt` validity** — a plain-text file at the site root describing the site's purpose and structure for AI systems. [Search Engine Land's coverage of the check](https://searchengineland.com/google-llms-txt-chrome-lighthouse-478246) confirms it specifically verifies the file contains real Markdown-formatted links (`[label](url)`), not bare URLs — bare URLs are harder for a language model to parse confidently as "this text names that destination."
 
 <Callout type="info" title="Why the accessibility overlap is not a coincidence">
   Every one of these checks was already valuable for a completely different audience before agents

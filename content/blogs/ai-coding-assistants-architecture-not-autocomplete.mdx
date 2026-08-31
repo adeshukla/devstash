@@ -7,7 +7,7 @@ createdAt: '2026-08-31'
 updatedAt: '2026-08-31'
 category: 'ai-workflows'
 tags: ['ai-assistants', 'claude-code', 'developer-tools', 'ai-workflows']
-readingTime: 7
+readingTime: 4
 canonical: 'https://devstash.me/blog/ai-coding-assistants-architecture-not-autocomplete'
 draft: false
 featured: false
@@ -19,7 +19,7 @@ The framing "AI coding assistant" still gets described, in a lot of writing, as 
 
 Line-completion autocomplete has one job: predict what you were about to type. It has no model of your intent beyond the current file, no way to verify its own suggestion, and no way to act on anything beyond the cursor position.
 
-An agentic coding tool — this is the category Claude Code, current Cursor agent mode, and Copilot's workspace/agent features all sit in now — does something structurally different: it reads relevant files across the project, forms a plan that might touch several of them, makes the edits, runs a build or test command, reads the result, and iterates if something failed. The loop is read → plan → act → verify → repeat, not predict-the-next-token.
+An agentic coding tool — this is the category Claude Code, Cursor's Agent mode, and [GitHub Copilot's agent mode](https://docs.github.com/en/copilot) all sit in now — does something structurally different: it reads relevant files across the project, forms a plan that might touch several of them, makes the edits, runs a build or test command, reads the result, and iterates if something failed. The loop is read → plan → act → verify → repeat, not predict-the-next-token.
 
 <Callout type="info" title="Why this distinction matters for how you use it">
   If you are still treating these tools as "better autocomplete," you are prompting them for

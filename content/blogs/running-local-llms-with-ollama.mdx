@@ -7,7 +7,7 @@ createdAt: '2026-08-31'
 updatedAt: '2026-08-31'
 category: 'ai-workflows'
 tags: ['ollama', 'local-llm', 'ai-workflows', 'privacy']
-readingTime: 6
+readingTime: 4
 canonical: 'https://devstash.me/blog/running-local-llms-with-ollama'
 draft: false
 featured: false
@@ -17,7 +17,7 @@ Every automation I have written about on this site — the n8n workflows, the AI
 
 ## What Ollama actually is
 
-Ollama packages open-weight models (Llama, Mistral, Gemma, Qwen, and others) into a single local binary with a simple CLI and a local HTTP API that mirrors the shape of a hosted API. `ollama run llama3.1` pulls the model and drops you into a chat prompt; `ollama serve` exposes it as an endpoint your own code can call at `localhost:11434`, the same way you would call Groq or OpenAI, just pointed at your own machine instead of someone else's.
+Ollama packages open-weight models (Llama, Mistral, Gemma, Qwen, and others) into a single local binary with a simple CLI and a local HTTP API that mirrors the shape of a hosted API. `ollama run llama3.1` pulls the model and drops you into a chat prompt; `ollama serve` exposes it as an endpoint your own code can call at `localhost:11434`, the same way you would call Groq or OpenAI, just pointed at your own machine instead of someone else's — the full request/response shape is in [Ollama's official API docs](https://docs.ollama.com/api/introduction).
 
 <Callout type="info" title="What you are trading away">
   A locally-runnable model, even a good one, is trading raw capability for the ability to run on
