@@ -10,6 +10,7 @@
     "lint:content": "node scripts/seo/check-metadata.mjs",
     "check:project-mdx": "node scripts/seo/check-project-mdx.mjs",
     "check:links": "node scripts/automation/check-links.mjs",
+    "export:devto": "node scripts/automation/generate-devto-export.mjs",
     "check:env-example": "node scripts/security/check-env-example.mjs",
     "check:images": "node scripts/automation/optimize-images.mjs --check",
     "optimize:images": "node scripts/automation/optimize-images.mjs",

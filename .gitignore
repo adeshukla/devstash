@@ -50,6 +50,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# generated per-post exports for manual cross-posting (pnpm export:devto) —
+# never the canonical copy, content/blogs/*.mdx always is
+/devto-export/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
