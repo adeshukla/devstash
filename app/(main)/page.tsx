@@ -12,10 +12,18 @@ import { Icon } from '@/components/icons/Icon'
 import { getAllProjects, getFeaturedProjects } from '@/lib/markdown/projects'
 import { getAllPosts, getFeaturedPosts } from '@/lib/markdown/blog'
 
-// Home metadata — canonical defaults to the site root (no trailing slash).
+// Home metadata — canonical is deliberately omitted so it defaults to the site
+// root with no trailing slash.
+//
+// The title leads with the person, not the brand: "DevStash" collides with
+// devstash.dev and an unrelated GitHub project of the same name, while
+// "Adesh Shukla — Frontend Developer" is the query a recruiter actually types.
+// The old title ("DevStash — Modern Developer Ecosystem") targeted a phrase
+// with no real search demand and rendered the brand name twice.
 export const metadata: Metadata = buildMetadata({
+  title: 'Adesh Shukla — Frontend Developer, React & Next.js',
   description:
-    'The developer ecosystem of Adesh Shukla — frontend engineering, automation, AI workflows, and developer resources. Projects, writing, and tools in one place.',
+    'Frontend developer with 6+ years building React and Next.js products — fast, accessible, SEO-ready. Based in NCR, open to roles in Noida, Gurugram or remote.',
 })
 
 // ─── Flagship build — the AI Content Pipeline demo (/lab/ai-content-pipeline):

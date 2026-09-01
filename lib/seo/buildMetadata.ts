@@ -69,12 +69,14 @@ export function buildMetadata(options: MetadataOptions = {}): Metadata {
         }
 
   return {
-    // Root layout applies a '%s | DevStash' title template to plain string
-    // titles. We already append the suffix above when `title` is provided,
-    // so use `{ absolute }` to opt out of the template and avoid doubling it.
-    // When no `title` override is given, fullTitle is the bare site title
-    // (no suffix) and should still flow through the template as normal.
-    title: title ? { absolute: fullTitle } : fullTitle,
+    // Root layout applies a '%s | DevStash' title template to plain *string*
+    // titles, so always return `{ absolute }` and opt out of it entirely.
+    // When `title` is given we've already appended the suffix above; when it
+    // isn't, fullTitle is siteConfig.title, which itself contains "DevStash"
+    // — letting that flow through the template rendered the site name twice
+    // ("DevStash — Modern Developer Ecosystem | DevStash") on every page that
+    // called buildMetadata() without a title override, the homepage included.
+    title: { absolute: fullTitle },
     description,
     alternates: {
       canonical: canonicalUrl,
@@ -89,7 +91,11 @@ export function buildMetadata(options: MetadataOptions = {}): Metadata {
       creator: siteConfig.twitterHandle,
     },
     robots: noIndex
-      ? { index: false, follow: false }
+      ? // noindex,FOLLOW — not nofollow. Every page that opts out of the index
+        // here (thin tag archives, fictional-brand lab demos) still links back
+        // into real content, and `nofollow` would strand that link equity and
+        // eventually push Google to stop crawling the page's links at all.
+        { index: false, follow: true }
       : {
           index: true,
           follow: true,

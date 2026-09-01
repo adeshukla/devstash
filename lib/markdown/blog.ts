@@ -129,6 +129,31 @@ export function getAllTags(): { tag: string; count: number }[] {
     .sort((a, b) => b.count - a.count)
 }
 
+// ─── Tag indexability ────────────────────────────────────────────────────────
+//
+// A tag archive holding a single post is a near-duplicate of that post: same
+// title, same description, one card. Indexing it splits relevance between two
+// URLs competing for the same query and pads the index with thin pages. As of
+// this change the majority of tags on the site have exactly one post, so the
+// tag archives were the largest single block of URLs in the sitemap while
+// carrying almost no unique content.
+//
+// Thin tag pages stay live and linked for human navigation — they're just
+// marked noindex,follow and dropped from the sitemap, so link equity still
+// flows through them to the posts.
+
+export const MIN_POSTS_FOR_INDEXABLE_TAG = 2
+
+/** Tags with enough posts for the archive to be worth indexing on its own. */
+export function getIndexableTags(): { tag: string; count: number }[] {
+  return getAllTags().filter(({ count }) => count >= MIN_POSTS_FOR_INDEXABLE_TAG)
+}
+
+/** Whether a single tag archive should be indexable (see above). */
+export function isTagIndexable(tag: string): boolean {
+  return getPostsByTag(tag).length >= MIN_POSTS_FOR_INDEXABLE_TAG
+}
+
 export function getFeaturedPosts(limit = 3): BlogPost[] {
   return getAllPosts()
     .filter((p) => p.featured)

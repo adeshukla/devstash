@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next'
-import { getAllPosts, getAllCategories, getAllTags } from '@/lib/markdown/blog'
+import { getAllPosts, getAllCategories, getIndexableTags } from '@/lib/markdown/blog'
 import { getAllProjects } from '@/lib/markdown/projects'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://devstash.me'
@@ -102,7 +102,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.5,
   }))
 
-  const tagRoutes: MetadataRoute.Sitemap = getAllTags().map(({ tag }) => ({
+  // Only tags with enough posts to be a real archive (see
+  // MIN_POSTS_FOR_INDEXABLE_TAG). A single-post tag page duplicates the post
+  // it links to; those pages stay live and crawlable but are marked
+  // noindex,follow and left out of the sitemap rather than padding it with
+  // thin URLs that compete with the posts themselves.
+  const tagRoutes: MetadataRoute.Sitemap = getIndexableTags().map(({ tag }) => ({
     url: `${BASE_URL}/blog/tag/${tag}`,
     lastModified: new Date(),
     changeFrequency: 'weekly',

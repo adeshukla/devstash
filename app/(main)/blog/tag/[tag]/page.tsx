@@ -8,7 +8,7 @@ import { buildBreadcrumbSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
 import { PageHeaderGlow } from '@/components/ui'
 import { BlogList } from '@/components/blog/BlogList'
-import { getAllPosts, getPostsByTag, getAllTags } from '@/lib/markdown/blog'
+import { getAllPosts, getPostsByTag, getAllTags, isTagIndexable } from '@/lib/markdown/blog'
 
 // ─── Static Params ────────────────────────────────────────────────────────────
 
@@ -28,6 +28,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: `All DevStash blog posts tagged with #${tag}.`,
     canonical: `/blog/tag/${tag}`,
     type: 'website',
+    // A one-post tag archive duplicates the post it links to, so it's kept
+    // live and crawlable for navigation but excluded from the index (and
+    // from the sitemap) — see MIN_POSTS_FOR_INDEXABLE_TAG in lib/markdown/blog.
+    noIndex: !isTagIndexable(tag),
     ogImage: buildOgImageUrl({
       title: `#${tag} — Blog`,
       description: `All DevStash blog posts tagged with #${tag}.`,

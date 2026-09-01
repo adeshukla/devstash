@@ -74,10 +74,16 @@ export function HeroSection() {
 
             {/* Sub-copy */}
             <MountReveal delay={240}>
+              {/* "6+ years" is the strongest recruiter/E-E-A-T signal on the
+                  site and was previously stated only on /about — the page
+                  fewest visitors reach. Same claim, surfaced on the first
+                  screen. */}
               <p className="text-ds-muted max-w-2xl text-base leading-relaxed sm:text-lg">
-                I&apos;m Adesh Shukla — a frontend developer with a designer&apos;s eye. I build
-                with React and Next.js, turn Figma into high-performance, SEO-ready products, and
-                automate the repetitive parts of the workflow.
+                I&apos;m Adesh Shukla — a frontend developer with{' '}
+                <strong className="text-ds-text font-semibold">6+ years</strong> and a
+                designer&apos;s eye. I build with React and Next.js, turn Figma into
+                high-performance, SEO-ready products, and automate the repetitive parts of the
+                workflow.
               </p>
             </MountReveal>
 
