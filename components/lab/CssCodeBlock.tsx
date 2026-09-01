@@ -35,7 +35,16 @@ export function CssCodeBlock({ code, label = 'CSS' }: { code: string; label?: st
           {copied ? 'Copied ✓' : 'Copy'}
         </button>
       </div>
-      <pre className="overflow-x-auto p-3 text-xs leading-relaxed">
+      {/* tabIndex + a role/label: a horizontally scrollable region has to be
+          reachable and operable by keyboard, or its overflowing content is
+          simply unavailable to anyone not using a mouse (axe:
+          scrollable-region-focusable). */}
+      <pre
+        tabIndex={0}
+        role="region"
+        aria-label={label ? `${label} code` : 'Code'}
+        className="focus-visible:ring-ds-accent overflow-x-auto p-3 text-xs leading-relaxed focus-visible:ring-2 focus-visible:outline-none"
+      >
         <code className="text-ds-text font-mono whitespace-pre">{code}</code>
       </pre>
     </div>

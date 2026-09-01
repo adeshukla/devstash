@@ -32,6 +32,16 @@ import {
   type CharacterScene,
   type PersonStyle,
 } from './characterEngine'
+import {
+  LAYOUT_LABELS,
+  BACKGROUND_LABELS,
+  ALL_BACKGROUNDS,
+  SIZE_PRESETS,
+  DEFAULT_SIZE,
+  type LayoutKey,
+  type BackgroundKey,
+  type SizePreset,
+} from './illustrationLayout'
 import type { Theme } from './designTokens'
 import { CssCodeBlock } from './CssCodeBlock'
 
@@ -169,6 +179,10 @@ function GenerateTab() {
   // abstract-only
   const [motifOverride, setMotifOverride] = useState<MotifKey[]>([])
   const [animation, setAnimation] = useState<AnimationKey>('float')
+  const [layout, setLayout] = useState<LayoutKey>('auto')
+  const [backdrop, setBackdrop] = useState<BackgroundKey>('flat')
+  const [size, setSize] = useState<SizePreset>(DEFAULT_SIZE)
+  const [exporting, setExporting] = useState(false)
 
   // shared: which theme's code is copied — set by clicking a preview panel
   const [codeTheme, setCodeTheme] = useState<Theme>('dark')
@@ -180,8 +194,19 @@ function GenerateTab() {
   const [motionOn, setMotionOn] = useState(true)
 
   const composition = useMemo(
-    () => generateComposition({ topic, nonce, density, motifs: motifOverride, palette, animation }),
-    [topic, nonce, density, motifOverride, palette, animation]
+    () =>
+      generateComposition({
+        topic,
+        nonce,
+        density,
+        motifs: motifOverride,
+        palette,
+        animation,
+        layout,
+        backdrop,
+        canvas: { w: size.w, h: size.h },
+      }),
+    [topic, nonce, density, motifOverride, palette, animation, layout, backdrop, size]
   )
   const svgCode = useMemo(
     () => serializeComposition(composition, animation, codeTheme),
@@ -206,12 +231,61 @@ function GenerateTab() {
     [charComposition, motionOn, codeTheme]
   )
 
+  /**
+   * Rasterise the serialized SVG rather than the live DOM: the standalone
+   * string already has literal colors baked per theme, so the PNG matches the
+   * copyable code exactly instead of depending on page CSS variables.
+   */
+  async function downloadPng() {
+    setExporting(true)
+    try {
+      // An SVG loaded as an <img> needs intrinsic dimensions to rasterise —
+      // with only a viewBox, Chrome decodes it to a zero-sized image and the
+      // canvas draw silently produces nothing.
+      const raw = isCharacter ? charSvgCode : svgCode
+      const svg = raw.replace(/^<svg /, `<svg width="${size.w}" height="${size.h}" `)
+      // A data: URL, not a blob: one — the site's CSP is
+      // `img-src 'self' data: https://*.clarity.ms`, so a blob: image is
+      // blocked outright and the rasterise silently produces nothing. Encoding
+      // as data: keeps the export working without widening the policy.
+      const url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+
+      const img = new Image()
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve()
+        img.onerror = () => reject(new Error('svg decode failed'))
+        img.src = url
+      })
+      const canvas = document.createElement('canvas')
+      canvas.width = size.w
+      canvas.height = size.h
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+      ctx.drawImage(img, 0, 0, size.w, size.h)
+      const png = await new Promise<Blob | null>((res) => canvas.toBlob(res, 'image/png'))
+      if (!png) return
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(png)
+      a.download = `illustration-${size.key}-${composition.seed}.png`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(a.href)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   function toggleMotif(m: MotifKey) {
     setMotifOverride((prev) => (prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]))
   }
 
   const usingAuto = motifOverride.length === 0
   const isCharacter = style === 'character'
+  // The preview must follow the selected output size, or a square/OG canvas
+  // renders only the top-left 400x225 of the composition.
+  const previewW = isCharacter ? 400 : size.w
+  const previewH = isCharacter ? 225 : size.h
 
   return (
     <div className="flex flex-col gap-8">
@@ -298,8 +372,12 @@ function GenerateTab() {
             <p className="text-ds-muted flex items-center justify-between px-3 pt-3 font-mono text-[11px] tracking-wide uppercase">
               Dark {codeTheme === 'dark' && <span className="text-ds-accent">● code shown</span>}
             </p>
-            <div className="aspect-video p-3">
-              <svg viewBox="0 0 400 225" className="h-full w-full rounded-lg">
+            <div className="p-3">
+              <svg
+                viewBox={`0 0 ${previewW} ${previewH}`}
+                style={{ aspectRatio: `${previewW} / ${previewH}` }}
+                className="w-full rounded-lg"
+              >
                 {isCharacter
                   ? renderCharacterComposition(charComposition, motionOn)
                   : renderComposition(composition, animation)}
@@ -316,8 +394,12 @@ function GenerateTab() {
             <p className="text-ds-muted flex items-center justify-between px-3 pt-3 font-mono text-[11px] tracking-wide uppercase">
               Light {codeTheme === 'light' && <span className="text-ds-accent">● code shown</span>}
             </p>
-            <div className="aspect-video p-3">
-              <svg viewBox="0 0 400 225" className="h-full w-full rounded-lg">
+            <div className="p-3">
+              <svg
+                viewBox={`0 0 ${previewW} ${previewH}`}
+                style={{ aspectRatio: `${previewW} / ${previewH}` }}
+                className="w-full rounded-lg"
+              >
                 {isCharacter
                   ? renderCharacterComposition(charComposition, motionOn)
                   : renderComposition(composition, animation)}
@@ -564,6 +646,52 @@ function GenerateTab() {
 
             <div>
               <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
+                Composition
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {(Object.keys(LAYOUT_LABELS) as LayoutKey[]).map((l) => (
+                  <button
+                    key={l}
+                    type="button"
+                    onClick={() => setLayout(l)}
+                    aria-pressed={layout === l}
+                    className={
+                      layout === l
+                        ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                        : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
+                    }
+                  >
+                    {LAYOUT_LABELS[l]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
+                Backdrop
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {ALL_BACKGROUNDS.map((b) => (
+                  <button
+                    key={b}
+                    type="button"
+                    onClick={() => setBackdrop(b)}
+                    aria-pressed={backdrop === b}
+                    className={
+                      backdrop === b
+                        ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                        : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
+                    }
+                  >
+                    {BACKGROUND_LABELS[b]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
                 Animation
               </p>
               <div className="flex flex-wrap gap-2">
@@ -587,6 +715,37 @@ function GenerateTab() {
           </div>
 
           <div>
+            <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">Export</p>
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              {SIZE_PRESETS.map((preset) => (
+                <button
+                  key={preset.key}
+                  type="button"
+                  onClick={() => setSize(preset)}
+                  aria-pressed={size.key === preset.key}
+                  title={preset.hint}
+                  className={
+                    size.key === preset.key
+                      ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                      : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
+                  }
+                >
+                  {preset.label}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={downloadPng}
+                disabled={exporting}
+                className="border-ds-accent text-ds-accent hover:bg-ds-accent rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors hover:text-white disabled:opacity-50"
+              >
+                {exporting ? 'Rendering…' : `Download PNG (${size.w}×${size.h})`}
+              </button>
+            </div>
+            <p className="text-ds-muted mb-6 text-sm">
+              The composition is generated at the selected size, not cropped to it — an Open Graph
+              card is genuinely composed for 1200×630 rather than a letterboxed 16:9.
+            </p>
             <p className="text-ds-muted mb-2 text-sm">
               Standalone SVG — self-contained (embedded keyframes, fallback colors), paste it
               anywhere:

@@ -7,6 +7,17 @@ import {
   type ColorKey,
   type Theme,
 } from './designTokens'
+import {
+  resolveLayout,
+  layoutPlacements,
+  backgroundPrimitives,
+  backgroundUsesWash,
+  DEFAULT_SIZE,
+  type LayoutKey,
+  type BackgroundKey,
+  type Canvas,
+  type Placement,
+} from './illustrationLayout'
 
 export type MotifKey = 'geometric' | 'network' | 'bars' | 'terminal' | 'organic' | 'connectors'
 export type PaletteKey = 'auto' | 'accent-purple' | 'warm' | 'cool' | 'mono'
@@ -349,14 +360,32 @@ export interface GeneratorOptions {
   motifs: MotifKey[]
   palette: PaletteKey
   animation: AnimationKey
+  /** Composition archetype. 'auto' resolves deterministically from the seed. */
+  layout?: LayoutKey
+  /** Drawn behind the motifs for depth. */
+  backdrop?: BackgroundKey
+  /** Output dimensions. Composition is generated AT this aspect, not cropped to it. */
+  canvas?: Canvas
+}
+
+/** One motif cluster plus where it sits, how large it is, and how far back. */
+export interface ShapeGroup {
+  shapes: Shape[]
+  placement: Placement
 }
 
 export interface Composition {
   seed: number
   background: BgTint
+  /** Flattened, kept so existing consumers keep working. */
   shapes: Shape[]
+  /** Grouped by motif so each cluster can be scaled and depth-faded. */
+  groups: ShapeGroup[]
   motifs: MotifKey[]
   matchedMotifs: MotifKey[]
+  layout: Exclude<LayoutKey, 'auto'>
+  backdrop: BackgroundKey
+  canvas: Canvas
 }
 
 /**
@@ -367,6 +396,8 @@ export interface Composition {
  */
 export function generateComposition(options: GeneratorOptions): Composition {
   const { topic, nonce, density, motifs, palette, animation } = options
+  const canvas = options.canvas ?? { w: DEFAULT_SIZE.w, h: DEFAULT_SIZE.h }
+  const backdrop = options.backdrop ?? 'flat'
   const seed = hashSeed(`${topic}::${nonce}`)
   const rng = mulberry32(seed)
   const matchedMotifs = autoMotifs(topic, density + 1)
@@ -374,16 +405,37 @@ export function generateComposition(options: GeneratorOptions): Composition {
   const colors = palette === 'auto' ? AUTO_PALETTES[seed % AUTO_PALETTES.length] : PALETTES[palette]
   const background = BG_TINTS[seed % BG_TINTS.length]
 
-  const shapes: Shape[] = []
-  const bandWidth = 400 / Math.max(activeMotifs.length, 1)
-  activeMotifs.forEach((motif, i) => {
-    const cx = bandWidth * i + bandWidth / 2 + (rng() - 0.5) * bandWidth * 0.25
-    const cy = 112.5 + (rng() - 0.5) * 50
-    shapes.push(...MOTIF_GENERATORS[motif](rng, cx, cy, colors, density))
+  // Placement, scale and depth come from a composition archetype rather than
+  // equal vertical bands, which is what gives a result a subject instead of a
+  // row of equally-weighted clusters.
+  const layout = resolveLayout(options.layout ?? 'auto', seed)
+  const placements = layoutPlacements(layout, activeMotifs.length, canvas, rng)
+
+  const groups: ShapeGroup[] = activeMotifs.map((motif, i) => {
+    const placement = placements[i] ?? placements[placements.length - 1]
+    return {
+      placement,
+      shapes: MOTIF_GENERATORS[motif](rng, placement.cx, placement.cy, colors, density),
+    }
   })
 
   void animation // animation is applied at render time, not baked into the composition
-  return { seed, background, shapes, motifs: activeMotifs, matchedMotifs }
+  return {
+    seed,
+    background,
+    shapes: groups.flatMap((g) => g.shapes),
+    groups,
+    motifs: activeMotifs,
+    matchedMotifs,
+    layout,
+    backdrop,
+    canvas,
+  }
+}
+
+/** Scale a group about its own centre so hierarchy reads without redrawing. */
+function groupTransform(p: Placement): string {
+  return `translate(${p.cx.toFixed(2)} ${p.cy.toFixed(2)}) scale(${p.scale.toFixed(3)}) translate(${(-p.cx).toFixed(2)} ${(-p.cy).toFixed(2)})`
 }
 
 const ANIMATION_NAME: Record<Exclude<AnimationKey, 'none'>, string> = {
@@ -430,55 +482,97 @@ function shapeStyle(index: number, animation: AnimationKey): React.CSSProperties
  * Colors resolve via CSS custom properties, so this stays theme-reactive in
  * the browser regardless of which theme is being previewed. */
 export function renderComposition(comp: Composition, animation: AnimationKey): ReactNode {
+  const { w, h } = comp.canvas
+  const bg = backgroundPrimitives(comp.backdrop, comp.canvas)
+  let shapeIndex = 0
   return (
     <>
-      <rect width={400} height={225} fill={cssBgTint(comp.background)} />
-      {comp.shapes.map((s, i) => {
-        const style = shapeStyle(i, animation)
-        if (s.kind === 'circle') {
-          return (
-            <circle
-              key={i}
-              cx={s.cx}
-              cy={s.cy}
-              r={s.r}
-              fill={cssVar(s.fill)}
-              opacity={s.opacity}
-              style={style}
-            />
-          )
-        }
-        if (s.kind === 'rect') {
-          return (
-            <rect
-              key={i}
-              x={s.x}
-              y={s.y}
-              width={s.w}
-              height={s.h}
-              rx={s.rx}
-              fill={cssVar(s.fill)}
-              opacity={s.opacity}
-              style={style}
-            />
-          )
-        }
-        if (s.kind === 'line') {
-          return (
-            <line
-              key={i}
-              x1={s.x1}
-              y1={s.y1}
-              x2={s.x2}
-              y2={s.y2}
-              stroke={cssVar(s.stroke)}
-              strokeWidth={s.strokeWidth}
-              opacity={s.opacity}
-            />
-          )
-        }
-        return <path key={i} d={s.d} fill={cssVar(s.fill)} opacity={s.opacity} style={style} />
-      })}
+      {backgroundUsesWash(comp.backdrop) && (
+        <defs>
+          <radialGradient id="igWash" cx="50%" cy="45%" r="75%">
+            <stop offset="0%" stopColor={cssVar('accent')} stopOpacity="0.18" />
+            <stop offset="100%" stopColor={cssVar('accent')} stopOpacity="0" />
+          </radialGradient>
+        </defs>
+      )}
+      <rect width={w} height={h} fill={cssBgTint(comp.background)} />
+      {backgroundUsesWash(comp.backdrop) && <rect width={w} height={h} fill="url(#igWash)" />}
+      {bg.map((b, i) =>
+        b.kind === 'line' ? (
+          <line
+            key={`bg${i}`}
+            x1={b.x1}
+            y1={b.y1}
+            x2={b.x2}
+            y2={b.y2}
+            stroke={cssVar('muted')}
+            strokeWidth={1}
+            opacity={b.opacity}
+          />
+        ) : (
+          <circle
+            key={`bg${i}`}
+            cx={b.cx}
+            cy={b.cy}
+            r={b.r}
+            fill={b.fill ? cssVar('muted') : 'none'}
+            stroke={b.fill ? undefined : cssVar('muted')}
+            strokeWidth={b.fill ? undefined : 1}
+            opacity={b.opacity}
+          />
+        )
+      )}
+      {comp.groups.map((group, gi) => (
+        <g key={gi} transform={groupTransform(group.placement)} opacity={group.placement.opacity}>
+          {group.shapes.map((s) => {
+            const i = shapeIndex++
+            const style = shapeStyle(i, animation)
+            if (s.kind === 'circle') {
+              return (
+                <circle
+                  key={i}
+                  cx={s.cx}
+                  cy={s.cy}
+                  r={s.r}
+                  fill={cssVar(s.fill)}
+                  opacity={s.opacity}
+                  style={style}
+                />
+              )
+            }
+            if (s.kind === 'rect') {
+              return (
+                <rect
+                  key={i}
+                  x={s.x}
+                  y={s.y}
+                  width={s.w}
+                  height={s.h}
+                  rx={s.rx}
+                  fill={cssVar(s.fill)}
+                  opacity={s.opacity}
+                  style={style}
+                />
+              )
+            }
+            if (s.kind === 'line') {
+              return (
+                <line
+                  key={i}
+                  x1={s.x1}
+                  y1={s.y1}
+                  x2={s.x2}
+                  y2={s.y2}
+                  stroke={cssVar(s.stroke)}
+                  strokeWidth={s.strokeWidth}
+                  opacity={s.opacity}
+                />
+              )
+            }
+            return <path key={i} d={s.d} fill={cssVar(s.fill)} opacity={s.opacity} style={style} />
+          })}
+        </g>
+      ))}
     </>
   )
 }
@@ -528,10 +622,37 @@ export function serializeComposition(
   animation: AnimationKey,
   theme: Theme
 ): string {
+  const { w, h } = comp.canvas
   const styleTag = animation === 'none' ? '' : `\n  <style>${illustrationKeyframes()}</style>`
-  const body = comp.shapes.map((s, i) => `  ${shapeToSvgTag(s, i, animation, theme)}`).join('\n')
-  return `<svg viewBox="0 0 400 225" xmlns="http://www.w3.org/2000/svg">${styleTag}
-  <rect width="400" height="225" fill="${resolveBgTint(comp.background, theme)}" />
-${body}
+  const muted = resolveToken('muted', theme)
+
+  const defs = backgroundUsesWash(comp.backdrop)
+    ? `\n  <defs><radialGradient id="igWash" cx="50%" cy="45%" r="75%"><stop offset="0%" stop-color="${resolveToken('accent', theme)}" stop-opacity="0.18" /><stop offset="100%" stop-color="${resolveToken('accent', theme)}" stop-opacity="0" /></radialGradient></defs>`
+    : ''
+  const wash = backgroundUsesWash(comp.backdrop)
+    ? `\n  <rect width="${w}" height="${h}" fill="url(#igWash)" />`
+    : ''
+
+  const backdrop = backgroundPrimitives(comp.backdrop, comp.canvas)
+    .map((b) =>
+      b.kind === 'line'
+        ? `  <line x1="${b.x1}" y1="${b.y1}" x2="${b.x2}" y2="${b.y2}" stroke="${muted}" stroke-width="1" opacity="${b.opacity}" />`
+        : `  <circle cx="${b.cx}" cy="${b.cy}" r="${b.r?.toFixed(1)}" ${b.fill ? `fill="${muted}"` : `fill="none" stroke="${muted}" stroke-width="1"`} opacity="${b.opacity}" />`
+    )
+    .join('\n')
+
+  let shapeIndex = 0
+  const body = comp.groups
+    .map((group) => {
+      const inner = group.shapes
+        .map((s) => `    ${shapeToSvgTag(s, shapeIndex++, animation, theme)}`)
+        .join('\n')
+      return `  <g transform="${groupTransform(group.placement)}" opacity="${group.placement.opacity.toFixed(2)}">\n${inner}\n  </g>`
+    })
+    .join('\n')
+
+  return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">${styleTag}${defs}
+  <rect width="${w}" height="${h}" fill="${resolveBgTint(comp.background, theme)}" />${wash}
+${backdrop ? backdrop + '\n' : ''}${body}
 </svg>`
 }
