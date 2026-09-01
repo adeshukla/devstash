@@ -11,7 +11,7 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildProjectSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
-import { getAllProjects, getProjectBySlug } from '@/lib/markdown/projects'
+import { getAllProjects, getProjectBySlug, parseCaseStudyOutcome } from '@/lib/markdown/projects'
 import {
   Badge,
   Button,
@@ -268,14 +268,25 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                         ))}
                       </ul>
                     </div>
-                    {project.caseStudy.outcome && (
-                      <div>
-                        <h3 className="text-ds-accent mb-2 font-mono text-sm font-medium">
-                          Outcome
-                        </h3>
-                        <p className="text-ds-muted">{project.caseStudy.outcome}</p>
-                      </div>
-                    )}
+                    {(() => {
+                      // A pending outcome is a deliberate "no real metrics to
+                      // report, and here's why" note, not a result — label it
+                      // as such instead of presenting it under "Outcome",
+                      // which reads as though the explanation IS the result.
+                      const outcome = parseCaseStudyOutcome(project.caseStudy?.outcome)
+                      if (!outcome) return null
+
+                      return (
+                        <div>
+                          <h3 className="text-ds-accent mb-2 font-mono text-sm font-medium">
+                            {outcome.pending ? 'On measurable results' : 'Outcome'}
+                          </h3>
+                          <p className={outcome.pending ? 'text-ds-muted italic' : 'text-ds-muted'}>
+                            {outcome.text}
+                          </p>
+                        </div>
+                      )
+                    })()}
                   </div>
                 </div>
               )}

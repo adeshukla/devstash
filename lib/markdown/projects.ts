@@ -49,3 +49,34 @@ export function getProjectsByCategory(category: ProjectCategory): Project[] {
 export function getLiveProjects(): Project[] {
   return getAllProjects().filter((p) => p.status === 'live')
 }
+
+// ─── CASE-STUDY OUTCOME ──────────────────────────────────────────────
+//
+// `caseStudy.outcome` follows the project's no-fabricated-metrics rule: where
+// there is no real traffic or usage data, the field records WHY rather than
+// inventing a number. Those entries were authored with a leading `// TODO:`
+// marker, which was being rendered verbatim to visitors — a portfolio page
+// reading "Outcome: // TODO: no usage data" looks unfinished rather than
+// deliberately honest.
+//
+// The marker stays in the JSON (it's a genuine signal that real numbers are
+// still owed once a project has them); this just parses it out so the UI can
+// present the two cases differently.
+
+const OUTCOME_PENDING_MARKER = /^\s*\/\/\s*TODO:\s*/i
+
+export interface ParsedOutcome {
+  /** Marker stripped, ready to render. */
+  text: string
+  /** True when no real metrics exist yet and the text explains why. */
+  pending: boolean
+}
+
+export function parseCaseStudyOutcome(outcome: string | undefined): ParsedOutcome | null {
+  if (!outcome?.trim()) return null
+
+  const pending = OUTCOME_PENDING_MARKER.test(outcome)
+  const text = outcome.replace(OUTCOME_PENDING_MARKER, '').trim()
+
+  return text ? { text, pending } : null
+}

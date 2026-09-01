@@ -12,15 +12,48 @@ import type {
 import { siteConfig } from '@/content/metadata/site.config'
 import type { BreadcrumbItem, FAQItem } from '@/types/seo'
 
+// Stable @id for the author entity, so Person / WebSite / BlogPosting all
+// point at the SAME node instead of describing three unrelated "Adesh Shukla"s.
+// This is the main lever available for entity disambiguation: the name collides
+// with other developers (Devesh / Devashish Shukla) in search results, and
+// "DevStash" collides with devstash.dev and an unrelated project of the same
+// name — so every signal that ties this specific person to this specific site
+// is worth emitting explicitly.
+const PERSON_ID = `${siteConfig.url}/#person`
+const WEBSITE_ID = `${siteConfig.url}/#website`
+
 // ── Person ────────────────────────────────────────────────────
 export function buildPersonSchema(): WithContext<Person> {
   return {
     '@context': 'https://schema.org',
     '@type': 'Person',
+    '@id': PERSON_ID,
     name: siteConfig.author.name,
     url: siteConfig.url,
     email: siteConfig.author.email,
-    sameAs: [siteConfig.author.github, siteConfig.author.linkedin],
+    jobTitle: 'Frontend Developer',
+    // Every profile that corroborates the same identity. The X handle was
+    // already in site.config but had never been emitted here.
+    sameAs: [siteConfig.author.github, siteConfig.author.linkedin, siteConfig.author.x],
+    // Matches the location stated on /about and in the homepage hero.
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Ghaziabad',
+      addressRegion: 'Delhi NCR',
+      addressCountry: 'IN',
+    },
+    // Topical association — the subjects the site actually covers, so the
+    // entity is linked to these areas rather than floating unattached.
+    knowsAbout: [
+      'Frontend Development',
+      'React',
+      'Next.js',
+      'TypeScript',
+      'Web Performance',
+      'Web Accessibility',
+      'Technical SEO',
+      'Workflow Automation',
+    ],
   }
 }
 
@@ -29,13 +62,16 @@ export function buildWebSiteSchema(): WithContext<WebSite> {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': WEBSITE_ID,
     name: siteConfig.name,
+    // Disambiguates the bare brand token from the other "DevStash" projects
+    // by binding it to the person it belongs to.
+    alternateName: `${siteConfig.name} — ${siteConfig.author.name}`,
     url: siteConfig.url,
     description: siteConfig.description,
-    author: {
-      '@type': 'Person',
-      name: siteConfig.author.name,
-    },
+    inLanguage: 'en',
+    author: { '@id': PERSON_ID },
+    publisher: { '@id': PERSON_ID },
   }
 }
 
