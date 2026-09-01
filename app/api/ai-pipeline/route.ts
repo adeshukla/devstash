@@ -4,6 +4,12 @@ import { z } from 'zod'
 import { callGroq, callWithFallback, hasAnyProviderConfigured, GroqCallError } from '@/lib/ai/groq'
 import { AI_TELL_PHRASES, countAiTellPhrases } from '@/lib/ai/aiTellPhrases'
 import { countHumanInputMarkers } from '@/lib/ai/humanInputMarkers'
+import {
+  renderArticleHtml,
+  CONTACT_FORM_HTML,
+  CONTACT_FORM_CSS,
+  CONTACT_FORM_JS,
+} from '@/lib/ai/landingPageParts'
 import { BLOG_CATEGORIES } from '@/types/blog'
 import type { PipelineMetrics, DemoFrontmatter } from '@/types/aiPipeline'
 
@@ -161,16 +167,99 @@ const REVEAL_FAILSAFE_JS = `
   })()
 </script>`
 
-function injectRuntimeGuards(html: string): string {
+const ARTICLE_SECTION_CSS = `
+  .article-section { padding: clamp(4rem,10vw,7rem) 1.5rem; }
+  .article-inner { max-width: 720px; margin: 0 auto; }
+  .article-inner h2 { margin: 2.5rem 0 .75rem; }
+  .article-inner h3, .article-inner h4 { margin: 2rem 0 .5rem; }
+  .article-inner p, .article-inner li { color: var(--muted); line-height: 1.8; }
+  .article-inner p { margin: 0 0 1.1rem; }
+  .article-inner ul, .article-inner ol { margin: 0 0 1.4rem; padding-left: 1.25rem; }
+  .article-inner li { margin-bottom: .5rem; }
+  .article-inner strong { color: var(--text); }
+  .article-inner code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 5px; padding: .1em .35em;
+  }
+  .article-inner pre {
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1rem; overflow-x: auto; margin: 0 0 1.4rem;
+  }
+  .article-inner pre code { background: none; border: 0; padding: 0; }
+  .article-inner .table-wrap { overflow-x: auto; margin: 0 0 1.4rem; }
+  .article-inner table { width: 100%; border-collapse: collapse; font-size: .925rem; }
+  .article-inner th, .article-inner td {
+    text-align: left; padding: .6rem .75rem; border-bottom: 1px solid var(--border);
+  }
+  .article-inner th { color: var(--text); font-weight: 600; background: var(--surface-2); }
+  .article-inner td { color: var(--muted); }`
+
+function buildArticleSection(markdown: string): string {
+  const body = renderArticleHtml(markdown)
+  if (!body) return ''
+  return `
+<section id="article" class="article-section reveal" aria-labelledby="article-heading">
+  <div class="article-inner">
+    <h2 id="article-heading">The full write-up</h2>
+    ${body}
+  </div>
+</section>`
+}
+
+/**
+ * Everything the page must contain regardless of what the model returned.
+ *
+ * The model is asked for these too, but asking is not the same as having: the
+ * article body is injected verbatim from the pipeline's own output so all ~600-900
+ * generated words actually reach the page instead of being summarised into three
+ * cards, and the form ships hand-written so its validation behaves identically
+ * on every run.
+ */
+function injectRuntimeGuards(html: string, articleMarkdown: string): string {
+  const injectedCss = `
+<style>
+${ARTICLE_SECTION_CSS}
+${CONTACT_FORM_CSS}
+</style>`
+
   let out = /<\/head>/i.test(html)
-    ? html.replace(/<\/head>/i, `${SCROLL_GUARD_CSS}\n</head>`)
+    ? html.replace(/<\/head>/i, `${SCROLL_GUARD_CSS}${injectedCss}\n</head>`)
     : /<body[^>]*>/i.test(html)
-      ? html.replace(/(<body[^>]*>)/i, `$1${SCROLL_GUARD_CSS}`)
-      : html + SCROLL_GUARD_CSS
+      ? html.replace(/(<body[^>]*>)/i, `$1${SCROLL_GUARD_CSS}${injectedCss}`)
+      : html + SCROLL_GUARD_CSS + injectedCss
+
+  // Article + form go before the footer when there is one, so the footer stays
+  // last; otherwise append to the end of body.
+  const tail = `${buildArticleSection(articleMarkdown)}\n${CONTACT_FORM_HTML}`
+  if (/<footer[\s>]/i.test(out)) {
+    out = out.replace(/(<footer[\s>])/i, `${tail}\n$1`)
+  } else if (/<\/body>/i.test(out)) {
+    out = out.replace(/<\/body>/i, `${tail}\n</body>`)
+  } else {
+    out += tail
+  }
+
+  // Every call to action points at the form. The prompt says so, but a
+  // generated href="#" or a link to a page that doesn't exist is a dead end,
+  // so this rewrites them rather than trusting it. Anything already aimed at a
+  // real in-page anchor or an external URL is left alone.
+  out = out.replace(
+    /<a\b([^>]*?)href="([^"]*)"([^>]*)>/gi,
+    (match, pre: string, href: string, post: string) => {
+      const attrs = `${pre}${post}`
+      const looksLikeCta = /class="[^"]*\bbtn|cta\b/i.test(attrs)
+      const isDeadEnd = href === '#' || href === '' || href === 'javascript:void(0)'
+      if (!looksLikeCta && !isDeadEnd) return match
+      if (/^(https?:|mailto:|tel:)/i.test(href)) return match
+      if (href.startsWith('#') && href !== '#') return match
+      return `<a${pre}href="#contact"${post}>`
+    }
+  )
 
   out = /<\/body>/i.test(out)
-    ? out.replace(/<\/body>/i, `${REVEAL_FAILSAFE_JS}\n</body>`)
-    : out + REVEAL_FAILSAFE_JS
+    ? out.replace(/<\/body>/i, `${REVEAL_FAILSAFE_JS}${CONTACT_FORM_JS}\n</body>`)
+    : out + REVEAL_FAILSAFE_JS + CONTACT_FORM_JS
 
   return out
 }
@@ -368,7 +457,19 @@ ARTICLE:
 ${articleExcerpt}
 """
 
-## Content — the most important rule
+## NON-NEGOTIABLE — a page breaking ANY of these is rejected outright
+1. Every CTA link is href="#contact". No other href on any button, ever.
+2. No nav menu, no nav links, no hamburger.
+3. No <img>, no background-image:url(), no image URL of any kind.
+4. No fixed height on html/body. No bare .reveal{opacity:0} — gate it on .js.
+5. Never print a "[TODO: ...]" marker.
+6. The theme toggle works in BOTH directions (see the exact CSS below).
+Two sections are appended to your output automatically after you finish: the
+full article body and a contact form with id="contact". Do NOT write either
+one yourself — do not restate the article, and do not build a form. Your CTAs
+link to that injected form.
+
+## Content
 A reader must know what the article covers from the page alone; generic
 startup filler is a failure.
 - h1 = TITLE verbatim; hero lead = DESCRIPTION verbatim.
@@ -417,7 +518,7 @@ border-color --accent, soft accent glow, always transitioned.
 1. Sticky header, blurred via backdrop-filter, bottom border: short wordmark
    from the title left, theme toggle right. Nothing else.
 2. Hero: eyebrow, h1, description lead (max-width 60ch), tag chips + reading
-   time, ONE accent CTA named for this subject. Behind it 2-3 blurred blobs,
+   time, ONE accent CTA named for this subject, href="#contact". Behind it 2-3 blurred blobs,
    width:min(420px,80vw), blur(90px), opacity .15-.25, only --accent/
    --accent-2 hues, absolute, z-index:-1, pointer-events:none. Never yellow/
    green/pink.
@@ -430,7 +531,8 @@ border-color --accent, soft accent glow, always transitioned.
    Each drifts on its own keyframes (18s/24s/30s, ease-in-out, infinite
    alternate) animating translate/scale and morphing border-radius. Overlay
    one short caption from the article.
-5. Closing band on --surface-2: heading about this subject + one accent CTA.
+5. Closing band on --surface-2: heading about this subject + one accent CTA,
+   href="#contact".
 6. Footer: one --muted line, top border.
 
 ## Interactivity — all three, one inline script
@@ -501,7 +603,7 @@ Wrap all motion in @media (prefers-reduced-motion: reduce).
           temperature: 0.6,
         }
       )
-      htmlPage = injectRuntimeGuards(stripCodeFence(htmlPageResult.content))
+      htmlPage = injectRuntimeGuards(stripCodeFence(htmlPageResult.content), humanizeResult.content)
 
       // If the model hit the token ceiling mid-document the HTML is cut off
       // mid-tag and renders as a broken fragment. Close it so the preview and
