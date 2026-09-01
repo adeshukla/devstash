@@ -42,6 +42,7 @@ import {
   type BackgroundKey,
   type SizePreset,
 } from './illustrationLayout'
+import { FINISH_LABELS, ALL_FINISHES, type FinishKey } from './illustrationFinish'
 import type { Theme } from './designTokens'
 import { CssCodeBlock } from './CssCodeBlock'
 
@@ -181,6 +182,7 @@ function GenerateTab() {
   const [animation, setAnimation] = useState<AnimationKey>('float')
   const [layout, setLayout] = useState<LayoutKey>('auto')
   const [backdrop, setBackdrop] = useState<BackgroundKey>('flat')
+  const [finish, setFinish] = useState<FinishKey>('gradient')
   const [size, setSize] = useState<SizePreset>(DEFAULT_SIZE)
   const [exporting, setExporting] = useState(false)
 
@@ -205,8 +207,9 @@ function GenerateTab() {
         layout,
         backdrop,
         canvas: { w: size.w, h: size.h },
+        finish,
       }),
-    [topic, nonce, density, motifOverride, palette, animation, layout, backdrop, size]
+    [topic, nonce, density, motifOverride, palette, animation, layout, backdrop, size, finish]
   )
   const svgCode = useMemo(
     () => serializeComposition(composition, animation, codeTheme),
@@ -691,25 +694,48 @@ function GenerateTab() {
             </div>
 
             <div>
+              <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">Finish</p>
+              <div className="flex flex-wrap gap-2">
+                {ALL_FINISHES.map((f) => (
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => setFinish(f)}
+                    aria-pressed={finish === f}
+                    className={
+                      finish === f
+                        ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                        : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
+                    }
+                  >
+                    {FINISH_LABELS[f]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
               <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
                 Animation
               </p>
               <div className="flex flex-wrap gap-2">
-                {(['none', 'float', 'pulse', 'drift'] as AnimationKey[]).map((a) => (
-                  <button
-                    key={a}
-                    type="button"
-                    onClick={() => setAnimation(a)}
-                    aria-pressed={animation === a}
-                    className={
-                      animation === a
-                        ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white capitalize'
-                        : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm capitalize transition-colors'
-                    }
-                  >
-                    {a}
-                  </button>
-                ))}
+                {(['none', 'float', 'pulse', 'drift', 'draw', 'orbit'] as AnimationKey[]).map(
+                  (a) => (
+                    <button
+                      key={a}
+                      type="button"
+                      onClick={() => setAnimation(a)}
+                      aria-pressed={animation === a}
+                      className={
+                        animation === a
+                          ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white capitalize'
+                          : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm capitalize transition-colors'
+                      }
+                    >
+                      {a}
+                    </button>
+                  )
+                )}
               </div>
             </div>
           </div>

@@ -18,10 +18,17 @@ import {
   type Canvas,
   type Placement,
 } from './illustrationLayout'
+import {
+  finishDefs,
+  finishDefsToSvg,
+  shapeFill,
+  glowFilter,
+  type FinishKey,
+} from './illustrationFinish'
 
 export type MotifKey = 'geometric' | 'network' | 'bars' | 'terminal' | 'organic' | 'connectors'
 export type PaletteKey = 'auto' | 'accent-purple' | 'warm' | 'cool' | 'mono'
-export type AnimationKey = 'none' | 'float' | 'pulse' | 'drift'
+export type AnimationKey = 'none' | 'float' | 'pulse' | 'drift' | 'draw' | 'orbit'
 export type Density = 1 | 2 | 3
 type BgTint = 'surface2' | 'accentTint' | 'purpleTint'
 
@@ -366,6 +373,8 @@ export interface GeneratorOptions {
   backdrop?: BackgroundKey
   /** Output dimensions. Composition is generated AT this aspect, not cropped to it. */
   canvas?: Canvas
+  /** How shapes are filled and lit. */
+  finish?: FinishKey
 }
 
 /** One motif cluster plus where it sits, how large it is, and how far back. */
@@ -386,6 +395,9 @@ export interface Composition {
   layout: Exclude<LayoutKey, 'auto'>
   backdrop: BackgroundKey
   canvas: Canvas
+  finish: FinishKey
+  /** Resolved palette, kept so the finish can build gradients from it. */
+  colors: [ColorKey, ColorKey]
 }
 
 /**
@@ -430,6 +442,8 @@ export function generateComposition(options: GeneratorOptions): Composition {
     layout,
     backdrop,
     canvas,
+    finish: options.finish ?? 'flat',
+    colors,
   }
 }
 
@@ -442,6 +456,8 @@ const ANIMATION_NAME: Record<Exclude<AnimationKey, 'none'>, string> = {
   float: 'igFloat',
   pulse: 'igPulse',
   drift: 'igDrift',
+  draw: 'igDraw',
+  orbit: 'igOrbit',
 }
 
 // Per-animation easing — a generic `ease-in-out` makes every shape hit its
@@ -452,24 +468,46 @@ const ANIMATION_EASING: Record<Exclude<AnimationKey, 'none'>, string> = {
   float: 'cubic-bezier(0.37, 0, 0.63, 1)',
   pulse: 'cubic-bezier(0.45, 0, 0.4, 1)',
   drift: 'cubic-bezier(0.37, 0, 0.63, 1)',
+  // A stroke that draws on should decelerate into its finish, so the line
+  // arrives rather than stopping dead.
+  draw: 'cubic-bezier(0.16, 1, 0.3, 1)',
+  // Rotation must be perfectly linear or the loop visibly stutters at the seam.
+  orbit: 'linear',
 }
 
 /** One timing source for BOTH the live preview and the exported SVG string —
  * if these ever diverge, the copied code stops matching what was previewed.
  * Durations use a fractional 4-step spread (3.2/4.1/5/5.9s) instead of flat
  * 3/4/5s so neighboring shapes don't sync up into a visible group beat. */
-function animationTiming(index: number, animation: Exclude<AnimationKey, 'none'>) {
+/** Exact length so stroke-dasharray draws the whole line and no more. */
+function lineLength(s: Shape): number | undefined {
+  if (s.kind !== 'line') return undefined
+  return Math.hypot(s.x2 - s.x1, s.y2 - s.y1)
+}
+
+function animationTiming(
+  index: number,
+  animation: Exclude<AnimationKey, 'none'>,
+  isStroke = false
+) {
+  // A dash animation on a filled shape does nothing visible, so solids run the
+  // companion reveal instead of silently sitting still.
+  const name = animation === 'draw' && !isStroke ? 'igReveal' : ANIMATION_NAME[animation]
   return {
-    name: ANIMATION_NAME[animation],
+    name,
     duration: `${(3.2 + (index % 4) * 0.9).toFixed(1)}s`,
     easing: ANIMATION_EASING[animation],
     delay: `${((index * 0.35) % 2.1).toFixed(2)}s`,
   }
 }
 
-function shapeStyle(index: number, animation: AnimationKey): React.CSSProperties | undefined {
-  if (animation === 'none') return undefined
-  const t = animationTiming(index, animation)
+function shapeStyle(
+  index: number,
+  animation: AnimationKey,
+  isStroke = false
+): React.CSSProperties | undefined {
+  if (animation === 'none' || animation === 'orbit') return undefined
+  const t = animationTiming(index, animation, isStroke)
   return {
     animation: `${t.name} ${t.duration} ${t.easing} infinite`,
     animationDelay: t.delay,
@@ -481,12 +519,48 @@ function shapeStyle(index: number, animation: AnimationKey): React.CSSProperties
 /** Renders a composition as live React SVG content (used for the preview).
  * Colors resolve via CSS custom properties, so this stays theme-reactive in
  * the browser regardless of which theme is being previewed. */
+/**
+ * Gradient/glow defs for the live preview. Stops are CSS variables so the
+ * preview tracks the page theme, while serializeComposition emits the same
+ * gradients with literal colours for the standalone copy.
+ */
+function FinishDefsEls({ comp }: { comp: Composition }): ReactNode {
+  if (comp.finish === 'flat') return null
+  const defs = finishDefs(comp.finish, comp.colors, comp.seed, 'dark')
+  if (!defs) return null
+  return (
+    <defs>
+      {defs.gradients.map((g, gi) => (
+        <linearGradient key={g.id} id={g.id} x1={g.x1} y1={g.y1} x2={g.x2} y2={g.y2}>
+          <stop offset="0%" stopColor={cssVar(comp.colors[gi === 0 ? 0 : 1])} />
+          <stop offset="100%" stopColor={cssVar(comp.colors[gi === 0 ? 1 : 0])} />
+        </linearGradient>
+      ))}
+      {defs.glow && (
+        <filter id={defs.glow.id} x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation={defs.glow.stdDeviation} result="b" />
+          <feMerge>
+            <feMergeNode in="b" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      )}
+    </defs>
+  )
+}
+
 export function renderComposition(comp: Composition, animation: AnimationKey): ReactNode {
   const { w, h } = comp.canvas
   const bg = backgroundPrimitives(comp.backdrop, comp.canvas)
+  const glow = glowFilter(comp.finish, comp.seed)
+  // The preview uses live CSS variables so it follows the page theme; only the
+  // serialized copy bakes literal colours.
+  const paint = (token: ColorKey, i: number) =>
+    comp.finish === 'flat' ? cssVar(token) : shapeFill(comp.finish, token, i, comp.seed, 'dark')
   let shapeIndex = 0
   return (
     <>
+      <FinishDefsEls comp={comp} />
       {backgroundUsesWash(comp.backdrop) && (
         <defs>
           <radialGradient id="igWash" cx="50%" cy="45%" r="75%">
@@ -522,57 +596,91 @@ export function renderComposition(comp: Composition, animation: AnimationKey): R
           />
         )
       )}
-      {comp.groups.map((group, gi) => (
-        <g key={gi} transform={groupTransform(group.placement)} opacity={group.placement.opacity}>
-          {group.shapes.map((s) => {
-            const i = shapeIndex++
-            const style = shapeStyle(i, animation)
-            if (s.kind === 'circle') {
+      <g
+        style={
+          animation === 'orbit'
+            ? {
+                animation: 'igOrbit 42s linear infinite',
+                transformBox: 'view-box',
+                transformOrigin: 'center',
+              }
+            : undefined
+        }
+      >
+        {comp.groups.map((group, gi) => (
+          <g key={gi} transform={groupTransform(group.placement)} opacity={group.placement.opacity}>
+            {group.shapes.map((s) => {
+              const i = shapeIndex++
+              const style = shapeStyle(i, animation)
+              if (s.kind === 'circle') {
+                return (
+                  <circle
+                    key={i}
+                    cx={s.cx}
+                    cy={s.cy}
+                    r={s.r}
+                    fill={paint(s.fill, i)}
+                    filter={glow}
+                    opacity={s.opacity}
+                    style={style}
+                  />
+                )
+              }
+              if (s.kind === 'rect') {
+                return (
+                  <rect
+                    key={i}
+                    x={s.x}
+                    y={s.y}
+                    width={s.w}
+                    height={s.h}
+                    rx={s.rx}
+                    fill={paint(s.fill, i)}
+                    filter={glow}
+                    opacity={s.opacity}
+                    style={style}
+                  />
+                )
+              }
+              if (s.kind === 'line') {
+                const len = lineLength(s)
+                const drawing = animation === 'draw' && len !== undefined
+                return (
+                  <line
+                    key={i}
+                    x1={s.x1}
+                    y1={s.y1}
+                    x2={s.x2}
+                    y2={s.y2}
+                    stroke={comp.finish === 'flat' ? cssVar(s.stroke) : paint(s.stroke, i)}
+                    strokeWidth={s.strokeWidth}
+                    opacity={s.opacity}
+                    strokeDasharray={drawing ? len : undefined}
+                    style={
+                      drawing
+                        ? ({
+                            ...shapeStyle(i, animation, true),
+                            '--len': len,
+                          } as React.CSSProperties)
+                        : undefined
+                    }
+                  />
+                )
+              }
               return (
-                <circle
+                <path
                   key={i}
-                  cx={s.cx}
-                  cy={s.cy}
-                  r={s.r}
-                  fill={cssVar(s.fill)}
+                  d={s.d}
+                  fill={paint(s.fill, i)}
+                  filter={glow}
                   opacity={s.opacity}
                   style={style}
                 />
               )
-            }
-            if (s.kind === 'rect') {
-              return (
-                <rect
-                  key={i}
-                  x={s.x}
-                  y={s.y}
-                  width={s.w}
-                  height={s.h}
-                  rx={s.rx}
-                  fill={cssVar(s.fill)}
-                  opacity={s.opacity}
-                  style={style}
-                />
-              )
-            }
-            if (s.kind === 'line') {
-              return (
-                <line
-                  key={i}
-                  x1={s.x1}
-                  y1={s.y1}
-                  x2={s.x2}
-                  y2={s.y2}
-                  stroke={cssVar(s.stroke)}
-                  strokeWidth={s.strokeWidth}
-                  opacity={s.opacity}
-                />
-              )
-            }
-            return <path key={i} d={s.d} fill={cssVar(s.fill)} opacity={s.opacity} style={style} />
-          })}
-        </g>
-      ))}
+            })}
+          </g>
+        ))}
+      </g>
     </>
   )
 }
@@ -585,32 +693,53 @@ const KEYFRAMES_SOURCE = `
 @keyframes igFloat { 0%, 100% { transform: translateY(0); } 35% { transform: translateY(-7px); } 65% { transform: translateY(-9px); } }
 @keyframes igPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.09); opacity: 0.82; } }
 @keyframes igDrift { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 33% { transform: translate(3px, -5px) rotate(2.5deg); } 66% { transform: translate(-2px, -3px) rotate(-1.5deg); } }
-@media (prefers-reduced-motion: reduce) { circle, rect, path, line { animation: none !important; } }
+@keyframes igDraw { 0% { stroke-dashoffset: var(--len, 200); } 45%, 78% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: var(--len, 200); } }
+@keyframes igReveal { 0% { transform: scale(0.72); opacity: 0.25; } 42%, 78% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.72); opacity: 0.25; } }
+@keyframes igOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { circle, rect, path, line { animation: none !important; stroke-dashoffset: 0 !important; } }
 `.trim()
 
 export function illustrationKeyframes(): string {
   return KEYFRAMES_SOURCE
 }
 
-function shapeToSvgTag(s: Shape, i: number, animation: AnimationKey, theme: Theme): string {
+function shapeToSvgTag(
+  s: Shape,
+  i: number,
+  animation: AnimationKey,
+  theme: Theme,
+  finish: FinishKey,
+  seed: number
+): string {
+  const isStroke = s.kind === 'line'
   let style = ''
-  if (animation !== 'none') {
-    const t = animationTiming(i, animation)
+  if (animation !== 'none' && animation !== 'orbit') {
+    const t = animationTiming(i, animation, isStroke)
     style = ` style="animation: ${t.name} ${t.duration} ${t.easing} infinite; animation-delay: ${t.delay}; transform-box: fill-box; transform-origin: center;"`
   }
   const opacity = s.opacity !== undefined ? ` opacity="${s.opacity}"` : ''
+  const glow = glowFilter(finish, seed)
+  const filter = glow ? ` filter="${glow}"` : ''
+  const paint = (token: ColorKey) => shapeFill(finish, token, i, seed, theme)
+
   if (s.kind === 'circle') {
-    return `<circle cx="${s.cx.toFixed(1)}" cy="${s.cy.toFixed(1)}" r="${s.r.toFixed(1)}" fill="${resolveToken(s.fill, theme)}"${opacity}${style} />`
+    return `<circle cx="${s.cx.toFixed(1)}" cy="${s.cy.toFixed(1)}" r="${s.r.toFixed(1)}" fill="${paint(s.fill)}"${opacity}${filter}${style} />`
   }
   if (s.kind === 'rect') {
     const rx = s.rx ? ` rx="${s.rx}"` : ''
-    return `<rect x="${s.x.toFixed(1)}" y="${s.y.toFixed(1)}" width="${s.w.toFixed(1)}" height="${s.h.toFixed(1)}"${rx} fill="${resolveToken(s.fill, theme)}"${opacity}${style} />`
+    return `<rect x="${s.x.toFixed(1)}" y="${s.y.toFixed(1)}" width="${s.w.toFixed(1)}" height="${s.h.toFixed(1)}"${rx} fill="${paint(s.fill)}"${opacity}${filter}${style} />`
   }
   if (s.kind === 'line') {
     const sw = s.strokeWidth ? ` stroke-width="${s.strokeWidth}"` : ''
-    return `<line x1="${s.x1.toFixed(1)}" y1="${s.y1.toFixed(1)}" x2="${s.x2.toFixed(1)}" y2="${s.y2.toFixed(1)}" stroke="${resolveToken(s.stroke, theme)}"${sw}${opacity} />`
+    const len = lineLength(s)
+    // Dash the exact stroke length so every line finishes drawing together.
+    const dash =
+      animation === 'draw' && len !== undefined
+        ? ` stroke-dasharray="${len.toFixed(1)}" style="--len:${len.toFixed(1)}; animation: igDraw ${animationTiming(i, 'draw', true).duration} ease-in-out infinite; animation-delay: ${animationTiming(i, 'draw', true).delay};"`
+        : ''
+    return `<line x1="${s.x1.toFixed(1)}" y1="${s.y1.toFixed(1)}" x2="${s.x2.toFixed(1)}" y2="${s.y2.toFixed(1)}" stroke="${paint(s.stroke)}"${sw}${opacity}${dash} />`
   }
-  return `<path d="${s.d}" fill="${resolveToken(s.fill, theme)}"${opacity}${style} />`
+  return `<path d="${s.d}" fill="${paint(s.fill)}"${opacity}${filter}${style} />`
 }
 
 /** Serializes a composition to a standalone, self-contained SVG string for
@@ -626,6 +755,8 @@ export function serializeComposition(
   const styleTag = animation === 'none' ? '' : `\n  <style>${illustrationKeyframes()}</style>`
   const muted = resolveToken('muted', theme)
 
+  const finish = finishDefsToSvg(finishDefs(comp.finish, comp.colors, comp.seed, theme))
+  const finishTag = finish ? `\n  <defs>${finish}</defs>` : ''
   const defs = backgroundUsesWash(comp.backdrop)
     ? `\n  <defs><radialGradient id="igWash" cx="50%" cy="45%" r="75%"><stop offset="0%" stop-color="${resolveToken('accent', theme)}" stop-opacity="0.18" /><stop offset="100%" stop-color="${resolveToken('accent', theme)}" stop-opacity="0" /></radialGradient></defs>`
     : ''
@@ -641,17 +772,28 @@ export function serializeComposition(
     )
     .join('\n')
 
+  // Orbit revolves the whole arrangement about the canvas centre. Applied
+  // per-shape it would rotate each shape in place — invisible on a circle, and
+  // merely spinning a bar — so it wraps the groups instead.
+  const orbitOpen =
+    animation === 'orbit'
+      ? '  <g style="animation: igOrbit 42s linear infinite; transform-box: view-box; transform-origin: center;">\n'
+      : ''
+  const orbitClose = animation === 'orbit' ? '\n  </g>' : ''
+
   let shapeIndex = 0
   const body = comp.groups
     .map((group) => {
       const inner = group.shapes
-        .map((s) => `    ${shapeToSvgTag(s, shapeIndex++, animation, theme)}`)
+        .map(
+          (s) => `    ${shapeToSvgTag(s, shapeIndex++, animation, theme, comp.finish, comp.seed)}`
+        )
         .join('\n')
       return `  <g transform="${groupTransform(group.placement)}" opacity="${group.placement.opacity.toFixed(2)}">\n${inner}\n  </g>`
     })
     .join('\n')
 
-  return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">${styleTag}${defs}
+  return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">${styleTag}${finishTag}${defs}
   <rect width="${w}" height="${h}" fill="${resolveBgTint(comp.background, theme)}" />${wash}
 ${backdrop ? backdrop + '\n' : ''}${body}
 </svg>`
