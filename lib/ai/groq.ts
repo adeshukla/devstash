@@ -39,6 +39,14 @@ export interface LlmCallOptions {
   modelOverride?: string
   /** Per-call completion cap. Unset means the provider default. */
   maxTokens?: number
+  /**
+   * gpt-oss models are REASONING models: hidden reasoning tokens are billed
+   * against the same completion budget as the visible answer. At default
+   * effort a mechanical rewrite can spend its entire ~2048-token default cap
+   * thinking and return a truncated fragment. 'low' collapses reasoning to
+   * near zero for tasks that need transformation, not deliberation.
+   */
+  reasoningEffort?: 'low' | 'medium' | 'high'
 }
 
 export interface GroqCallResult {
@@ -91,6 +99,7 @@ async function callProvider(
       messages,
       temperature: options?.temperature ?? 0.7,
       ...(options?.maxTokens ? { max_tokens: options.maxTokens } : {}),
+      ...(options?.reasoningEffort ? { reasoning_effort: options.reasoningEffort } : {}),
       ...(options?.jsonMode ? { response_format: { type: 'json_object' } } : {}),
     }),
   })

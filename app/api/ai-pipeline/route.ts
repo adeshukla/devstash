@@ -13,6 +13,16 @@ const RUN_CAP_COOKIE = 'devstash_ai_pipeline_runs'
 const DAILY_CAP = 3
 const CATEGORY_VALUES = BLOG_CATEGORIES.map((c) => c.value) as [string, ...string[]]
 
+// The three text steps run on a gpt-oss reasoning model, where hidden
+// reasoning tokens are billed against the same completion budget as the
+// answer. At default effort the copy-edit step was spending its whole
+// ~2048-token default cap thinking and returning a 95-character fragment —
+// which then starved every downstream step, including the HTML page, of
+// content. These are mechanical transforms, not problems needing
+// deliberation, so reasoning is pinned low. Leaving max_tokens unset keeps
+// all three inside the shared per-model tokens-per-minute budget.
+const TEXT_STEP_OPTIONS = { reasoningEffort: 'low' } as const
+
 // ─── Zod schemas ────────────────────────────────────────────────────────────
 
 const PipelineRequestSchema = z.object({
@@ -114,6 +124,24 @@ function stripCodeFence(raw: string): string {
     .trim()
 }
 
+// A generation that pins html/body to height:100% (or 100vh) alongside an
+// overflow rule clamps the scroll container to a single viewport — the page
+// renders but everything below the hero is unreachable, which reads as "it
+// only generated a hero". The prompt forbids it, but this class of breakage
+// is severe enough to guarantee rather than request: a last stylesheet wins
+// on equal specificity, and !important beats whatever the model wrote.
+const SCROLL_GUARD_CSS = `
+<style>
+  /* injected: guarantees the document can always scroll vertically */
+  html, body { height: auto !important; max-height: none !important; overflow-y: visible !important; }
+</style>`
+
+function injectScrollGuard(html: string): string {
+  if (/<\/head>/i.test(html)) return html.replace(/<\/head>/i, `${SCROLL_GUARD_CSS}\n</head>`)
+  if (/<body[^>]*>/i.test(html)) return html.replace(/(<body[^>]*>)/i, `$1${SCROLL_GUARD_CSS}`)
+  return html + SCROLL_GUARD_CSS
+}
+
 // ─── POST handler ───────────────────────────────────────────────────────────
 
 export async function POST(request: Request) {
@@ -170,15 +198,16 @@ export async function POST(request: Request) {
     // be correct about (accurate concept prose + standard, verifiable code) and
     // leaves [TODO: ...] placeholders wherever the post needs the author's real,
     // first-hand substance. The human fills those in before publishing.
-    const draftResult = await runStep([
-      {
-        role: 'system',
-        content:
-          'You are a technical writer producing an honest first-draft scaffold of a blog post for developers. You never fabricate code, benchmarks, metrics, results, opinions, or personal experience.',
-      },
-      {
-        role: 'user',
-        content: `Write a first-draft scaffold of a technical blog post for developers about "${topic}".
+    const draftResult = await runStep(
+      [
+        {
+          role: 'system',
+          content:
+            'You are a technical writer producing an honest first-draft scaffold of a blog post for developers. You never fabricate code, benchmarks, metrics, results, opinions, or personal experience.',
+        },
+        {
+          role: 'user',
+          content: `Write a first-draft scaffold of a technical blog post for developers about "${topic}".
 Target keywords to include naturally: ${keywords.join(', ') || 'none specified'}.
 Tone: ${tone}.
 Target length: approximately ${targetLength} words.
@@ -192,8 +221,10 @@ Rules:
 - No generic filler intros or outros, no empty hedging.
 
 Output plain text only. No markdown frontmatter, no JSON.`,
-      },
-    ])
+        },
+      ],
+      TEXT_STEP_OPTIONS
+    )
 
     // ── Step 2: de-cliché copy-edit ──
     // NOT a "pretend to be a person" pass. It strips AI-writing tics and tightens
@@ -201,15 +232,16 @@ Output plain text only. No markdown frontmatter, no JSON.`,
     // fabricated voice both reads as fake and still trips AI detectors, and it
     // would violate the project's no-hallucination rule. Genuine voice is added
     // by a human editing step afterwards, not manufactured here.
-    const humanizeResult = await runStep([
-      {
-        role: 'system',
-        content:
-          'You are a copy-editor that removes AI-writing tics from technical content without changing its meaning or inventing anything new.',
-      },
-      {
-        role: 'user',
-        content: `Edit the following draft so it reads less like AI-generated text. Do only these things:
+    const humanizeResult = await runStep(
+      [
+        {
+          role: 'system',
+          content:
+            'You are a copy-editor that removes AI-writing tics from technical content without changing its meaning or inventing anything new.',
+        },
+        {
+          role: 'user',
+          content: `Edit the following draft so it reads less like AI-generated text. Do only these things:
 - Remove or plainly replace these cliché phrases: ${AI_TELL_PHRASES.join(', ')}.
 - Cut filler intros/outros and empty hedging (e.g. "only time will tell", "in this article we will", "in today's world").
 - Vary sentence length and rhythm so the prose isn't uniformly even.
@@ -223,8 +255,10 @@ Draft:
 """
 ${draftResult.content}
 """`,
-      },
-    ])
+        },
+      ],
+      TEXT_STEP_OPTIONS
+    )
 
     // ── Step 3: SEO frontmatter JSON (with deterministic fallback) ──
     const frontmatterResult = await runStep(
@@ -250,7 +284,7 @@ ${humanizeResult.content}
 """`,
         },
       ],
-      { jsonMode: true }
+      { ...TEXT_STEP_OPTIONS, jsonMode: true }
     )
 
     let frontmatter: DemoFrontmatter
@@ -378,8 +412,18 @@ Surfaces: cards use --surface, 1px solid --border, radius 16px, padding
 3. Feature grid: 2-4 cards sourced from ARTICLE per the content rule above, in a
    responsive grid (single column on mobile). Each card gets a small INLINE SVG
    icon (stroke:currentColor, no fill) — never emoji.
-4. A wide 16:9 [Image placeholder] block: dashed --border, --surface-2 fill,
-   centred --muted label.
+4. A wide 16:9 SHOWPIECE — not an empty grey box. Build it from CSS only:
+   a --surface-2 panel, rounded corners, --border edge, overflow:hidden,
+   containing EXACTLY 3 overlapping radial-gradient blobs in --accent and
+   --accent-2. Each blob MUST have filter:blur(60px) and opacity between .35
+   and .55, and be smaller than the panel (roughly 45-65% of its width) — the
+   effect is soft ambient light pooling behind glass, never one hard-edged
+   solid ellipse filling the frame. Each drifts on its own @keyframes at a
+   different duration (18s / 24s / 30s, ease-in-out, infinite alternate),
+   animating transform translate/scale AND morphing border-radius. Add a faint
+   grid or scanline overlay at low opacity for depth. Overlay one short caption
+   line drawn from the article. It must read as deliberate art direction — a
+   visitor should never think an image failed to load.
 5. Closing band on --surface-2: a heading about this subject and one accent CTA.
 6. Footer: one --muted line with a top border.
 
@@ -402,12 +446,20 @@ Wrap all motion in @media (prefers-reduced-motion: reduce) so it is disabled.
   no remote images.
 - Responsive and unbroken down to a 300px viewport. Use clamp(), %, grid/flex,
   and min-width:0 on grid/flex children so long words cannot force overflow.
+- NEVER set a fixed height on html or body — no height:100%, no height:100vh,
+  no overflow:hidden on both axes. Any of those clamps the scroll container to
+  one viewport and makes everything below the hero unreachable. Use
+  min-height:100vh at most, and only on body.
 - Set overflow-x:hidden on body AND html, and size the decorative blobs with
   min() (e.g. width:min(420px,80vw)) so an absolutely-positioned blob can never
   push a horizontal scrollbar on a narrow screen. Also set
   overflow-wrap:break-word on body so a long unbroken word cannot overflow.
-- Every image slot is a literal "[Image placeholder]" block. Never a real or
-  fake image URL, never invented alt text for a photo that does not exist.
+- Never reference an image file: no <img>, no background-image: url(), no real
+  or fake image URL, and no invented alt text for a photo that does not exist.
+  Every visual is drawn with CSS gradients and inline SVG. If a spot genuinely
+  needs a photograph the author must supply, render a small dashed
+  "[Image placeholder]" block — but prefer a CSS visual, and never make the
+  page's main visual an empty placeholder box.
 - Invent NOTHING factual: no testimonials, logos, pricing, company names, or
   statistics that are not in the source content above. If a section would
   normally need one, write a bracketed placeholder instead.
@@ -436,7 +488,7 @@ Wrap all motion in @media (prefers-reduced-motion: reduce) so it is disabled.
           temperature: 0.6,
         }
       )
-      htmlPage = stripCodeFence(htmlPageResult.content)
+      htmlPage = injectScrollGuard(stripCodeFence(htmlPageResult.content))
 
       // If the model hit the token ceiling mid-document the HTML is cut off
       // mid-tag and renders as a broken fragment. Close it so the preview and
