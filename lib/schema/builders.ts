@@ -10,6 +10,7 @@ import type {
   FAQPage,
 } from 'schema-dts'
 import { siteConfig } from '@/content/metadata/site.config'
+import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import type { BreadcrumbItem, FAQItem } from '@/types/seo'
 
 // Stable @id for the author entity, so Person / WebSite / BlogPosting all
@@ -86,9 +87,29 @@ interface BlogPostSchema {
   featuredImage: string
   canonical: string
   tags: string[]
+  category?: string
+  readingTime?: number
 }
 
 export function buildBlogPostingSchema(post: BlogPostSchema): WithContext<BlogPosting> {
+  // No post currently sets `featuredImage`, and resolvePublicImage() returns ''
+  // for anything it can't resolve — so `${siteConfig.url}${featuredImage}`
+  // was emitting the bare homepage URL as the article image on every post.
+  // Google requires `image` to be an actual image; pointing it at an HTML page
+  // fails validation and forfeits article rich-result eligibility.
+  //
+  // Fall back to the same generated /api/og card the page already uses for
+  // og:image, so the structured data and the social preview agree.
+  const image = post.featuredImage
+    ? `${siteConfig.url}${post.featuredImage}`
+    : buildOgImageUrl({
+        title: post.title,
+        description: post.description,
+        type: 'article',
+        ...(post.category ? { category: post.category } : {}),
+        ...(typeof post.readingTime === 'number' ? { readingTime: post.readingTime } : {}),
+      })
+
   return {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -97,7 +118,7 @@ export function buildBlogPostingSchema(post: BlogPostSchema): WithContext<BlogPo
     datePublished: post.createdAt,
     dateModified: post.updatedAt,
     url: `${siteConfig.url}/blog/${post.slug}`,
-    image: `${siteConfig.url}${post.featuredImage}`,
+    image,
     keywords: post.tags.join(', '),
     author: {
       '@type': 'Person',

@@ -55,8 +55,18 @@ export default function HomePage() {
   const featuredProjects = getFeaturedProjects(6)
   const projects = featuredProjects.length > 0 ? featuredProjects : getAllProjects().slice(0, 6)
 
-  const featuredPosts = getFeaturedPosts(3)
-  const posts = featuredPosts.length > 0 ? featuredPosts : getAllPosts().slice(0, 3)
+  // FeaturedPosts renders up to 4, but only 2 posts are flagged `featured`, so
+  // the homepage was linking to 2 of 20 posts. The old fallback only triggered
+  // when NOTHING was flagged, so a partial set stayed partial. Top up with the
+  // most recent unflagged posts instead: the homepage is the site's highest-
+  // authority page, and every extra outbound link from it is a crawl path into
+  // a post that currently has almost no internal links pointing at it.
+  const HOMEPAGE_POST_COUNT = 4
+  const featuredPosts = getFeaturedPosts(HOMEPAGE_POST_COUNT)
+  const posts = [
+    ...featuredPosts,
+    ...getAllPosts().filter((p) => !featuredPosts.some((f) => f.slug === p.slug)),
+  ].slice(0, HOMEPAGE_POST_COUNT)
 
   return (
     <>

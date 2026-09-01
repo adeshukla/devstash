@@ -7,7 +7,7 @@ import { Badge, Card, CardTilt, Reveal, PageHeaderGlow } from '@/components/ui'
 
 const title = 'Lab — Interactive Tools & Live Demos'
 const description =
-  'A playground of things I built and shipped live in the browser: an AI content pipeline, CSS and SVG generators, SEO tooling, and conversion-focused landing-page samples.'
+  'Things I built and shipped live in the browser: an AI content pipeline, CSS and SVG generators, SEO tooling, and conversion-focused landing-page samples.'
 
 export const metadata: Metadata = buildMetadata({
   title,

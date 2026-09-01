@@ -8,7 +8,7 @@ import type { IconName } from '@/components/icons/Icon'
 
 const title = 'Work With Me — Frontend Development & Automation'
 const description =
-  'Freelance and contract frontend development, SEO-ready builds, and workflow automation from Adesh Shukla — for teams that need a Next.js site or internal tool built right.'
+  'Freelance and contract frontend development, SEO-ready builds, and workflow automation from Adesh Shukla — for teams needing a Next.js site or internal tool.'
 
 export const metadata: Metadata = buildMetadata({
   title,
