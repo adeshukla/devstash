@@ -44,6 +44,4 @@ This is the same trust gap I described in [the vibe coding post](/blog/vibe-codi
 
 I would apply the same discipline to code written by any contributor I had not personally watched write it line by line, AI or human. What changed is the volume: AI-assisted development means more code moves through review per hour than before, so the fixed cost of a solid test suite gets amortized over more changes, and the fixed cost of *not* having one compounds faster too. Faster code generation without a proportional increase in verification is the actual risk — not the code generation itself.
 
-[TODO: add a concrete example — a specific bug an AI assistant introduced on this site that a test or the QA suite actually caught before it shipped, since a real incident is more convincing than the general argument]
-
 The honest summary: tests were never really about catching mistakes a careful human reviewer would obviously spot. They were always about catching the ones that look fine on a read-through. AI-generated code raised the rate of exactly that failure mode, which is precisely why the tests matter more now, not less.

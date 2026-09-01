@@ -40,7 +40,7 @@ This single distinction has done more to shape what I automate than any general 
 ## What I have deliberately kept manual
 
 - **Anything where the "wrong" output looks plausible and specifically flatters the reader.** Performance reviews, testimonial-style copy, anything praising my own work — I do not automate these because a model producing a slightly-too-generous, slightly-fabricated version of the truth is a failure mode that is both likely and hard to catch, exactly the "fails quietly" case above.
-- **Final publish/send actions.** Every automation I run stops one step short of the irreversible action — saving a draft, not publishing a post; writing a row, not sending an email. [TODO: confirm current state — list the specific automations where this manual gate still applies, since this may change as trust in a given pipeline builds up over time]
+- **Final publish/send actions.** Every automation I run stops one step short of the irreversible action — saving a draft, not publishing a post; writing a row, not sending an email. On this site that gate is structural rather than a habit I have to remember: the admin panel that writes posts to disk is disabled outright in production (`NODE_ENV === 'production'` turns it off), so nothing can publish itself even if I wanted it to. Posts get written locally, reviewed, then committed like any other change.
 - **One-off tasks that will not repeat.** The setup cost of a reliable n8n workflow is real — building the node, testing the edge cases, handling the rate limits. If a task will not run at least a handful of times, the automation costs more than doing it by hand.
 
 <Callout type="tip" title="A rule that has aged well">

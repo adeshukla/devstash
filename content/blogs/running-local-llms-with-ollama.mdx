@@ -38,7 +38,12 @@ Ollama packages open-weight models (Llama, Mistral, Gemma, Qwen, and others) int
 
 For anything genuinely open-ended — the kind of "draft this, then improve it, then extract structured data from it" chain I described in [my n8n + Groq patterns post](/blog/n8n-groq-workflow-patterns) — a hosted frontier-adjacent model is still doing meaningfully better work per attempt, and Groq's inference speed removes the latency argument that used to favor local models for interactive use. The gap has narrowed considerably as open-weight models have improved, but it has not closed for multi-step reasoning chains.
 
-[TODO: add your own hardware notes here — which model sizes you have actually run locally, what hardware, and what response latency you saw, since this varies enormously by machine and is the kind of specific number that is worse to guess than to state plainly as unverified]
+I am deliberately not quoting tokens-per-second numbers here. Local inference
+speed swings wildly with the specific machine — whether the model fits entirely
+in VRAM is usually the single biggest factor, ahead of raw GPU or CPU spec — so
+a figure from my hardware would tell you almost nothing about yours. Pull a
+model, run `ollama run <model> --verbose`, and read your own numbers. That
+takes about five minutes and is the only benchmark that applies to you.
 
 <Callout type="tip" title="A practical starting point">
   If you are trying this for the first time, start with a small instruction-tuned model (the 7-8B

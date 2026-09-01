@@ -45,7 +45,13 @@ Following the same [multi-step chaining pattern](/blog/n8n-groq-workflow-pattern
 3. **Action-item extraction as a separate pass**, with attribution required as a structured field, not inferred loosely from summary prose — a Code node validates every extracted item has a name attached before it proceeds.
 4. **Human confirm step** before anything writes to a calendar or task tracker — a Slack message with the extracted items and a simple approve/edit reaction, not a silent write.
 
-[TODO: describe whether you have actually built this specific workflow yet, or if this is still a proposed design — and if built, what real meeting-notes source you are pulling transcripts from]
+To be clear about what this is: a design, not a shipped workflow. I have not
+built this particular pipeline — the n8n automations I actually run are the
+job-application one and a few smaller jobs. I am writing it up because the
+design decisions are the interesting part and they transfer, and because the
+"fails quietly" analysis above is what would determine whether I ship it at
+all. If you build it before I do, the human confirm step in stage four is the
+one I would not skip.
 
 ## The actual lesson
 

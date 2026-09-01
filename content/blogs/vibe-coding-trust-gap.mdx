@@ -7,7 +7,7 @@ createdAt: '2026-07-14'
 updatedAt: '2026-07-14'
 category: 'ai-workflows'
 tags: ['vibe-coding', 'ai-workflows', 'code-review', 'ai-assistants']
-readingTime: 4
+readingTime: 5
 canonical: 'https://devstash.me/blog/vibe-coding-trust-gap'
 draft: false
 featured: false
@@ -42,9 +42,21 @@ In my own work, the trust gap shows up in the same few places every time:
 
 ## What I actually do differently now
 
-[TODO: describe your specific pre-merge checklist for AI-generated changes — e.g. what you always re-read manually, what test coverage you require before merging, any tooling you've added specifically for this]
+The part I refuse to leave to memory, I automated. This site runs a pre-commit
+hook and a CI pipeline that gate every change the same way regardless of who or
+what wrote it: `tsc --noEmit` and ESLint on one job, then a content job running
+a frontmatter linter, an MDX compile check, a broken-internal-link checker and
+an image check. Separately, `pnpm qa` runs a static security audit plus
+Playwright suites for responsive layout and accessibility. None of that is
+clever — it is deliberately boring, mechanical checking that does not care
+whether the diff looked confident.
 
-The general shape, regardless of the specifics: I stopped treating "the assistant ran it and it worked" as equivalent to "I reviewed it." Those are different levels of confidence, and conflating them is exactly how a plausible-looking bug reaches production. A quick pass reading the diff line by line, asking "what input would break this," takes a few minutes and catches most of what a single successful run doesn't.
+What the tooling cannot do is judge intent, so that is the part I still do by
+hand: read the diff line by line and ask what input would break it. The two
+questions are different. A green pipeline says the code is valid; only reading
+it says the code is right.
+
+Underneath both is one habit: I stopped treating "the assistant ran it and it worked" as equivalent to "I reviewed it." Those are different levels of confidence, and conflating them is exactly how a plausible-looking bug reaches production.
 
 <Callout type="tip" title="A cheap habit that pays for itself">
   Before accepting an AI-written fix, ask it directly: "what's the one input that would break this?"
