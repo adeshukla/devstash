@@ -62,12 +62,16 @@ export interface GroqCallResult {
 export class GroqCallError extends Error {
   constructor(
     message: string,
-    public status?: number
+    public status?: number,
+    /** For 429s: how long the provider asked us to wait, in ms. */
+    public retryAfterMs?: number
   ) {
     super(message)
     this.name = 'GroqCallError'
   }
 }
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 /**
  * One chat-completions call against a specific provider. Never logs the API
@@ -107,6 +111,27 @@ async function callProvider(
   const latencyMs = Date.now() - started
 
   if (!res.ok) {
+    // 429 is by far the most common failure on the free tier: one full pipeline
+    // run spends ~6k of the 8k-per-minute budget, so two runs close together —
+    // or two visitors at once — reliably trip it. Surface it as its own status
+    // so callers can wait and retry instead of failing the whole run, and carry
+    // the provider's own retry hint when it gives one.
+    if (res.status === 429) {
+      const retryAfterHeader = res.headers.get('retry-after')
+      let retryAfterMs = retryAfterHeader ? Number(retryAfterHeader) * 1000 : 0
+      if (!retryAfterMs) {
+        // Groq puts "Please try again in 7.26s" in the error body when it
+        // doesn't send a retry-after header.
+        const body = await res.text().catch(() => '')
+        const m = body.match(/try again in ([\d.]+)s/i)
+        if (m) retryAfterMs = Math.ceil(parseFloat(m[1]) * 1000)
+      }
+      throw new GroqCallError(
+        `${config.name} rate limited`,
+        429,
+        Math.min(retryAfterMs || 5000, 20_000)
+      )
+    }
     throw new GroqCallError(`${config.name} request failed with status ${res.status}`, res.status)
   }
 
@@ -127,6 +152,42 @@ async function callProvider(
 }
 
 /**
+ * callProvider plus a bounded wait-and-retry on 429 only.
+ *
+ * The per-minute token budget refills continuously, so a rate limit here is
+ * genuinely transient — the provider usually tells us it will clear in a few
+ * seconds. Retrying that is the difference between "AI pipeline failed to
+ * complete" and a run that just takes a moment longer. Nothing else is
+ * retried: a 400 or 401 will fail identically no matter how long we wait.
+ */
+async function callProviderWithRetry(
+  config: ProviderConfig,
+  apiKey: string,
+  messages: GroqMessage[],
+  options?: LlmCallOptions,
+  maxRetries = 2
+): Promise<GroqCallResult> {
+  let lastErr: unknown
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      // eslint-disable-next-line no-await-in-loop -- sequential backoff is the point
+      return await callProvider(config, apiKey, messages, options)
+    } catch (err) {
+      lastErr = err
+      const is429 = err instanceof GroqCallError && err.status === 429
+      if (!is429 || attempt === maxRetries) throw err
+      const waitMs = (err as GroqCallError).retryAfterMs ?? 5000
+      console.warn(
+        `[lib/ai/groq] ${config.name} rate limited, retrying in ${waitMs}ms (attempt ${attempt + 1}/${maxRetries})`
+      )
+      // eslint-disable-next-line no-await-in-loop -- sequential backoff is the point
+      await sleep(waitMs)
+    }
+  }
+  throw lastErr
+}
+
+/**
  * BYOK path — visitors are only ever asked for a Groq key, so this always
  * targets Groq directly with the key they supplied. No fallback: it's their
  * key, their call.
@@ -136,7 +197,7 @@ export async function callGroq(
   messages: GroqMessage[],
   options?: LlmCallOptions
 ): Promise<GroqCallResult> {
-  return callProvider(GROQ, apiKey, messages, options)
+  return callProviderWithRetry(GROQ, apiKey, messages, options)
 }
 
 /** Whether at least one provider in the fallback chain has a server-side key configured. */
@@ -163,7 +224,12 @@ export async function callWithFallback(
     const config = configured[i]
     try {
       // eslint-disable-next-line no-await-in-loop -- sequential fallback is the point
-      return await callProvider(config, process.env[config.apiKeyEnv] as string, messages, options)
+      return await callProviderWithRetry(
+        config,
+        process.env[config.apiKeyEnv] as string,
+        messages,
+        options
+      )
     } catch (err) {
       lastErr = err
       const isLast = i === configured.length - 1

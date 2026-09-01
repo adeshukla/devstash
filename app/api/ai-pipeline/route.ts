@@ -355,16 +355,7 @@ ${humanizeResult.content}
         ).trim()
       }
 
-      htmlPageResult = await runStep(
-        [
-          {
-            role: 'system',
-            content:
-              'You are a senior product designer who codes. You produce single-file HTML landing pages with the polish of a well-funded startup site — considered typography, a real dark palette, generous space, and motion that feels intentional. You never ship a generic centered-text template. Output ONLY the raw HTML — no markdown fences, no commentary.',
-          },
-          {
-            role: 'user',
-            content: `Design and build a single-file HTML landing page from the article below.
+      const htmlUserPrompt = `Design and build a single-file HTML landing page from the article below.
 
 TITLE: ${frontmatter.title}
 DESCRIPTION: ${frontmatter.description}
@@ -377,173 +368,136 @@ ARTICLE:
 ${articleExcerpt}
 """
 
-## <head> — emit the frontmatter as real SEO tags
-
-Build the head from the values above, not invented ones:
-  <title> = TITLE
-  <meta name="description" content="DESCRIPTION">
-  <meta name="keywords" content="TAGS">
-  <meta name="author" content="Adesh Shukla">
-  <meta name="robots" content="index,follow">
-  <link rel="canonical" href="https://devstash.me/blog/SLUG">
-  Open Graph: og:type=article, og:title, og:description, og:url (the canonical)
-  Twitter: twitter:card=summary_large_image, twitter:title, twitter:description
-  <meta name="article:section" content="CATEGORY"> and one article:tag per TAG
-Also emit a JSON-LD <script type="application/ld+json"> BlogPosting with
-headline, description, keywords, articleSection, author (Person "Adesh
-Shukla") and mainEntityOfPage set to the canonical URL. Omit any image field
-entirely rather than pointing it at something that is not an image.
-
-## Use the real content — the most important rule
-
-A reader must be able to tell what the article covers from the page alone.
-Generic startup filler is a failure.
-- h1 = TITLE verbatim. Hero lead = DESCRIPTION verbatim.
-- CATEGORY as a small uppercase eyebrow above the h1; each TAG as a rounded
-  chip; READING TIME beside them.
+## Content — the most important rule
+A reader must know what the article covers from the page alone; generic
+startup filler is a failure.
+- h1 = TITLE verbatim; hero lead = DESCRIPTION verbatim.
+- CATEGORY as an uppercase eyebrow above the h1; each TAG a rounded chip;
+  READING TIME beside them.
 - Every card comes from a REAL point in ARTICLE: heading = that point in 2-5
-  words, body = 1-2 sentences of its actual substance. Never generic benefits
-  ("Fast", "Secure", "Scalable"). Fewer cards beats invented ones.
-- Headings and CTA labels reflect this subject — never "Explore"/"Get Started".
-- Never print a "[TODO: ...]" marker from ARTICLE, and never write copy around
-  one as if filled in; skip that point and use another.
-- Invent NOTHING factual — no testimonials, logos, pricing, or statistics.
+  words, body = 1-2 sentences of its substance. Never "Fast"/"Secure"/
+  "Scalable". Fewer cards beats invented ones. Headings and CTA labels name
+  this subject, never "Explore"/"Get Started".
+- Never print a "[TODO: ...]" marker, or write copy around one as if filled.
+- Invent no testimonials, logos, pricing or statistics.
 
-## Theme — light AND dark, with a working toggle
+## <head>
+title=TITLE; description=DESCRIPTION; keywords=TAGS; author="Adesh Shukla";
+robots=index,follow; canonical=https://devstash.me/blog/SLUG; og:type=article
++ og:title/og:description/og:url; twitter:card=summary_large_image +
+twitter:title/twitter:description; article:section=CATEGORY + one article:tag
+per TAG; and a JSON-LD BlogPosting (headline, description, keywords,
+articleSection, author Person "Adesh Shukla", mainEntityOfPage=canonical) with
+no image field.
 
-Use EXACTLY this three-block structure — the media query MUST be guarded with
-:not([data-theme="light"]), or a visitor whose OS is in dark mode can never
-switch the page to light and the toggle silently does nothing for them:
-
-  :root { <LIGHT tokens> }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) { <DARK tokens> }
-  }
-  :root[data-theme="dark"] { <DARK tokens> }
-
-That way the system preference drives the first paint, and an explicit choice
-wins in BOTH directions. Never give a colour its only definition inside one of
-those blocks.
-  LIGHT: --bg:#FFFFFF; --surface:#F8FAFC; --surface-2:#F1F5F9;
-         --border:#E2E8F0; --text:#0F172A; --muted:#64748B;
-  DARK:  --bg:#0B0F19; --surface:#111827; --surface-2:#161F2E;
-         --border:#1F2937; --text:#F3F4F6; --muted:#9CA3AF;
-  BOTH:  --accent:#3B82F6; --accent-2:#8B5CF6;
-Every colour in the page comes from these tokens — never hard-code a stray hex,
-including translucent ones. The sticky header must tint itself from a token
-(e.g. color-mix(in srgb, var(--bg) 70%, transparent)), NOT a literal
-rgba(0,0,0,...). Any colour whose only definition sits inside a
-prefers-color-scheme block will not update when the toggle is used — so define
-every colour through the tokens above and never re-declare one per media query.
-Give body a token background and a colour transition so switching feels smooth.
+## Theme — light + dark, toggle must win both ways
+Use EXACTLY this, or a dark-OS visitor can never switch to light:
+  :root{ LIGHT }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ DARK } }
+  :root[data-theme="dark"]{ DARK }
+LIGHT: --bg:#FFFFFF; --surface:#F8FAFC; --surface-2:#F1F5F9; --border:#E2E8F0;
+       --text:#0F172A; --muted:#64748B
+DARK:  --bg:#0B0F19; --surface:#111827; --surface-2:#161F2E; --border:#1F2937;
+       --text:#F3F4F6; --muted:#9CA3AF
+BOTH:  --accent:#3B82F6; --accent-2:#8B5CF6
+Every colour comes from these tokens — no stray hex, including translucent
+ones (tint the header with color-mix, not rgba(0,0,0,...)). Never define a
+colour only inside a media block.
 
 ## Art direction
+system-ui; h1 clamp(2.5rem,7vw,4.5rem), letter-spacing:-.03em,
+line-height:1.05, with a background-clip:text --accent -> --accent-2 gradient;
+h2 clamp(1.75rem,4vw,2.5rem); body 1rem/1.7. Sections padding
+clamp(4rem,10vw,7rem) 1.5rem; max-width 1100px centred. Cards: --surface,
+1px --border, radius 16px, padding 1.5-2rem; hover translateY(-4px),
+border-color --accent, soft accent glow, always transitioned.
 
-Type: system-ui stack with a fluid scale — h1 clamp(2.5rem,7vw,4.5rem),
-letter-spacing:-.03em, line-height:1.05; h2 clamp(1.75rem,4vw,2.5rem);
-body 1rem/1.7. Give the h1 (or a span in it) a background-clip:text gradient
-from --accent to --accent-2.
-Space: sections padding clamp(4rem,10vw,7rem) 1.5rem; content max-width 1100px,
-centred; nothing cramped.
-Surfaces: cards use --surface, 1px solid --border, radius 16px, padding
-1.5-2rem; on hover translateY(-4px), border-color --accent, soft accent glow.
+## Sections — in order. Standalone page: NO nav menu, no nav links, no
+## hamburger, nothing linking to a page that doesn't exist.
+1. Sticky header, blurred via backdrop-filter, bottom border: short wordmark
+   from the title left, theme toggle right. Nothing else.
+2. Hero: eyebrow, h1, description lead (max-width 60ch), tag chips + reading
+   time, ONE accent CTA named for this subject. Behind it 2-3 blurred blobs,
+   width:min(420px,80vw), blur(90px), opacity .15-.25, only --accent/
+   --accent-2 hues, absolute, z-index:-1, pointer-events:none. Never yellow/
+   green/pink.
+3. Feature grid: 2-4 cards per the content rule, one column on mobile, each
+   with a small INLINE SVG icon (stroke:currentColor) — never emoji.
+4. A 16:9 CSS showpiece, never an empty box: --surface-2 panel, rounded,
+   --border, overflow:hidden, holding EXACTLY 3 overlapping radial-gradient
+   blobs in --accent/--accent-2, each filter:blur(60px), opacity .35-.55, and
+   45-65% of the panel width — soft light behind glass, not one hard ellipse.
+   Each drifts on its own keyframes (18s/24s/30s, ease-in-out, infinite
+   alternate) animating translate/scale and morphing border-radius. Overlay
+   one short caption from the article.
+5. Closing band on --surface-2: heading about this subject + one accent CTA.
+6. Footer: one --muted line, top border.
 
-## Sections — in this order. This is a standalone landing page: NO nav menu,
-## no nav links, no hamburger. Nothing should link to a page that doesn't exist.
-
-1. Minimal header: a short wordmark derived from the title on the left, and the
-   theme toggle button on the right. No navigation links at all.
-   Sticky, translucent via backdrop-filter: blur(12px), bottom border.
-2. Hero: category eyebrow, oversized h1, the description as a --muted lead
-   (max-width ~60ch), tag chips + reading time, and ONE primary accent CTA
-   whose label fits this subject. Behind it 2-3 large blurred radial-gradient
-   blobs — width:min(420px,80vw), filter:blur(90px), opacity .15-.25, ONLY
-   --accent/--accent-2 hues, position:absolute, z-index:-1, pointer-events:none.
-   Never yellow/green/pink.
-3. Feature grid: 2-4 cards sourced from ARTICLE per the content rule above, in a
-   responsive grid (single column on mobile). Each card gets a small INLINE SVG
-   icon (stroke:currentColor, no fill) — never emoji.
-4. A wide 16:9 SHOWPIECE — not an empty grey box. Build it from CSS only:
-   a --surface-2 panel, rounded corners, --border edge, overflow:hidden,
-   containing EXACTLY 3 overlapping radial-gradient blobs in --accent and
-   --accent-2. Each blob MUST have filter:blur(60px) and opacity between .35
-   and .55, and be smaller than the panel (roughly 45-65% of its width) — the
-   effect is soft ambient light pooling behind glass, never one hard-edged
-   solid ellipse filling the frame. Each drifts on its own @keyframes at a
-   different duration (18s / 24s / 30s, ease-in-out, infinite alternate),
-   animating transform translate/scale AND morphing border-radius. Add a faint
-   grid or scanline overlay at low opacity for depth. Overlay one short caption
-   line drawn from the article. It must read as deliberate art direction — a
-   visitor should never think an image failed to load.
-5. Closing band on --surface-2: a heading about this subject and one accent CTA.
-6. Footer: one --muted line with a top border.
-
-## Interactivity — all three, in one inline script
-
-- Theme toggle: sets data-theme on <html>, swaps its icon and aria-pressed,
-  persists the choice to localStorage inside try/catch (it can throw in private
-  mode), and restores it on load before first paint where possible. Its sun and
-  moon icons are INLINE SVG like every other icon — never the emoji characters
-  and never any emoji anywhere on the page. Give it an aria-label.
-- IntersectionObserver scroll-reveal, but content MUST NEVER depend on JS to
-  become visible. Never write a bare \`.reveal{opacity:0}\`: if the observer
-  does not run — throttled tab, sandboxed preview, a JS error — the whole page
-  below the hero stays permanently invisible. Put \`<script>document
-  .documentElement.classList.add('js')</script>\` as the FIRST thing in <head>,
-  then gate the hidden state on it:
-    .reveal{opacity:1}
-    .js .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
-    .js .reveal.revealed{opacity:1;transform:none}
-  Reveal at 15% visibility, staggered ~80ms by index.
-- Cards respond on hover and keyboard focus.
-Wrap all motion in @media (prefers-reduced-motion: reduce) so it is disabled.
+## Interactivity — all three, one inline script
+- Theme toggle: sets data-theme on <html>, swaps icon + aria-pressed, persists
+  to localStorage in try/catch, restores on load. Sun/moon are INLINE SVG at
+  20x20 — no emoji anywhere on the page. Give it an aria-label and a real tap
+  target: min 44x44px, visible --border, radius, hover state. It must not
+  render as a few stray pixels.
+- Scroll-reveal that NEVER hides content behind JS. Put
+  <script>document.documentElement.classList.add('js')</script> first in
+  <head>, then: .reveal{opacity:1} /
+  .js .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease} /
+  .js .reveal.revealed{opacity:1;transform:none}. IntersectionObserver reveals
+  at 15% visibility, staggered ~80ms. A bare .reveal{opacity:0} is forbidden:
+  if the observer never runs the page is permanently blank below the hero.
+- Cards react on hover and keyboard focus.
+Wrap all motion in @media (prefers-reduced-motion: reduce).
 
 ## Hard rules
+- ONE file: one <style> in <head>, one <script> before </body>. Zero network
+  requests — no CDN, font, script src, or remote image.
+- NEVER set a fixed height on html or body (no height:100%/100vh, no
+  overflow:hidden on both axes) — it clamps scrolling and strands everything
+  below the hero. min-height:100vh on body at most.
+- overflow-x:hidden on html AND body; overflow-wrap:break-word on body;
+  min-width:0 on grid/flex children. Unbroken to a 300px viewport.
+- No <img>, no background-image:url(), no real or fake image URL. Visuals are
+  CSS gradients and inline SVG only.
+- Semantic landmarks, exactly one h1, and an explicit
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}.
+- Output the complete document, <!doctype html> to </html>. Do not
+  truncate or abbreviate any section.`
 
-- ONE file: all CSS in one <style> in <head>, all JS in one <script> before
-  </body>. Zero network requests — no CDN, no external font, no src on script,
-  no remote images.
-- Responsive and unbroken down to a 300px viewport. Use clamp(), %, grid/flex,
-  and min-width:0 on grid/flex children so long words cannot force overflow.
-- NEVER set a fixed height on html or body — no height:100%, no height:100vh,
-  no overflow:hidden on both axes. Any of those clamps the scroll container to
-  one viewport and makes everything below the hero unreachable. Use
-  min-height:100vh at most, and only on body.
-- Set overflow-x:hidden on body AND html, and size the decorative blobs with
-  min() (e.g. width:min(420px,80vw)) so an absolutely-positioned blob can never
-  push a horizontal scrollbar on a narrow screen. Also set
-  overflow-wrap:break-word on body so a long unbroken word cannot overflow.
-- Never reference an image file: no <img>, no background-image: url(), no real
-  or fake image URL, and no invented alt text for a photo that does not exist.
-  Every visual is drawn with CSS gradients and inline SVG. If a spot genuinely
-  needs a photograph the author must supply, render a small dashed
-  "[Image placeholder]" block — but prefer a CSS visual, and never make the
-  page's main visual an empty placeholder box.
-- Invent NOTHING factual: no testimonials, logos, pricing, company names, or
-  statistics that are not in the source content above. If a section would
-  normally need one, write a bracketed placeholder instead.
-- Semantic landmarks (header/main/section/footer), exactly one h1, and every
-  control keyboard-reachable. You MUST include an explicit
-  \`:focus-visible{outline:2px solid var(--accent);outline-offset:2px}\` rule —
-  a page with no visible focus ring is not acceptable.
-- Output the complete document, <!doctype html> through </html>. Do not
-  truncate or abbreviate any section.`,
+      // Groq rejects the request outright with 413 — not a truncation —
+      // when prompt + max_tokens exceeds the 8k-per-minute ceiling. This
+      // prompt has grown twice already and each time silently pushed the
+      // pipeline over, breaking every run. Derive the cap from the actual
+      // prompt so that cannot happen again. ~3.5 chars/token deliberately
+      // OVER-estimates the prompt, which errs toward a smaller, safe cap.
+      const TPM_CEILING = 8000
+      const SAFETY_MARGIN = 500
+      const estimatedPromptTokens = Math.ceil((htmlUserPrompt.length + 400) / 3.5)
+      const htmlMaxTokens = Math.max(
+        2000,
+        Math.min(5200, TPM_CEILING - estimatedPromptTokens - SAFETY_MARGIN)
+      )
+
+      htmlPageResult = await runStep(
+        [
+          {
+            role: 'system',
+            content:
+              'You are a senior product designer who codes. You produce single-file HTML landing pages with the polish of a well-funded startup site — considered typography, a real dark palette, generous space, and motion that feels intentional. You never ship a generic centered-text template. Output ONLY the raw HTML — no markdown fences, no commentary.',
+          },
+          {
+            role: 'user',
+            content: htmlUserPrompt,
           },
         ],
         {
-          // The default 20b model reliably emits a 2010-era template here —
-          // white background, centered grey header, clashing blob colours, and
-          // a dark-mode toggle as its idea of "interactivity". A page this
-          // detailed needs the larger model and real output room; the short
-          // text steps above are fine on the cheaper default.
           modelOverride: 'openai/gpt-oss-120b',
-          // 8k tokens/minute, prompt included, or the request is rejected
-          // outright rather than truncated. Budget: ~1.4k instructions + up to
-          // ~0.7k article excerpt leaves comfortably over 5.6k for the page,
-          // and a full page measured ~3.2k completion tokens. The cap is
-          // per-model, so this is separate from the 20b budget the three text
-          // steps above spend.
-          maxTokens: 5200,
+          // Derived, not hard-coded. Groq rejects a request outright with 413
+          // when prompt + max_tokens exceeds the per-minute ceiling, and this
+          // prompt has grown twice already — each time silently pushing the
+          // pipeline over and breaking every run. Computing the ceiling from
+          // the actual prompt keeps that impossible.
+          maxTokens: htmlMaxTokens,
           temperature: 0.6,
         }
       )
@@ -621,15 +575,32 @@ Wrap all motion in @media (prefers-reduced-motion: reduce) so it is disabled.
     // Never log the request body or the API key — status/message only.
     if (err instanceof GroqCallError) {
       console.error('[api/ai-pipeline] Groq call failed:', err.status, err.message)
-      const status = err.status === 401 ? 401 : 502
+
+      if (err.status === 401) {
+        return NextResponse.json(
+          { error: 'That Groq API key was rejected. Double-check it and try again.' },
+          { status: 401 }
+        )
+      }
+
+      // A 429 that survived the retries means the shared free-tier minute
+      // budget is genuinely saturated — one full run spends most of it. Say so
+      // plainly instead of "failed to complete", which reads as a broken demo
+      // and gives the visitor no idea that waiting actually fixes it.
+      if (err.status === 429) {
+        return NextResponse.json(
+          {
+            error:
+              'The shared free tier is rate limited right now — one run uses most of its per-minute budget. Wait about a minute and try again, or paste your own Groq API key to skip the queue.',
+            requiresByok: true,
+          },
+          { status: 429 }
+        )
+      }
+
       return NextResponse.json(
-        {
-          error:
-            status === 401
-              ? 'That Groq API key was rejected. Double-check it and try again.'
-              : 'The AI pipeline failed to complete. Please try again.',
-        },
-        { status }
+        { error: 'The AI pipeline failed to complete. Please try again.' },
+        { status: 502 }
       )
     }
     console.error(
