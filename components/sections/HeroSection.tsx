@@ -76,14 +76,18 @@ export function HeroSection() {
             <MountReveal delay={240}>
               {/* "6+ years" is the strongest recruiter/E-E-A-T signal on the
                   site and was previously stated only on /about — the page
-                  fewest visitors reach. Same claim, surfaced on the first
-                  screen. */}
+                  fewest visitors reach. Same claim, surfaced on the first screen.
+
+                  Keep the <strong> followed by a period rather than a space:
+                  JSX trims the leading whitespace of a multi-line text node, so
+                  `</strong> and a…` silently renders as `yearsand a`, and
+                  Prettier rewrites the `{' '}` that would fix it straight back
+                  into that broken literal space. */}
               <p className="text-ds-muted max-w-2xl text-base leading-relaxed sm:text-lg">
-                I&apos;m Adesh Shukla — a frontend developer with{' '}
-                <strong className="text-ds-text font-semibold">6+ years</strong> and a
-                designer&apos;s eye. I build with React and Next.js, turn Figma into
-                high-performance, SEO-ready products, and automate the repetitive parts of the
-                workflow.
+                I&apos;m Adesh Shukla — a frontend developer with a designer&apos;s eye, building
+                for the web for <strong className="text-ds-text font-semibold">6+ years</strong>. I
+                build with React and Next.js, turn Figma into high-performance, SEO-ready products,
+                and automate the repetitive parts of the workflow.
               </p>
             </MountReveal>
 
