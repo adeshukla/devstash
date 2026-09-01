@@ -272,6 +272,22 @@ ${humanizeResult.content}
     let htmlPage: string | null = null
     let htmlPageResult: Awaited<ReturnType<typeof runStep>> | null = null
     if (generateHtmlPage) {
+      // Groq's free tier caps at 8k tokens/minute counting the prompt, so the
+      // article can't be pasted in whole — a 1200-word post would eat the
+      // budget the page itself needs to be written. The landing page only
+      // needs the argument's shape, not every sentence. Cut on a paragraph
+      // break so a card is never sourced from a half-sentence.
+      const ARTICLE_EXCERPT_LIMIT = 1500
+      const rawArticle = humanizeResult.content.trim()
+      let articleExcerpt = rawArticle
+      if (rawArticle.length > ARTICLE_EXCERPT_LIMIT) {
+        const cut = rawArticle.slice(0, ARTICLE_EXCERPT_LIMIT)
+        const lastBreak = Math.max(cut.lastIndexOf('\n\n'), cut.lastIndexOf('. '))
+        articleExcerpt = (
+          lastBreak > ARTICLE_EXCERPT_LIMIT * 0.5 ? cut.slice(0, lastBreak) : cut
+        ).trim()
+      }
+
       htmlPageResult = await runStep(
         [
           {
@@ -281,60 +297,102 @@ ${humanizeResult.content}
           },
           {
             role: 'user',
-            content: `Design and build a single-file HTML landing page for the content below.
+            content: `Design and build a single-file HTML landing page from the article below.
 
-Post title: ${frontmatter.title}
-Post description: ${frontmatter.description}
-Source content — summarize into sections, do not paste verbatim:
+TITLE: ${frontmatter.title}
+DESCRIPTION: ${frontmatter.description}
+CATEGORY: ${frontmatter.category}
+TAGS: ${frontmatter.tags.join(', ')}
+READING TIME: ${frontmatter.readingTime} min
+ARTICLE:
 """
-${humanizeResult.content}
+${articleExcerpt}
 """
 
-## Art direction — follow exactly
+## Use the real content — the most important rule
 
-Dark theme. Put these on :root and use them everywhere; never hard-code a stray colour:
-  --bg:#0B0F19; --surface:#111827; --surface-2:#161F2E;
-  --border:#1F2937; --text:#F3F4F6; --muted:#9CA3AF;
-  --accent:#3B82F6; --accent-2:#8B5CF6;
-Body background is --bg. Never a white or light-grey page.
+A reader must be able to tell what the article covers from the page alone.
+Generic startup filler is a failure.
+- h1 = TITLE verbatim. Hero lead = DESCRIPTION verbatim.
+- CATEGORY as a small uppercase eyebrow above the h1; each TAG as a rounded
+  chip; READING TIME beside them.
+- Every card comes from a REAL point in ARTICLE: heading = that point in 2-5
+  words, body = 1-2 sentences of its actual substance. Never generic benefits
+  ("Fast", "Secure", "Scalable"). Fewer cards beats invented ones.
+- Headings and CTA labels reflect this subject — never "Explore"/"Get Started".
+- Never print a "[TODO: ...]" marker from ARTICLE, and never write copy around
+  one as if filled in; skip that point and use another.
+- Invent NOTHING factual — no testimonials, logos, pricing, or statistics.
 
-Type: system-ui stack, but set a real fluid scale with clamp() —
-h1 clamp(2.5rem,7vw,4.5rem) with letter-spacing:-.03em and line-height:1.05;
-h2 clamp(1.75rem,4vw,2.5rem); body 1rem/1.7; muted text uses --muted.
-Give the h1 (or a span inside it) a background-clip:text gradient from
---accent to --accent-2.
+## Theme — light AND dark, with a working toggle
 
-Space: use a 4/8px rhythm. Sections get padding: clamp(4rem,10vw,7rem) 1.5rem.
-Content max-width 1100px, centred. Nothing is cramped.
+Use EXACTLY this three-block structure — the media query MUST be guarded with
+:not([data-theme="light"]), or a visitor whose OS is in dark mode can never
+switch the page to light and the toggle silently does nothing for them:
 
-Surfaces: cards use --surface, 1px solid --border, border-radius 16px,
-padding 1.5-2rem. On hover: translateY(-4px), border-color --accent,
-and a soft accent glow via box-shadow. Always transition.
+  :root { <LIGHT tokens> }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { <DARK tokens> }
+  }
+  :root[data-theme="dark"] { <DARK tokens> }
 
-## Sections — build all of these, in order
+That way the system preference drives the first paint, and an explicit choice
+wins in BOTH directions. Never give a colour its only definition inside one of
+those blocks.
+  LIGHT: --bg:#FFFFFF; --surface:#F8FAFC; --surface-2:#F1F5F9;
+         --border:#E2E8F0; --text:#0F172A; --muted:#64748B;
+  DARK:  --bg:#0B0F19; --surface:#111827; --surface-2:#161F2E;
+         --border:#1F2937; --text:#F3F4F6; --muted:#9CA3AF;
+  BOTH:  --accent:#3B82F6; --accent-2:#8B5CF6;
+Every colour in the page comes from these tokens — never hard-code a stray hex,
+including translucent ones. The sticky header must tint itself from a token
+(e.g. color-mix(in srgb, var(--bg) 70%, transparent)), NOT a literal
+rgba(0,0,0,...). Any colour whose only definition sits inside a
+prefers-color-scheme block will not update when the toggle is used — so define
+every colour through the tokens above and never re-declare one per media query.
+Give body a token background and a colour transition so switching feels smooth.
 
-1. Sticky header: small wordmark left, 3-4 nav links right, one accent
-   button. background: rgba(11,15,25,.7) + backdrop-filter: blur(12px),
-   bottom border. Nav links collapse into a working hamburger under 720px.
-2. Hero: oversized h1, a --muted subheading (max-width ~60ch), two CTAs
-   (one solid --accent, one bordered ghost). Behind it, 2-3 large blurred
-   radial-gradient blobs (300-500px, filter:blur(90px), opacity .15-.25,
-   ONLY --accent/--accent-2 hues, position:absolute, z-index:-1,
-   pointer-events:none). Never yellow/green/pink.
-3. Feature grid: 3 cards in an asymmetric/bento grid (grid-template-columns
-   with a wider first card on desktop, single column on mobile). Each card
-   gets a small icon drawn as INLINE SVG (stroke:currentColor) — never emoji.
-4. A wide 16:9 [Image placeholder] block, dashed --border, --surface-2 fill,
+## Art direction
+
+Type: system-ui stack with a fluid scale — h1 clamp(2.5rem,7vw,4.5rem),
+letter-spacing:-.03em, line-height:1.05; h2 clamp(1.75rem,4vw,2.5rem);
+body 1rem/1.7. Give the h1 (or a span in it) a background-clip:text gradient
+from --accent to --accent-2.
+Space: sections padding clamp(4rem,10vw,7rem) 1.5rem; content max-width 1100px,
+centred; nothing cramped.
+Surfaces: cards use --surface, 1px solid --border, radius 16px, padding
+1.5-2rem; on hover translateY(-4px), border-color --accent, soft accent glow.
+
+## Sections — in this order. This is a standalone landing page: NO nav menu,
+## no nav links, no hamburger. Nothing should link to a page that doesn't exist.
+
+1. Minimal header: a short wordmark derived from the title on the left, and the
+   theme toggle button on the right. No navigation links at all.
+   Sticky, translucent via backdrop-filter: blur(12px), bottom border.
+2. Hero: category eyebrow, oversized h1, the description as a --muted lead
+   (max-width ~60ch), tag chips + reading time, and ONE primary accent CTA
+   whose label fits this subject. Behind it 2-3 large blurred radial-gradient
+   blobs — width:min(420px,80vw), filter:blur(90px), opacity .15-.25, ONLY
+   --accent/--accent-2 hues, position:absolute, z-index:-1, pointer-events:none.
+   Never yellow/green/pink.
+3. Feature grid: 2-4 cards sourced from ARTICLE per the content rule above, in a
+   responsive grid (single column on mobile). Each card gets a small INLINE SVG
+   icon (stroke:currentColor, no fill) — never emoji.
+4. A wide 16:9 [Image placeholder] block: dashed --border, --surface-2 fill,
    centred --muted label.
-5. Closing CTA band on --surface-2 with a heading and one accent button.
-6. Footer: one line, --muted, top border.
+5. Closing band on --surface-2: a heading about this subject and one accent CTA.
+6. Footer: one --muted line with a top border.
 
-## Interactivity — implement all three in one inline script
+## Interactivity — all three, in one inline script
 
-- IntersectionObserver scroll-reveal: elements start opacity:0,
-  translateY(24px) and animate in when 15% visible, staggered ~80ms by index.
-- The mobile hamburger actually toggles the nav, with aria-expanded kept in sync.
-- Cards respond on hover/focus per the surface rules above.
+- Theme toggle: sets data-theme on <html>, swaps its icon and aria-pressed,
+  persists the choice to localStorage inside try/catch (it can throw in private
+  mode), and restores it on load before first paint where possible. Its sun and
+  moon icons are INLINE SVG like every other icon — never the emoji characters
+  and never any emoji anywhere on the page. Give it an aria-label.
+- IntersectionObserver scroll-reveal: elements start opacity:0
+  translateY(24px), animate in at 15% visibility, staggered ~80ms by index.
+- Cards respond on hover and keyboard focus.
 Wrap all motion in @media (prefers-reduced-motion: reduce) so it is disabled.
 
 ## Hard rules
@@ -353,8 +411,10 @@ Wrap all motion in @media (prefers-reduced-motion: reduce) so it is disabled.
 - Invent NOTHING factual: no testimonials, logos, pricing, company names, or
   statistics that are not in the source content above. If a section would
   normally need one, write a bracketed placeholder instead.
-- Semantic landmarks (header/main/section/footer), exactly one h1, visible
-  :focus-visible outline, and keyboard-reachable controls.
+- Semantic landmarks (header/main/section/footer), exactly one h1, and every
+  control keyboard-reachable. You MUST include an explicit
+  \`:focus-visible{outline:2px solid var(--accent);outline-offset:2px}\` rule —
+  a page with no visible focus ring is not acceptable.
 - Output the complete document, <!doctype html> through </html>. Do not
   truncate or abbreviate any section.`,
           },
@@ -366,16 +426,29 @@ Wrap all motion in @media (prefers-reduced-motion: reduce) so it is disabled.
           // detailed needs the larger model and real output room; the short
           // text steps above are fine on the cheaper default.
           modelOverride: 'openai/gpt-oss-120b',
-          // Groq's free tier caps at 8k tokens per minute and counts the
-          // prompt toward it, so prompt (~1.2k) + max_tokens must stay under
-          // that or the request is rejected outright rather than truncated.
-          // The cap is per-model, so this budget is separate from the 20b one
-          // the three text steps above are spending.
-          maxTokens: 6500,
+          // 8k tokens/minute, prompt included, or the request is rejected
+          // outright rather than truncated. Budget: ~1.4k instructions + up to
+          // ~0.7k article excerpt leaves comfortably over 5.6k for the page,
+          // and a full page measured ~3.2k completion tokens. The cap is
+          // per-model, so this is separate from the 20b budget the three text
+          // steps above spend.
+          maxTokens: 5200,
           temperature: 0.6,
         }
       )
       htmlPage = stripCodeFence(htmlPageResult.content)
+
+      // If the model hit the token ceiling mid-document the HTML is cut off
+      // mid-tag and renders as a broken fragment. Close it so the preview and
+      // the downloaded file are at least valid, rather than handing back
+      // something that silently looks finished but isn't.
+      const truncated = htmlPageResult.finishReason === 'length' || !/<\/html>\s*$/i.test(htmlPage)
+      if (truncated) {
+        if (!/<\/body>/i.test(htmlPage)) htmlPage += '\n</body>'
+        if (!/<\/html>/i.test(htmlPage)) htmlPage += '\n</html>'
+        htmlPage +=
+          '\n<!-- NOTE: generation hit the token limit and this document was closed automatically. Re-run to get a complete page. -->'
+      }
     }
 
     const metrics: PipelineMetrics = {

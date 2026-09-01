@@ -47,6 +47,8 @@ export interface GroqCallResult {
   completionTokens: number
   latencyMs: number
   provider: string
+  /** 'stop' = the model finished; 'length' = it hit the token cap mid-output. */
+  finishReason: string
 }
 
 export class GroqCallError extends Error {
@@ -111,6 +113,7 @@ async function callProvider(
     completionTokens: data?.usage?.completion_tokens ?? 0,
     latencyMs,
     provider: config.name,
+    finishReason: data?.choices?.[0]?.finish_reason ?? 'unknown',
   }
 }
 
