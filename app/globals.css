@@ -945,3 +945,136 @@ body {
     transform: none !important;
   }
 }
+
+/* ─── Lab previews ──────────────────────────────────────────────────────────
+   Motion for the live previews on /lab (components/lab/LabPreview.tsx). Every
+   entry there demonstrates its own output rather than describing it, so this
+   motion is content, not decoration — it is the reason the page reads as a lab.
+   Gated on no-preference: with reduced motion the previews render as static
+   diagrams, which still communicate the shape of each tool. */
+@media (prefers-reduced-motion: no-preference) {
+  .lab-fill {
+    width: 0;
+    animation: labFill 2.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+  .lab-morph {
+    border-radius: 42% 58% 63% 37% / 47% 42% 58% 53%;
+    animation: labMorph 7s ease-in-out infinite alternate;
+  }
+  .lab-draw {
+    stroke-dasharray: 180;
+    stroke-dashoffset: 180;
+    animation: labDraw 3.2s ease-out infinite;
+  }
+  .lab-blink {
+    animation: pulse2 2.4s ease-in-out infinite;
+  }
+  .lab-rise {
+    opacity: 0;
+    animation: labRise 3.4s ease-out infinite;
+  }
+  /* Scale only — never opacity. These chips carry real text, and fading text
+     in from transparent puts it below the contrast floor for the duration of
+     the animation, which an auditor correctly flags. */
+  .lab-pop {
+    transform: scale(0.82);
+    animation: labPop 3s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+  }
+  .lab-pulse {
+    animation: pulse2 2.8s ease-in-out infinite;
+  }
+}
+
+/* Static, legible fallbacks so a reduced-motion visitor sees a finished
+   diagram rather than an empty frame. */
+@media (prefers-reduced-motion: reduce) {
+  .lab-fill {
+    width: 70%;
+  }
+  .lab-morph {
+    border-radius: 42% 58% 63% 37% / 47% 42% 58% 53%;
+  }
+  .lab-draw {
+    stroke-dasharray: none;
+  }
+}
+
+@keyframes labFill {
+  0%,
+  8% {
+    width: 0;
+  }
+  45%,
+  70% {
+    width: 100%;
+  }
+  92%,
+  100% {
+    width: 0;
+  }
+}
+@keyframes labMorph {
+  0% {
+    border-radius: 42% 58% 63% 37% / 47% 42% 58% 53%;
+    transform: rotate(0deg);
+  }
+  50% {
+    border-radius: 63% 37% 41% 59% / 38% 61% 39% 62%;
+  }
+  100% {
+    border-radius: 35% 65% 55% 45% / 60% 35% 65% 40%;
+    transform: rotate(12deg);
+  }
+}
+@keyframes labDraw {
+  0% {
+    stroke-dashoffset: 180;
+  }
+  55%,
+  85% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 180;
+  }
+}
+@keyframes labRise {
+  0%,
+  6% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  25%,
+  80% {
+    opacity: 1;
+    transform: none;
+  }
+  95%,
+  100% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+@keyframes labPop {
+  0%,
+  8% {
+    transform: scale(0.82);
+  }
+  28%,
+  78% {
+    transform: scale(1);
+  }
+  95%,
+  100% {
+    transform: scale(0.82);
+  }
+}
+
+/* ─── Browser surfaces ──────────────────────────────────────────────────────
+   Selection ships with a browser default that belongs to no design system;
+   theming it is the cheapest signal a page was built rather than assembled.
+   The scrollbar above is already themed. */
+::selection {
+  background-color: color-mix(in srgb, var(--color-ds-accent) 28%, transparent);
+  color: var(--color-ds-text);
+}

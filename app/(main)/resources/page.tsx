@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
-import { Badge, Card, CardTilt, Reveal, PageHeaderGlow } from '@/components/ui'
+import { PageHeaderGlow } from '@/components/ui'
 import { Icon, type IconName } from '@/components/icons/Icon'
 import resourcesData from '@/content/resources/resources.json'
 
@@ -32,11 +32,11 @@ interface Resource {
 
 const CATEGORY_LABELS: Record<Resource['category'], string> = {
   docs: 'Docs',
-  article: 'Article / Blog',
-  course: 'Course',
-  repo: 'Repository',
+  article: 'Articles',
+  course: 'Courses',
+  repo: 'Repositories',
   video: 'Video',
-  tool: 'Tool',
+  tool: 'Tools',
 }
 
 const CATEGORY_ICONS: Record<Resource['category'], IconName> = {
@@ -48,16 +48,22 @@ const CATEGORY_ICONS: Record<Resource['category'], IconName> = {
   tool: 'devtools',
 }
 
-const CATEGORY_VARIANTS: Record<
-  Resource['category'],
-  'blue' | 'purple' | 'green' | 'default' | 'warn' | 'muted'
-> = {
-  docs: 'blue',
-  article: 'purple',
-  course: 'green',
-  repo: 'default',
-  video: 'warn',
-  tool: 'muted',
+const CATEGORY_ORDER: Resource['category'][] = [
+  'docs',
+  'article',
+  'course',
+  'repo',
+  'video',
+  'tool',
+]
+
+/** The host, shown so a reader can judge the source before committing a click. */
+function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return ''
+  }
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -70,13 +76,14 @@ export default function ResourcesPage() {
     return acc
   }, {})
 
+  const orderedCats = CATEGORY_ORDER.filter((cat) => grouped[cat]?.length)
+
   return (
     <main>
-      {/* ── Header ── */}
       {/* Breadcrumb handles its own buildBreadcrumbSchema JsonLd internally */}
       <section className="border-ds-border relative overflow-hidden border-b py-16">
         <PageHeaderGlow />
-        <div className="mx-auto max-w-5xl px-6">
+        <div className="mx-auto max-w-3xl px-6">
           <Breadcrumb
             items={[
               { name: 'Home', url: 'https://devstash.me' },
@@ -86,62 +93,63 @@ export default function ResourcesPage() {
           <h1 className="text-ds-text mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
             Resources
           </h1>
-          <p className="text-ds-muted mt-3 max-w-xl">
-            Docs, articles, and references I keep coming back to. No SEO filler — just the stuff
-            that actually helps.
+          <p className="text-ds-muted mt-4 max-w-[68ch] text-lg leading-relaxed">
+            The docs, articles and references I actually go back to — not a link dump. Every entry
+            here earned its place by being useful more than once.
+          </p>
+          <p className="text-ds-muted mt-6 text-sm">
+            {resources.length} resources across {orderedCats.length} categories
           </p>
         </div>
       </section>
 
-      {/* ── Content ── */}
+      {/* A reading list, not a card grid: title first, one line of why, and the
+          source host so the reader can judge before clicking. */}
       <section className="py-16">
-        <div className="mx-auto flex max-w-5xl flex-col gap-16 px-6">
-          {(Object.keys(grouped) as Resource['category'][]).map((cat) => (
-            <div key={cat}>
-              <h2 className="text-ds-text mb-6 flex items-center gap-3 text-xl font-bold">
-                <Icon name={CATEGORY_ICONS[cat]} className="text-ds-accent h-5 w-5 flex-shrink-0" />
+        <div className="mx-auto flex max-w-3xl flex-col gap-14 px-6">
+          {orderedCats.map((cat) => (
+            <section key={cat} aria-labelledby={`cat-${cat}`}>
+              <h2
+                id={`cat-${cat}`}
+                className="text-ds-text mb-1 flex items-center gap-2.5 text-sm font-semibold tracking-wide uppercase"
+              >
+                <Icon name={CATEGORY_ICONS[cat]} className="text-ds-accent h-4 w-4 shrink-0" />
                 {CATEGORY_LABELS[cat]}
+                <span className="text-ds-muted text-xs font-normal normal-case">
+                  {grouped[cat]?.length}
+                </span>
               </h2>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {grouped[cat]?.map((resource, i) => (
-                  <Reveal key={resource.id} delay={(i % 6) * 60}>
-                    <CardTilt>
-                      <Link
-                        href={resource.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                      >
-                        <Card variant="spotlight" className="h-full">
-                          <div className="flex flex-col gap-3 p-5">
-                            <div className="flex items-center justify-between gap-2">
-                              <Badge
-                                variant={CATEGORY_VARIANTS[resource.category]}
-                                icon={<Icon name={CATEGORY_ICONS[resource.category]} />}
-                              >
-                                {CATEGORY_LABELS[resource.category]}
-                              </Badge>
-                              {resource.free && <Badge variant="muted">Free</Badge>}
-                            </div>
-                            <h3 className="text-ds-text group-hover:text-ds-accent font-semibold transition-colors">
-                              {resource.title}
-                            </h3>
-                            <p className="text-ds-muted text-sm">{resource.description}</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {resource.tags.map((t) => (
-                                <span key={t} className="text-ds-muted font-mono text-xs">
-                                  #{t}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        </Card>
-                      </Link>
-                    </CardTilt>
-                  </Reveal>
+
+              <ul className="divide-y divide-[var(--color-ds-border)]">
+                {grouped[cat]?.map((resource) => (
+                  <li key={resource.id}>
+                    <Link
+                      href={resource.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg -mx-3 block rounded-lg px-3 py-4 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                    >
+                      <div className="flex items-baseline justify-between gap-4">
+                        <h3 className="text-ds-text group-hover:text-ds-accent font-medium transition-colors">
+                          {resource.title}
+                        </h3>
+                        <span className="text-ds-muted flex shrink-0 items-center gap-1.5 text-xs">
+                          {!resource.free && <span>Paid</span>}
+                          <span className="hidden sm:inline">{hostOf(resource.url)}</span>
+                          <Icon
+                            name="external-link"
+                            className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+                          />
+                        </span>
+                      </div>
+                      <p className="text-ds-muted mt-1 max-w-[68ch] text-sm leading-relaxed">
+                        {resource.description}
+                      </p>
+                    </Link>
+                  </li>
                 ))}
-              </div>
-            </div>
+              </ul>
+            </section>
           ))}
         </div>
       </section>

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
-import { Badge, Card, CardTilt, Reveal, PageHeaderGlow } from '@/components/ui'
+import { PageHeaderGlow } from '@/components/ui'
 import { Icon, type IconName } from '@/components/icons/Icon'
 import toolsData from '@/content/tools/tools.json'
 
@@ -71,76 +71,74 @@ export default function ToolsPage() {
   }, {})
 
   const orderedCats = CATEGORY_ORDER.filter((cat) => grouped[cat]?.length)
+  const freeCount = tools.filter((t) => t.free).length
 
   return (
     <main>
-      {/* ── Header ── */}
       {/* Breadcrumb handles its own buildBreadcrumbSchema JsonLd internally */}
       <section className="border-ds-border relative overflow-hidden border-b py-16">
         <PageHeaderGlow side="right" />
-        <div className="mx-auto max-w-5xl px-6">
+        <div className="mx-auto max-w-3xl px-6">
           <Breadcrumb
             items={[
               { name: 'Home', url: 'https://devstash.me' },
               { name: 'Tools', url: 'https://devstash.me/tools' },
             ]}
           />
-          <h1 className="text-ds-text mt-6 text-4xl font-bold tracking-tight sm:text-5xl">Tools</h1>
-          <p className="text-ds-muted mt-3 max-w-xl">
-            What&apos;s actually running on my machine. No affiliate links, no sponsored picks —
-            just the stack I reach for every day.
+          <h1 className="text-ds-text mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
+            What&apos;s actually on my machine
+          </h1>
+          <p className="text-ds-muted mt-4 max-w-[68ch] text-lg leading-relaxed">
+            The stack I reach for every day, and what each thing is genuinely for. No affiliate
+            links, no sponsored picks, nothing I don&apos;t open in a normal week.
+          </p>
+          <p className="text-ds-muted mt-6 text-sm">
+            {tools.length} tools · {freeCount} free
           </p>
         </div>
       </section>
 
-      {/* ── Tool groups ── */}
+      {/* An inventory, not a card grid. Each row is name + what it's for, which
+          is the only question this page has to answer. */}
       <section className="py-16">
-        <div className="mx-auto flex max-w-5xl flex-col gap-16 px-6">
+        <div className="mx-auto flex max-w-3xl flex-col gap-14 px-6">
           {orderedCats.map((cat) => (
-            <div key={cat}>
-              <h2 className="text-ds-text mb-6 flex items-center gap-3 text-xl font-bold">
-                <Icon name={CATEGORY_ICONS[cat]} className="text-ds-accent h-5 w-5 flex-shrink-0" />
+            <section key={cat} aria-labelledby={`cat-${cat}`}>
+              <h2
+                id={`cat-${cat}`}
+                className="text-ds-text mb-1 flex items-center gap-2.5 text-sm font-semibold tracking-wide uppercase"
+              >
+                <Icon name={CATEGORY_ICONS[cat]} className="text-ds-accent h-4 w-4 shrink-0" />
                 {CATEGORY_LABELS[cat]}
-                <span className="bg-ds-border h-px flex-1" aria-hidden="true" />
               </h2>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {grouped[cat]?.map((tool, i) => (
-                  <Reveal key={tool.id} delay={(i % 6) * 60}>
-                    <CardTilt>
-                      <Link
-                        href={tool.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                      >
-                        <Card variant="spotlight" className="h-full">
-                          <div className="flex flex-col gap-3 p-5">
-                            <div className="flex items-center justify-between">
-                              <h3 className="text-ds-text group-hover:text-ds-accent font-semibold transition-colors">
-                                {tool.name}
-                              </h3>
-                              {tool.free ? (
-                                <Badge variant="green">Free</Badge>
-                              ) : (
-                                <Badge variant="muted">Paid</Badge>
-                              )}
-                            </div>
-                            <p className="text-ds-muted text-sm">{tool.description}</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {tool.tags.map((t) => (
-                                <span key={t} className="text-ds-muted font-mono text-xs">
-                                  #{t}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        </Card>
-                      </Link>
-                    </CardTilt>
-                  </Reveal>
+
+              <ul className="divide-y divide-[var(--color-ds-border)]">
+                {grouped[cat]?.map((tool) => (
+                  <li key={tool.id}>
+                    <Link
+                      href={tool.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg -mx-3 grid gap-1 rounded-lg px-3 py-4 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:grid-cols-[13rem_1fr] sm:items-baseline sm:gap-6"
+                    >
+                      <div className="flex items-baseline gap-2">
+                        <h3 className="text-ds-text group-hover:text-ds-accent font-medium transition-colors">
+                          {tool.name}
+                        </h3>
+                        {!tool.free && <span className="text-ds-muted text-xs">Paid</span>}
+                        <Icon
+                          name="external-link"
+                          className="text-ds-muted h-3 w-3 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+                        />
+                      </div>
+                      <p className="text-ds-muted max-w-[68ch] text-sm leading-relaxed">
+                        {tool.description}
+                      </p>
+                    </Link>
+                  </li>
                 ))}
-              </div>
-            </div>
+              </ul>
+            </section>
           ))}
         </div>
       </section>
