@@ -3,6 +3,7 @@ import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { ShapeCustomizer } from '@/components/lab/ShapeCustomizer'
 import { BorderCustomizer } from '@/components/lab/BorderCustomizer'
 import { ShadowCustomizer } from '@/components/lab/ShadowCustomizer'
+import { SurfaceStudio } from '@/components/lab/SurfaceStudio'
 import { CssCodeBlock } from '@/components/lab/CssCodeBlock'
 
 export const metadata: Metadata = buildMetadata({
@@ -181,6 +182,20 @@ export default function CssShapesPlaygroundPage() {
             exact CSS for what&apos;s on screen.
           </p>
           <ShapeCustomizer />
+        </div>
+      </section>
+
+      {/* ── Surface studio ── */}
+      <section className="border-ds-border border-b px-6 py-16">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-ds-text mb-2 text-2xl font-bold">Surfaces</h2>
+          <p className="text-ds-muted mb-8">
+            The three treatments that actually get pasted into real projects — a frosted glass
+            panel, a gradient with a real middle stop, and a shadow built from stacked layers rather
+            than one flat blur. Every control takes your own colour, and each one copies out as
+            either CSS or a Tailwind arbitrary-value class.
+          </p>
+          <SurfaceStudio />
         </div>
       </section>
 
