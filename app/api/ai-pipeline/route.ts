@@ -18,6 +18,7 @@ import {
   HERO_VISUAL_CSS,
   HERO_VISUAL_HTML,
 } from '@/lib/ai/landingPageChrome'
+import { buildContentSections, CONTENT_SECTIONS_CSS } from '@/lib/ai/contentSections'
 import { BLOG_CATEGORIES } from '@/types/blog'
 import type { PipelineMetrics, DemoFrontmatter } from '@/types/aiPipeline'
 
@@ -36,6 +37,18 @@ const CATEGORY_VALUES = BLOG_CATEGORIES.map((c) => c.value) as [string, ...strin
 // deliberation, so reasoning is pinned low. Leaving max_tokens unset keeps
 // all three inside the shared per-model tokens-per-minute budget.
 const TEXT_STEP_OPTIONS = { reasoningEffort: 'low' } as const
+
+// Groq reserves prompt + max_tokens against the per-minute ceiling, and an
+// UNSET max_tokens reserves the model default (~2048). Three text steps at the
+// default therefore reserve ~8.2k against an 8k limit and the run 429s partway
+// through — which is the intermittent "pipeline failed to complete" users hit.
+// Sizing each step to what it actually needs (reasoning is pinned low, so
+// these are close to the visible output) brings the run to well under half the
+// budget and leaves room for the 120b page step on its own separate quota.
+function textStepBudget(targetLengthWords: number) {
+  // ~1.4 tokens per word, doubled for headroom, clamped to something sane.
+  return Math.min(2200, Math.max(700, Math.round(targetLengthWords * 2.4)))
+}
 
 // ─── Zod schemas ────────────────────────────────────────────────────────────
 
@@ -182,18 +195,6 @@ const ARTICLE_SECTION_CSS = `
   .article-inner th { color: var(--text); font-weight: 600; background: var(--surface-2); }
   .article-inner td { color: var(--muted); }`
 
-function buildArticleSection(markdown: string): string {
-  const body = renderArticleHtml(markdown)
-  if (!body) return ''
-  return `
-<section id="article" class="article-section reveal" aria-labelledby="article-heading">
-  <div class="article-inner">
-    <h2 id="article-heading">The full write-up</h2>
-    ${body}
-  </div>
-</section>`
-}
-
 /**
  * Everything the page must contain regardless of what the model returned.
  *
@@ -214,6 +215,7 @@ ${LAYOUT_CSS}
 ${REVEAL_SAFE_CSS}
 ${HERO_VISUAL_CSS}
 ${ARTICLE_SECTION_CSS}
+${CONTENT_SECTIONS_CSS}
 ${CONTACT_FORM_CSS}
 </style>`
 
@@ -222,6 +224,23 @@ ${CONTACT_FORM_CSS}
     : /<body[^>]*>/i.test(html)
       ? html.replace(/(<body[^>]*>)/i, `$1${SCROLL_GUARD_CSS}${injectedCss}`)
       : html + SCROLL_GUARD_CSS + injectedCss
+
+  // Without this meta the browser lays out at ~980px and then zooms the whole
+  // page down to fit, which reads as "responsive" in a screenshot but is
+  // actually just tiny and unreadable on a phone. Force it rather than trust
+  // the model to have written it.
+  if (!/<meta[^>]+name=["']viewport["']/i.test(out)) {
+    const viewport = '\n<meta name="viewport" content="width=device-width, initial-scale=1">'
+    out = /<head[^>]*>/i.test(out)
+      ? out.replace(/(<head[^>]*>)/i, `$1${viewport}`)
+      : `${viewport}\n${out}`
+  }
+
+  // Footer credits the brand, not the person.
+  out = out.replace(/<footer\b[\s\S]*?<\/footer>/i, () => {
+    const year = new Date().getFullYear()
+    return `<footer class="ds-footer"><p>© ${year} DevStash. All rights reserved.</p></footer>`
+  })
 
   // Hero visual: the model is told to leave a marker for it rather than build
   // its own showpiece, which previously ate a full screen of height. If the
@@ -235,13 +254,29 @@ ${CONTACT_FORM_CSS}
 
   // Article + form go before the footer when there is one, so the footer stays
   // last; otherwise append to the end of body.
-  const tail = `${buildArticleSection(articleMarkdown)}\n${CONTACT_FORM_HTML}`
+  const contentSections = buildContentSections(articleMarkdown)
+
+  // Reading order matters: hero -> the model's feature cards -> the real
+  // content -> the model's closing CTA band -> the form. Appending everything
+  // before the footer put the closing "ready to start?" band ahead of the
+  // content it is supposed to close, so the content goes before the LAST
+  // section the model wrote instead.
+  const lastSection = out.lastIndexOf('<section')
+  if (contentSections && lastSection > -1) {
+    out = out.slice(0, lastSection) + contentSections + '\n' + out.slice(lastSection)
+  } else if (contentSections) {
+    out = /<footer[\s>]/i.test(out)
+      ? out.replace(/(<footer[\s>])/i, `${contentSections}\n$1`)
+      : out.replace(/<\/body>/i, `${contentSections}\n</body>`)
+  }
+
+  // The form always sits last, immediately before the footer.
   if (/<footer[\s>]/i.test(out)) {
-    out = out.replace(/(<footer[\s>])/i, `${tail}\n$1`)
+    out = out.replace(/(<footer[\s>])/i, `${CONTACT_FORM_HTML}\n$1`)
   } else if (/<\/body>/i.test(out)) {
-    out = out.replace(/<\/body>/i, `${tail}\n</body>`)
+    out = out.replace(/<\/body>/i, `${CONTACT_FORM_HTML}\n</body>`)
   } else {
-    out += tail
+    out += CONTACT_FORM_HTML
   }
 
   // Every call to action points at the form. The prompt says so, but a
@@ -414,7 +449,7 @@ ${humanizeResult.content}
 """`,
         },
       ],
-      { ...TEXT_STEP_OPTIONS, jsonMode: true }
+      { ...TEXT_STEP_OPTIONS, jsonMode: true, maxTokens: 500 }
     )
 
     let frontmatter: DemoFrontmatter

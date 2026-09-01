@@ -43,7 +43,13 @@ function inlineMarkdown(escaped: string): string {
 
 // ─── Article body ────────────────────────────────────────────────────────────
 
+// The scaffold step is told to emit "[TODO: ...]", but it does not always use
+// the brackets — bare "TODO: provide real LCP numbers" lines were reaching the
+// rendered page, which is the one place an author's private note must never
+// appear. Strip the bracketed form anywhere, and any line that is essentially
+// a TODO note (optionally wrapped in bold/emphasis or a list bullet).
 const TODO_MARKER = /\[TODO:[^\]]*\]/gi
+const TODO_LINE = /^[ \t>*_-]*\**\s*TODO\b[^\n]*$/gim
 
 /**
  * Minimal, deliberately boring Markdown -> HTML for the pipeline's own output:
@@ -54,7 +60,7 @@ const TODO_MARKER = /\[TODO:[^\]]*\]/gi
  * substance, and a public landing page is the last place they should surface.
  */
 export function renderArticleHtml(markdown: string): string {
-  const source = markdown.replace(TODO_MARKER, '').trim()
+  const source = markdown.replace(TODO_MARKER, '').replace(TODO_LINE, '').trim()
   if (!source) return ''
 
   const blocks: string[] = []
@@ -209,7 +215,7 @@ export const CONTACT_FORM_HTML = `
                   aria-describedby="lead-message-error"></textarea>
         <p class="field-error" id="lead-message-error" role="alert"></p>
       </div>
-      <button type="submit" class="btn btn-primary lead-submit">Send message</button>
+      <button type="submit" class="cta lead-submit">Send message</button>
       <p class="form-status" id="lead-status" role="status" aria-live="polite"></p>
     </form>
   </div>
@@ -236,7 +242,14 @@ export const CONTACT_FORM_CSS = `
   .form-status { margin: .25rem 0 0; font-size: .875rem; color: var(--muted); }
   .form-status[data-state="ok"] { color: #10b981; }
   .form-status[data-state="err"] { color: #ef4444; }
-  .lead-submit { align-self: flex-start; }`
+  .lead-submit {
+    align-self: flex-start; cursor: pointer; border: 0;
+    display: inline-block; background: var(--accent); color: #fff;
+    padding: .8rem 1.5rem; border-radius: 10px; font: inherit; font-weight: 600;
+    line-height: 1.2; transition: filter .2s ease, transform .2s ease;
+  }
+  .lead-submit:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .lead-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }`
 
 export const CONTACT_FORM_JS = `
 <script>

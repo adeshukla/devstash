@@ -42,20 +42,29 @@ export const REVEAL_SAFE_CSS = `
  * out, which strands every visitor whose OS is set to dark.
  */
 export const THEME_CSS = `
+  /* Accent and muted differ per theme for contrast reasons, not taste. The
+     brand blue #3B82F6 only reaches 3.67:1 on white and slate-500 muted only
+     4.34:1 on the light surface — both below the 4.5:1 AA floor for normal
+     text, and axe flags every one. Light mode therefore uses a darker accent
+     (#2563EB, 5.0:1 both as text on white and behind white CTA text) and a
+     darker muted (#475569). Dark mode keeps the brand blue, which has ample
+     contrast against the near-black background. */
   :root {
     --bg:#FFFFFF; --surface:#F8FAFC; --surface-2:#F1F5F9;
-    --border:#E2E8F0; --text:#0F172A; --muted:#64748B;
-    --accent:#3B82F6; --accent-2:#8B5CF6;
+    --border:#E2E8F0; --text:#0F172A; --muted:#475569;
+    --accent:#2563EB; --accent-2:#7C3AED;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg:#0B0F19; --surface:#111827; --surface-2:#161F2E;
       --border:#1F2937; --text:#F3F4F6; --muted:#9CA3AF;
+      --accent:#3B82F6; --accent-2:#8B5CF6;
     }
   }
   :root[data-theme="dark"] {
     --bg:#0B0F19; --surface:#111827; --surface-2:#161F2E;
     --border:#1F2937; --text:#F3F4F6; --muted:#9CA3AF;
+    --accent:#3B82F6; --accent-2:#8B5CF6;
   }
   html, body { background: var(--bg) !important; color: var(--text) !important; }
   body { transition: background-color .25s ease, color .25s ease; }`
@@ -69,15 +78,18 @@ export const LAYOUT_CSS = `
   }
   img, svg, video { max-width: 100%; height: auto; }
   section { padding: clamp(3rem,8vw,6rem) 1.25rem; }
-  h1, h2, h3 { line-height: 1.15; letter-spacing: -.02em; margin: 0 0 .5em; }
-  h1 { font-size: clamp(2rem,6vw,3.25rem); }
-  h2 { font-size: clamp(1.5rem,4vw,2.125rem); }
+  h1, h2, h3, h4 { letter-spacing: -.02em; margin: 0 0 .5em; text-wrap: balance; }
+  h1 { font-size: clamp(2rem,5.5vw,3.25rem); line-height: 1.08; font-weight: 800; }
+  h2 { font-size: clamp(1.5rem,3.6vw,2.125rem); line-height: 1.2; font-weight: 700; }
+  h3 { font-size: clamp(1.125rem,2.2vw,1.3125rem); line-height: 1.3; font-weight: 650; }
+  h4 { font-size: 1rem; line-height: 1.4; font-weight: 650; }
+  p { line-height: 1.75; }
   a { color: var(--accent); }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* Header: compact wordmark left, real 40px toggle right. */
   .ds-header {
-    position: sticky; top: 0; z-index: 50;
+    position: sticky !important; top: 0 !important; z-index: 50;
     display: flex; align-items: center; justify-content: space-between; gap: 1rem;
     padding: .7rem clamp(1rem,4vw,2rem);
     background: color-mix(in srgb, var(--bg) 82%, transparent);
