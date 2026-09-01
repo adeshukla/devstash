@@ -32,6 +32,15 @@ export interface GroqMessage {
   content: string
 }
 
+export interface LlmCallOptions {
+  temperature?: number
+  jsonMode?: boolean
+  /** Per-call model override — falls back to the provider's default model. */
+  modelOverride?: string
+  /** Per-call completion cap. Unset means the provider default. */
+  maxTokens?: number
+}
+
 export interface GroqCallResult {
   content: string
   promptTokens: number
@@ -59,7 +68,7 @@ async function callProvider(
   config: ProviderConfig,
   apiKey: string,
   messages: GroqMessage[],
-  options?: { temperature?: number; jsonMode?: boolean }
+  options?: LlmCallOptions
 ): Promise<GroqCallResult> {
   const started = Date.now()
 
@@ -70,9 +79,16 @@ async function callProvider(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: config.model,
+      // A caller can request a bigger model for one step without changing the
+      // provider default — the HTML page builder needs far more capability and
+      // output room than the short text steps do. Only honoured for Groq:
+      // model IDs aren't portable, so passing a Groq ID to the Cerebras
+      // fallback would turn a graceful degrade into a hard 400.
+      model:
+        config.name === 'groq' && options?.modelOverride ? options.modelOverride : config.model,
       messages,
       temperature: options?.temperature ?? 0.7,
+      ...(options?.maxTokens ? { max_tokens: options.maxTokens } : {}),
       ...(options?.jsonMode ? { response_format: { type: 'json_object' } } : {}),
     }),
   })
@@ -106,7 +122,7 @@ async function callProvider(
 export async function callGroq(
   apiKey: string,
   messages: GroqMessage[],
-  options?: { temperature?: number; jsonMode?: boolean }
+  options?: LlmCallOptions
 ): Promise<GroqCallResult> {
   return callProvider(GROQ, apiKey, messages, options)
 }
@@ -123,7 +139,7 @@ export function hasAnyProviderConfigured(): boolean {
  */
 export async function callWithFallback(
   messages: GroqMessage[],
-  options?: { temperature?: number; jsonMode?: boolean }
+  options?: LlmCallOptions
 ): Promise<GroqCallResult> {
   const configured = FALLBACK_CHAIN.filter((c) => process.env[c.apiKeyEnv])
   if (configured.length === 0) {
