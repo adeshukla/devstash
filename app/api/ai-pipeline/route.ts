@@ -134,12 +134,45 @@ const SCROLL_GUARD_CSS = `
 <style>
   /* injected: guarantees the document can always scroll vertically */
   html, body { height: auto !important; max-height: none !important; overflow-y: visible !important; }
+  /* injected: if scripting is unavailable, never leave reveal content hidden */
+  @media (scripting: none) {
+    [class*="reveal"], [class*="fade"], [class*="animate"] { opacity: 1 !important; transform: none !important; }
+  }
 </style>`
 
-function injectScrollGuard(html: string): string {
-  if (/<\/head>/i.test(html)) return html.replace(/<\/head>/i, `${SCROLL_GUARD_CSS}\n</head>`)
-  if (/<body[^>]*>/i.test(html)) return html.replace(/(<body[^>]*>)/i, `$1${SCROLL_GUARD_CSS}`)
-  return html + SCROLL_GUARD_CSS
+// Scroll-reveal patterns start content at opacity:0 and depend on an
+// IntersectionObserver to show it. When that observer never runs — a throttled
+// background tab, a sandboxed preview frame, any JS error earlier on the page —
+// every section below the hero stays invisible forever and the page reads as
+// "it only generated a hero". The prompt now asks for a .js-gated fallback, but
+// this failsafe guarantees it: anything still hidden after 1.5s gets shown.
+const REVEAL_FAILSAFE_JS = `
+<script>
+  (function () {
+    setTimeout(function () {
+      var sel = '[class*="reveal"],[class*="fade"],[class*="animate"]'
+      document.querySelectorAll(sel).forEach(function (el) {
+        if (parseFloat(getComputedStyle(el).opacity) < 0.05) {
+          el.style.setProperty('opacity', '1', 'important')
+          el.style.setProperty('transform', 'none', 'important')
+        }
+      })
+    }, 1500)
+  })()
+</script>`
+
+function injectRuntimeGuards(html: string): string {
+  let out = /<\/head>/i.test(html)
+    ? html.replace(/<\/head>/i, `${SCROLL_GUARD_CSS}\n</head>`)
+    : /<body[^>]*>/i.test(html)
+      ? html.replace(/(<body[^>]*>)/i, `$1${SCROLL_GUARD_CSS}`)
+      : html + SCROLL_GUARD_CSS
+
+  out = /<\/body>/i.test(out)
+    ? out.replace(/<\/body>/i, `${REVEAL_FAILSAFE_JS}\n</body>`)
+    : out + REVEAL_FAILSAFE_JS
+
+  return out
 }
 
 // ─── POST handler ───────────────────────────────────────────────────────────
@@ -335,6 +368,7 @@ ${humanizeResult.content}
 
 TITLE: ${frontmatter.title}
 DESCRIPTION: ${frontmatter.description}
+SLUG: ${frontmatter.slug}
 CATEGORY: ${frontmatter.category}
 TAGS: ${frontmatter.tags.join(', ')}
 READING TIME: ${frontmatter.readingTime} min
@@ -342,6 +376,23 @@ ARTICLE:
 """
 ${articleExcerpt}
 """
+
+## <head> — emit the frontmatter as real SEO tags
+
+Build the head from the values above, not invented ones:
+  <title> = TITLE
+  <meta name="description" content="DESCRIPTION">
+  <meta name="keywords" content="TAGS">
+  <meta name="author" content="Adesh Shukla">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://devstash.me/blog/SLUG">
+  Open Graph: og:type=article, og:title, og:description, og:url (the canonical)
+  Twitter: twitter:card=summary_large_image, twitter:title, twitter:description
+  <meta name="article:section" content="CATEGORY"> and one article:tag per TAG
+Also emit a JSON-LD <script type="application/ld+json"> BlogPosting with
+headline, description, keywords, articleSection, author (Person "Adesh
+Shukla") and mainEntityOfPage set to the canonical URL. Omit any image field
+entirely rather than pointing it at something that is not an image.
 
 ## Use the real content — the most important rule
 
@@ -434,8 +485,16 @@ Surfaces: cards use --surface, 1px solid --border, radius 16px, padding
   mode), and restores it on load before first paint where possible. Its sun and
   moon icons are INLINE SVG like every other icon — never the emoji characters
   and never any emoji anywhere on the page. Give it an aria-label.
-- IntersectionObserver scroll-reveal: elements start opacity:0
-  translateY(24px), animate in at 15% visibility, staggered ~80ms by index.
+- IntersectionObserver scroll-reveal, but content MUST NEVER depend on JS to
+  become visible. Never write a bare \`.reveal{opacity:0}\`: if the observer
+  does not run — throttled tab, sandboxed preview, a JS error — the whole page
+  below the hero stays permanently invisible. Put \`<script>document
+  .documentElement.classList.add('js')</script>\` as the FIRST thing in <head>,
+  then gate the hidden state on it:
+    .reveal{opacity:1}
+    .js .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+    .js .reveal.revealed{opacity:1;transform:none}
+  Reveal at 15% visibility, staggered ~80ms by index.
 - Cards respond on hover and keyboard focus.
 Wrap all motion in @media (prefers-reduced-motion: reduce) so it is disabled.
 
@@ -488,7 +547,7 @@ Wrap all motion in @media (prefers-reduced-motion: reduce) so it is disabled.
           temperature: 0.6,
         }
       )
-      htmlPage = injectScrollGuard(stripCodeFence(htmlPageResult.content))
+      htmlPage = injectRuntimeGuards(stripCodeFence(htmlPageResult.content))
 
       // If the model hit the token ceiling mid-document the HTML is cut off
       // mid-tag and renders as a broken fragment. Close it so the preview and
