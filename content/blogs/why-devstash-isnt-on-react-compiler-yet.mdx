@@ -1,0 +1,42 @@
+---
+title: 'Why DevStash Isn''t on React Compiler Yet'
+slug: 'why-devstash-isnt-on-react-compiler-yet'
+description: 'React Compiler auto-memoizes at build time and is one of 2026''s most-discussed shifts. What it does, and the specific reason this site hasn''t adopted it yet.'
+author: 'Adesh Shukla'
+createdAt: '2026-09-04'
+updatedAt: '2026-09-04'
+category: 'frontend'
+tags: ['react', 'react-compiler', 'performance', 'nextjs']
+readingTime: 4
+canonical: 'https://devstash.me/blog/why-devstash-isnt-on-react-compiler-yet'
+draft: false
+featured: false
+---
+
+React Compiler is one of the most-discussed frontend shifts of 2026, and it's a genuinely good idea: automatic memoization, handled at build time, so you stop hand-writing `useMemo` and `useCallback` to prevent re-renders. DevStash doesn't use it. Not because it's bad — because of one specific, boring constraint already written into this project's own rules, and it's worth explaining rather than quietly skipping the topic.
+
+## What it actually does
+
+Before React Compiler, avoiding unnecessary re-renders was manual work: wrap an expensive computation in `useMemo`, wrap a callback passed to a memoized child in `useCallback`, and hope you remembered every dependency correctly.
+
+```tsx
+// Manual memoization — the pattern React Compiler exists to remove
+const sorted = useMemo(() => items.sort(compareFn), [items])
+const handleClick = useCallback(() => onSelect(id), [id, onSelect])
+```
+
+React Compiler analyzes your component code at build time and inserts that memoization for you automatically, based on what actually changes between renders — no `useMemo`, no `useCallback`, no dependency array to get subtly wrong. It's a compiler pass, not a runtime library: the optimization happens once, when you build, not on every render in the browser.
+
+That's a real, structural improvement over the old pattern. Hand-written memoization has a well-known failure mode — a wrong or missing dependency silently breaks the optimization, or worse, causes a stale-closure bug that only shows up in production. A compiler doing the same analysis mechanically doesn't make that class of mistake.
+
+## The specific reason this project hasn't adopted it
+
+This site's own `CLAUDE.md` pins exact versions, not ranges: `react` `19.2.4` and `react-dom` `19.2.4`, called out explicitly as "exact pin, not caret-ranged." That's a deliberate hard constraint, put in place after enough breaking changes across this stack (Zod v3→v4, Tailwind v3→v4, `@next/mdx` vs `next-mdx-remote`) to make "add a new build-time dependency that touches every component" a decision that gets made on purpose, not picked up incidentally through a routine update.
+
+React Compiler is still explicitly framed as new tooling with each release bringing meaningful changes to its own optimization heuristics — it earns different results depending on the exact compiler version, not just the React version underneath it. Adopting it on a strict-pin project means also pinning and actively tracking *that* dependency's changes, on top of the two already being tracked. For a site where every page is already a Server Component by default (this project's Rule 7: "Server Components by default, `use client` only when interactive") the actual client-side re-render surface is small — a handful of interactive components like the mobile nav, theme toggle, and the illustration generator's controls. The manual `useMemo`/`useCallback` burden that React Compiler removes is a much smaller problem here than it would be on a client-heavy dashboard.
+
+## When it would actually change the math
+
+If a future page here needed a genuinely re-render-heavy client component — something closer to the illustration generator's live SVG preview, recomputing on every slider drag — that's exactly the shape of problem React Compiler is built for, and the calculation would flip: the safety win from automatic, correct memoization would clearly outweigh the cost of tracking one more pinned dependency.
+
+The honest position is: not "we evaluated it and rejected it," but "the constraint that's already load-bearing on this project (exact version pins, mostly-server-rendered pages) makes this a low-value place to adopt it right now, and a specific, checkable condition — a genuinely re-render-heavy client component landing on the site — is what would change that." That's a more useful thing to write down than either blanket hype or blanket skepticism.

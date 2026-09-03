@@ -1,0 +1,74 @@
+---
+title: 'Tailwind v4''s CSS-First Config: What Actually Changes'
+slug: 'tailwind-v4-css-first-config-migration'
+description: 'DevStash runs Tailwind v4 with every token in @theme, not tailwind.config.ts. What that migration actually breaks, and one silent-failure gotcha worth knowing.'
+author: 'Adesh Shukla'
+createdAt: '2026-08-31'
+updatedAt: '2026-08-31'
+category: 'frontend'
+tags: ['tailwindcss', 'css', 'frontend', 'migration']
+readingTime: 5
+canonical: 'https://devstash.me/blog/tailwind-v4-css-first-config-migration'
+draft: false
+featured: false
+---
+
+Every design token on this site — `ds-bg`, `ds-accent`, `ds-surface`, all of it — lives in a single `@theme` block inside `globals.css`. There is no `tailwind.config.ts` defining colors anymore. That's not a stylistic choice; it's how Tailwind v4 works now, and it changes more about a project than the changelog makes it sound like.
+
+## The actual shift: config moved into CSS
+
+Tailwind v3 read a JS/TS config file and generated CSS from it. Tailwind v4 flips that: the config *is* CSS.
+
+```css
+/* globals.css — v4 */
+@import 'tailwindcss';
+
+@theme {
+  --color-ds-bg: #0b0f19;
+  --color-ds-accent: #3b82f6;
+  --color-ds-purple: #8b5cf6;
+  --font-sans: var(--font-dm-sans);
+}
+```
+
+Every `--color-*`, `--font-*`, `--spacing-*` variable declared in `@theme` becomes both a real CSS custom property (usable anywhere, including outside Tailwind classes) *and* a Tailwind utility. `--color-ds-accent` gives you `text-ds-accent`, `bg-ds-accent`, `border-ds-accent` automatically — no `extend.colors` object, no rebuild step to pick up a new token.
+
+If you go looking for `tailwind.config.ts` on a v4 project expecting the old `theme.extend` shape, you'll find it nearly empty — content globs, maybe a plugin registration, nothing else. That's correct, not a migration you forgot to finish.
+
+## What breaks on the way there
+
+**Content detection changed.** v3 required you to list every glob pattern Tailwind should scan for class names in `content: []`. v4 auto-detects your project structure in most setups — which is *less* config to maintain, but if you've got classes generated in an unusual location (a CMS-driven template, a monorepo package Tailwind wouldn't normally see), verify it's actually being scanned rather than assuming the old glob still applies.
+
+**Arbitrary color values now come from real CSS, not a JS object.** In v3 you might reference `theme('colors.blue.500')` inside a config function. In v4 there's no JS theme object to import — if you need a token's raw value outside a class (in a chart library, in inline styles), read the CSS custom property directly: `getComputedStyle(document.documentElement).getPropertyValue('--color-ds-accent')`.
+
+**Some plugins assume the old config shape.** Anything reading `theme.extend.colors` at build time to generate its own output needs a v4-aware version. Check before migrating if you lean on plugins beyond the official first-party ones.
+
+## The gotcha that ships broken code silently
+
+This is the one worth remembering, because it doesn't error — it just does nothing.
+
+Tailwind's arbitrary-value syntax (`bg-[...]`, `shadow-[...]`) has always required no raw spaces inside the brackets. That rule didn't change in v4, but it's easy to violate by accident once you're generating class strings programmatically instead of typing them by hand — which is exactly what a token-driven `@theme` setup tempts you into doing.
+
+```ts
+// Looks completely reasonable. Is silently inert.
+const cls = `bg-[rgba(${r}, ${g}, ${b}, ${a})]`
+```
+
+That comma-space inside `rgba(...)` breaks Tailwind's bracket parser. No build error, no console warning — the class simply never generates any CSS, and the element renders as if the class weren't there at all. I hit this exact bug shipping a color-picker tool on this site: the generated Tailwind output looked correct in the code block, but pasting it into a real project did nothing, because of the spaces after each comma.
+
+```ts
+// Correct — no raw spaces inside the brackets
+const cls = `bg-[rgba(${r},${g},${b},${a})]`
+```
+
+If you're building anything that emits Tailwind arbitrary values from user input or computed values — a theme generator, a design tool, an admin panel — strip whitespace from inside the brackets before you render the class string. It's a one-line fix, but only if you know to look for it.
+
+## A practical migration checklist
+
+- Move every custom color/font/spacing token from `theme.extend` into an `@theme` block in your main CSS file.
+- Delete the now-empty parts of `tailwind.config.ts` rather than leaving stale, unused config around.
+- Re-check any plugin that reads the JS theme object at build time.
+- If anything generates arbitrary-value class strings programmatically, strip internal spaces before rendering them.
+- Spot-check a few pages after migrating — content-detection changes are the most likely thing to silently drop a class that used to work.
+
+The end state is genuinely nicer to work in: one file to open when you need a token, real CSS variables usable outside Tailwind's class system, and no build step between changing a color and seeing it reflected. It's just not a drop-in swap — treat it as a real migration, not a version bump.

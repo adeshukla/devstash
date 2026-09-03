@@ -1,0 +1,63 @@
+---
+title: 'Model Context Protocol, Explained for Developers Who Just Want to Ship'
+slug: 'model-context-protocol-explained-for-working-developers'
+description: 'MCP standardizes how AI agents talk to tools and data. What it actually solves, how the pieces fit together, and where it fits next to n8n-style automation.'
+author: 'Adesh Shukla'
+createdAt: '2026-09-02'
+updatedAt: '2026-09-02'
+category: 'ai-workflows'
+tags: ['mcp', 'ai-agents', 'ai-workflows', 'developer-tools']
+readingTime: 4
+canonical: 'https://devstash.me/blog/model-context-protocol-explained-for-working-developers'
+draft: false
+featured: false
+---
+
+Model Context Protocol (MCP) went from "thing Anthropic published" to standard infrastructure fast — [by mid-2026 there were roughly 9,400 published servers across the major registries](https://blog.jetbrains.com/research/2026/08/ai-coding-agent-adoption-2026/), and nearly every serious agent tool speaks it. If you've been heads-down shipping and only half-absorbed what it actually is, here's the version that skips the hype and gets to the mechanics.
+
+## The problem it's solving
+
+Before MCP, every time you wanted an AI agent to use a tool — query a database, call an API, read a file, search the web — someone wrote a custom integration for that specific agent and that specific tool. A Claude integration for Notion looked nothing like a ChatGPT plugin for Notion, which looked nothing like a LangChain tool for Notion. N tools times M agents, all bespoke.
+
+MCP is the fix: a standard protocol so a tool provider builds *one* server, and any MCP-compatible agent can use it. Same idea as how a USB-C port doesn't care what brand of cable is plugged into it.
+
+## The actual pieces
+
+MCP defines a client-server relationship with three primitives:
+
+- **Tools** — functions the agent can call, with a defined input schema. This is the closest analog to what you'd already recognize as "function calling."
+- **Resources** — data the agent can read: a file, a database row, a URL. Read-only, addressable by URI.
+- **Prompts** — reusable prompt templates the server exposes, parameterized by the client.
+
+A server declares what it offers. A client (the agent host — Claude Code, Cursor, an IDE, a custom app) connects, discovers the server's tools/resources/prompts, and the model decides at runtime which ones it needs for the task in front of it.
+
+```json
+// Rough shape of a tool the server exposes
+{
+  "name": "search_orders",
+  "description": "Search customer orders by email or order ID",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "query": { "type": "string" }
+    },
+    "required": ["query"]
+  }
+}
+```
+
+The server owns the implementation — how `search_orders` actually queries your database is entirely your business logic. The protocol only standardizes the *shape* of the conversation between agent and tool.
+
+## Where this differs from what you're probably already doing
+
+If you're running n8n-style automation — webhook triggers, chained HTTP nodes, an LLM node in the middle — you're already doing agent-to-tool orchestration, just wired by hand per workflow. The difference with MCP is who decides which tool gets called and when.
+
+An n8n chain has a fixed shape: node A always feeds node B. An MCP-connected agent is handed a *menu* of tools and decides at inference time which ones the task actually needs, in what order, possibly none of them. That's a real tradeoff, not a strict upgrade — a fixed n8n chain is predictable and cheap to debug; an agent choosing its own tool sequence is more flexible but needs more guardrails (scoped permissions, tool allowlists, sane defaults on failure).
+
+They're not mutually exclusive either. A perfectly reasonable architecture is an n8n workflow where one node *is* an MCP client, giving that step access to a whole toolbox instead of one hardcoded API call.
+
+## What this means practically
+
+If you're building anything that exposes internal tools to an AI assistant — a CLI, an internal dashboard's data, a set of scripts your team runs by hand — an MCP server is now the default way to make that agent-usable, rather than a bespoke plugin per assistant. The upfront cost is defining clean, narrow tool schemas (the same discipline as designing a good REST endpoint); the payoff is that it works with whatever agent your team standardizes on next, without rewriting the integration.
+
+We haven't wired an MCP server into DevStash's own pipeline yet — the current AI automation here (the `/lab/ai-content-pipeline` demo, and the n8n + Groq workflows behind the scenes) predates that being the obvious choice. If we revisit it, the natural first candidate is exposing the blog's own content layer — `getAllPosts()`, `getProjectBySlug()` — as MCP resources, so an agent could query real site content directly instead of a workflow re-implementing that lookup by hand. That's a "would," not a "did" — worth being precise about the difference.

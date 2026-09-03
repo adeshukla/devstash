@@ -1,0 +1,44 @@
+---
+title: 'Claude Code vs. Cursor: What Actually Differs Architecturally'
+slug: 'claude-code-vs-cursor-what-actually-differs'
+description: 'Not a feature bake-off. The real architectural difference between a terminal-native coding agent and an AI-native editor, from building this site with one.'
+author: 'Adesh Shukla'
+createdAt: '2026-09-03'
+updatedAt: '2026-09-03'
+category: 'devtools'
+tags: ['claude-code', 'cursor', 'ai-assistants', 'devtools']
+readingTime: 5
+canonical: 'https://devstash.me/blog/claude-code-vs-cursor-what-actually-differs'
+draft: false
+featured: false
+---
+
+I want to be upfront about the shape of this post: I've built and maintained DevStash with Claude Code as the daily driver — it's in the commit history, and this site's `CLAUDE.md` is the actual instruction file it reads before touching code. I haven't run Cursor on a project of comparable size and duration, so this isn't a bake-off with a scorecard at the end. What I can do honestly is lay out the real architectural difference between the two categories, because it matters more than most comparisons make it sound.
+
+## Two different things wearing similar marketing
+
+"AI coding assistant" gets used for both, but they're not the same shape of tool.
+
+**Cursor is an editor.** It's a fork of VS Code with an AI agent built into the editing surface — inline completions, an agent panel that can edit files, multi-model choice. The agent lives *inside* the place you write code, and its context is naturally scoped to what's open and what it can see in the project.
+
+**Claude Code is a terminal-native agent.** It's not an editor at all — it's an agentic loop that runs in your shell, reads and writes files, runs commands, and can be handed a task that spans far outside "edit this file": run the test suite, check a deployment, query a database, drive a browser, spin up subagents for parallel research. It's editor-agnostic by design; you can pair it with any editor you already use, or none.
+
+That's the actual axis the comparison sits on: **in-editor agent vs. standalone agent with a shell**. Everything else — model choice, pricing, specific features — sits downstream of that one structural decision.
+
+## Where the standalone-agent shape shows up in practice
+
+Working on this exact project surfaces it constantly. A real example from this repo's own history: fixing a Turbopack crash on Windows wasn't a code-edit problem — it required running the dev server, reading the actual crash output, editing `package.json`, and re-running to confirm. Another: the ESLint 9 + `FlatCompat` circular-JSON crash documented in this project's `CLAUDE.md` was diagnosed by actually executing `pnpm lint`, reading the real stack trace, and testing the fix by running it again — not by pattern-matching what the fix "should" look like from a diff.
+
+None of that is unique to Claude Code specifically — it's what a terminal-native agent with real command execution unlocks generally, as opposed to an agent whose primary interface is proposing an edit inside a file buffer. An in-editor agent can still shell out, but the terminal is a tool it reaches for, not the ground it stands on.
+
+## Where persistent project instructions matter
+
+Both tools support some form of durable project context, but Claude Code's `CLAUDE.md` convention is worth calling out specifically because of how load-bearing it becomes on a real project. This site's `CLAUDE.md` is genuinely long — hard version pins (`react` 19.2.4, not `^19`), a documented list of known issues and their exact fixes, folder-structure rules, brand tokens. Every new session starts by reading it, which means version-specific gotchas (like the `next-mdx-remote` vs `@next/mdx` Turbopack crash) don't get rediscovered every time — they're already written down, in this repo, checked into git.
+
+That's a genuinely different failure mode to guard against than "which model is smarter": a stale or wrong `CLAUDE.md` is now actively misleading, in a way an editor with no persistent memory can't be. Worth treating that file as documentation that needs upkeep, not a one-time setup step.
+
+## The honest takeaway
+
+If your work is mostly "edit this function, see it update live" — inline completion and an editor-native agent is a genuinely good fit, and Cursor is built around exactly that loop. If your work regularly needs to leave the file — run things, check real output, coordinate multi-step changes across a shell, a build, and a deploy — a terminal-native agent with actual command execution is doing a structurally different job, not just a "more powerful" version of the same one.
+
+I use Claude Code because this project's actual failure modes — Windows-specific crashes, dependency version landmines, a real dev server that needs to actually run to prove anything — kept being things that needed a shell, not just an editor. Your project's failure modes might look nothing like that, and the honest answer is to notice which one yours actually are before picking a tool based on a feature list.
