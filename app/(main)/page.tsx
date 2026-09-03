@@ -5,7 +5,6 @@ import { buildWebSiteSchema, buildPersonSchema } from '@/lib/schema/builders'
 import { HeroSection } from '@/components/sections/HeroSection'
 import { ProjectsGrid } from '@/components/sections/ProjectsGrid'
 import { FeaturedPosts } from '@/components/sections/FeaturedPosts'
-import { Testimonials } from '@/components/sections/Testimonials'
 import { WhatIDoBento } from '@/components/sections/WhatIDoBento'
 import { Reveal, Button, Badge } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
@@ -157,8 +156,10 @@ export default function HomePage() {
         </section>
       </Reveal>
 
-      {/* Social proof — sits right before the ask, classic placement */}
-      <Testimonials />
+      {/* Testimonials: built (components/sections/Testimonials.tsx +
+          components/ui/TestimonialsCarousel.tsx), self-gates on real quotes in
+          content/testimonials/testimonials.json. Not wired in for now per
+          Adesh — component kept for later, not deleted. */}
 
       {/* Closing CTA */}
       <Reveal>
