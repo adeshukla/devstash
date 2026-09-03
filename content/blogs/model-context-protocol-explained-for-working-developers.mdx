@@ -50,7 +50,7 @@ The server owns the implementation — how `search_orders` actually queries your
 
 ## Where this differs from what you're probably already doing
 
-If you're running n8n-style automation — webhook triggers, chained HTTP nodes, an LLM node in the middle — you're already doing agent-to-tool orchestration, just wired by hand per workflow. The difference with MCP is who decides which tool gets called and when.
+If you're running [n8n-style automation](/blog/n8n-groq-workflow-patterns) — webhook triggers, chained HTTP nodes, an LLM node in the middle — you're already doing agent-to-tool orchestration, just wired by hand per workflow. The difference with MCP is who decides which tool gets called and when.
 
 An n8n chain has a fixed shape: node A always feeds node B. An MCP-connected agent is handed a *menu* of tools and decides at inference time which ones the task actually needs, in what order, possibly none of them. That's a real tradeoff, not a strict upgrade — a fixed n8n chain is predictable and cheap to debug; an agent choosing its own tool sequence is more flexible but needs more guardrails (scoped permissions, tool allowlists, sane defaults on failure).
 

@@ -38,6 +38,7 @@ export type Scene =
   | 'protocol-plug'
   | 'editor-split'
   | 'compiler-atom'
+  | 'suspense-boundary'
 
 const BLOG_SCENE: Record<BlogCategory, Scene> = {
   frontend: 'frontend',
@@ -97,6 +98,7 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   'model-context-protocol-explained-for-working-developers': 'protocol-plug',
   'claude-code-vs-cursor-what-actually-differs': 'editor-split',
   'why-devstash-isnt-on-react-compiler-yet': 'compiler-atom',
+  'usesearchparams-suspense-boundary-build-error': 'suspense-boundary',
 }
 
 interface CategoryIllustrationProps {
@@ -227,6 +229,8 @@ export function SceneContent({ scene }: { scene: Scene }) {
       return <EditorSplitScene />
     case 'compiler-atom':
       return <CompilerAtomScene />
+    case 'suspense-boundary':
+      return <SuspenseBoundaryScene />
   }
 }
 
@@ -262,6 +266,7 @@ export const ALL_SCENES: Scene[] = [
   'protocol-plug',
   'editor-split',
   'compiler-atom',
+  'suspense-boundary',
 ]
 
 // Keyword index — maps a scene to the words a topic string is checked
@@ -311,6 +316,14 @@ export const SCENE_KEYWORDS: Record<Scene, string[]> = {
     'usecallback',
     'build time',
     'react',
+  ],
+  'suspense-boundary': [
+    'suspense',
+    'build error',
+    'boundary',
+    'prerender',
+    'fallback',
+    'debugging',
   ],
 }
 
@@ -1422,6 +1435,65 @@ function CompilerAtomScene() {
         className="fill-ds-purple animate-pulse2"
       />
       <rect x="255" y="113" width="14" height="5" rx="2" className="fill-ds-purple/60" />
+    </g>
+  )
+}
+
+// ── Suspense boundary — a dashed boundary catching a bailed-out subtree ─────
+function SuspenseBoundaryScene() {
+  return (
+    <g>
+      {/* The boundary itself: dashed, because it's a declared edge rather
+          than a rendered box. */}
+      <rect
+        x="112"
+        y="62"
+        width="176"
+        height="100"
+        rx="10"
+        className="fill-ds-surface stroke-ds-accent"
+        strokeWidth="2"
+        strokeDasharray="7 6"
+      />
+      {/* Skeleton fallback standing in for the subtree that can't prerender. */}
+      <rect
+        x="134"
+        y="86"
+        width="90"
+        height="11"
+        rx="4"
+        className="fill-ds-muted/30 animate-pulse2"
+      />
+      <rect
+        x="134"
+        y="106"
+        width="132"
+        height="11"
+        rx="4"
+        className="fill-ds-muted/20 animate-pulse2"
+        style={{ animationDelay: '220ms' }}
+      />
+      <rect
+        x="134"
+        y="126"
+        width="64"
+        height="11"
+        rx="4"
+        className="fill-ds-accent/40 animate-pulse2"
+        style={{ animationDelay: '440ms' }}
+      />
+      {/* The build error, resolved — sits outside the boundary it needed. */}
+      <g className="animate-float">
+        <circle cx="288" cy="62" r="17" className="fill-ds-success/20" />
+        <path
+          d="M280 62l6 6 11-13"
+          className="stroke-ds-success"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      </g>
     </g>
   )
 }

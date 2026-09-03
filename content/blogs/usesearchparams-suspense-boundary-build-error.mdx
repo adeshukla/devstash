@@ -1,0 +1,118 @@
+---
+title: "Fixing 'useSearchParams() should be wrapped in a suspense boundary' in Next.js 16"
+slug: 'usesearchparams-suspense-boundary-build-error'
+description: 'Why Next.js 16 throws this error at build time, where the Suspense boundary actually has to go, and the two common fixes that quietly make things worse.'
+author: 'Adesh Shukla'
+createdAt: '2026-09-04'
+updatedAt: '2026-09-04'
+category: 'frontend'
+tags: ['nextjs', 'app-router', 'react', 'typescript']
+readingTime: 6
+canonical: 'https://devstash.me/blog/usesearchparams-suspense-boundary-build-error'
+draft: false
+featured: false
+---
+
+Your build was fine. You added a component that reads a query parameter. Now `pnpm build` fails with:
+
+```
+useSearchParams() should be wrapped in a suspense boundary at page "/blog"
+```
+
+The error names the **page**, not the component that actually caused it, which is the first reason this takes longer to fix than it should. Here's what's really happening and where the boundary has to go.
+
+## Why Next.js throws this at build time and not in dev
+
+`next dev` renders on demand, so it always knows the URL and the search params. `next build` tries to **statically prerender** your page at build time — before any request exists, and therefore before any query string exists.
+
+`useSearchParams()` cannot return anything meaningful during that prerender. React's answer is to bail out of prerendering the part of the tree that depends on it and render a fallback instead. But React can only do that if there's a `<Suspense>` boundary marking *which part* of the tree to swap out. With no boundary, the bailout would swallow the entire page, so Next.js refuses to build and asks you to draw the line yourself.
+
+That's the whole mechanic: **the boundary tells Next.js how much of the page to give up on during prerender.** Everything below follows from that.
+
+## The fix, and where the boundary actually goes
+
+The boundary has to be in a **parent** of the component calling `useSearchParams()` — and critically, in a different component than the hook itself.
+
+```tsx
+// app/blog/page.tsx — a Server Component
+import { Suspense } from 'react'
+import { BlogFilter } from '@/components/blog/BlogFilter'
+
+export default function BlogPage() {
+  return (
+    <Suspense>
+      <BlogFilter />
+    </Suspense>
+  )
+}
+```
+
+```tsx
+// components/blog/BlogFilter.tsx
+'use client'
+import { useSearchParams } from 'next/navigation'
+
+export function BlogFilter() {
+  const searchParams = useSearchParams()
+  // ...
+}
+```
+
+The most common failed attempt is wrapping the hook's own output *inside* the same component:
+
+```tsx
+// ❌ Does nothing. The component already called the hook before it
+// returned any JSX — the boundary is below the bailout, not above it.
+export function BlogFilter() {
+  const searchParams = useSearchParams()
+  return <Suspense>{/* ... */}</Suspense>
+}
+```
+
+By the time this component returns, `useSearchParams()` has already been called. A boundary in its own return value is too late. It has to wrap the component from outside.
+
+## Finding the component when the error only names the page
+
+Since the error points at the route, not the file, work down the tree from that page and look for:
+
+- Any `'use client'` component that calls `useSearchParams()`, `usePathname()` in some versions, or a router hook that reads the URL
+- Components several layers deep — a `<Filter>` inside a `<Toolbar>` inside your page still triggers it
+- Third-party client components (analytics widgets, search boxes) that read search params internally
+
+A fast way to narrow it down:
+
+```bash
+grep -rn "useSearchParams" app/ components/
+```
+
+Then check which of those files is reachable from the failing route. In practice it's nearly always a filter, a search box, a pagination control, or an analytics/UTM reader.
+
+## Two fixes that look like they work but cost you
+
+**1. `export const dynamic = 'force-dynamic'`**
+
+This makes the build error disappear by opting the entire route out of static generation. It works, and it's occasionally correct — but you've traded a prerendered page for a server-rendered-on-every-request page. On a content page that could have been static, that's a real and permanent performance regression to silence a one-line fix. Only reach for it when the page genuinely must be dynamic for other reasons.
+
+**2. Moving the hook into a `useEffect`**
+
+Reading search params off `window.location` in an effect avoids the error, but now that content doesn't exist in the server-rendered HTML at all. It renders empty, then pops in after hydration. You've swapped a build error for a layout shift and, for anything content-bearing, worse SEO.
+
+The `<Suspense>` boundary is the fix the framework is asking for. The other two are ways of avoiding the question.
+
+## Does the fallback matter?
+
+For a small control, `<Suspense>` with no fallback is fine — it renders nothing during prerender, then the real component after hydration.
+
+```tsx
+<Suspense fallback={<FilterSkeleton />}>
+  <BlogFilter />
+</Suspense>
+```
+
+Add a fallback when the component occupies real layout space. Without one, that space collapses to zero during prerender and expands on hydration — a Cumulative Layout Shift you're inflicting on yourself. Size the skeleton to match the real component's dimensions and CLS stays flat.
+
+## The general rule worth remembering
+
+Any hook that reads request-time information cannot run during static prerendering, and Next.js will require you to declare a boundary around it. `useSearchParams()` is just the one people hit first, because query strings are so ordinary that it doesn't feel like a request-time dependency until the build fails.
+
+If you're working through other Next.js 16 App Router migration issues — `params` and `searchParams` becoming Promises is the other big one — I've collected the patterns I actually use in [Next.js 16 App Router: Patterns I Actually Use](/blog/nextjs-16-app-router-patterns).

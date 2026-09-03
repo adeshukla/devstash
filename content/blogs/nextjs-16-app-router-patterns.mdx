@@ -153,6 +153,8 @@ import { Suspense } from 'react'
 
 The `<Suspense>` wrapper doesn't need a fallback for simple components. But adding a skeleton fallback is good UX if the filter data is async.
 
+If this is the error that brought you here, I've written it up properly — why the build fails when dev didn't, where exactly the boundary has to sit, and the two "fixes" that quietly cost you performance — in [Fixing 'useSearchParams() should be wrapped in a suspense boundary'](/blog/usesearchparams-suspense-boundary-build-error).
+
 ## buildMetadata Factory Pattern
 
 Repeating OG tags, canonical URLs, and Twitter card meta on every page is error-prone. The solution is a factory function in `lib/seo/buildMetadata.ts` that takes a few required fields and fills in the rest from `site.config.ts` defaults:

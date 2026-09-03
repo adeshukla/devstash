@@ -72,3 +72,5 @@ If you're building anything that emits Tailwind arbitrary values from user input
 - Spot-check a few pages after migrating — content-detection changes are the most likely thing to silently drop a class that used to work.
 
 The end state is genuinely nicer to work in: one file to open when you need a token, real CSS variables usable outside Tailwind's class system, and no build step between changing a color and seeing it reflected. It's just not a drop-in swap — treat it as a real migration, not a version bump.
+
+For how this sits inside the wider stack — Next.js 16, TypeScript strict mode, and a file-based content layer — I wrote up the whole architecture in [Building DevStash](/blog/building-devstash-with-nextjs).

@@ -116,6 +116,7 @@ const SCENE_LABELS: Record<Scene, string> = {
   'protocol-plug': 'Protocol Plug',
   'editor-split': 'Editor Split',
   'compiler-atom': 'Compiler Atom',
+  'suspense-boundary': 'Suspense Boundary',
 }
 
 const DENSITY_LABELS: Record<Density, string> = { 1: 'Minimal', 2: 'Balanced', 3: 'Rich' }
