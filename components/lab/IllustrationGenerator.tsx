@@ -112,6 +112,10 @@ const SCENE_LABELS: Record<Scene, string> = {
   'test-shield': 'Test Shield',
   mainstream: 'Mainstream',
   'agent-router': 'Agent Router',
+  'css-tokens': 'CSS Tokens',
+  'protocol-plug': 'Protocol Plug',
+  'editor-split': 'Editor Split',
+  'compiler-atom': 'Compiler Atom',
 }
 
 const DENSITY_LABELS: Record<Density, string> = { 1: 'Minimal', 2: 'Balanced', 3: 'Rich' }

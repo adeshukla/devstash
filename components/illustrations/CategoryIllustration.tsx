@@ -34,6 +34,10 @@ export type Scene =
   | 'test-shield'
   | 'mainstream'
   | 'agent-router'
+  | 'css-tokens'
+  | 'protocol-plug'
+  | 'editor-split'
+  | 'compiler-atom'
 
 const BLOG_SCENE: Record<BlogCategory, Scene> = {
   frontend: 'frontend',
@@ -87,6 +91,12 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   'ai-meeting-notes-calendar-automation': 'calendar',
   // Shares 'frontend' with the existing App Router patterns post.
   'nextjs-app-router-agent-driven-dev': 'agent-router',
+  // These four content-gap posts would otherwise collide with existing
+  // posts in the same category bucket (frontend x2, devtools, ai-workflows).
+  'tailwind-v4-css-first-config-migration': 'css-tokens',
+  'model-context-protocol-explained-for-working-developers': 'protocol-plug',
+  'claude-code-vs-cursor-what-actually-differs': 'editor-split',
+  'why-devstash-isnt-on-react-compiler-yet': 'compiler-atom',
 }
 
 interface CategoryIllustrationProps {
@@ -209,6 +219,14 @@ export function SceneContent({ scene }: { scene: Scene }) {
       return <MainstreamScene />
     case 'agent-router':
       return <AgentRouterScene />
+    case 'css-tokens':
+      return <CssTokensScene />
+    case 'protocol-plug':
+      return <ProtocolPlugScene />
+    case 'editor-split':
+      return <EditorSplitScene />
+    case 'compiler-atom':
+      return <CompilerAtomScene />
   }
 }
 
@@ -240,6 +258,10 @@ export const ALL_SCENES: Scene[] = [
   'test-shield',
   'mainstream',
   'agent-router',
+  'css-tokens',
+  'protocol-plug',
+  'editor-split',
+  'compiler-atom',
 ]
 
 // Keyword index — maps a scene to the words a topic string is checked
@@ -272,6 +294,24 @@ export const SCENE_KEYWORDS: Record<Scene, string[]> = {
   'test-shield': ['testing', 'unit test', 'qa', 'coverage', 'verification', 'trust code'],
   mainstream: ['consumer', 'mainstream', 'photo editor', 'video editor', 'finance app'],
   'agent-router': ['app router', 'routing', 'agent-driven', 'next.js', 'navigation'],
+  'css-tokens': ['tailwind', 'css', 'theme', 'design tokens', 'utility classes', 'config'],
+  'protocol-plug': [
+    'mcp',
+    'model context protocol',
+    'protocol',
+    'standard',
+    'connector',
+    'tool calling',
+  ],
+  'editor-split': ['cursor', 'claude code', 'editor', 'ide', 'compare', 'coding agent'],
+  'compiler-atom': [
+    'react compiler',
+    'memoization',
+    'usememo',
+    'usecallback',
+    'build time',
+    'react',
+  ],
 }
 
 // ── Frontend — browser window + a cursor click ripple ──────────────────────
@@ -1199,6 +1239,189 @@ function AgentRouterScene() {
           strokeLinejoin="round"
         />
       </g>
+    </g>
+  )
+}
+
+// ── CSS tokens — @theme block with color swatches floating out of it ────────
+function CssTokensScene() {
+  const swatches = [
+    { cx: 130, cy: 158, className: 'fill-ds-accent' },
+    { cx: 156, cy: 166, className: 'fill-ds-purple' },
+    { cx: 182, cy: 158, className: 'fill-ds-success' },
+    { cx: 208, cy: 166, className: 'fill-ds-warning' },
+  ]
+  return (
+    <g>
+      <rect
+        x="100"
+        y="55"
+        width="200"
+        height="80"
+        rx="8"
+        className="fill-ds-surface stroke-ds-border"
+      />
+      <text x="114" y="80" className="fill-ds-purple" fontFamily="var(--font-mono)" fontSize="13">
+        @theme {'{'}
+      </text>
+      <text x="126" y="100" className="fill-ds-accent" fontFamily="var(--font-mono)" fontSize="11">
+        --color-ds-accent
+      </text>
+      <text x="114" y="120" className="fill-ds-purple" fontFamily="var(--font-mono)" fontSize="13">
+        {'}'}
+      </text>
+      {swatches.map((s, i) => (
+        <circle
+          key={i}
+          cx={s.cx}
+          cy={s.cy}
+          r="9"
+          className={`${s.className} animate-float`}
+          style={{ animationDelay: `${i * 150}ms` }}
+        />
+      ))}
+    </g>
+  )
+}
+
+// ── Protocol plug — two blocks joined by a standard connector ───────────────
+function ProtocolPlugScene() {
+  return (
+    <g>
+      <rect
+        x="88"
+        y="82"
+        width="76"
+        height="56"
+        rx="8"
+        className="fill-ds-surface stroke-ds-border"
+      />
+      <rect
+        x="236"
+        y="82"
+        width="76"
+        height="56"
+        rx="8"
+        className="fill-ds-surface stroke-ds-border"
+      />
+      <line x1="164" y1="110" x2="180" y2="110" className="stroke-ds-border" strokeWidth="3" />
+      <line x1="220" y1="110" x2="236" y2="110" className="stroke-ds-border" strokeWidth="3" />
+      <g className="animate-pulse2">
+        <rect
+          x="180"
+          y="96"
+          width="40"
+          height="28"
+          rx="6"
+          className="fill-ds-accent/15 stroke-ds-accent"
+          strokeWidth="2"
+        />
+        <line x1="192" y1="96" x2="192" y2="86" className="stroke-ds-accent" strokeWidth="3" />
+        <line x1="208" y1="96" x2="208" y2="86" className="stroke-ds-accent" strokeWidth="3" />
+      </g>
+      <circle cx="126" cy="110" r="4" className="fill-ds-muted/50" />
+      <circle cx="274" cy="110" r="4" className="fill-ds-purple/60" />
+    </g>
+  )
+}
+
+// ── Editor split — terminal on the left, cursor-in-editor on the right ──────
+function EditorSplitScene() {
+  return (
+    <g>
+      <rect
+        x="90"
+        y="52"
+        width="105"
+        height="118"
+        rx="8"
+        className="fill-ds-surface stroke-ds-border"
+      />
+      <text x="102" y="76" className="fill-ds-accent" fontFamily="var(--font-mono)" fontSize="13">
+        {'>_'}
+      </text>
+      <rect x="102" y="92" width="14" height="12" className="fill-ds-accent animate-blink" />
+      <line x1="102" y1="114" x2="170" y2="114" className="stroke-ds-muted/30" />
+      <line x1="102" y1="128" x2="150" y2="128" className="stroke-ds-muted/30" />
+      <line x1="200" y1="60" x2="200" y2="162" className="stroke-ds-border" strokeWidth="1" />
+      <rect
+        x="205"
+        y="52"
+        width="105"
+        height="118"
+        rx="8"
+        className="fill-ds-surface stroke-ds-border"
+      />
+      <rect x="217" y="72" width="60" height="10" rx="2" className="fill-ds-purple/50" />
+      <rect x="217" y="90" width="80" height="10" rx="2" className="fill-ds-muted/30" />
+      <rect x="217" y="108" width="40" height="10" rx="2" className="fill-ds-purple/50" />
+      <line
+        x1="259"
+        y1="108"
+        x2="259"
+        y2="118"
+        className="stroke-ds-purple animate-blink"
+        strokeWidth="2"
+      />
+    </g>
+  )
+}
+
+// ── Compiler atom — a React atom passing through a compiler funnel ──────────
+function CompilerAtomScene() {
+  return (
+    <g>
+      <g className="animate-float">
+        <circle cx="140" cy="100" r="5" className="fill-ds-accent" />
+        <ellipse
+          cx="140"
+          cy="100"
+          rx="26"
+          ry="10"
+          className="stroke-ds-accent fill-none"
+          strokeWidth="2"
+        />
+        <ellipse
+          cx="140"
+          cy="100"
+          rx="26"
+          ry="10"
+          transform="rotate(60 140 100)"
+          className="stroke-ds-accent/70 fill-none"
+          strokeWidth="2"
+        />
+        <ellipse
+          cx="140"
+          cy="100"
+          rx="26"
+          ry="10"
+          transform="rotate(120 140 100)"
+          className="stroke-ds-accent/40 fill-none"
+          strokeWidth="2"
+        />
+      </g>
+      <path
+        d="M185 88l38 22-38 22 12-22z"
+        className="fill-ds-surface stroke-ds-border"
+        strokeLinejoin="round"
+      />
+      <rect
+        x="245"
+        y="95"
+        width="42"
+        height="30"
+        rx="6"
+        className="fill-ds-purple/15 stroke-ds-purple"
+      />
+      <rect
+        x="255"
+        y="104"
+        width="22"
+        height="5"
+        rx="2"
+        className="fill-ds-purple animate-pulse2"
+      />
+      <rect x="255" y="113" width="14" height="5" rx="2" className="fill-ds-purple/60" />
     </g>
   )
 }
