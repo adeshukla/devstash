@@ -7,7 +7,7 @@ createdAt: '2026-09-04'
 updatedAt: '2026-09-04'
 category: 'frontend'
 tags: ['react', 'react-compiler', 'performance', 'nextjs']
-readingTime: 4
+readingTime: 6
 canonical: 'https://devstash.me/blog/why-devstash-isnt-on-react-compiler-yet'
 draft: false
 featured: false
@@ -34,6 +34,37 @@ That's a real, structural improvement over the old pattern. Hand-written memoiza
 This site's own `CLAUDE.md` pins exact versions, not ranges: `react` `19.2.4` and `react-dom` `19.2.4`, called out explicitly as "exact pin, not caret-ranged." That's a deliberate hard constraint, put in place after enough breaking changes across this stack (Zod v3→v4, Tailwind v3→v4, `@next/mdx` vs `next-mdx-remote`) to make "add a new build-time dependency that touches every component" a decision that gets made on purpose, not picked up incidentally through a routine update.
 
 React Compiler is still explicitly framed as new tooling with each release bringing meaningful changes to its own optimization heuristics — it earns different results depending on the exact compiler version, not just the React version underneath it. Adopting it on a strict-pin project means also pinning and actively tracking *that* dependency's changes, on top of the two already being tracked. For a site where every page is already a Server Component by default (one of the [App Router patterns I actually use](/blog/nextjs-16-app-router-patterns): `use client` only when genuinely interactive) the actual client-side re-render surface is small — a handful of interactive components like the mobile nav, theme toggle, and the illustration generator's controls. The manual `useMemo`/`useCallback` burden that React Compiler removes is a much smaller problem here than it would be on a client-heavy dashboard.
+
+## The part people skip: it can bail out on your components
+
+React Compiler only optimizes code it can prove is safe to optimize. Its whole analysis assumes your components follow the Rules of React — pure render functions, no mutation of props or state during render, hooks called unconditionally. When it encounters a component that breaks those rules, it doesn't guess and it doesn't crash your build. **It skips that component and moves on.**
+
+That's the right behavior, but it has a consequence worth stating plainly: you can add React Compiler to a codebase, see the build succeed, ship it, and get substantially less optimization than you think — because the components with the worst re-render problems are often exactly the ones doing something irregular enough to make the compiler bail.
+
+"The build passed" is not the same claim as "my components are being optimized."
+
+## How to find out if your code is ready — without adopting anything
+
+This is the genuinely useful part, and it costs nothing: the compiler's analysis is available as an ESLint plugin, separately from the compiler itself.
+
+```bash
+pnpm add -D eslint-plugin-react-hooks@latest
+```
+
+The modern `react-hooks` plugin ships the compiler's diagnostics as lint rules. Turning them on tells you which components violate the Rules of React — which is to say, exactly which components the compiler would refuse to optimize — without changing a single byte of your build output.
+
+That's worth running even if you never intend to adopt the compiler, because every rule it flags is a real correctness smell in its own right. Mutating a prop during render is a bug whether or not a compiler is watching. In that sense the linter is the useful half of the tool, and it's the half you can adopt with zero risk.
+
+If you *do* decide to go further, on Next.js it's one flag:
+
+```ts
+// next.config.ts
+const nextConfig = {
+  experimental: { reactCompiler: true },
+}
+```
+
+Then measure. Use React DevTools' Profiler to record the same interaction before and after — if your re-render surface was already small, you will genuinely see very little, and that's a finding, not a failure.
 
 ## When it would actually change the math
 

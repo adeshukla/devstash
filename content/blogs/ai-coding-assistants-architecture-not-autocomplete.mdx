@@ -7,7 +7,7 @@ createdAt: '2026-08-03'
 updatedAt: '2026-09-04'
 category: 'ai-workflows'
 tags: ['ai-assistants', 'ai-coding-agents', 'claude-code', 'developer-tools', 'ai-workflows']
-readingTime: 4
+readingTime: 6
 canonical: 'https://devstash.me/blog/ai-coding-assistants-architecture-not-autocomplete'
 draft: false
 featured: false
@@ -34,6 +34,23 @@ The tasks that actually benefit from this shift are the ones autocomplete could 
 - **Cross-file refactors** — renaming a concept that appears in a type definition, three components, and a test file, where the tool needs to understand what "the same concept" means across files with different local names.
 - **"Make the build pass"** as a goal rather than a single fix — the tool can run `tsc`, read the actual error, form a hypothesis, edit, and re-run, closing the loop itself instead of you pasting the error back in each time.
 - **Planning before acting** — a genuinely agentic tool can lay out a multi-step plan and let you approve or redirect it before any file changes, which is a fundamentally different interaction than accepting or rejecting a single inline suggestion.
+
+## The highest-leverage thing you can do: write the context down
+
+Once a tool operates on whole-project plans rather than single lines, the quality of its output depends far less on how you phrase any individual request and far more on **what it knows about your project before you ask.**
+
+Every serious agentic tool now supports some version of a durable instruction file — `CLAUDE.md`, `.cursorrules`, `AGENTS.md`. They differ in name and format, but the job is identical: facts the tool should have loaded before it touches anything.
+
+The mistake is treating that file as a personality prompt ("be concise, write clean code"). What actually earns its place is the stuff a model cannot infer from reading the code:
+
+- **Version constraints and why they exist.** "React is pinned to an exact version, not a caret range" is unguessable from `package.json` alone, and it's the difference between a helpful upgrade and a broken build.
+- **Decisions that look wrong without history.** This project uses `next-mdx-remote` rather than the more obvious `@next/mdx`, because the latter threw a serialization error. Without that written down, any sufficiently helpful assistant will eventually "fix" it back.
+- **Known gotchas with their resolutions.** Turbopack crashing on Windows, design tokens living in `globals.css` rather than the Tailwind config — each one is an hour someone already spent.
+- **Hard rules with consequences.** "Never invent metrics or testimonials" is worth more than any amount of style guidance.
+
+I keep this file in the repo, in version control, treated as documentation rather than configuration. It has a failure mode worth naming: **a stale context file is worse than none**, because it actively misleads. When I change an architectural decision, updating that file is part of the change, not a follow-up task.
+
+The realistic way to think about it: you're not writing a prompt, you're onboarding a competent new contributor who will never retain anything between sessions and will re-read your onboarding doc every single time. That framing gets you a much better file than "prompt engineering" does.
 
 ## What has not changed
 

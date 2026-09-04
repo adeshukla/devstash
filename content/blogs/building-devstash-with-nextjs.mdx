@@ -2,9 +2,9 @@
 title: 'Building DevStash: My Personal Developer Platform with Next.js 16'
 slug: building-devstash-with-nextjs
 description: >-
-  How I architected a modern developer platform using Next.js 16, Tailwind v4,
-  TypeScript strict mode, and a file-based content layer — from zero to
-  production.
+  How I architected a developer platform on Next.js 16, Tailwind v4 and a
+  file-based content layer — the decisions that held up, and the ones that cost
+  me hours.
 author: Adesh Shukla
 createdAt: '2026-06-20'
 updatedAt: '2026-09-04'
@@ -20,62 +20,104 @@ draft: false
 featured: true
 ---
 
-Every developer reaches a point where a LinkedIn profile and a PDF resume just aren't enough.
-I'm a designer-turned-developer and I wanted something that actually *showed* my engineering thinking
-— not just listed it.
+Every developer reaches a point where a LinkedIn profile and a PDF resume aren't enough. I'm a designer-turned-developer, and I wanted something that actually *showed* engineering thinking rather than listing it as a bullet point.
 
-So I built DevStash.
+So I built DevStash. This is what's actually under it, including the decisions that cost me time.
 
-## What is DevStash?
+## The constraint that shaped everything
 
-DevStash is my personal developer platform at [devstash.me](https://devstash.me). It's not just a
-portfolio — it's designed to evolve: from a project showcase, to a content platform, to eventually
-a mini developer ecosystem with tools and resources.
+I decided early that content would be **files in the repo**, not rows in a database. Blog posts are MDX in `content/blogs/`. Projects are JSON in `content/projects/`. No database, no CMS, no admin panel to keep alive in production.
 
-## Tech Stack Decisions
+That one choice cascaded into most of the architecture:
 
-### Next.js 16 with App Router
+- Every page can be statically generated at build time, because all content exists at build time.
+- Content changes go through git — reviewable, revertable, with real history.
+- There's no runtime dependency that can be down when someone visits.
+- Migrating to a headless CMS later means rewriting one directory, `lib/markdown/`, and nothing else.
 
-Next.js 16 gives me SSR, SSG, and ISR all in one framework. The App Router's Server Components mean
-I can fetch data directly in components without `useEffect` — dramatically reducing JavaScript sent to the browser.
+The cost is real too: publishing requires a commit and a deploy, and there's no "edit from my phone." For a site where I'm the only author, that trade was worth it.
 
-### Tailwind CSS v4
+## Next.js 16 and the Server Components default
 
-Tailwind v4 drops the config file for design tokens and moves everything into `globals.css` using
-the new `@theme` block:
+The App Router's genuine win is that Server Components are the default, so the question flips from "what can I render on the server?" to "what actually needs to be interactive?"
 
-```css
-@theme {
-  --color-ds-accent: #3B82F6;
-  --color-ds-bg: #0B0F19;
-  --color-ds-surface: #111827;
+On this site the answer is: not much. The mobile nav, the theme toggle, the blog filter, the table of contents, and the lab tools. Everything else — cards, lists, layouts, all the SEO components — is a Server Component that ships zero JavaScript.
+
+Two Next.js 16 specifics worth knowing if you're migrating:
+
+```tsx
+// params and searchParams are Promises in 16 — you must await them
+type Props = { params: Promise<{ slug: string }> }
+
+export default async function PostPage({ params }: Props) {
+  const { slug } = await params
+  const post = getPostBySlug(slug)
+  // ...
 }
 ```
 
-These tokens become Tailwind utility classes automatically: `bg-ds-bg`, `text-ds-accent`, etc.
+The failure mode here is nasty: in the old pattern `searchParams.category` doesn't throw, it just silently returns `undefined`. TypeScript strict mode catches it at compile time, which is one more reason to run strict.
 
-### File-Based Content Layer
+The other one is `useSearchParams()` requiring a `<Suspense>` boundary at build time. I hit it, and eventually wrote up [the full explanation of why it happens and where the boundary goes](/blog/usesearchparams-suspense-boundary-build-error), because the error message names the page rather than the component that caused it.
 
-Blog posts are MDX files in `content/blogs/`. Projects are JSON files in `content/projects/`.
-No database, no CMS dependency, version-controlled content. If I ever need a headless CMS,
-I only swap the `lib/markdown/` layer — nothing else changes.
+## Tailwind v4: tokens in CSS, not config
 
-## One Thing I Learned
+Tailwind v4 moves design tokens out of `tailwind.config.ts` and into a `@theme` block in your CSS:
 
-Turbopack crashes on Windows. Remove `--turbopack` from your dev script immediately.
-I also learned that Tailwind v4 tokens go in `globals.css`, not `tailwind.config.ts`.
-Spent an hour on that one.
+```css
+@theme {
+  --color-ds-bg: #0b0f19;
+  --color-ds-surface: #111827;
+  --color-ds-accent: #3b82f6;
+  --color-ds-purple: #8b5cf6;
+}
+```
 
-## What's Next
+Every token becomes a utility automatically — `bg-ds-bg`, `text-ds-accent`, `border-ds-border` — *and* stays a real CSS custom property you can read from JavaScript or use outside Tailwind entirely.
 
-Phase 3 (this post is part of it) sets up the content pipeline. Phase 4 builds the visible pages.
-Phase 5 completes the full blog system with table of contents, related posts, and syntax highlighted
-code blocks.
+The rule I enforce on myself: **no raw hex anywhere in JSX.** It sounds pedantic until you add a light theme. Every hardcoded `#0B0F19` is a spot that stays dark while everything around it switches. Because all the SVG illustrations on this site use `fill-ds-*` utilities rather than fixed colors, they repaint correctly in both themes with no extra work.
 
-<ImageGallery images={[
-  { "src": "/images/blog/post-slug-1.png", "alt": "Step 1: Setup screen" },
-  { "src": "/images/blog/post-slug-2.png", "alt": "Step 2: Configuration" },
-  { "src": "/images/blog/post-slug-3.png", "alt": "Final result", "caption": "Optional caption text" }
-]} />
+I wrote more about [what actually breaks in a v4 migration](/blog/tailwind-v4-css-first-config-migration), including a silent-failure gotcha that generates no CSS and throws no error.
 
-Follow along — I'll be writing about every major decision as I build it.
+## The SEO layer is a system, not per-page work
+
+This is the part I'd argue is the most genuinely reusable idea in the codebase. Rather than hand-writing meta tags per page, there's one factory:
+
+```ts
+export const metadata = buildMetadata({
+  title: 'Bare Title',           // suffix appended internally
+  description: '...',
+  canonical: '/blog/some-slug',  // relative — site URL is prepended
+  type: 'article',
+})
+```
+
+It fills in Open Graph, Twitter cards, canonical URLs, and robots directives from one config file. Structured data works the same way — `lib/schema/builders.ts` exports builders for Person, WebSite, BlogPosting, BreadcrumbList and more, so JSON-LD is a function call rather than hand-written JSON per page.
+
+OG images are generated at the edge from `/api/og`, so every post gets a branded social preview without anyone opening a design tool.
+
+The thing I'd tell anyone building this: **the value isn't any single tag, it's that it's impossible to forget one.** A new page can't ship without metadata, because the factory is how pages are written.
+
+## Automation, because I don't trust my own memory
+
+A pre-commit hook and CI run the same gates on every change:
+
+- `tsc --noEmit` and ESLint
+- a frontmatter linter that enforces the blog schema — required fields, description length, canonical format, tag counts
+- an MDX compile check on project descriptions
+- a broken-internal-link checker
+- a scan that catches real-looking secrets in `.env.example`
+
+Separately, `pnpm qa` runs a static security audit plus Playwright suites for accessibility and responsive layout from 200px to 1440px.
+
+None of this is glamorous, and all of it exists because I shipped a bug that any one of those checks would have caught. The frontmatter linter in particular has caught more mistakes than I'd like to admit — it's very easy to write a description that's 40 characters too long and never notice.
+
+## What I'd do differently
+
+**Turbopack on Windows.** It crashed constantly. Removing `--turbopack` from the dev script fixed it, and I've left it off since.
+
+**`@next/mdx` was the wrong pick.** It threw a serialization error I lost real time to. `next-mdx-remote` handles the same job without it.
+
+**I under-estimated content.** The architecture was the fun part and I over-invested in it early. The thing that actually determines whether a site like this does anything is whether you keep writing — and no amount of clever infrastructure substitutes for that.
+
+The site is a live system now — 25 posts, 8 projects, a set of interactive tools, and everything above running on every deploy. The full source is [on GitHub](https://github.com/adeshukla/devstash) if you'd rather read the code than my description of it.

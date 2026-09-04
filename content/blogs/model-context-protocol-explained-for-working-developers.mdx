@@ -4,10 +4,10 @@ slug: 'model-context-protocol-explained-for-working-developers'
 description: 'MCP standardizes how AI agents talk to tools and data. What it actually solves, how the pieces fit together, and where it fits next to n8n-style automation.'
 author: 'Adesh Shukla'
 createdAt: '2026-09-02'
-updatedAt: '2026-09-02'
+updatedAt: '2026-09-04'
 category: 'ai-workflows'
 tags: ['mcp', 'ai-agents', 'ai-workflows', 'developer-tools']
-readingTime: 4
+readingTime: 7
 canonical: 'https://devstash.me/blog/model-context-protocol-explained-for-working-developers'
 draft: false
 featured: false
@@ -55,6 +55,26 @@ If you're running [n8n-style automation](/blog/n8n-groq-workflow-patterns) — w
 An n8n chain has a fixed shape: node A always feeds node B. An MCP-connected agent is handed a *menu* of tools and decides at inference time which ones the task actually needs, in what order, possibly none of them. That's a real tradeoff, not a strict upgrade — a fixed n8n chain is predictable and cheap to debug; an agent choosing its own tool sequence is more flexible but needs more guardrails (scoped permissions, tool allowlists, sane defaults on failure).
 
 They're not mutually exclusive either. A perfectly reasonable architecture is an n8n workflow where one node *is* an MCP client, giving that step access to a whole toolbox instead of one hardcoded API call.
+
+## Designing tools an agent can actually use
+
+The protocol is the easy part. The part that decides whether your server is useful is tool design, and the instinct most of us bring from REST APIs is subtly wrong here.
+
+A REST endpoint is consumed by a developer who reads your docs once and writes integration code deliberately. An MCP tool is consumed by a model that picks from a menu at inference time, based almost entirely on the tool's name and description. That changes what "good" looks like:
+
+**Descriptions are the interface, not documentation.** `search_orders` with the description "Search customer orders by email or order ID" gets chosen correctly. The same function described as "Order query endpoint (v2)" gets skipped or misused. Write the description for someone deciding *whether this is the right tool*, not for someone who already decided.
+
+**Narrow beats general.** One `database_query` tool that accepts arbitrary SQL is maximally flexible and nearly unusable — the model has to construct correct SQL against a schema it can't see, and every mistake is a silent wrong answer. Three specific tools (`get_customer`, `list_recent_orders`, `search_products`) constrain the space enough that being right is the default.
+
+**Return errors the model can act on.** "Error 400" tells a model nothing. "No customer found with that email — try search_customers with a partial name" tells it exactly what to do next, and it usually will.
+
+**Assume every tool will be called wrong at some point.** Validate inputs at the server, and make destructive operations require explicit confirmation rather than trusting the model to be careful. The model is not an authenticated user with intent — it's a component that occasionally guesses.
+
+## The security question you should ask first
+
+Because an MCP server exposes real capability to something that decides at runtime what to call, "what could this do if it chose badly?" is a design question, not a paranoid one.
+
+Two things worth settling before you ship one: **scope credentials to the minimum the tools actually need** — a server exposing read-only reporting should hold read-only database access, not an admin connection string — and **treat data returned from a tool as untrusted content, not instructions.** If your server returns user-generated text (support tickets, comments, scraped pages) and that text contains something shaped like a directive, a naive agent may act on it. That's prompt injection with a real blast radius, and the mitigation lives in how the host handles tool output, not in the protocol.
 
 ## What this means practically
 
