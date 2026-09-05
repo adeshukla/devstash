@@ -64,13 +64,19 @@ export function HeroSection() {
               </div>
             </MountReveal>
 
-            {/* Main heading */}
-            <MountReveal delay={160}>
-              <h1 className="text-ds-text text-4xl leading-tight font-bold tracking-tight sm:text-5xl">
-                Web interfaces that ship —{' '}
-                <span className="text-gradient-animate">fast, accessible, built to last.</span>
-              </h1>
-            </MountReveal>
+            {/* Main heading — deliberately NOT wrapped in MountReveal.
+                This <h1> is the homepage's LCP element, and `animate-fade-up`
+                is `fadeUp 0.5s ease both`: `both` holds it at opacity 0 for
+                the delay, then fades in over 500ms, so a delay={160} wrapper
+                kept it from being fully painted until ~660ms after styles
+                applied. LCP counts when the element actually paints, so that
+                animation was pure LCP cost on the one element that must not
+                pay it. The surrounding blocks still stagger in around it —
+                the headline just doesn't wait its turn. */}
+            <h1 className="text-ds-text text-4xl leading-tight font-bold tracking-tight sm:text-5xl">
+              Web interfaces that ship —{' '}
+              <span className="text-gradient-animate">fast, accessible, built to last.</span>
+            </h1>
 
             {/* Sub-copy */}
             <MountReveal delay={240}>
