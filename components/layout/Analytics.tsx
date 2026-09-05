@@ -2,14 +2,27 @@
 //
 // Loads analytics via next/script, all env-gated (nothing renders when the
 // corresponding env var is unset):
-//   - Google Tag Manager  (NEXT_PUBLIC_GTM_ID)  — afterInteractive
+//   - Google Tag Manager  (NEXT_PUBLIC_GTM_ID)  — lazyOnload
 //   - Google Analytics 4  (NEXT_PUBLIC_GA_ID)   — lazyOnload (direct gtag)
 //   - Microsoft Clarity   (NEXT_PUBLIC_CLARITY_ID) — lazyOnload
 //
-// NOTE: GA4 is loaded directly via gtag.js so events fire immediately. GTM is
-// also loaded for tag management + dataLayer events. To avoid double-counting,
-// do NOT also add a GA4 Configuration tag for the same Measurement ID inside
-// GTM — let the direct loader own GA4, and use GTM for other tags/triggers.
+// All three are lazyOnload per RULE 7 ("lazyOnload for all third-party
+// scripts"). GTM was previously afterInteractive, which pulled ~285 KiB of
+// tag-manager + gtag payload into the critical window and showed up in
+// PageSpeed as the largest "reduce unused JavaScript" entry. Analytics has no
+// reason to compete with LCP — nothing on this site renders based on it.
+//
+// IMPORTANT — pick ONE owner per tool, never both:
+//   (a) GTM owns everything: set only NEXT_PUBLIC_GTM_ID and configure the GA4
+//       + Clarity tags inside the container. This is what production does as of
+//       2026-09 (verified: the live gtag URL carries `&gtm=...` and the Clarity
+//       tag carries `?ref=gtm`, i.e. the container loaded both).
+//   (b) Direct loaders own GA4/Clarity: set NEXT_PUBLIC_GA_ID /
+//       NEXT_PUBLIC_CLARITY_ID and keep those tags OUT of the GTM container.
+// Setting both for the same ID double-loads the script and double-counts hits.
+// Under (a), window.gtag is not defined — trackEvent() still works because it
+// also pushes to dataLayer, but forwarding those custom events to GA4 requires
+// a matching trigger in the GTM container.
 import Script from 'next/script'
 
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
@@ -20,7 +33,7 @@ export function Analytics() {
   return (
     <>
       {GTM_ID ? (
-        <Script id="gtm-init" strategy="afterInteractive">{`
+        <Script id="gtm-init" strategy="lazyOnload">{`
           (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
           var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;
           j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})

@@ -49,6 +49,12 @@ const nextConfig: NextConfig = {
    * that would force every blog/project page (currently statically
    * generated) to render on every request, which conflicts with RULE 7
    * (perf budget is non-negotiable) for a marginal hardening gain here.
+   * img-src allows c.bing.com because Microsoft Clarity fires an ID-sync
+   * pixel at `c.bing.com/c.gif?...&RedC=c.clarity.ms`. Without it the browser
+   * blocks the request and logs a CSP error to the console on every page load,
+   * which Lighthouse then reports under "Browser errors were logged to the
+   * console". Scoped to img-src only (one host, images only) rather than
+   * widening script-src or connect-src.
    * `<script type="application/ld+json">` is exempt from script-src by spec
    * (browsers never parse it as JS), so JSON-LD needs no allowance at all.
    * 'unsafe-inline' in script-src covers only the 3 first-party analytics
@@ -63,7 +69,7 @@ const nextConfig: NextConfig = {
       default-src 'self';
       script-src 'self' 'unsafe-inline'${devEval} https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms https://*.clarity.ms https://www.google.com https://www.gstatic.com;
       style-src 'self' 'unsafe-inline';
-      img-src 'self' data: https://*.clarity.ms;
+      img-src 'self' data: https://*.clarity.ms https://c.bing.com;
       font-src 'self' data:;
       connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://*.clarity.ms;
       frame-src https://www.google.com;
