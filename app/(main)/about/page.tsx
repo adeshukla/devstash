@@ -15,7 +15,7 @@ import {
 } from '@/components/ui'
 import { Icon, type IconName } from '@/components/icons/Icon'
 
-const title = 'About Adesh Shukla — Frontend Developer'
+const title = 'About Adesh Shukla — UI Developer'
 const description =
   'Designer-turned-developer, 6+ years on the interface layer — CSS, design systems, accessibility and technical SEO. Based in Ghaziabad, NCR, open to UI roles.'
 

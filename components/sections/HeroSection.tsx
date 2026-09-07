@@ -42,9 +42,9 @@ export function HeroSection() {
                     </>
                   }
                   phrases={[
-                    'building developer tools',
-                    'shipping Next.js apps',
-                    'automating workflows',
+                    'building interfaces',
+                    'auditing accessibility',
+                    'chasing Core Web Vitals',
                     'writing about frontend',
                   ]}
                 />
