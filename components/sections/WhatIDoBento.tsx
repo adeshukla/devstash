@@ -124,14 +124,14 @@ export function WhatIDoBento() {
             </p>
             <div className="border-ds-border bg-ds-surface2 rounded-lg border p-4">
               <p className="text-ds-success truncate font-mono text-xs">
-                devstash.me › projects › netflix-gpt
+                devstash.me › projects › css-shapes-playground
               </p>
               <p className="text-ds-accent mt-1.5 truncate text-base">
-                Flix GPT — Case Study | DevStash
+                CSS Shapes &amp; Animation Playground | DevStash
               </p>
               <p className="text-ds-muted mt-1 line-clamp-2 text-sm leading-relaxed">
-                A full-stack Netflix clone powered by Gemini AI for smart movie recommendations —
-                architecture, decisions, and the real build.
+                A real, working CSS showcase — a live shape + color customizer, animated borders,
+                and layered shadows, with copyable CSS on every single demo.
               </p>
             </div>
             <h3 className="text-ds-text mt-6 text-xl font-semibold sm:text-2xl">

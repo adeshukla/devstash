@@ -69,8 +69,9 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   'choosing-scalable-architecture-early': 'architecture',
   'css-shapes-playground': 'shapes',
   'utm-builder': 'link',
-  'real-estate-listing': 'house',
-  'marketing-lead-gen': 'megaphone',
+  // ('house' and 'megaphone' overrides removed with the real-estate-listing and
+  // marketing-lead-gen project entries. Both scenes stay in ALL_SCENES — the
+  // illustration generator offers them as pickable scenes on their own.)
   // These four all share the 'frontend'/'automation' category bucket with at
   // least one other post, so without an override they'd render the exact
   // same scene as something else on the same /blog grid.
