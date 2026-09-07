@@ -17,9 +17,13 @@ const CATEGORY_LABELS: Record<ProjectCategory, string> = {
   'open-source': 'Open Source',
 }
 
-const title = 'Projects — Frontend, Automation & Web Apps'
+// This page is the case-study layer: what each tool solved and why it is built
+// the way it is. The running versions live in /lab, and every card links across
+// to its own. Keep the two framings distinct — the old copy here promised
+// "open source repos" and "client work" that the project files do not contain.
+const title = 'Projects — Frontend Build Notes & Case Studies'
 const description =
-  'Frontend projects built with React, Next.js, and TypeScript, plus automation tooling. A mix of open-source experiments and client work by Adesh Shukla.'
+  'Case studies behind the tools on this site — the problem each one solved, the decisions and tradeoffs behind it, and what I would change next time.'
 
 export const metadata: Metadata = buildMetadata({
   title,
@@ -63,8 +67,12 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
             Projects
           </h1>
           <p className="text-ds-muted mt-3 max-w-xl">
-            Things I&apos;ve designed, built, and shipped — open source repos, automation tools, and
-            web apps.
+            The build behind each tool — the problem it solved, the tradeoffs, and what I&apos;d
+            change. Every one links through to the running version in the{' '}
+            <Link href="/lab" className="text-ds-accent hover:underline">
+              Lab
+            </Link>
+            .
           </p>
 
           {/* Category filter */}
