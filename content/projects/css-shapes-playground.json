@@ -1,7 +1,7 @@
 {
   "slug": "css-shapes-playground",
   "title": "CSS Shapes & Animation Playground",
-  "description": "A real, working CSS showcase — a live shape + color customizer, animated borders, CTA button animations, and box-shadow effects, with copyable CSS on every single demo.",
+  "description": "Shapes, glass, gradients and layered shadows tuned live in your own colours — every control copies out as plain CSS or a Tailwind arbitrary-value class.",
   "longDescription": "Twelve real CSS techniques across four categories — shape morphing, animated borders, CTA button motion, and box-shadow effects — plus an interactive customizer where you pick a color and shape and get the exact CSS back. Every demo card ships its own copy-able CSS snippet. No canvas, no animation library, no JS driving the actual motion — only the customizer's shape/color state is React; everything else is plain, running CSS.",
   "status": "live",
   "featured": true,

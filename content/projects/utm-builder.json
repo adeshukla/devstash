@@ -1,7 +1,7 @@
 {
   "slug": "utm-builder",
   "title": "UTM Link Builder",
-  "description": "A real, working UTM link builder for PPC landing pages — fully client-side, built from the habits of actually tagging 200+ campaign URLs by hand.",
+  "description": "Preserves query params already on the URL instead of clobbering them, and catches a missing utm_ prefix — built from tagging 200+ campaign URLs by hand.",
   "longDescription": "A small utility, not a landing page — enter a base URL and campaign parameters, get a properly tagged link back with a one-click copy. Nothing is sent to a server; the whole thing runs in the browser using the native URL and URLSearchParams APIs.",
   "status": "live",
   "featured": true,
