@@ -32,7 +32,7 @@ export function buildPersonSchema(): WithContext<Person> {
     name: siteConfig.author.name,
     url: siteConfig.url,
     email: siteConfig.author.email,
-    jobTitle: 'Frontend Developer',
+    jobTitle: 'UI Developer',
     // Every profile that corroborates the same identity. The X handle was
     // already in site.config but had never been emitted here.
     sameAs: [siteConfig.author.github, siteConfig.author.linkedin, siteConfig.author.x],
@@ -45,13 +45,17 @@ export function buildPersonSchema(): WithContext<Person> {
     },
     // Topical association — the subjects the site actually covers, so the
     // entity is linked to these areas rather than floating unattached.
+    // Topical association for the person, so keep this to what is actually
+    // defensible in a conversation — not every technology the site is built
+    // with. The site runs on Next.js; that is a fact about the artifact, not a
+    // claim about its author's expertise, and those are different things.
     knowsAbout: [
-      'Frontend Development',
-      'React',
-      'Next.js',
-      'TypeScript',
-      'Web Performance',
+      'User Interface Development',
+      'CSS',
+      'Design Systems',
       'Web Accessibility',
+      'Web Performance',
+      'Core Web Vitals',
       'Technical SEO',
       'Workflow Automation',
     ],

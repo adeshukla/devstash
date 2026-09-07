@@ -20,9 +20,9 @@ import { getAllPosts, getFeaturedPosts } from '@/lib/markdown/blog'
 // The old title ("DevStash — Modern Developer Ecosystem") targeted a phrase
 // with no real search demand and rendered the brand name twice.
 export const metadata: Metadata = buildMetadata({
-  title: 'Adesh Shukla — Frontend Developer, React & Next.js',
+  title: 'Adesh Shukla — UI Developer: Accessibility & Technical SEO',
   description:
-    'Frontend developer with 6+ years building React and Next.js products — fast, accessible, SEO-ready. Based in NCR, open to roles in Noida, Gurugram or remote.',
+    'Designer-turned-developer, 6+ years on the interface layer — CSS and design systems, accessibility, Core Web Vitals, technical SEO. Based in NCR, open to roles.',
 })
 
 // ─── Flagship build — the AI Content Pipeline demo (/lab/ai-content-pipeline):

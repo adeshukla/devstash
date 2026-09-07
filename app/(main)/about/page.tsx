@@ -17,7 +17,7 @@ import { Icon, type IconName } from '@/components/icons/Icon'
 
 const title = 'About Adesh Shukla — Frontend Developer'
 const description =
-  'Frontend developer with 6+ years across React, Next.js, and UI systems. A designer-turned-developer based in Ghaziabad, NCR, now open to frontend roles.'
+  'Designer-turned-developer, 6+ years on the interface layer — CSS, design systems, accessibility and technical SEO. Based in Ghaziabad, NCR, open to UI roles.'
 
 export const metadata: Metadata = buildMetadata({
   title,
@@ -29,12 +29,22 @@ export const metadata: Metadata = buildMetadata({
 
 // ─── Static data ──────────────────────────────────────────────────────────────
 
+// Ordered by what can actually be defended in an interview, strongest first —
+// not by what looks most impressive in a list. A skills grid is a set of claims
+// someone will ask follow-up questions about, so anything here has to survive
+// "show me" and "why did you do it that way".
 const SKILLS: Record<string, string[]> = {
-  Frontend: [stack.react, stack.next, stack.typescript, stack.tailwind, 'Redux Toolkit'],
-  Tooling: ['Vite', 'pnpm', 'Webpack', 'Husky', 'Prettier'],
-  Automation: ['n8n', 'Groq API', 'Ollama', 'Google Sheets API', 'Resend'],
-  Design: ['Figma', 'UI/UX Design', 'Design Systems', 'Tailwind UI'],
-  Backend: ['Node.js', 'Next.js API Routes', 'Firebase Auth', 'REST APIs'],
+  Interface: ['HTML', 'CSS', stack.tailwind, 'Responsive Layout', 'Design Systems'],
+  'Accessibility & SEO': [
+    'WCAG 2.1 AA',
+    'axe-core',
+    'Semantic HTML',
+    'Structured Data',
+    'Sitemaps',
+  ],
+  Performance: ['Core Web Vitals', 'Lighthouse', 'LCP / CLS / INP', 'Perf Budgets'],
+  Design: ['Figma', 'UI/UX Design', 'Design-to-Code Handoff'],
+  Tooling: ['Git', 'pnpm', 'Prettier', 'Playwright'],
 }
 
 // Reuses the site's existing drawn-icon set (same marks the /tools and
@@ -42,11 +52,11 @@ const SKILLS: Record<string, string[]> = {
 // per category, not per pill, so coverage stays 100% instead of some skills
 // having a matching tech mark and others not.
 const CATEGORY_ICONS: Record<string, IconName> = {
-  Frontend: 'frontend',
-  Tooling: 'devtools',
-  Automation: 'automation',
+  Interface: 'frontend',
+  'Accessibility & SEO': 'browser',
+  Performance: 'performance',
   Design: 'design',
-  Backend: 'terminal',
+  Tooling: 'devtools',
 }
 
 const TIMELINE = [
@@ -96,9 +106,9 @@ export default function AboutPage() {
               </h1>
               <div className="text-ds-muted mt-4 flex max-w-2xl flex-col gap-3 text-base leading-relaxed sm:mt-6 sm:gap-4 sm:text-lg">
                 <p>
-                  Frontend developer with a designer&apos;s eye and an automation enthusiast&apos;s
-                  brain. I&apos;ve been building for the web for 6+ years — from Figma mockups to
-                  deployed, performant Next.js apps.
+                  Designer-turned-developer, 6+ years on the interface layer. I take a design and
+                  make it real on the web — CSS and design systems, accessibility I measure rather
+                  than assume, Core Web Vitals, and the technical SEO most builds leave until last.
                 </p>
                 <p>
                   Currently at Chetu India building landing pages for US clients. Also building{' '}
