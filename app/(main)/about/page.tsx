@@ -62,7 +62,10 @@ const CATEGORY_ICONS: Record<string, IconName> = {
 const TIMELINE = [
   {
     year: 'Jul 2021 – Present',
-    role: 'Frontend Developer',
+    // Matches the payslip designation, so the site, the résumé and Chetu's own
+    // HR record all say the same thing. The Team Lead period is covered in the
+    // résumé bullets rather than in the title line.
+    role: 'UI Developer',
     company: 'Chetu India Pvt. Ltd.',
     desc: 'Building 200+ high-conversion PPC landing pages for US-based clients. Internal marketing web team.',
   },

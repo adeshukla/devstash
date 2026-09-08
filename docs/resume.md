@@ -36,7 +36,7 @@ restructuring.
 
 ## Work Experience
 
-### Frontend Developer → Team Lead — Chetu India Pvt. Ltd.
+### UI Developer — Chetu India Pvt. Ltd.
 
 _Jul 2021 – Present · 4.5+ yrs · Internal Marketing Web Team, Noida_
 
@@ -64,7 +64,7 @@ estate agents) · [instyledirect.com](https://instyledirect.com) ·
 ### DevStash — devstash.me
 
 - Public developer site — 25-post technical blog and four browser-based CSS/SEO tools. Product direction, content and UI/UX are mine; built with AI assistance which I directed and reviewed.
-- Verified in production: **Lighthouse Accessibility 100, Best Practices 100, SEO 100, Performance 94+** (mobile).
+- Verified in production: **Lighthouse Accessibility 100 and SEO 100** (mobile) — semantic structure, contrast, structured data and sitemaps.
 
 ## Education
 
