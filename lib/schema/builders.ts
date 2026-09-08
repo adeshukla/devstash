@@ -56,7 +56,7 @@ export function buildPersonSchema(): WithContext<Person> {
       'Web Accessibility',
       'Web Performance',
       'Core Web Vitals',
-      'Technical SEO',
+      'Landing Page Development',
       'Workflow Automation',
     ],
   }

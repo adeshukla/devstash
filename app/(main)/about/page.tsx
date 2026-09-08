@@ -17,7 +17,7 @@ import { Icon, type IconName } from '@/components/icons/Icon'
 
 const title = 'About Adesh Shukla — UI Developer'
 const description =
-  'Designer-turned-developer, 6+ years on the interface layer — CSS, design systems, accessibility and technical SEO. Based in Ghaziabad, NCR, open to UI roles.'
+  'UI developer, 6+ years — 200+ PPC landing pages for US clients, plus CSS, responsive layout, accessibility and page-speed work. Ghaziabad, NCR. Open to UI roles.'
 
 export const metadata: Metadata = buildMetadata({
   title,
@@ -106,9 +106,10 @@ export default function AboutPage() {
               </h1>
               <div className="text-ds-muted mt-4 flex max-w-2xl flex-col gap-3 text-base leading-relaxed sm:mt-6 sm:gap-4 sm:text-lg">
                 <p>
-                  Designer-turned-developer, 6+ years on the interface layer. I take a design and
-                  make it real on the web — CSS and design systems, accessibility I measure rather
-                  than assume, Core Web Vitals, and the technical SEO most builds leave until last.
+                  Designer-turned-developer, 6+ years. I take a design and make it real on the web.
+                  Most of my work has been landing pages at volume — CSS, responsive layout, keeping
+                  an older codebase alive, and fixing the accessibility and speed problems that show
+                  up once a page is actually live.
                 </p>
                 <p>
                   Currently at Chetu India building landing pages for US clients. Also building{' '}

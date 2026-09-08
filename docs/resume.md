@@ -1,132 +1,158 @@
 # Adesh Shukla — Résumé (source)
 
-> **This is the editable source for your résumé.** It uses only verified
-> information from the site (with `TODO:` markers where I don't have the data —
-> fill those before exporting). To produce the PDF served at
-> `/resume-adesh-shukla.pdf`, see **[How to export to PDF](#how-to-export-to-pdf)**
-> at the bottom, then replace `public/resume-adesh-shukla.pdf`.
+> **Editable source for the résumé.** Every line here is something you can defend
+> in an interview — if you can't explain it under a follow-up question, it isn't
+> in this file. Fill the `TODO:` markers before exporting, then replace
+> `public/resume-adesh-shukla.pdf`. Export instructions at the bottom.
+>
+> **Deliberately not listed:** React, Next.js, Redux, TypeScript, Node.js,
+> Firebase. Those were on the old version and you'd be asked about them in the
+> first technical round. Add them back when you can build with them unaided —
+> not before.
 
 ---
 
 # Adesh Shukla
 
-**Frontend Developer** · React · Next.js · TypeScript · Automation
+**UI Developer** · Landing Pages · CSS · Web Performance
 
 Ghaziabad, UP, India · Open to Noida / Delhi NCR & Remote
 [hello@devstash.me](mailto:hello@devstash.me) ·
 Portfolio: [devstash.me](https://devstash.me) ·
-GitHub: [github.com/adeshukla](https://github.com/adeshukla) ·
 LinkedIn: [linkedin.com/in/adeshukla](https://www.linkedin.com/in/adeshukla)
 
-<!-- TODO: add phone number if you want it on the résumé -->
+<!-- TODO: add phone number -->
 
 ---
 
 ## Summary
 
-Frontend developer with a designer's eye and 6+ years building for the web —
-from Figma mockups to deployed, performant Next.js applications. I turn designs
-into high-performance, SEO-ready products and automate the repetitive parts of
-the workflow (content pipelines, CI quality gates, AI workflows). Currently
-building **DevStash** (devstash.me), a developer ecosystem covering engineering,
-automation, and AI workflows.
+UI developer with 6+ years building marketing and landing-page front-ends, the
+last five for US clients. I've shipped 200+ PPC landing pages, maintained a
+long-lived Bootstrap codebase without breaking it, and fixed the accessibility
+and page-speed problems that surface after launch. Comfortable working directly
+with US stakeholders on requirements and turnaround, and I led a small team
+before a company-wide restructuring.
 
 ---
 
 ## Skills
 
-- **Frontend:** React, Next.js 16 (App Router, RSC), TypeScript (strict),
-  Tailwind CSS v4, Redux Toolkit
-- **Tooling & DevOps:** Vite, pnpm, Webpack, Husky, Prettier, GitHub Actions
-  (CI: type-check, build, Lighthouse), Vercel
-- **Automation & AI:** n8n, Groq API, Ollama (local LLMs), Google Sheets API,
-  Resend
-- **Backend & Data:** Node.js, Next.js API Routes, Firebase Auth, REST APIs
-- **Design:** Figma, UI/UX, design systems, design tokens
-- **SEO & Web Perf:** structured data (JSON-LD), dynamic OG images, Core Web
-  Vitals, Lighthouse 90+
+- **Markup & Styling:** HTML5, CSS3, Bootstrap 3/5, Tailwind CSS, responsive
+  layout, cross-browser fixes
+- **CMS & Templating:** WordPress (theme/content), PHP-based page templates
+- **Accessibility:** WAVE audits, semantic HTML, contrast and alt-text fixes
+- **Performance:** PageSpeed Insights / Lighthouse audits, image and asset
+  optimisation, Core Web Vitals basics
+- **Design:** Figma, design-to-code handoff, Photoshop (basic image work)
+- **Ways of working:** direct US-client communication, requirement gathering,
+  peer support and review
+- **Currently learning:** JavaScript fundamentals (see Growth, below)
 
 ---
 
 ## Experience
 
-### Frontend Developer — Chetu India Pvt. Ltd.
+### Chetu India Pvt. Ltd. — Internal Marketing Web Team
 
-_Jul 2021 – Present · Internal marketing web team_
+_Jul 2021 – Present · Noida_
+<!-- TODO: confirm your title history and dates, e.g.
+     "Frontend Developer (Jul 2021 – <date>), Team Lead (<date> – <date>),
+     Senior Team Member (<date> – Present)". List the highest title you held. -->
 
-- Build high-conversion PPC landing pages (200+) for US-based clients.
-- <!-- TODO: add 2–3 measurable achievements, e.g. "Improved LCP from X to Ys",
-  "Increased conversion by N%", "Reduced build time / page weight by N%". -->
+- Built and shipped **200+ high-conversion PPC landing pages** for US-based
+  clients, working to campaign deadlines.
+- Owned the company website and its subdomain landing sites end to end — build,
+  updates, and post-launch fixes.
+- Maintained a long-lived **Bootstrap 3** codebase, making layout and responsive
+  changes without regressions across existing pages.
+- Fixed **accessibility issues** found via WAVE audits — semantic structure,
+  contrast, alt text.
+- Improved **page speed** using PageSpeed Insights, mainly asset and image
+  optimisation.
+- Worked **directly with US managers** on requirements, clarifications and
+  delivery timelines.
+- **Promoted to Team Lead**, supporting and reviewing the work of team members.
 
-### Frontend Developer — IS Global
+<!-- TODO: 1–2 numbers would make this section much stronger. Anything you can
+     recall counts: pages shipped per month, a PageSpeed score before/after, a
+     campaign that converted well, team size you led. Approximate is fine —
+     "roughly", "around" — as long as it's honest. -->
+
+### IS Global — Frontend Developer
 
 _Jul 2020 – Jun 2021_
 
-- General frontend development — building and maintaining websites and UIs
-  with HTML, CSS, JavaScript, and React.
+- Built and maintained **WordPress** sites — content updates, template edits,
+  and CSS-heavy layout work.
+- Started as an intern and was retained as a full-time employee.
 
 ---
 
-## Selected Projects
+## Selected Work
 
-### DevStash — Developer Ecosystem & Personal Platform
+### DevStash — devstash.me
 
-_[devstash.me](https://devstash.me) · [source](https://github.com/adeshukla)_
+_Personal site and developer resource hub_
 
-- Built a content-driven developer platform with **Next.js 16 App Router**,
-  TypeScript (strict), and **Tailwind CSS v4** design tokens.
-- File-based MDX blog pipeline (`next-mdx-remote`, gray-matter) with a
-  local-only admin (auth, post create/edit/delete, image upload).
-- **SEO-first:** per-page metadata, canonical URLs, JSON-LD, and a dynamic
-  `next/og` image endpoint; GA4 + GTM analytics with custom event tracking.
-- **Automation:** MDX frontmatter linter, broken-link checker, and Lighthouse CI
-  wired into pre-commit + GitHub Actions.
+- Public site with a 25-post technical blog, four browser-based CSS/SEO tools,
+  and a resources section.
+- Product direction, content decisions and UI/UX are mine; the implementation
+  was built with AI assistance (Claude), which I directed and reviewed.
+- Verified in production: **Lighthouse Accessibility 100**, Best Practices 100,
+  SEO 100, Performance 94+ on mobile.
 
-### Netflix GPT — AI-Powered Netflix Clone
+<!-- Why the AI line is there: an interviewer who opens the repo will see it
+     anyway, and being upfront reads as honest rather than caught out. It also
+     stops them asking React questions you don't want. If you'd rather not
+     include this project at all right now, delete this whole section — the
+     Chetu experience is the stronger half of this résumé. -->
 
-_[netflix-gpt.vercel.app](https://netflix-gpt.vercel.app) · [source](https://github.com/adeshukla/netflix-gpt)_
+---
 
-- Full-stack Netflix clone with **React, Vite, Redux Toolkit, and Firebase
-  Auth** (email/password, persistent sessions).
-- Integrated **Google Gemini API** for a GPT search feature — natural-language /
-  mood prompts return real movie recommendations.
-- Fully responsive (mobile → 4K); GitHub Actions CI/CD (type-check + build on
-  every PR).
+## Growth
+
+- Working through JavaScript fundamentals daily, building small features by
+  hand rather than following along with tutorials.
+
+<!-- TODO: once you have 3–4 small things you actually wrote yourself, link them
+     here. That single line will do more in an interview than any tool list. -->
 
 ---
 
 ## Education
 
-<!-- TODO: Add degree, institution, and year. -->
+<!-- TODO: Add your qualification, institution and year.
+     If you want to mention the CA path pre-2017, one line is enough —
+     e.g. "Pursued CA (Foundation/Inter) until 2017 before moving into web
+     development." A career switch reads as deliberate, not as a gap. -->
 
 ---
 
 ## Links
 
 - Portfolio: https://devstash.me
-- GitHub: https://github.com/adeshukla
 - LinkedIn: https://www.linkedin.com/in/adeshukla
 - Email: hello@devstash.me
+
+<!-- GitHub is intentionally left off. The public repos there are early
+     learning projects and don't help this pitch. Add it back once there's
+     something on it you'd want a reviewer to open. -->
 
 ---
 
 ## How to export to PDF
 
-Pick whichever is easiest — the file the site serves is
-`public/resume-adesh-shukla.pdf`:
+The file the site serves is `public/resume-adesh-shukla.pdf`:
 
-1. **Fill in the `TODO:` items above** (phone optional, achievements, earlier
-   roles, education). Don't ship a résumé with TODOs in it.
-2. **Generate the PDF** from this markdown using any of:
-   - VS Code extension "Markdown PDF" → right-click → _Markdown PDF: Export
-     (pdf)_.
-   - Paste into a résumé builder (e.g. Reactive Resume, FlowCV, or even Google
-     Docs) and **Print → Save as PDF** for nicer typography.
-   - `md-to-pdf` / `pandoc` if you have them locally.
-3. **Replace** `public/resume-adesh-shukla.pdf` with the exported file (keep the
-   exact filename — the nav/about "Download résumé" buttons link to it).
-4. Commit + push.
+1. **Fill in every `TODO:` above.** Never ship a résumé with TODOs in it.
+2. **Generate the PDF** — easiest options:
+   - VS Code extension "Markdown PDF" → right-click → _Markdown PDF: Export (pdf)_
+   - Paste into FlowCV / Reactive Resume / Google Docs → Print → Save as PDF
+     (better typography, and these give you a one-page layout for free)
+3. **Replace** `public/resume-adesh-shukla.pdf`, keeping the exact filename —
+   the nav and About "Download résumé" buttons link to it.
+4. Commit and push.
 
-> Why not auto-generate the PDF here? A résumé PDF is a binary with layout/typography
-> that's best controlled by you (and the source still has TODOs only you can
-> fill). This markdown is the single source you edit; export when it's final.
+**Keep it to one page.** With six years and two employers, one page is expected;
+two pages invites the question of what's padding.

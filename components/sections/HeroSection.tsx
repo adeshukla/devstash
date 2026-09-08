@@ -91,9 +91,11 @@ export function HeroSection() {
                   into that broken literal space. */}
               <p className="text-ds-muted max-w-2xl text-base leading-relaxed sm:text-lg">
                 I&apos;m Adesh Shukla — a designer-turned-developer, building for the web for{' '}
-                <strong className="text-ds-text font-semibold">6+ years</strong>. My work sits on
-                the interface layer: CSS and design systems, accessibility measured rather than
-                assumed, Core Web Vitals, and the technical SEO most builds leave until last.
+                <strong className="text-ds-text font-semibold">6+ years</strong>. Most of that is
+                landing pages at volume —{' '}
+                <strong className="text-ds-text font-semibold">200+</strong> of them for US clients
+                — plus the CSS, responsive work, accessibility fixes and page-speed cleanup that
+                keeps them working after launch.
               </p>
             </MountReveal>
 
