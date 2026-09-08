@@ -103,10 +103,10 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   'claude-code-vs-cursor-what-actually-differs': 'editor-split',
   'why-devstash-isnt-on-react-compiler-yet': 'compiler-atom',
   'usesearchparams-suspense-boundary-build-error': 'suspense-boundary',
-  // Praxis is the only 'web-app' project, so it has no bucket collision —
-  // but the generic category scene says nothing about what it is. Its own
-  // scene shows the actual loop: a reviewed card, a follow-up question, and
-  // an expanding repetition schedule.
+  // Parked: content/projects/praxis.json is pulled for now while the Praxis
+  // content is still being written. The mapping and the 'recall-cards' scene
+  // stay so re-adding the project file is the only step needed — the scene is
+  // also pickable on its own in the illustration generator meanwhile.
   praxis: 'recall-cards',
   // Both of these are category 'tool', which falls through to the shared
   // 'devtools' scene — the same one the DevStash build-notes post renders,
