@@ -17,13 +17,15 @@ const CATEGORY_LABELS: Record<ProjectCategory, string> = {
   'open-source': 'Open Source',
 }
 
-// This page is the case-study layer: what each tool solved and why it is built
-// the way it is. The running versions live in /lab, and every card links across
-// to its own. Keep the two framings distinct — the old copy here promised
-// "open source repos" and "client work" that the project files do not contain.
+// This page is the case-study layer: what each build solved and why it is put
+// together the way it is. The browser tools run in /lab and their cards link
+// across; Praxis runs on its own domain, so the copy can no longer promise that
+// everything here is a tool living in the Lab. Keep the two framings distinct —
+// the older copy also promised "open source repos" and "client work" that the
+// project files do not contain.
 const title = 'Projects — Frontend Build Notes & Case Studies'
 const description =
-  'Case studies behind the tools on this site — the problem each one solved, the decisions and tradeoffs behind it, and what I would change next time.'
+  'Case studies behind what I have built — the problem each one solved, the decisions and tradeoffs behind it, and what I would change next time.'
 
 export const metadata: Metadata = buildMetadata({
   title,
@@ -67,12 +69,12 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
             Projects
           </h1>
           <p className="text-ds-muted mt-3 max-w-xl">
-            The build behind each tool — the problem it solved, the tradeoffs, and what I&apos;d
-            change. Every one links through to the running version in the{' '}
+            The build behind each one — the problem it solved, the tradeoffs, and what I&apos;d
+            change. Every card links through to something running: the browser tools live in the{' '}
             <Link href="/lab" className="text-ds-accent hover:underline">
               Lab
             </Link>
-            .
+            , and Praxis runs on its own domain.
           </p>
 
           {/* Category filter */}

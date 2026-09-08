@@ -1,0 +1,35 @@
+{
+  "slug": "praxis",
+  "title": "Praxis — Frontend Interview Practice",
+  "description": "A frontend interview-prep platform — reasoning-first quizzes, a concept genealogy map, and an AI interviewer that cross-questions shallow answers.",
+  "longDescription": "Praxis is a learning platform I designed for my own interview preparation, then built out properly. It holds 451 lessons across 15 tracks — JavaScript, React, Next.js, TypeScript, Angular, modern CSS, accessibility, web performance, system design, AWS, Docker, data layer, UX, engineering practices and AI fundamentals. Each lesson pairs an explanation with a quiz where every option carries its reasoning, a genealogy view tracing an API back to the idea underneath it, and a mock interviewer that follows up when an answer is shallow. An SM-2 spaced-repetition schedule brings back whatever you fumbled. The product thinking, the learning model and the UX are mine; the implementation was built with AI assistance that I directed and reviewed.",
+  "status": "live",
+  "featured": true,
+  "order": 4,
+  "category": "web-app",
+  "tech": ["Next.js", "React", "TypeScript", "Tailwind CSS", "Supabase", "PostgreSQL"],
+  "liveUrl": "https://praxis.devstash.me",
+  "image": "/images/projects/praxis.webp",
+  "startDate": "2026-08-07",
+  "year": 2026,
+  "highlights": [
+    "451 lessons across 15 tracks, each with its own quiz set and interview question bank — verified by count, not estimated",
+    "Reasoning-first quizzes: every option carries why it is right or wrong, so a wrong answer teaches something specific instead of just scoring zero",
+    "Concept genealogy — useState traced back through closures to lexical environment, so an API stops being memorisation",
+    "A mock interviewer that cross-questions: answer shallowly and it digs, the way a real interviewer finds the floor of what you know",
+    "SM-2 spaced repetition scheduling weak concepts back into the queue, with fumbled topics surfaced on the dashboard",
+    "Row-level security on every user table (profiles, progress, quiz and question attempts, review schedule), on a self-hosted Supabase stack rather than a managed tier",
+    "Lighthouse mobile on the live site: Accessibility 100, Best Practices 100, SEO 100 — 51 audits passed, 0 failed"
+  ],
+  "caseStudy": {
+    "problem": "Preparing for frontend interviews, I kept hitting the same wall: I could recognise a concept and still fall apart on the second follow-up question. Existing prep sites optimise for recall — flashcards, MCQs, answer keys — which trains you to recognise the right answer, not to defend it. Nothing I tried practised the part that actually fails in an interview.",
+    "approach": "Design the product around the failure mode instead of around content volume. That meant four things working as one loop: quizzes where every option explains its own reasoning, a genealogy view that traces an API back to the primitive underneath it, an interviewer that keeps probing until it finds the edge of what you know, and spaced repetition so the things you fumbled come back before you forget them. I specified the model and the UX; the implementation was built with AI assistance under my direction and review.",
+    "decisions": [
+      "Reasoning attached to every option, not just the correct one — an answer key tells you that you were wrong, and reasoning tells you what you actually misunderstood.",
+      "Self-hosted Supabase — Postgres, GoTrue and PostgREST via Docker Compose — instead of a managed tier, so a personal project carries no monthly bill and the auth and database layer is the part I actually had to understand.",
+      "Content as MDX plus JSON on disk rather than in a CMS — 451 lessons, 451 quiz files and 451 interview banks stay diffable, reviewable in a pull request, and buildable without a database.",
+      "Built and shipped it publicly rather than keeping it local, so the performance and accessibility work had to hold up on a real deployment instead of on localhost."
+    ],
+    "outcome": "Live at praxis.devstash.me, scoring 100 on Accessibility, Best Practices and SEO on Lighthouse mobile with zero failed audits. It has no users — it was built for my own interview preparation and has not been promoted, so there are no signup, retention or engagement numbers to report and I won't invent any. What it demonstrates is product direction and follow-through on a system considerably larger than a single-page tool."
+  }
+}

@@ -117,6 +117,9 @@ const SCENE_LABELS: Record<Scene, string> = {
   'editor-split': 'Editor Split',
   'compiler-atom': 'Compiler Atom',
   'suspense-boundary': 'Suspense Boundary',
+  'recall-cards': 'Recall Cards',
+  'svg-canvas': 'SVG Canvas',
+  'social-card': 'Social Card',
 }
 
 const DENSITY_LABELS: Record<Density, string> = { 1: 'Minimal', 2: 'Balanced', 3: 'Rich' }

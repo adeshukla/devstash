@@ -39,6 +39,9 @@ export type Scene =
   | 'editor-split'
   | 'compiler-atom'
   | 'suspense-boundary'
+  | 'recall-cards'
+  | 'svg-canvas'
+  | 'social-card'
 
 const BLOG_SCENE: Record<BlogCategory, Scene> = {
   frontend: 'frontend',
@@ -100,6 +103,16 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   'claude-code-vs-cursor-what-actually-differs': 'editor-split',
   'why-devstash-isnt-on-react-compiler-yet': 'compiler-atom',
   'usesearchparams-suspense-boundary-build-error': 'suspense-boundary',
+  // Praxis is the only 'web-app' project, so it has no bucket collision —
+  // but the generic category scene says nothing about what it is. Its own
+  // scene shows the actual loop: a reviewed card, a follow-up question, and
+  // an expanding repetition schedule.
+  praxis: 'recall-cards',
+  // Both of these are category 'tool', which falls through to the shared
+  // 'devtools' scene — the same one the DevStash build-notes post renders,
+  // so three cards were showing the identical thumbnail.
+  'illustration-generator': 'svg-canvas',
+  'meta-tag-generator': 'social-card',
 }
 
 interface CategoryIllustrationProps {
@@ -232,6 +245,12 @@ export function SceneContent({ scene }: { scene: Scene }) {
       return <CompilerAtomScene />
     case 'suspense-boundary':
       return <SuspenseBoundaryScene />
+    case 'recall-cards':
+      return <RecallCardsScene />
+    case 'svg-canvas':
+      return <SvgCanvasScene />
+    case 'social-card':
+      return <SocialCardScene />
   }
 }
 
@@ -268,6 +287,9 @@ export const ALL_SCENES: Scene[] = [
   'editor-split',
   'compiler-atom',
   'suspense-boundary',
+  'recall-cards',
+  'svg-canvas',
+  'social-card',
 ]
 
 // Keyword index — maps a scene to the words a topic string is checked
@@ -326,6 +348,17 @@ export const SCENE_KEYWORDS: Record<Scene, string[]> = {
     'fallback',
     'debugging',
   ],
+  'recall-cards': [
+    'spaced repetition',
+    'flashcard',
+    'quiz',
+    'interview prep',
+    'recall',
+    'revision',
+    'study',
+  ],
+  'svg-canvas': ['svg', 'vector', 'illustration', 'bezier', 'path', 'canvas', 'artboard'],
+  'social-card': ['meta tags', 'open graph', 'og image', 'social preview', 'twitter card', 'share'],
 }
 
 // ── Frontend — browser window + a cursor click ripple ──────────────────────
@@ -1493,6 +1526,162 @@ function SuspenseBoundaryScene() {
           strokeLinecap="round"
           strokeLinejoin="round"
           fill="none"
+        />
+      </g>
+    </g>
+  )
+}
+
+// ── Recall cards — a reviewed card, the follow-up, and the next interval ───
+// Praxis's actual loop rather than a generic "learning" book: you answer, it
+// asks again, and the card comes back on a widening schedule.
+function RecallCardsScene() {
+  return (
+    <g>
+      {/* Deck — two cards behind the one being reviewed. */}
+      <rect
+        x="110"
+        y="46"
+        width="126"
+        height="78"
+        rx="10"
+        className="fill-ds-surface2 stroke-ds-border"
+        strokeWidth="2"
+      />
+      <rect
+        x="100"
+        y="55"
+        width="126"
+        height="78"
+        rx="10"
+        className="fill-ds-surface2 stroke-ds-border"
+        strokeWidth="2"
+      />
+      <rect
+        x="90"
+        y="64"
+        width="126"
+        height="78"
+        rx="10"
+        className="fill-ds-surface stroke-ds-accent"
+        strokeWidth="2"
+      />
+
+      {/* The prompt, then three options — the highlighted one is the answer
+          that carried its reasoning, which is the whole point of the format. */}
+      <rect x="104" y="78" width="68" height="8" rx="4" className="fill-ds-accent" />
+      <rect x="104" y="96" width="92" height="7" rx="3.5" className="fill-ds-muted/25" />
+      <rect x="104" y="110" width="78" height="7" rx="3.5" className="fill-ds-success" />
+      <rect x="104" y="124" width="86" height="7" rx="3.5" className="fill-ds-muted/20" />
+
+      {/* The cross-question coming back at the card. */}
+      <g className="animate-float">
+        <path d="M244 88l-12 14 22-8z" className="fill-ds-purple/25" />
+        <rect
+          x="232"
+          y="46"
+          width="74"
+          height="46"
+          rx="12"
+          className="fill-ds-purple/15 stroke-ds-purple"
+          strokeWidth="2"
+        />
+        <rect x="244" y="60" width="48" height="6" rx="3" className="fill-ds-purple/60" />
+        <rect
+          x="244"
+          y="72"
+          width="30"
+          height="6"
+          rx="3"
+          className="fill-ds-purple animate-blink"
+        />
+      </g>
+
+      {/* Spaced repetition — the same card returning on widening intervals. */}
+      <path d="M100 160h200" className="stroke-ds-border2" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="100" cy="160" r="3.5" className="fill-ds-accent/35" />
+      <circle cx="128" cy="160" r="4" className="fill-ds-accent/55" />
+      <circle cx="186" cy="160" r="4.5" className="fill-ds-accent/75" />
+      <circle cx="300" cy="160" r="6" className="fill-ds-accent animate-pulse2" />
+    </g>
+  )
+}
+
+// ── SVG canvas — an artboard with a live bezier and its control handles ────
+function SvgCanvasScene() {
+  return (
+    <g>
+      <rect
+        x="96"
+        y="58"
+        width="208"
+        height="104"
+        rx="10"
+        className="fill-ds-surface stroke-ds-border"
+        strokeWidth="2"
+      />
+      <path
+        d="M124 138C150 78 208 158 276 88"
+        className="stroke-ds-accent fill-none"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      {/* Control handles — the bit that makes it authoring, not just artwork. */}
+      <path
+        d="M124 138L150 96M276 88L232 126"
+        className="stroke-ds-purple/50 fill-none"
+        strokeWidth="1.5"
+        strokeDasharray="4 4"
+      />
+      <rect
+        x="145"
+        y="91"
+        width="10"
+        height="10"
+        rx="2"
+        className="fill-ds-bg stroke-ds-purple"
+        strokeWidth="2"
+      />
+      <rect
+        x="227"
+        y="121"
+        width="10"
+        height="10"
+        rx="2"
+        className="fill-ds-bg stroke-ds-purple"
+        strokeWidth="2"
+      />
+      <circle cx="124" cy="138" r="5" className="fill-ds-accent" />
+      <circle cx="276" cy="88" r="6" className="fill-ds-accent animate-pulse2" />
+    </g>
+  )
+}
+
+// ── Social card — the link preview a meta tag actually produces ────────────
+function SocialCardScene() {
+  return (
+    <g>
+      <rect
+        x="110"
+        y="54"
+        width="180"
+        height="112"
+        rx="10"
+        className="fill-ds-surface stroke-ds-border"
+        strokeWidth="2"
+      />
+      <rect x="122" y="66" width="156" height="44" rx="6" className="fill-ds-accent/20" />
+      <rect x="122" y="122" width="108" height="8" rx="4" className="fill-ds-muted/50" />
+      <rect x="122" y="136" width="140" height="6" rx="3" className="fill-ds-muted/25" />
+      <rect x="122" y="150" width="52" height="6" rx="3" className="fill-ds-accent" />
+      {/* The tags the card is generated from. */}
+      <g className="animate-float">
+        <path
+          d="M258 78l-12 10 12 10M270 78l12 10-12 10"
+          className="stroke-ds-purple fill-none"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
       </g>
     </g>
