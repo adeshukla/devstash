@@ -67,10 +67,15 @@ const TIMELINE = [
     desc: 'Building 200+ high-conversion PPC landing pages for US-based clients. Internal marketing web team.',
   },
   {
-    year: 'Jul 2020 – Jun 2021',
+    // Company name and dates aligned to docs/resume.html, which was rebuilt
+    // from the original résumé PDF. This entry previously said "IS Global",
+    // "Jul 2020 – Jun 2021", and claimed React — three separate ways for a
+    // recruiter reading the site and the résumé side by side to see two
+    // different histories.
+    year: 'Feb 2020 – Jul 2021',
     role: 'Frontend Developer',
-    company: 'IS Global',
-    desc: 'General frontend development — building and maintaining websites and UIs with HTML, CSS, JavaScript, and React.',
+    company: 'IS Software Solutions Pvt. Ltd.',
+    desc: 'Responsive pages and admin panel UIs with HTML, CSS, JavaScript and Bootstrap, plus WordPress template and layout work.',
   },
 ]
 
