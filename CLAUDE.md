@@ -75,6 +75,33 @@ Never mix concerns between modules.
 
 ---
 
+### RULE 9 — `main` IS A RELEASE, NOT A SAVE BUTTON
+
+Commit freely to `dev`. It auto-deploys to staging.devstash.me, which is
+behind Vercel SSO — only Adesh can see it, so there is no cost to letting
+several changes accumulate there.
+
+**Never merge `dev` into `main` on your own initiative.** Finish the work,
+say what is sitting on staging, and wait for Adesh to say ship. He reviews the
+queue with:
+
+```bash
+git log origin/main..origin/dev --oneline
+```
+
+**Why this rule exists:** 7 production deploys went out in two days
+(2026-09-08/09). Three landed inside 30 minutes on 2026-09-09, and two of them
+cancelled out — a project card was removed and then reverted, so production
+changed three times to finish exactly where it started. On staging that costs
+nothing; on `main` it is churn on a live site.
+
+The one exception is something **factually wrong or broken in production** —
+e.g. the résumé claiming a Lighthouse score the site does not actually have.
+Raise it immediately and let Adesh decide. Still do not push on your own
+judgement.
+
+---
+
 ## SECTION 3 — TECH STACK (HARD CONSTRAINTS)
 
 | Layer           | Choice                                | Notes                                                                                                                                    |
