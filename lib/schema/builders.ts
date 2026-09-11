@@ -12,6 +12,7 @@ import type {
 import { siteConfig } from '@/content/metadata/site.config'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import type { BreadcrumbItem, FAQItem } from '@/types/seo'
+import type { ProjectCategory } from '@/types/project'
 
 // Stable @id for the author entity, so Person / WebSite / BlogPosting all
 // point at the SAME node instead of describing three unrelated "Adesh Shukla"s.
@@ -146,17 +147,29 @@ interface ProjectSchema {
   title: string
   slug: string
   description: string
-  type?: 'web-app' | 'tool' | 'automation' | 'library'
+  /** Field name must stay `category` — every call site passes a whole `Project`,
+   * and `Project` names this field `category`. It was previously declared as
+   * `type`, which no caller ever set, so the check below silently fell through
+   * and emitted CreativeWork for every project — tools included. */
+  category?: ProjectCategory
   githubUrl?: string
   liveUrl?: string
 }
 
+/**
+ * @param urlOverride Relative path to use as the entity's `url`, for pages that
+ * host the tool itself (e.g. `/lab/utm-builder`) rather than its case study.
+ * Defaults to the `/projects/<slug>` case-study URL.
+ */
 export function buildProjectSchema(
-  project: ProjectSchema
+  project: ProjectSchema,
+  urlOverride?: string
 ): WithContext<SoftwareApplication | CreativeWork> {
-  const url = `${siteConfig.url}/projects/${project.slug}`
+  const url = urlOverride
+    ? `${siteConfig.url}${urlOverride}`
+    : `${siteConfig.url}/projects/${project.slug}`
 
-  if (project.type === 'web-app' || project.type === 'tool') {
+  if (project.category === 'web-app' || project.category === 'tool') {
     return {
       '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',

@@ -11,7 +11,6 @@ const ROUTES = [
   '/',
   '/about',
   '/projects',
-  '/projects/netflix-gpt',
   '/blog',
   '/blog/understanding-css-cubic-bezier-easing',
   '/lab',
