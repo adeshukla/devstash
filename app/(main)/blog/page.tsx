@@ -20,20 +20,43 @@ const title = 'Blog — Frontend, Automation & AI Workflows'
 const description =
   'Articles on frontend development, automation, AI workflows, and developer tooling — practical write-ups from things Adesh figures out while building.'
 
-export const metadata: Metadata = buildMetadata({
-  title,
-  description,
-  canonical: '/blog',
-  type: 'website',
-  ogImage: buildOgImageUrl({ title, description, type: 'website' }),
-})
-
 type Props = {
   searchParams: Promise<{
     category?: string
     tag?: string
     page?: string
   }>
+}
+
+/**
+ * Canonical has to depend on the query string here.
+ *
+ * This was a static `canonical: '/blog'`, so every paginated and filtered view
+ * told Google it was a duplicate of page 1. `/blog?page=2` and `/blog?page=3`
+ * are the only internal links to 16 of the 25 posts, and pointing their
+ * canonical at `/blog` discards exactly that discovery path — while the posts
+ * themselves sat in "Discovered – currently not indexed".
+ *
+ * Paginated views now self-canonicalise (Google's guidance for pagination),
+ * and the `?category=` / `?tag=` filtered views canonicalise to the dedicated
+ * `/blog/category/<c>` and `/blog/tag/<t>` routes, which render the same set.
+ */
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const { category, tag, page } = await searchParams
+  const pageNum = Math.max(1, parseInt(page ?? '1', 10) || 1)
+
+  let canonical = '/blog'
+  if (category) canonical = `/blog/category/${category}`
+  else if (tag) canonical = `/blog/tag/${tag}`
+  else if (pageNum > 1) canonical = `/blog?page=${pageNum}`
+
+  return buildMetadata({
+    title: pageNum > 1 && !category && !tag ? `${title} — Page ${pageNum}` : title,
+    description,
+    canonical,
+    type: 'website',
+    ogImage: buildOgImageUrl({ title, description, type: 'website' }),
+  })
 }
 
 export default async function BlogPage({ searchParams }: Props) {

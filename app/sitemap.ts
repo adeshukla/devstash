@@ -4,79 +4,85 @@ import { getAllProjects } from '@/lib/markdown/projects'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://devstash.me'
 
+/**
+ * Newest `updatedAt` among the given posts, as the archive's real lastmod.
+ *
+ * Every route below used to report `lastModified: new Date()`, i.e. "modified
+ * right now" on every single fetch of the sitemap. Google's documented
+ * behaviour is to start ignoring `lastmod` entirely once it proves unreliable,
+ * which is exactly the wrong outcome on a site whose problem is that new posts
+ * sit in "Discovered – currently not indexed". Static pages now omit lastmod
+ * rather than assert something false, and every content route derives it from
+ * the content itself.
+ */
+function newestUpdate(posts: { updatedAt: string }[]): Date | undefined {
+  const times = posts.map((p) => new Date(p.updatedAt).getTime()).filter((t) => !Number.isNaN(t))
+  return times.length ? new Date(Math.max(...times)) : undefined
+}
+
 export default function sitemap(): MetadataRoute.Sitemap {
+  const allPosts = getAllPosts()
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: BASE_URL, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
+    { url: BASE_URL, changeFrequency: 'weekly', priority: 1.0 },
     {
       url: `${BASE_URL}/about`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/projects`,
-      lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.9,
     },
-    { url: `${BASE_URL}/blog`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    { url: `${BASE_URL}/blog`, changeFrequency: 'daily', priority: 0.9 },
     {
       url: `${BASE_URL}/lab`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/resources`,
-      lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.7,
     },
     {
       url: `${BASE_URL}/tools`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
       url: `${BASE_URL}/contact`,
-      lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 0.5,
     },
     {
       url: `${BASE_URL}/services`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
       url: `${BASE_URL}/uses`,
-      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.4,
     },
     {
       url: `${BASE_URL}/feed.xml`,
-      lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.3,
     },
     {
       url: `${BASE_URL}/privacy`,
-      lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 0.3,
     },
     {
       url: `${BASE_URL}/terms`,
-      lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 0.3,
     },
   ]
 
-  const blogRoutes: MetadataRoute.Sitemap = getAllPosts().map((post) => ({
+  const blogRoutes: MetadataRoute.Sitemap = allPosts.map((post) => ({
     url: `${BASE_URL}/blog/${post.slug}`,
     lastModified: new Date(post.updatedAt),
     changeFrequency: 'monthly',
@@ -85,7 +91,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const projectRoutes: MetadataRoute.Sitemap = getAllProjects().map((project) => ({
     url: `${BASE_URL}/projects/${project.slug}`,
-    lastModified: new Date(),
+    lastModified: new Date(project.endDate ?? project.startDate),
     changeFrequency: 'monthly',
     priority: 0.8,
   }))
@@ -97,7 +103,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // reason, since both listings are already computed for the blog list page.
   const categoryRoutes: MetadataRoute.Sitemap = getAllCategories().map(({ category }) => ({
     url: `${BASE_URL}/blog/category/${category}`,
-    lastModified: new Date(),
+    lastModified: newestUpdate(allPosts.filter((p) => p.category === category)),
     changeFrequency: 'weekly',
     priority: 0.5,
   }))
@@ -109,7 +115,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // thin URLs that compete with the posts themselves.
   const tagRoutes: MetadataRoute.Sitemap = getIndexableTags().map(({ tag }) => ({
     url: `${BASE_URL}/blog/tag/${tag}`,
-    lastModified: new Date(),
+    lastModified: newestUpdate(allPosts.filter((p) => p.tags.includes(tag))),
     changeFrequency: 'weekly',
     priority: 0.4,
   }))
@@ -126,7 +132,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'ai-content-pipeline',
   ].map((slug) => ({
     url: `${BASE_URL}/lab/${slug}`,
-    lastModified: new Date(),
     changeFrequency: 'monthly',
     priority: 0.6,
   }))
