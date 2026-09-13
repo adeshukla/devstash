@@ -29,7 +29,7 @@ Before touching a single component, I go through the Figma file and extract:
 - **Type scale** — every font size/weight/line-height combination actually used. Usually there are 5–7 real combinations even if the file has more text layers than that.
 - **Spacing scale** — I sample the gaps between a handful of elements (padding inside cards, gaps between sections) and look for the pattern. Most well-built Figma files follow a consistent scale (4px or 8px base); inconsistent ones tell you to pick a sensible scale yourself rather than copy exact pixel values everywhere.
 
-On a project using Tailwind, this step maps directly onto editing the token layer — for DevStash that's the `@theme` block in `globals.css`, since Tailwind v4 moved tokens out of `tailwind.config.ts` entirely. Having the tokens defined before writing the first component means I'm never eyeballing a "close enough" spacing value mid-build.
+On a project using Tailwind, this step maps directly onto editing the token layer — for DevStash that's the `@theme` block in `globals.css`, since [Tailwind v4 moved tokens out of `tailwind.config.ts` entirely](/blog/tailwind-v4-css-first-config-migration). Having the tokens defined before writing the first component means I'm never eyeballing a "close enough" spacing value mid-build.
 
 <Callout type="tip" title="Why this saves time, not costs it">
   Skipping token extraction feels faster in the first ten minutes. It costs more than that back the

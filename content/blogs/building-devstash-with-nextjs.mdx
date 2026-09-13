@@ -35,13 +35,15 @@ That one choice cascaded into most of the architecture:
 - There's no runtime dependency that can be down when someone visits.
 - Migrating to a headless CMS later means rewriting one directory, `lib/markdown/`, and nothing else.
 
-The cost is real too: publishing requires a commit and a deploy, and there's no "edit from my phone." For a site where I'm the only author, that trade was worth it.
+The cost is real too: publishing requires a commit and a deploy, and there's no "edit from my phone." For a site where I'm the only author, that trade was worth it. Owning every role on a project like this is its own subject, and I wrote up [what AI assistance actually removes from that, and what it doesn't](/blog/one-person-product-team-vibe-coding).
 
 ## Next.js 16 and the Server Components default
 
 The App Router's genuine win is that Server Components are the default, so the question flips from "what can I render on the server?" to "what actually needs to be interactive?"
 
 On this site the answer is: not much. The mobile nav, the theme toggle, the blog filter, the table of contents, and the lab tools. Everything else — cards, lists, layouts, all the SEO components — is a Server Component that ships zero JavaScript.
+
+That mostly-server-rendered shape is half of why this site [isn't on React Compiler yet](/blog/why-devstash-isnt-on-react-compiler-yet); the other half is exact version pins.
 
 Two Next.js 16 specifics worth knowing if you're migrating:
 

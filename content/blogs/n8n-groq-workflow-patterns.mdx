@@ -21,6 +21,8 @@ My first instinct, every time, is to write one big prompt that does everything â
 
 The pattern I use now: one node per _distinct task_, not one node per step of a checklist. "Draft the content" is one task. "Extract structured metadata from that draft" is a second, separate task â€” even though it feels like it could be tacked onto the end of the first prompt.
 
+That fixed, node-to-node shape is also where n8n differs most from an MCP-connected agent, which gets a menu of tools and picks at inference time. I compared the two in [Model Context Protocol, Explained](/blog/model-context-protocol-explained-for-working-developers).
+
 <Callout type="warning" title="The gotcha that gets everyone">
   n8n's LLM Chain node strips every field from the upstream JSON except its own `text` output. If
   node 2 needs a field that node 1's *input* had (not node 1's output), you have to reach back for
@@ -53,6 +55,8 @@ return [{ json: parsed }]
 
 Failing loudly here beats failing quietly three nodes downstream, where the error message has nothing to do with the actual cause.
 
+I used the same split (a summarization pass, then extraction as a separate pass with a Code node validating every item) in [a design for AI meeting-notes automation](/blog/ai-meeting-notes-calendar-automation).
+
 ## Be explicit about output format in the prompt, every time
 
 "Output ONLY the JSON object, no explanation, no markdown formatting" needs to be in the prompt itself, not something you assume the model will infer from context. `llama-3.1-8b-instant` on Groq is fast and cheap, but it's also more likely to add a friendly "Here's the JSON you requested:" preamble than a larger model would if you don't explicitly forbid it. I add this instruction to every prompt that expects structured output, even when it feels redundant.
@@ -79,6 +83,8 @@ workflow tool." The LLM Chain node's data-stripping behavior, JSON that isn't al
 and per-minute rate limits are the three things that have broken every non-trivial n8n + Groq
 workflow I've built, until I started designing around them from the start instead of debugging
 them after the fact.
+
+The decision that comes before any of these patterns, whether a task should be automated at all, has its own post: [what I actually automate with n8n + Groq, and what I don't](/blog/what-i-actually-automate-and-what-i-dont).
 
 If you're setting up your first multi-step n8n + Groq workflow, I'd start with the
 [Groq documentation](https://console.groq.com/docs) for the exact rate limits on your model, and

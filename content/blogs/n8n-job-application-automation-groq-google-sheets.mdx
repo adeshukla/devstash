@@ -27,6 +27,8 @@ My first attempt used Ollama with `qwen2.5:7b` running locally. On an Acer Aspir
 
 Switching to Groq's `llama-3.1-8b-instant` via API brought this down to under 2 seconds per email. It's free within the rate limits and the output quality for structured email generation is excellent.
 
+Local models still have real uses (privacy, no per-request cost, offline work), and I wrote up [how I decide between local and API-based models](/blog/running-local-llms-with-ollama) separately.
+
 <Callout type="tip" title="Groq free tier">
 The Groq free tier allows around 6,000 requests per day on `llama-3.1-8b-instant`. More than enough for a job search workflow.
 </Callout>

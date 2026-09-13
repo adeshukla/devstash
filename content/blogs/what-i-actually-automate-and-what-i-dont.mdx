@@ -20,7 +20,7 @@ I have automated a decent chunk of my own workflow with n8n and Groq — the [jo
 Before building an automation, I ask one question: **does this task fail loudly or quietly when it goes wrong?**
 
 - **Fails loudly** (a broken build, a form that will not submit, a 404) → automate it. Someone notices immediately if the automation itself breaks, so a bad run gets caught fast and the blast radius is small.
-- **Fails quietly** (a slightly-off summary, a mis-categorized item, a tone that is a little wrong) → be much more careful. Nobody notices for a while, which means a silently-broken automation can run for weeks producing subtly bad output before anyone catches it.
+- **Fails quietly** (a slightly-off summary, a mis-categorized item, a tone that is a little wrong) → be much more careful. Nobody notices for a while, which means a silently-broken automation can run for weeks producing subtly bad output before anyone catches it. AI meeting summaries are a textbook case: [here's where that automation fails quietly](/blog/ai-meeting-notes-calendar-automation).
 
 This single distinction has done more to shape what I automate than any general "AI good/AI bad" instinct. It is not about how hard the task is — it is about how expensive an undetected failure is.
 

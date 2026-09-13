@@ -25,6 +25,8 @@ When an AI assistant writes a function, runs it, and shows you output that looks
 
 The trust gap is the space between (2) and (3). It's widest exactly when the output looks right, because a wrong number that looks plausible gets far less scrutiny than a wrong number that looks obviously broken. A function that returns `undefined` gets caught immediately. A function that returns a number that's off by 8% because of an edge case in date math can sit in production for months.
 
+The same gap shows up in consumer products with arguably higher stakes, because the person reviewing the output is often a non-technical user. [More on that shift](/blog/ai-goes-mainstream-consumer-tools).
+
 <Callout type="warning" title="The specific pattern to watch for">
   If an AI assistant says something like "I've fixed the bug and verified the output" after running
   a script once and eyeballing the result, that is not verification — it's a single anecdotal data
@@ -68,4 +70,4 @@ Underneath both is one habit: I stopped treating "the assistant ran it and it wo
 
 It's an argument for being precise about what part of the process is actually trustworthy. The code-generation speedup is real and I'm not giving it up. The verification step is a separate job that doesn't go away just because the first job got faster — if anything, it matters more, because more code is moving through review per hour than before, and each unreviewed assumption compounds with the next AI-generated change built on top of it.
 
-Related reading if you want the other half of this: [why I still write tests for AI-generated code](/blog/why-i-still-test-ai-generated-code) goes into the specific testing habits that catch this gap in practice.
+Related reading if you want the other half of this: [why I still write tests for AI-generated code](/blog/why-i-still-test-ai-generated-code) goes into the specific testing habits that catch this gap in practice. And if you're working solo, [the one-person product team post](/blog/one-person-product-team-vibe-coding) covers what that speedup actually removes and what it doesn't.

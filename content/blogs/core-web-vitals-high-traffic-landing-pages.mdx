@@ -54,6 +54,8 @@ What actually fixes it:
 - **Load tracking and marketing scripts with `async` or `defer`, and as late as reasonably possible.** Pixel and analytics scripts don't need to block rendering. On a Next.js app this is `next/script` with `strategy="lazyOnload"` or `"afterInteractive"` depending on how time-sensitive the script actually is — most marketing pixels are fine as `lazyOnload`.
 - **Don't let web fonts cause a visible reflow.** Pairing `font-display: swap` with a fallback font stack that's metrically close (similar x-height and width) keeps the swap from causing a visible jump.
 
+Layout stability has a second audience now as well. Lighthouse's Agentic Browsing category scores CLS, because an AI agent that clicks based on a snapshot taken a moment earlier can miss entirely if the page shifts. More on [what that category checks](/blog/agentic-browsing-lighthouse).
+
 ## INP: usually a forms and third-party script problem, not a "your code is slow" problem
 
 Interaction to Next Paint is newer territory for a lot of marketing teams, and on landing pages it's rarely caused by your own form-handling logic — it's almost always death by a thousand third-party scripts. Every chat widget, heatmap tool, A/B testing script, and ad pixel adds its own JavaScript execution that can block the main thread right when a visitor taps the CTA button.

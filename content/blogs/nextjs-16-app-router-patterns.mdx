@@ -128,6 +128,8 @@ What does NOT need `'use client'` (and is better without it):
 
 For the blog, the TOC is `'use client'` because it uses IntersectionObserver. The BlogFilter is `'use client'` because it calls `useRouter`. Everything else — BlogCard, BlogList, AuthorBio, RelatedPosts — is a pure Server Component.
 
+That default, together with file-based routing, is also what makes an App Router codebase easy for an AI coding agent to navigate correctly. I wrote that up in [Next.js 16 App Router in the Age of Agent-Driven Development](/blog/nextjs-app-router-agent-driven-dev).
+
 ## useSearchParams Needs Suspense
 
 If a `'use client'` component calls `useSearchParams()`, it must be wrapped in a `<Suspense>` boundary at the parent level. Without it, Next.js 16 throws a build error:

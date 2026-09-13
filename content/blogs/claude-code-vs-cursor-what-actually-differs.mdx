@@ -31,6 +31,8 @@ Working on this exact project surfaces it constantly. A real example from this r
 
 None of that is unique to Claude Code specifically — it's what a terminal-native agent with real command execution unlocks generally, as opposed to an agent whose primary interface is proposing an edit inside a file buffer. An in-editor agent can still shell out, but the terminal is a tool it reaches for, not the ground it stands on.
 
+The protocol that standardizes how an agent reaches tools like a database, an API, or a file is MCP, which I [explained for developers who just want to ship](/blog/model-context-protocol-explained-for-working-developers).
+
 ## Where persistent project instructions matter
 
 Both tools support some form of durable project context, but Claude Code's `CLAUDE.md` convention is worth calling out specifically because of how load-bearing it becomes on a real project. This site's `CLAUDE.md` is genuinely long — hard version pins (`react` 19.2.4, not `^19`), a documented list of known issues and their exact fixes, folder-structure rules, brand tokens. Every new session starts by reading it, which means version-specific gotchas (like the `next-mdx-remote` vs `@next/mdx` Turbopack crash) don't get rediscovered every time — they're already written down, in this repo, checked into git.

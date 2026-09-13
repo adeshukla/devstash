@@ -21,6 +21,8 @@ Line-completion autocomplete has one job: predict what you were about to type. I
 
 An agentic coding tool — this is the category Claude Code, Cursor's Agent mode, and [GitHub Copilot's agent mode](https://docs.github.com/en/copilot) all sit in now — does something structurally different: it reads relevant files across the project, forms a plan that might touch several of them, makes the edits, runs a build or test command, reads the result, and iterates if something failed. The loop is read → plan → act → verify → repeat, not predict-the-next-token.
 
+I compared the two most different shapes inside that category, an agent built into the editor versus a standalone agent with a shell, in [Claude Code vs. Cursor](/blog/claude-code-vs-cursor-what-actually-differs).
+
 <Callout type="info" title="Why this distinction matters for how you use it">
   If you are still treating these tools as "better autocomplete," you are prompting them for
   single-line completions and missing the part where they can plan and verify a change across ten
@@ -43,12 +45,14 @@ Every serious agentic tool now supports some version of a durable instruction fi
 
 The mistake is treating that file as a personality prompt ("be concise, write clean code"). What actually earns its place is the stuff a model cannot infer from reading the code:
 
-- **Version constraints and why they exist.** "React is pinned to an exact version, not a caret range" is unguessable from `package.json` alone, and it's the difference between a helpful upgrade and a broken build.
+- **Version constraints and why they exist.** "React is pinned to an exact version, not a caret range" is unguessable from `package.json` alone, and it's the difference between a helpful upgrade and a broken build. It's also the specific reason [this site isn't on React Compiler yet](/blog/why-devstash-isnt-on-react-compiler-yet).
 - **Decisions that look wrong without history.** This project uses `next-mdx-remote` rather than the more obvious `@next/mdx`, because the latter threw a serialization error. Without that written down, any sufficiently helpful assistant will eventually "fix" it back.
-- **Known gotchas with their resolutions.** Turbopack crashing on Windows, design tokens living in `globals.css` rather than the Tailwind config — each one is an hour someone already spent.
+- **Known gotchas with their resolutions.** Turbopack crashing on Windows, [design tokens living in `globals.css` rather than the Tailwind config](/blog/tailwind-v4-css-first-config-migration) — each one is an hour someone already spent.
 - **Hard rules with consequences.** "Never invent metrics or testimonials" is worth more than any amount of style guidance.
 
 I keep this file in the repo, in version control, treated as documentation rather than configuration. It has a failure mode worth naming: **a stale context file is worse than none**, because it actively misleads. When I change an architectural decision, updating that file is part of the change, not a follow-up task.
+
+On a codebase with strong conventions, the entries that earn their place are mostly the exceptions: spots where the pattern breaks and an agent has no way to detect it. I went through the App Router version of this in [Next.js 16 App Router in the Age of Agent-Driven Development](/blog/nextjs-app-router-agent-driven-dev).
 
 The realistic way to think about it: you're not writing a prompt, you're onboarding a competent new contributor who will never retain anything between sessions and will re-read your onboarding doc every single time. That framing gets you a much better file than "prompt engineering" does.
 

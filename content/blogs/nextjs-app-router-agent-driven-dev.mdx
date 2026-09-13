@@ -15,6 +15,8 @@ featured: false
 
 I have used an AI coding assistant on nearly every change to this site's App Router codebase for months now, and it is consistently better at navigating this codebase correctly than at navigating less-conventional ones I have worked in. That is not because the assistant "understands Next.js" in some special way — it is because the App Router's file-based routing conventions are exactly the kind of structure that makes a codebase legible to a tool with no persistent memory of your project, which is a real, underappreciated advantage independent of the AI angle.
 
+The assistant in question is Claude Code, which I compared architecturally with Cursor in [Claude Code vs. Cursor: What Actually Differs](/blog/claude-code-vs-cursor-what-actually-differs).
+
 ## Why file-based conventions help an agent specifically
 
 An AI coding agent working on a task typically has to rediscover project structure from scratch each session — it does not remember yesterday's exploration, it re-derives it from what it can observe: file names, folder structure, import patterns. A framework with strong, consistent conventions turns a lot of that rediscovery into a lookup instead of a search:
@@ -40,6 +42,8 @@ Conventions only help as much as they are actually followed consistently. The mo
   convention (it usually can), but because it has no way to detect a silent exception to a pattern
   it has correctly learned to expect.
 </Callout>
+
+It's the same reason a written instruction file matters so much once an assistant plans changes across a whole project instead of completing single lines, which I wrote about in [Architecture, Not Autocomplete](/blog/ai-coding-assistants-architecture-not-autocomplete).
 
 ## What this suggests going forward
 
