@@ -25,7 +25,15 @@ import { NextResponse } from 'next/server'
 import { after } from 'next/server'
 import { sendNotification } from '@/lib/email/sendNotification'
 import { renderNotificationEmail } from '@/lib/email/renderNotificationEmail'
-import { summarizeUserAgent, getRequestGeo, formatGeo } from '@/lib/utils/requestContext'
+import {
+  summarizeUserAgent,
+  getRequestGeo,
+  formatGeo,
+  validTimeZone,
+  formatOwnerTime,
+  formatVisitorTime,
+  timezonesDisagree,
+} from '@/lib/utils/requestContext'
 
 const KNOWN_EVENTS = new Set([
   'cv_viewed',
@@ -110,29 +118,38 @@ export async function POST(request: Request) {
   if (notify && shouldNotify(`${ip ?? 'unknown'}:${event}`)) {
     // after() runs post-response, so the beacon still gets its 204
     // immediately — the visitor's page never waits on an email send.
+    // Read request-derived values now, not inside after(), so nothing depends
+    // on the request still being readable once the response has gone out.
+    const geo = getRequestGeo(request.headers)
+    const at = new Date(entry.at)
+    const browserTimeZone = validTimeZone(body.tz)
+
     after(async () => {
-      const geo = getRequestGeo(request.headers)
+      const visitorTime = formatVisitorTime(at, browserTimeZone)
       const { html, text } = renderNotificationEmail({
         icon: notify.icon,
         heading: notify.heading,
         fields: [
-          {
-            label: 'When',
-            value: new Date(entry.at).toLocaleString('en-IN', {
-              dateStyle: 'medium',
-              timeStyle: 'short',
-            }),
-          },
+          { label: 'When', value: formatOwnerTime(at) },
+          ...(visitorTime ? [{ label: "Visitor's local time", value: visitorTime }] : []),
           { label: 'Page', value: entry.path ?? 'Unknown', mono: true },
           ...(entry.href
             ? [{ label: 'Link', value: entry.href, href: entry.href, mono: true }]
             : []),
           { label: 'Referrer', value: entry.referrer ?? 'Direct / no referrer' },
-          { label: 'Location', value: formatGeo(geo) },
+          { label: 'Approx. location', value: formatGeo(geo) },
+          ...(timezonesDisagree(at, geo.timezone, browserTimeZone)
+            ? [
+                {
+                  label: 'Location check',
+                  value: `IP timezone is ${geo.timezone}, but the browser is set to ${browserTimeZone} — likely a VPN, proxy or travel, so the location above is unreliable.`,
+                },
+              ]
+            : []),
           { label: 'Device', value: summarizeUserAgent(entry.ua) },
         ],
         footerNote:
-          'Automated notification from devstash.me — someone real, not you, triggered this.',
+          'Automated notification from devstash.me — someone real, not you, triggered this. Location is looked up from the IP address, so it is approximate: mobile networks and VPNs often show a different city.',
       })
       await sendNotification({
         subject: `${notify.icon} ${notify.heading} — devstash.me`,

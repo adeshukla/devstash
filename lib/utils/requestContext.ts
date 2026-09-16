@@ -40,6 +40,8 @@ export interface RequestGeo {
   city?: string
   region?: string
   country?: string
+  /** IANA zone Vercel derives from the IP, e.g. "Asia/Kolkata". */
+  timezone?: string
 }
 
 /** Vercel's edge network stamps these on every request — free, no external
@@ -59,10 +61,82 @@ export function getRequestGeo(headers: Headers): RequestGeo {
     city: decode(headers.get('x-vercel-ip-city')),
     region: decode(headers.get('x-vercel-ip-country-region')),
     country: decode(headers.get('x-vercel-ip-country')),
+    timezone: decode(headers.get('x-vercel-ip-timezone')),
   }
 }
 
+// Country arrives as an ISO code ("IN") — spell it out for a human reader.
+const countryNames = new Intl.DisplayNames(['en'], { type: 'region' })
+
 export function formatGeo(geo: RequestGeo): string {
-  const parts = [geo.city, geo.region, geo.country].filter(Boolean)
+  let country = geo.country
+  if (country) {
+    try {
+      country = countryNames.of(country) ?? country
+    } catch {
+      // Not a valid region code — show it as-is.
+    }
+  }
+  const parts = [geo.city, geo.region, country].filter(Boolean)
   return parts.length > 0 ? parts.join(', ') : 'Unknown location'
+}
+
+// Notification emails are read by the site owner in India. Vercel functions
+// run in UTC, so formatting without an explicit zone printed UTC wall-clock
+// time that looked like IST — 5h30m behind.
+const OWNER_TIMEZONE = 'Asia/Kolkata'
+
+/** A real IANA zone name, or undefined. The browser's zone arrives in the
+ * request body, so it is untrusted input. */
+export function validTimeZone(value: unknown): string | undefined {
+  if (typeof value !== 'string' || value.length === 0 || value.length > 64) return undefined
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: value })
+    return value
+  } catch {
+    return undefined
+  }
+}
+
+function formatInZone(date: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat('en-IN', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone,
+  }).format(date)
+}
+
+// Compare offsets, not names: browsers still report legacy aliases such as
+// "Asia/Calcutta", which is the same zone as "Asia/Kolkata".
+function utcOffset(date: Date, timeZone: string): string {
+  return (
+    new Intl.DateTimeFormat('en', { timeZone, timeZoneName: 'shortOffset' })
+      .formatToParts(date)
+      .find((p) => p.type === 'timeZoneName')?.value ?? ''
+  )
+}
+
+/** "16 Sept 2026, 3:42 pm IST" */
+export function formatOwnerTime(date: Date): string {
+  return `${formatInZone(date, OWNER_TIMEZONE)} IST`
+}
+
+/** The visitor's own wall-clock time, or undefined when it is IST anyway. */
+export function formatVisitorTime(date: Date, browserTimeZone?: string): string | undefined {
+  if (!browserTimeZone) return undefined
+  if (utcOffset(date, browserTimeZone) === utcOffset(date, OWNER_TIMEZONE)) return undefined
+  return `${formatInZone(date, browserTimeZone)} (${browserTimeZone})`
+}
+
+/** IP location can't be made precise, but it can be sanity-checked: when the
+ * IP's zone and the browser's zone sit at different UTC offsets, the IP is
+ * usually a VPN, proxy or corporate gateway — or the visitor is travelling. */
+export function timezonesDisagree(
+  date: Date,
+  ipTimeZone?: string,
+  browserTimeZone?: string
+): boolean {
+  const ip = validTimeZone(ipTimeZone)
+  if (!ip || !browserTimeZone) return false
+  return utcOffset(date, ip) !== utcOffset(date, browserTimeZone)
 }

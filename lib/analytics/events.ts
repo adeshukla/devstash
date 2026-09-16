@@ -58,6 +58,9 @@ export function logVisit(name: AnalyticsEvent, params?: AnalyticsParams): void {
       event: name,
       path: window.location.pathname,
       referrer: document.referrer || undefined,
+      // The browser's own zone — lets the notification show the visitor's
+      // local time and sanity-check the IP-derived location.
+      tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
       ...(params ?? {}),
     })
     if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
