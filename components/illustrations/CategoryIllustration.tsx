@@ -42,6 +42,7 @@ export type Scene =
   | 'recall-cards'
   | 'svg-canvas'
   | 'social-card'
+  | 'component-parts'
 
 const BLOG_SCENE: Record<BlogCategory, Scene> = {
   frontend: 'frontend',
@@ -103,8 +104,8 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   'claude-code-vs-cursor-what-actually-differs': 'editor-split',
   'why-devstash-isnt-on-react-compiler-yet': 'compiler-atom',
   'usesearchparams-suspense-boundary-build-error': 'suspense-boundary',
-  // Praxis is the only 'web-app' project, so it has no bucket collision —
-  // but the generic category scene says nothing about what it is. Its own
+  // Praxis is a 'web-app' project, and the generic category scene says
+  // nothing about what it is. Its own
   // scene shows the actual loop: a reviewed card, a follow-up question, and
   // an expanding repetition schedule.
   praxis: 'recall-cards',
@@ -113,6 +114,9 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   // so three cards were showing the identical thumbnail.
   'illustration-generator': 'svg-canvas',
   'meta-tag-generator': 'social-card',
+  // Build Components is also 'web-app'. Its scene shows the actual idea: a
+  // part, the settings panel that configures it, and its two code outputs.
+  'build-components': 'component-parts',
 }
 
 interface CategoryIllustrationProps {
@@ -251,6 +255,8 @@ export function SceneContent({ scene }: { scene: Scene }) {
       return <SvgCanvasScene />
     case 'social-card':
       return <SocialCardScene />
+    case 'component-parts':
+      return <ComponentPartsScene />
   }
 }
 
@@ -290,6 +296,7 @@ export const ALL_SCENES: Scene[] = [
   'recall-cards',
   'svg-canvas',
   'social-card',
+  'component-parts',
 ]
 
 // Keyword index — maps a scene to the words a topic string is checked
@@ -359,6 +366,15 @@ export const SCENE_KEYWORDS: Record<Scene, string[]> = {
   ],
   'svg-canvas': ['svg', 'vector', 'illustration', 'bezier', 'path', 'canvas', 'artboard'],
   'social-card': ['meta tags', 'open graph', 'og image', 'social preview', 'twitter card', 'share'],
+  'component-parts': [
+    'component library',
+    'ui components',
+    'design system',
+    'configurator',
+    'accessible components',
+    'shadcn',
+    'registry',
+  ],
 }
 
 // ── Frontend — browser window + a cursor click ripple ──────────────────────
@@ -1684,6 +1700,130 @@ function SocialCardScene() {
           strokeLinejoin="round"
         />
       </g>
+    </g>
+  )
+}
+
+function ComponentPartsScene() {
+  return (
+    <g>
+      {/* The part itself: a searchable select with its filtered list open. */}
+      <rect
+        x="84"
+        y="48"
+        width="128"
+        height="104"
+        rx="10"
+        className="fill-ds-surface stroke-ds-border"
+        strokeWidth="2"
+      />
+      <rect
+        x="96"
+        y="60"
+        width="104"
+        height="18"
+        rx="5"
+        className="fill-ds-bg stroke-ds-accent"
+        strokeWidth="2"
+      />
+      <rect x="103" y="66.5" width="40" height="5" rx="2.5" className="fill-ds-muted/50" />
+      <rect x="146" y="65" width="1.8" height="8" className="fill-ds-accent animate-blink" />
+      <path
+        d="M184 66l4 4 4-4"
+        className="stroke-ds-muted fill-none"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <g className="animate-float">
+        <rect
+          x="96"
+          y="84"
+          width="104"
+          height="56"
+          rx="6"
+          className="fill-ds-surface2 stroke-ds-border2"
+          strokeWidth="1.5"
+        />
+        <rect x="100" y="89" width="96" height="14" rx="4" className="fill-ds-accent/20" />
+        <rect x="106" y="93.5" width="52" height="5" rx="2.5" className="fill-ds-accent" />
+        <rect x="106" y="110" width="64" height="5" rx="2.5" className="fill-ds-muted/35" />
+        <rect x="106" y="125" width="44" height="5" rx="2.5" className="fill-ds-muted/35" />
+      </g>
+
+      {/* The settings panel driving it: add-ons toggled on and off, and a
+          colour pick — configuration instead of code. */}
+      <path
+        d="M226 100h-14"
+        className="stroke-ds-purple/60"
+        strokeWidth="2"
+        strokeDasharray="3 3"
+      />
+      <rect
+        x="226"
+        y="48"
+        width="90"
+        height="104"
+        rx="10"
+        className="fill-ds-surface stroke-ds-purple"
+        strokeWidth="2"
+      />
+      <rect x="236" y="61.5" width="34" height="5" rx="2.5" className="fill-ds-muted/40" />
+      <rect x="280" y="57.5" width="24" height="13" rx="6.5" className="fill-ds-accent" />
+      <circle cx="297.5" cy="64" r="4.5" className="fill-ds-bg" />
+      <rect x="236" y="81.5" width="28" height="5" rx="2.5" className="fill-ds-muted/40" />
+      <rect x="280" y="77.5" width="24" height="13" rx="6.5" className="fill-ds-muted/30" />
+      <circle cx="286.5" cy="84" r="4.5" className="fill-ds-bg" />
+      <rect x="236" y="101.5" width="38" height="5" rx="2.5" className="fill-ds-muted/40" />
+      <rect
+        x="280"
+        y="97.5"
+        width="24"
+        height="13"
+        rx="6.5"
+        className="fill-ds-accent animate-pulse2"
+      />
+      <circle cx="297.5" cy="104" r="4.5" className="fill-ds-bg" />
+      <circle cx="244" cy="132" r="9" className="stroke-ds-text fill-none" strokeWidth="1.5" />
+      <circle cx="244" cy="132" r="6" className="fill-ds-accent" />
+      <circle cx="262" cy="132" r="6" className="fill-ds-purple" />
+      <circle cx="280" cy="132" r="6" className="fill-ds-success" />
+
+      {/* Two outputs, both plain code. */}
+      <rect
+        x="118"
+        y="162"
+        width="76"
+        height="22"
+        rx="11"
+        className="fill-ds-accent/15 stroke-ds-accent"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M134 169l-5 4 5 4M148 169l5 4-5 4M143 167l-4 12"
+        className="stroke-ds-accent fill-none"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <rect x="160" y="170.5" width="24" height="5" rx="2.5" className="fill-ds-accent/60" />
+      <rect
+        x="206"
+        y="162"
+        width="76"
+        height="22"
+        rx="11"
+        className="fill-ds-purple/15 stroke-ds-purple"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M222 169l-5 4 5 4M236 169l5 4-5 4M231 167l-4 12"
+        className="stroke-ds-purple fill-none"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <rect x="248" y="170.5" width="24" height="5" rx="2.5" className="fill-ds-purple/60" />
     </g>
   )
 }

@@ -1,0 +1,35 @@
+{
+  "slug": "build-components",
+  "title": "Build Components — Accessible UI Parts, Plain Code",
+  "description": "Ready-made, accessible UI components you configure visually and take into your project as plain code — React + Tailwind or HTML/CSS/JS, with zero runtime dependencies.",
+  "longDescription": "Build Components is a catalogue of ready-made, accessible UI parts — date picker, modal, searchable select, validated form, site header, mega menu, tabs, carousel, data table and more — that you configure without writing code and then take into your own project as plain source. 27 parts are live, each with two outputs: React + Tailwind v4, or HTML/CSS/JS with no library at all. You copy the code, or install a part by URL through a shadcn-compatible registry, and either way nothing is added to your runtime dependencies. The product thinking, the component specs and the UX are mine; the implementation was built with AI assistance that I directed and reviewed.",
+  "status": "live",
+  "featured": true,
+  "order": 3,
+  "category": "web-app",
+  "tech": ["Next.js", "React", "TypeScript", "Tailwind CSS", "Playwright", "axe-core"],
+  "liveUrl": "https://build-components.devstash.me",
+  "githubUrl": "https://github.com/adeshukla/build-components",
+  "image": "/images/projects/build-components.webp",
+  "startDate": "2026-09-15",
+  "year": 2026,
+  "highlights": [
+    "27 live parts, each shipped as two outputs — React + Tailwind v4 and plain HTML/CSS/JS — with zero runtime dependencies",
+    "Configure content, behaviour, add-ons and style without writing code — a date picker, for example, takes one date or a range, typed in your chosen format such as DD/MM/YYYY, with earliest and latest dates",
+    "Every part is built against a named WAI-ARIA Authoring Practices pattern — combobox, dialog, tabs, menu button, carousel, disclosure navigation",
+    "The exported code is what gets tested: Playwright with axe (up to WCAG 2.2 AA) and keyboard flows on both outputs, across Chromium, WebKit and an iPhone profile",
+    "Install by URL through a shadcn-compatible registry — each registry item declares no dependencies, so the developer owns plain source, not a package"
+  ],
+  "caseStudy": {
+    "problem": "Every client site needs the same handful of components — a date picker, a modal, a searchable select, a validated form, a header — and every time the choice is the same bad trade. Build them from scratch and lose days to keyboard handling, focus management and edge cases that are easy to get subtly wrong. Or install a component library and take on its dependency, its styling opinions and its upgrade cycle, for a site that only needed six components. Neither path reliably ends in something accessible.",
+    "approach": "Treat components as parts you configure, not code you write from zero or a package you install. Each part is set up visually — content, behaviour, add-ons and style — and exported as plain source in two forms: React + Tailwind, or HTML/CSS/JS. What makes it trustworthy is testing the output rather than the preview: the exact files a developer takes away are the files run through accessibility and keyboard tests. I defined the product, the component specs and the UX; the implementation was built with AI assistance under my direction and review.",
+    "decisions": [
+      "Plain code, not a package. The developer owns the source and can change anything, and their project gains zero runtime dependencies — copy the code or install it by URL, nothing else.",
+      "A shadcn-compatible registry for install-by-URL instead of a new distribution format — developers already know the command, and every registry item lists no dependencies.",
+      "Each part follows a named WAI-ARIA Authoring Practices pattern, so keyboard and screen-reader behaviour comes from a published spec instead of guesswork.",
+      "Test both exported outputs, not only the in-app preview — Playwright with axe plus keyboard-only flows on Chromium, WebKit and iPhone. A preview that passes proves nothing about code that was generated separately.",
+      "React + Tailwind and plain HTML/CSS/JS first. Other frameworks come only after they pass the same tests, rather than being listed as supported before that."
+    ],
+    "outcome": "Live at build-components.devstash.me with 27 parts, every one tested on both outputs. No usage or adoption numbers exist yet, so none are reported here. What it demonstrates is the frontend fundamentals component work actually depends on — accessibility, keyboard behaviour and clean, dependency-free output — applied across a whole catalogue rather than a single component."
+  }
+}

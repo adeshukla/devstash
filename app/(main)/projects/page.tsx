@@ -19,7 +19,7 @@ const CATEGORY_LABELS: Record<ProjectCategory, string> = {
 
 // This page is the case-study layer: what each build solved and why it is put
 // together the way it is. The browser tools run in /lab and their cards link
-// across; Praxis runs on its own domain, so the copy cannot promise that
+// across; Praxis and Build Components run on their own domains, so the copy cannot promise that
 // everything here is a tool living in the Lab. Keep the two framings distinct —
 // the older copy also promised "open source repos" and "client work" that the
 // project files do not contain.
@@ -74,7 +74,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
             <Link href="/lab" className="text-ds-accent hover:underline">
               Lab
             </Link>
-            , and Praxis runs on its own domain.
+            , and Praxis and Build Components run on their own domains.
           </p>
 
           {/* Category filter */}
