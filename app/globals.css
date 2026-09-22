@@ -1078,3 +1078,14 @@ body {
   background-color: color-mix(in srgb, var(--color-ds-accent) 28%, transparent);
   color: var(--color-ds-text);
 }
+
+/* pulse2 animates `scale`. On SVG elements a CSS transform defaults to the
+   SVG's own origin (0 0), so every pulsing part in the CategoryIllustration
+   scenes drifted toward the top-left corner mid-pulse instead of pulsing in
+   place. fill-box + center scales each element around itself, the same fix
+   the Lab's character/illustration engines already apply inline. Scoped to
+   SVG: HTML elements already scale from their centre. */
+svg .animate-pulse2 {
+  transform-box: fill-box;
+  transform-origin: center;
+}
