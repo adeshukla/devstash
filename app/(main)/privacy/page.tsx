@@ -66,6 +66,20 @@ export default function PrivacyPage() {
                     sources, and device information via Google Analytics 4 (anonymised IP). No
                     cross-site tracking.
                   </li>
+                  <li>
+                    <strong className="text-ds-text">Interaction log</strong> — when you view or
+                    download the résumé, submit the contact form, or click an outbound link, we
+                    record the page, the referring page, your browser&apos;s timezone, your device
+                    and browser type, and the IP address the request came from. This is written to
+                    our hosting provider&apos;s server logs rather than a database, and the IP is
+                    used only to derive an approximate, city-level location.
+                  </li>
+                  <li>
+                    <strong className="text-ds-text">Notification emails</strong> — some of those
+                    interactions also send an email to the site owner with the same details: time,
+                    page, referring page, approximate location and device. It contains no name or
+                    email address unless you entered one in the contact form.
+                  </li>
                 </ul>
                 <p>
                   We do <strong className="text-ds-text">not</strong> collect payment information,
@@ -93,7 +107,8 @@ export default function PrivacyPage() {
                     analytics.
                   </li>
                   <li>
-                    <strong className="text-ds-text">Resend</strong> — contact form email delivery.
+                    <strong className="text-ds-text">Resend</strong> — contact form and notification
+                    email delivery.
                   </li>
                   <li>
                     <strong className="text-ds-text">Cloudflare</strong> — DNS management.
