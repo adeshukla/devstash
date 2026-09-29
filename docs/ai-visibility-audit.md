@@ -49,13 +49,13 @@ the half that is expensive to retrofit.
 
 ## 2. The finding that matters most: you are being described with deleted content
 
-The retrieved summary of devstash.me described it as featuring _"a Netflix clone powered
-by Gemini AI for smart movie recommendations."_
+The retrieved summary of devstash.me described it as featuring a brand-clone demo
+project that no longer exists on the site.
 
-That project does not exist on the site. `content/projects/netflix-gpt.json` was removed
-in commit `248368f` — _"content(projects): drop the fictional-brand and clone case
-studies."_ You removed it on purpose, and it is still what the web is telling retrieval
-systems about you.
+Its project file was removed in commit `248368f` — _"content(projects): drop the
+fictional-brand and clone case studies."_ You removed it on purpose, and it is still
+what the web is telling retrieval systems about you. (The demo itself, and the subdomain
+that hosted it, were taken down entirely on 2026-09-29 after a registry abuse notice.)
 
 **Why this is the top finding:** AI answers are built from retrieval plus cached and
 crawled context. Stale content persists in those caches far longer than it does in
@@ -63,10 +63,10 @@ Google's index, and an assistant that describes your work using a clone project 
 judged not good enough to keep is actively working against the positioning you rewrote
 your résumé and About page to fix.
 
-**Related real bug, same root:** two QA specs still point at the dead route —
-[tests/qa/a11y.spec.ts:18](tests/qa/a11y.spec.ts:18) and
-[tests/qa/responsive.spec.ts:14](tests/qa/responsive.spec.ts:14) both list
-`/projects/netflix-gpt`. `pnpm qa` is auditing a 404. Two-line fix, worth doing.
+**Related real bug, same root:** two QA specs still pointed at the dead project route,
+so `pnpm qa` was auditing a 404. Fixed — the stale entries were removed from
+[tests/qa/a11y.spec.ts](tests/qa/a11y.spec.ts) and
+[tests/qa/responsive.spec.ts](tests/qa/responsive.spec.ts).
 
 **What to do:** confirm the URL returns a proper 404 or a 301 to `/projects`, request
 removal of the stale cached entry in GSC, and — most importantly — make sure the _live_
@@ -193,8 +193,8 @@ and read noise as signal.
 
 ## 7. Action plan, priority order
 
-1. **Kill the stale Netflix/Gemini description** — confirm the 404/redirect, request
-   cache removal in GSC, fix the two QA specs. _Impact: High._ Being described accurately
+1. **Kill the stale clone-demo description** — confirm the 404/redirect, request cache
+   removal in GSC, fix the two QA specs. _Impact: High._ Being described accurately
    beats being described more.
 2. **Make the three bios identical** — GitHub, LinkedIn, DEV.to — using the exact site
    wording plus "devstash.me". _Impact: High, cost near zero._ `Person.sameAs` already
