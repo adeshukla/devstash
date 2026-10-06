@@ -43,6 +43,7 @@ export type Scene =
   | 'svg-canvas'
   | 'social-card'
   | 'component-parts'
+  | 'motion-timeline'
 
 const BLOG_SCENE: Record<BlogCategory, Scene> = {
   frontend: 'frontend',
@@ -117,6 +118,9 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   // Build Components is also 'web-app'. Its scene shows the actual idea: a
   // part, the settings panel that configures it, and its two code outputs.
   'build-components': 'component-parts',
+  // Motion Lab is 'web-app' too. Its scene is the actual subject: many
+  // pages, an easing curve with a travelling head, and the scrubber.
+  'motion-lab': 'motion-timeline',
 }
 
 interface CategoryIllustrationProps {
@@ -257,6 +261,8 @@ export function SceneContent({ scene }: { scene: Scene }) {
       return <SocialCardScene />
     case 'component-parts':
       return <ComponentPartsScene />
+    case 'motion-timeline':
+      return <MotionTimelineScene />
   }
 }
 
@@ -297,6 +303,7 @@ export const ALL_SCENES: Scene[] = [
   'svg-canvas',
   'social-card',
   'component-parts',
+  'motion-timeline',
 ]
 
 // Keyword index — maps a scene to the words a topic string is checked
@@ -366,6 +373,16 @@ export const SCENE_KEYWORDS: Record<Scene, string[]> = {
   ],
   'svg-canvas': ['svg', 'vector', 'illustration', 'bezier', 'path', 'canvas', 'artboard'],
   'social-card': ['meta tags', 'open graph', 'og image', 'social preview', 'twitter card', 'share'],
+  'motion-timeline': [
+    'motion',
+    'animation',
+    'scroll',
+    'gsap',
+    'webgl',
+    'parallax',
+    'landing page',
+    'easing',
+  ],
   'component-parts': [
     'component library',
     'ui components',
@@ -1824,6 +1841,75 @@ function ComponentPartsScene() {
         strokeLinejoin="round"
       />
       <rect x="248" y="170.5" width="24" height="5" rx="2.5" className="fill-ds-purple/60" />
+    </g>
+  )
+}
+
+function MotionTimelineScene() {
+  return (
+    <g>
+      {/* Three pages fanned out — the lab is many pages, not one demo. */}
+      <rect
+        x="84"
+        y="68"
+        width="92"
+        height="82"
+        rx="8"
+        className="fill-ds-surface2 stroke-ds-border2"
+        strokeWidth="2"
+        transform="rotate(-13 130 109)"
+      />
+      <rect
+        x="100"
+        y="61"
+        width="92"
+        height="82"
+        rx="8"
+        className="fill-ds-surface2 stroke-ds-border2"
+        strokeWidth="2"
+        transform="rotate(-6.5 146 102)"
+      />
+      <rect
+        x="116"
+        y="54"
+        width="92"
+        height="82"
+        rx="8"
+        className="fill-ds-surface stroke-ds-accent"
+        strokeWidth="2"
+      />
+      <rect x="128" y="68" width="42" height="7" rx="3.5" className="fill-ds-accent" />
+      <rect x="128" y="84" width="60" height="5" rx="2.5" className="fill-ds-muted/35" />
+      <rect x="128" y="96" width="48" height="5" rx="2.5" className="fill-ds-muted/25" />
+      <rect x="128" y="114" width="30" height="11" rx="5.5" className="fill-ds-purple/70" />
+
+      {/* The easing curve the motion runs on, with its travelling head and a
+          fading trail behind it. */}
+      <path
+        d="M214 150C244 150 246 78 300 70"
+        className="stroke-ds-purple/45 fill-none"
+        strokeWidth="2"
+        strokeDasharray="5 5"
+      />
+      <circle cx="232" cy="146" r="3" className="fill-ds-purple/25" />
+      <circle cx="245" cy="132" r="3.5" className="fill-ds-purple/45" />
+      <circle cx="256" cy="110" r="4" className="fill-ds-purple/70" />
+      <g className="animate-float">
+        <circle cx="300" cy="70" r="7" className="fill-ds-purple" />
+        <circle cx="300" cy="70" r="12" className="stroke-ds-purple/40 fill-none" strokeWidth="2" />
+      </g>
+
+      {/* Scrubber: the timeline the whole thing is driven from. */}
+      <path d="M96 170h208" className="stroke-ds-border2" strokeWidth="3" strokeLinecap="round" />
+      <path d="M96 170h96" className="stroke-ds-accent" strokeWidth="3" strokeLinecap="round" />
+      <rect
+        x="186"
+        y="162"
+        width="7"
+        height="16"
+        rx="3.5"
+        className="fill-ds-accent animate-pulse2"
+      />
     </g>
   )
 }

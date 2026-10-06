@@ -1,0 +1,35 @@
+{
+  "slug": "motion-lab",
+  "title": "DevStash Motion Lab — Heavy Animation on a Performance Budget",
+  "description": "Seventeen animated landing pages — five brand experiences and twelve industry templates — each built around a different animation technique and held to a mobile Core Web Vitals budget.",
+  "longDescription": "Motion Lab is one Next.js application hosting seventeen heavily animated landing pages. Five are fictional-brand experiences, each deliberately built around a different animation discipline: an image-sequence canvas scrub, scroll-driven WebGL through React Three Fiber, kinetic typography, horizontal scroll with parallax, and SVG storytelling. The other twelve are industry templates — restaurant, estate agency, gym, software, retail and more — which deliberately share one renderer, because a template exists to be adopted and twelve hand-built pages would not be templates. The point of the project is the constraint rather than the effects: every route is written against a per-route mobile performance budget and a reduced-motion contract, so the animation has to survive a throttled phone rather than only a desktop demo.",
+  "status": "live",
+  "featured": true,
+  "order": 2,
+  "category": "web-app",
+  "tech": ["Next.js", "React", "TypeScript", "GSAP", "Motion", "Three.js", "Lenis"],
+  "liveUrl": "https://showcase.devstash.me",
+  "image": "/images/projects/motion-lab.webp",
+  "startDate": "2026-09-22",
+  "year": 2026,
+  "highlights": [
+    "17 landing pages: 5 brand experiences that each demonstrate a different animation discipline, plus 12 industry templates sharing one renderer",
+    "The five techniques are deliberately unalike — image-sequence canvas scrub, WebGL via React Three Fiber, kinetic typography, horizontal scroll with parallax, and SVG storytelling",
+    "Per-route mobile budget: LCP under 2.5s, INP under 200ms, CLS under 0.1, measured by Lighthouse CI on a Moto G Power-class profile at 4x CPU slowdown",
+    "INP is the metric heavy animation actually breaks — scroll-linked JS, WebGL render loops and layout thrash all inflate it — so it is budgeted explicitly rather than hoped for",
+    "Accessibility 95+ and SEO 100 are blocking gates in CI, not aspirations",
+    "Reduced-motion contract: with prefers-reduced-motion set, every route still presents its complete final content instead of a broken halfway state"
+  ],
+  "caseStudy": {
+    "problem": "Animated marketing sites carry a reputation, and it is mostly earned: the ones that look impressive tend to be the ones that fail on a mid-range Android phone. That leaves front-end work stuck in a false choice — build something memorable, or build something that passes Core Web Vitals. The specific metric that breaks is rarely the one people optimise for. Continuous scroll-linked JavaScript, WebGL render loops and layout thrash inflate INP, which is measured from real interactions on real devices, and mobile is where it shows.",
+    "approach": "Treat the budget as the design constraint rather than a cleanup step. Seventeen pages, each written against a per-route mobile target measured on a throttled phone profile, with the LCP element server-rendered as text or a plain image on every route and fixed-dimension skeletons wherever something loads dynamically. The five brand experiences each take one animation discipline and push it, so the range is demonstrated rather than claimed; the twelve industry templates share a single renderer, because something meant to be adopted has to be consistent. Every brand in the project is invented and labelled as fictional on the page itself.",
+    "decisions": [
+      "Budgets live in the repo as CI assertions, not as guidance. Raising one requires a written decision explaining why the technique justifies it, which makes the trade explicit instead of gradual.",
+      "The LCP element on every route is server-rendered text or a plain image — never something that waits for an animation library to boot.",
+      "Fixed-dimension skeletons everywhere a dynamic import lands, because pop-in from code-splitting is the usual source of layout shift on pages like these.",
+      "Reduced motion shows the finished state, not a disabled one. A visitor who asks for less motion gets the complete page, which is the part most motion work gets wrong.",
+      "Experiences are deliberately unlike each other; templates are deliberately alike. Collapsing those two products into one set of pages would have made both worse."
+    ],
+    "outcome": "Live at showcase.devstash.me with 17 pages, a hub, and documented budgets and accessibility contracts in the repo. It is still being refined — designs are actively changing and more pages are planned — so this is a snapshot of work in progress rather than a finished product. There are no usage or engagement numbers to report and none are invented here. What it demonstrates is motion work that answers the question clients and hiring managers actually ask about it: what does it cost on a phone."
+  }
+}

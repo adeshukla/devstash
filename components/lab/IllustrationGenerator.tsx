@@ -121,6 +121,7 @@ const SCENE_LABELS: Record<Scene, string> = {
   'svg-canvas': 'SVG Canvas',
   'social-card': 'Social Card',
   'component-parts': 'Component Parts',
+  'motion-timeline': 'Motion Timeline',
 }
 
 const DENSITY_LABELS: Record<Density, string> = { 1: 'Minimal', 2: 'Balanced', 3: 'Rich' }
