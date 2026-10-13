@@ -122,6 +122,7 @@ const SCENE_LABELS: Record<Scene, string> = {
   'social-card': 'Social Card',
   'component-parts': 'Component Parts',
   'motion-timeline': 'Motion Timeline',
+  'asset-shrink': 'Asset Shrink',
 }
 
 const DENSITY_LABELS: Record<Density, string> = { 1: 'Minimal', 2: 'Balanced', 3: 'Rich' }

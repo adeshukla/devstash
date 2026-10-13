@@ -1,0 +1,46 @@
+{
+  "slug": "pare",
+  "title": "Pare — Asset Optimization That Runs in the Browser",
+  "description": "A browser-only optimizer for images, fonts and code: real codecs compiled to WebAssembly, no upload, no install, and a hard rule against any change that could break your site.",
+  "longDescription": "Pare shrinks a site's images, fonts, CSS, JavaScript, HTML and SVG entirely inside a browser tab, then hands back the optimized files and the markup to use them — the `<picture>` tag with srcset, sizes, width and height filled in, or the `@font-face` rules with unicode-range. It is built for the developer a build tool leaves behind: someone maintaining a static site or a WordPress theme, with a folder of files and no Node install. The codecs are the real ones — MozJPEG, OxiPNG, AVIF and WebP encoders, HarfBuzz for fonts, Lightning CSS, Terser and SVGO for code — compiled to WebAssembly and run in a worker pool, so nothing is uploaded and the tool keeps working offline after the first visit. Drop a whole folder and it optimizes the site in place, then renders every page before and after and withholds the download if anything moved.",
+  "status": "live",
+  "featured": true,
+  "order": 1,
+  "category": "tool",
+  "tech": [
+    "React",
+    "TypeScript",
+    "Vite",
+    "WebAssembly",
+    "Web Workers",
+    "Tailwind CSS",
+    "Playwright",
+    "Cloudflare Pages"
+  ],
+  "liveUrl": "https://pare.devstash.me",
+  "githubUrl": "https://github.com/adeshukla/pare",
+  "image": "/images/projects/pare.webp",
+  "startDate": "2026-09-01",
+  "year": 2026,
+  "highlights": [
+    "Runs entirely client-side: WebAssembly codecs in a worker pool, no server to send files to, and offline after first use",
+    "Images: a resize ladder encoded to AVIF, WebP and an optimized original, ThumbHash placeholders, and a paste-ready <picture> tag with width and height to prevent layout shift",
+    "Fonts: split by writing system so a page loads only the scripts it uses, or subset to the characters it shows — WOFF2 with @font-face and unicode-range",
+    "Whole-site mode fingerprints only files whose every reference could be traced, rewrites the addresses, then renders each page before and after — no clean comparison, no download",
+    "Minifiers are configured to rewrite and never remove: unused CSS rules, alt=\"\" and SVG ids all survive, and CSS purging is permanently out of scope",
+    "97.8 KB gzipped initial JavaScript against a 150 KB budget enforced in CI; 228 unit tests and 87 browser tests run in Chromium, Firefox and WebKit"
+  ],
+  "caseStudy": {
+    "problem": "Images are most of a typical page's weight, and optimizing them is the highest-leverage performance fix there is — but the options are awkward for a large group of developers. Build tools do it well and require Node, a terminal and a project structure, which is a wall for someone maintaining a PHP theme or a static site. Online compressors upload your files to someone else's server and return a file with no markup to use it properly. And the most aggressive optimizers, the ones that strip 'unused' CSS, break pages whose classes are added by a database or by JavaScript.",
+    "approach": "Put build-tool-grade codecs in a browser tab. Every encoder is compiled to WebAssembly and run across a pool of workers, so the tool needs no install and no server — files are read in the tab and never leave it. The output is not just smaller files but the markup to use them: <picture> elements with a full srcset and fixed dimensions, and @font-face rules with unicode-range. One rule outranks every saving: Pare compresses and converts, it never deletes. Folder mode renames a file only when every reference to it resolves statically, and a layout verifier renders each page before and after the run; the download button does not appear until that comparison is clean.",
+    "decisions": [
+      "CSS purging is permanently out of scope. It offers large savings on a small share of page weight in exchange for the one guarantee that makes the tool trustworthy, and it cannot be made safe without crawling a live site across every viewport and state.",
+      "The CSSO second pass was removed after it silently deleted a whole @media block it was too old to parse. No configuration made it safe, so it went.",
+      "No Core Web Vitals number in the preview. Measured from a blob URL on the optimizing machine, it would describe nothing about the visitor's real host — a number that looks authoritative and means nothing is worse than no number.",
+      "Verification compares layout, not pixels, and found real bugs: the HTML minifier was erasing inline style attributes, and a background image that stopped loading occupied no space, so the check now compares computed background-image too.",
+      "Server templates are copied byte for byte. In a WordPress or PHP theme, any file a template names keeps its name, because a path built on the server cannot be rewritten safely from the browser.",
+      "Every risky option — font subsetting, module bundling, the deeper Terser pass, AVIF/WebP in site mode — is off by default and states its cost before it runs."
+    ],
+    "outcome": "Live at pare.devstash.me, with the code public on GitHub. Every planned phase is built — images, fonts, text assets, folder mode and verification — and the three items deliberately not shipped each have a written decision explaining why. Running the suite in Firefox and WebKit, not just Chromium, surfaced bugs a single engine hid: in WebKit a dropped folder silently did nothing. It has not yet been run against a real WordPress export or measured on a large set of real photographs, so no real-world savings figures are claimed here, and there are no usage numbers to report."
+  }
+}

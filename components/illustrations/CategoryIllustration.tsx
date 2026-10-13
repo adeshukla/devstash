@@ -44,6 +44,7 @@ export type Scene =
   | 'social-card'
   | 'component-parts'
   | 'motion-timeline'
+  | 'asset-shrink'
 
 const BLOG_SCENE: Record<BlogCategory, Scene> = {
   frontend: 'frontend',
@@ -121,6 +122,10 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   // Motion Lab is 'web-app' too. Its scene is the actual subject: many
   // pages, an easing curve with a travelling head, and the scrubber.
   'motion-lab': 'motion-timeline',
+  // Pare is a 'tool', which would fall through to the shared 'devtools'
+  // scene. Its own scene is the job: a big file goes through a browser tab
+  // and comes out smaller, with no cloud involved.
+  pare: 'asset-shrink',
 }
 
 interface CategoryIllustrationProps {
@@ -263,6 +268,8 @@ export function SceneContent({ scene }: { scene: Scene }) {
       return <ComponentPartsScene />
     case 'motion-timeline':
       return <MotionTimelineScene />
+    case 'asset-shrink':
+      return <AssetShrinkScene />
   }
 }
 
@@ -304,6 +311,7 @@ export const ALL_SCENES: Scene[] = [
   'social-card',
   'component-parts',
   'motion-timeline',
+  'asset-shrink',
 ]
 
 // Keyword index — maps a scene to the words a topic string is checked
@@ -382,6 +390,15 @@ export const SCENE_KEYWORDS: Record<Scene, string[]> = {
     'parallax',
     'landing page',
     'easing',
+  ],
+  'asset-shrink': [
+    'image optimization',
+    'compress',
+    'avif',
+    'webp',
+    'minify',
+    'font subset',
+    'page weight',
   ],
   'component-parts': [
     'component library',
@@ -1910,6 +1927,93 @@ function MotionTimelineScene() {
         rx="3.5"
         className="fill-ds-accent animate-pulse2"
       />
+    </g>
+  )
+}
+
+function AssetShrinkScene() {
+  return (
+    <g>
+      {/* The browser tab everything happens in. */}
+      <rect
+        x="70"
+        y="46"
+        width="250"
+        height="146"
+        rx="10"
+        className="fill-ds-surface stroke-ds-border2"
+        strokeWidth="2"
+      />
+      <path d="M70 66h250" className="stroke-ds-border2" strokeWidth="2" />
+      <circle cx="84" cy="56" r="3" className="fill-ds-muted/40" />
+      <circle cx="95" cy="56" r="3" className="fill-ds-muted/40" />
+      <circle cx="106" cy="56" r="3" className="fill-ds-muted/40" />
+
+      {/* No upload: a cloud, struck through. */}
+      <path
+        d="M318 40a8 8 0 0 1 2-15.7a11 11 0 0 1 21 2.7a6.5 6.5 0 0 1 1 13z"
+        className="fill-ds-surface2 stroke-ds-border2"
+        strokeWidth="2"
+      />
+      <path
+        d="M314 44l32-24"
+        className="stroke-ds-error/70"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+
+      {/* The original: a large image file. */}
+      <path
+        d="M92 80h52l14 14v58a4 4 0 0 1-4 4H92a4 4 0 0 1-4-4V84a4 4 0 0 1 4-4z"
+        className="fill-ds-surface2 stroke-ds-border2"
+        strokeWidth="2"
+      />
+      <path d="M144 80v14h14" className="stroke-ds-border2 fill-none" strokeWidth="2" />
+      <circle cx="108" cy="104" r="6" className="fill-ds-warning/60" />
+      <path d="M96 140l18-20l12 12l8-8l16 16z" className="fill-ds-muted/35" />
+      <text x="98" y="151" className="fill-ds-muted" fontFamily="var(--font-mono)" fontSize="9">
+        JPG
+      </text>
+
+      {/* Pared down: chevrons pulse in sequence through the tab. */}
+      {[0, 1, 2].map((i) => (
+        <path
+          key={i}
+          d={`M${172 + i * 14} 118l8 6l-8 6`}
+          className="stroke-ds-accent animate-pulse2 fill-none"
+          strokeOpacity={0.4 + i * 0.3}
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ animationDelay: `${i * 0.3}s` }}
+        />
+      ))}
+
+      {/* The output: a smaller file, plus the other formats beside it. */}
+      <g className="animate-float">
+        <path
+          d="M228 100h28l9 9v33a3 3 0 0 1-3 3h-34a3 3 0 0 1-3-3v-39a3 3 0 0 1 3-3z"
+          className="fill-ds-surface stroke-ds-accent"
+          strokeWidth="2"
+        />
+        <path d="M256 100v9h9" className="stroke-ds-accent fill-none" strokeWidth="2" />
+        <path d="M231 134l10-11l7 7l4-4l9 8z" className="fill-ds-accent/45" />
+        <text x="231" y="117" className="fill-ds-accent" fontFamily="var(--font-mono)" fontSize="8">
+          AVIF
+        </text>
+      </g>
+      <rect x="276" y="104" width="34" height="13" rx="6.5" className="fill-ds-purple/20" />
+      <text x="282" y="114" className="fill-ds-purple" fontFamily="var(--font-mono)" fontSize="8">
+        WebP
+      </text>
+      <rect x="276" y="124" width="34" height="13" rx="6.5" className="fill-ds-purple/20" />
+      <text x="280" y="134" className="fill-ds-purple" fontFamily="var(--font-mono)" fontSize="8">
+        WOFF2
+      </text>
+
+      {/* Before / after bytes. */}
+      <path d="M92 170h206" className="stroke-ds-border2" strokeWidth="4" strokeLinecap="round" />
+      <path d="M92 180h58" className="stroke-ds-success" strokeWidth="4" strokeLinecap="round" />
     </g>
   )
 }
