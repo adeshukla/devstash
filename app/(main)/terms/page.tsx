@@ -72,8 +72,10 @@ export default function TermsPage() {
 
               <TermsSection title="3. Intellectual Property">
                 <p>
-                  All content on the Site — including text, code snippets, design, and graphics — is
-                  owned by Adesh Shukla unless otherwise stated. Open source code on{' '}
+                  All content on the Site — including text, design, and graphics — is owned by Adesh
+                  Shukla unless otherwise stated. The code examples in blog posts are the exception:
+                  they are MIT-licensed, so you can use them in your own projects, commercial or
+                  not. Open source code on{' '}
                   <a
                     href={siteConfig.author.github}
                     className="text-ds-accent underline-offset-4 hover:underline"
