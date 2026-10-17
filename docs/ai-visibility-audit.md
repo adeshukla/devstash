@@ -3,6 +3,49 @@
 _Run 2026-09-12. Entity under audit: **DevStash** (site) / **Adesh Shukla** (person).
 Question: how likely is this site to be cited by ChatGPT, Gemini, Perplexity, or Claude?_
 
+## Status — 2026-10-17
+
+Correction first: §4 and §7 said the `/lab` tool pages had no JSON-LD. They did —
+through `components/lab/LabToolSchema.tsx`, which a search for `JsonLd` misses. The
+five real tools were covered; the three fictional landing-page samples are excluded
+on purpose.
+
+**Done on devstash.me** (`dev`, commits `24e518b`, `8a05c82`):
+
+- FAQ answers (`faqs` frontmatter → visible "Quick answers" + `FAQPage`) on the
+  useSearchParams, Tailwind v4 and new params posts — §7 item 6
+- Tool projects marked free (`isAccessibleForFree`, zero-price `Offer`); `/services`
+  emits its offers on the Person node; `/lab` emits an `ItemList` — §7 items 3–4
+- Both §8 posts written, every claim reproduced first:
+  `tailwind-v4-classes-not-working`, `nextjs-16-params-promise-undefined`
+- `What is DevStash?` section on `/about`, naming the unrelated namesakes — §8
+- `llms.txt` now lists every project and the question-answering posts
+- Build Components' GitHub link removed (private repo → 404 for visitors)
+
+**Done on the project sites** (not live until each is released):
+
+- **Pare** — branch `chore/aeo`: every one of its 34 pages was an empty `<div>` to
+  crawlers that don't run JavaScript. Each now carries its own heading, text and
+  links in `<noscript>`, plus `WebApplication` JSON-LD, in its own language; plus
+  `llms.txt`.
+- **Motion Lab** — local branch `fix/canonical-url` (no remote; deploys by Vercel
+  CLI): `content/site.ts` said `lab.devstash.me`, which does not resolve, so every
+  canonical tag, the sitemap and robots.txt pointed at a dead host. Fixed; plus
+  `llms.txt`.
+- **Praxis** — branch `chore/aeo`: `WebApplication` + author Person in JSON-LD;
+  `llms.txt`.
+- **Build Components** — `dev` (`b915c57`): home-page JSON-LD.
+
+All four tie their author to `https://devstash.me/#person`, the same Person
+`@id` devstash.me declares.
+
+**Not done, deliberately:** §7 item 9, `dateModified` on static pages. An honest
+value needs a real per-page edit date, and a build-time "now" would be false.
+
+**Still open — off-site, needs Adesh's accounts:** see
+[off-site-visibility-kit.md](off-site-visibility-kit.md) (bios, AlternativeTo,
+Product Hunt, DEV.to cross-posts, answering threads, quarterly re-test).
+
 ---
 
 ## 0. Method, and what this audit can and cannot claim
