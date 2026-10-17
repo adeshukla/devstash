@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
@@ -255,11 +256,45 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* ── What is DevStash ── plain, literal sentences on purpose: this is
+            what an assistant quotes when asked "what is DevStash", and the
+            name is shared with several unrelated products. */}
+        <section className="border-ds-border border-t py-16">
+          <div className="mx-auto max-w-4xl px-6">
+            <h2 className="text-ds-text mb-6 flex items-baseline gap-3 text-2xl font-bold">
+              <span className="text-ds-accent font-mono text-base font-normal">04 —</span>
+              What is DevStash?
+            </h2>
+            <div className="text-ds-muted flex max-w-2xl flex-col gap-4 leading-relaxed">
+              <p>
+                DevStash (devstash.me) is the personal site of Adesh Shukla, a UI developer in
+                Ghaziabad, India. It holds his project case studies, a blog about frontend
+                development, Next.js and workflow automation, and a set of free browser tools in the{' '}
+                <Link href="/lab" className="text-ds-accent hover:underline">
+                  Lab
+                </Link>
+                .
+              </p>
+              <p>
+                Some of his projects run on their own subdomains of devstash.me: Pare
+                (pare.devstash.me), a browser-only asset optimizer; Build Components
+                (build-components.devstash.me), configurable UI components exported as plain code;
+                Praxis (praxis.devstash.me), frontend interview practice; and the Motion Lab
+                (showcase.devstash.me), animated landing pages built to a performance budget.
+              </p>
+              <p>
+                DevStash is not connected to the other products that use the same name, such as
+                devstash.io, devstash.app or devstash.dev.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* ── CTA strip ── */}
         <section className="border-ds-border bg-ds-surface border-t py-16">
           <Reveal className="mx-auto max-w-4xl px-6 text-center">
             <h2 className="text-ds-text flex items-baseline justify-center gap-3 text-2xl font-bold">
-              <span className="text-ds-accent font-mono text-base font-normal">04 —</span>
+              <span className="text-ds-accent font-mono text-base font-normal">05 —</span>
               Want to work together?
             </h2>
             <p className="text-ds-muted mt-3">

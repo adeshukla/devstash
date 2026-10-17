@@ -9,7 +9,6 @@
   "category": "web-app",
   "tech": ["Next.js", "React", "TypeScript", "Tailwind CSS", "Playwright", "axe-core"],
   "liveUrl": "https://build-components.devstash.me",
-  "githubUrl": "https://github.com/adeshukla/build-components",
   "image": "/images/projects/build-components.webp",
   "startDate": "2026-09-15",
   "year": 2026,

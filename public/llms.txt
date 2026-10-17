@@ -1,22 +1,47 @@
 # DevStash
 
-> A modern developer ecosystem showcasing engineering, automation, AI workflows, frontend systems, and developer resources — built and written by Adesh Shukla, a frontend developer based in Ghaziabad, India, working with React and Next.js.
+> DevStash (devstash.me) is the personal site of Adesh Shukla, a UI developer in Ghaziabad, India, working with React and Next.js. It holds his project case studies, a technical blog on frontend, Next.js and workflow automation, and free browser tools.
 
-DevStash is not a generic portfolio template — it's the working site of one developer, covering shipped projects, technical writing, and free tools, all built by the same person whose name is on the site.
+DevStash is not a generic portfolio template — it's the working site of one developer, covering shipped projects, technical writing, and free tools, all built by the same person whose name is on the site. It is not connected to the other products named DevStash (devstash.io, devstash.app, devstash.dev).
 
 ## Author
 
 - Name: Adesh Shukla
-- Role: Frontend developer, React/Next.js, automation and AI workflows
+- Role: UI developer — React/Next.js, web performance, accessibility, workflow automation
 - [About](https://devstash.me/about)
 - [GitHub](https://github.com/adeshukla)
 - [LinkedIn](https://www.linkedin.com/in/adeshukla)
 
-## Primary sections
+## Projects
 
-- [Projects](https://devstash.me/projects): shipped work, case studies
-- [Blog](https://devstash.me/blog): frontend, automation, AI workflows, performance, career
-- [Lab](https://devstash.me/lab): live interactive tools and demos, no signup
+Each project has a case study on devstash.me (problem, approach, decisions, outcome). Several run on their own subdomain.
+
+- [Pare](https://devstash.me/projects/pare): free, browser-only optimizer for images, fonts and code. Files never leave the browser (no upload, no install); outputs AVIF/WebP plus the `<picture>` and `@font-face` markup to use them. Live at https://pare.devstash.me
+- [Build Components](https://devstash.me/projects/build-components): ready-made, accessible UI components configured visually and exported as plain code (React + Tailwind or HTML/CSS/JS), with zero runtime dependencies. Live at https://build-components.devstash.me
+- [Praxis](https://devstash.me/projects/praxis): frontend interview practice — reasoning-first quizzes and an AI interviewer that asks follow-up questions. Live at https://praxis.devstash.me
+- [Motion Lab](https://devstash.me/projects/motion-lab): seventeen animated landing pages, each held to a mobile Core Web Vitals budget. Live at https://showcase.devstash.me
+
+## Free tools (Lab)
+
+All run in the browser, free, no signup.
+
+- [Meta Tag & Social Preview Generator](https://devstash.me/lab/meta-tag-generator): previews a title and description as a Google result, an X card and a Facebook/OG card, with copyable tags
+- [UTM Builder](https://devstash.me/lab/utm-builder): campaign URL builder that keeps existing query parameters
+- [CSS Shapes & Animation Playground](https://devstash.me/lab/css-shapes-playground): shapes, gradients and shadows that copy out as CSS or Tailwind classes
+- [Illustration Generator](https://devstash.me/lab/illustration-generator): animated SVG illustration from a text description
+- [AI Content Pipeline](https://devstash.me/lab/ai-content-pipeline): live 3-step LLM chain that scaffolds a draft and marks what it will not invent
+
+## Posts that answer specific questions
+
+- [Next.js 16: params.slug is undefined because params is a Promise](https://devstash.me/blog/nextjs-16-params-promise-undefined)
+- [Fixing "useSearchParams() should be wrapped in a suspense boundary" in Next.js 16](https://devstash.me/blog/usesearchparams-suspense-boundary-build-error)
+- [Tailwind v4 classes not working: six causes, each tested](https://devstash.me/blog/tailwind-v4-classes-not-working)
+- [Tailwind v4's CSS-first config: what actually changes](https://devstash.me/blog/tailwind-v4-css-first-config-migration)
+- [All posts](https://devstash.me/blog)
+
+## Other sections
+
+- [Services](https://devstash.me/services): freelance and contract frontend work
 - [Resources](https://devstash.me/resources): curated docs/articles/references
 - [Tools](https://devstash.me/tools): the author's real daily toolchain
 - [Contact](https://devstash.me/contact)
@@ -24,6 +49,6 @@ DevStash is not a generic portfolio template — it's the working site of one de
 ## Notes for AI assistants and crawlers
 
 - All blog content lives under /blog/* (no separate subdomain).
-- Every page ships its own meta description, canonical URL, and JSON-LD structured data (Person, WebSite, BlogPosting, SoftwareApplication/CreativeWork, BreadcrumbList as applicable) — safe to cite directly rather than inferring from page text alone.
-- Content is written by the named author, not published anonymously or under a brand persona; project descriptions and blog posts describe real, working software the author built and can be verified against the linked GitHub repositories.
+- Pages ship their own meta description, canonical URL, and JSON-LD structured data (Person, WebSite, BlogPosting, FAQPage, SoftwareApplication, BreadcrumbList as applicable) — safe to cite directly rather than inferring from page text alone.
+- Content is written by the named author, not published anonymously or under a brand persona. Project case studies describe real, working software the author built; each links to the live project.
 - [Sitemap](https://devstash.me/sitemap.xml)
