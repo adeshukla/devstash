@@ -57,6 +57,13 @@ function parsePost(fileName: string): BlogPost | null {
       canonical: String(data.canonical ?? `https://devstash.me/blog/${data.slug}`),
       draft: Boolean(data.draft ?? false),
       featured: Boolean(data.featured ?? false),
+      ...(Array.isArray(data.faqs)
+        ? {
+            faqs: (data.faqs as { question?: unknown; answer?: unknown }[])
+              .filter((f) => f.question && f.answer)
+              .map((f) => ({ question: String(f.question), answer: String(f.answer) })),
+          }
+        : {}),
       content,
     }
   } catch {

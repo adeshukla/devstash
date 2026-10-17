@@ -10,7 +10,7 @@ import type { PluggableList } from 'unified'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
-import { buildBlogPostingSchema } from '@/lib/schema/builders'
+import { buildBlogPostingSchema, buildFAQSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
 import { Badge, Reveal, MountReveal, PageHeaderGlow } from '@/components/ui'
 import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
@@ -90,6 +90,7 @@ export default async function BlogPostPage({ params }: Props) {
   return (
     <>
       <JsonLd data={buildBlogPostingSchema(post)} />
+      {post.faqs && post.faqs.length > 0 && <JsonLd data={buildFAQSchema(post.faqs)} />}
       <ReadingProgress />
       <ReadTracker slug={post.slug} />
 
@@ -201,6 +202,30 @@ export default async function BlogPostPage({ params }: Props) {
                 components={mdxComponents}
                 options={{ mdxOptions: { remarkPlugins, rehypePlugins } }}
               />
+
+              {/* Visible Q&A. FAQPage markup is only valid when the same text
+                  is on the page, so this renders exactly what the JSON-LD says. */}
+              {post.faqs && post.faqs.length > 0 && (
+                <section
+                  aria-labelledby="quick-answers"
+                  className="border-ds-border mt-12 border-t pt-10"
+                >
+                  <h2
+                    id="quick-answers"
+                    className="text-ds-text mb-4 scroll-mt-24 font-sans text-2xl font-semibold"
+                  >
+                    Quick answers
+                  </h2>
+                  {post.faqs.map((faq) => (
+                    <div key={faq.question}>
+                      <h3 className="text-ds-text mt-6 mb-2 font-sans text-lg font-semibold">
+                        {faq.question}
+                      </h3>
+                      <p className="text-ds-muted mb-4 leading-7">{faq.answer}</p>
+                    </div>
+                  ))}
+                </section>
+              )}
 
               {/* Author */}
               <Reveal className="border-ds-border mt-12 border-t pt-10">

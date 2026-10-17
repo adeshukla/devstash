@@ -4,7 +4,7 @@ slug: 'nextjs-16-app-router-patterns'
 description: 'Lessons from building a real Next.js 16 app — async searchParams, MDX rendering, generateStaticParams, and the Server Component patterns I reach for.'
 author: 'Adesh Shukla'
 createdAt: '2026-06-20'
-updatedAt: '2026-06-20'
+updatedAt: '2026-10-17'
 category: 'frontend'
 tags: ['nextjs', 'react', 'typescript', 'app-router']
 readingTime: 6
@@ -52,7 +52,7 @@ export default async function PostPage({ params }: Props) {
 }
 ```
 
-If you're migrating from Next.js 14, this is the first thing to audit. TypeScript strict mode will catch it at compile time — another reason to have `"strict": true` in tsconfig.
+If you're migrating from Next.js 14, this is the first thing to audit. Strict mode catches untyped props, but not a hand-written `{ params: { slug: string } }` — Next.js 16's route check accepts that, and the page silently renders empty. I [reproduced exactly why](/blog/nextjs-16-params-promise-undefined), and the `PageProps` helper that closes the gap.
 
 ## generateStaticParams + generateMetadata Together
 

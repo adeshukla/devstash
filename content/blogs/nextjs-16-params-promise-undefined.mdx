@@ -1,0 +1,105 @@
+---
+title: 'Next.js 16 params Is a Promise: Fix params.slug undefined'
+slug: 'nextjs-16-params-promise-undefined'
+description: 'In Next.js 16, params.slug renders empty and the build still passes. Why the type check misses it, the exact error in your terminal, and the fix.'
+author: 'Adesh Shukla'
+createdAt: '2026-10-17'
+updatedAt: '2026-10-17'
+category: 'frontend'
+tags: ['nextjs', 'app-router', 'typescript', 'debugging']
+readingTime: 5
+canonical: 'https://devstash.me/blog/nextjs-16-params-promise-undefined'
+draft: false
+featured: false
+faqs:
+  - question: 'Why is params.slug undefined in Next.js 16?'
+    answer: 'Because params is a Promise in Next.js 16, not a plain object. Reading params.slug reads a property of the Promise, which does not exist. Await it first: const { slug } = await params, inside an async page component.'
+  - question: 'Why does the build pass when params is typed as a plain object?'
+    answer: 'The route type check Next.js 16 generates types each page component props as { params: Promise<...> } & any, which collapses to any, so a hand-written type such as { params: { slug: string } } is accepted. The page compiles, returns 200 and renders an empty value.'
+  - question: 'How do I make TypeScript catch the params mistake?'
+    answer: 'Type the props with the PageProps helper Next.js generates, for example PageProps<"/blog/[slug]">. With that type, params.slug is a type error: Property slug does not exist on type Promise<{ slug: string }>.'
+  - question: 'Is searchParams also a Promise in Next.js 16?'
+    answer: 'Yes. searchParams on a page, like params, has to be awaited before you read from it, and the same applies to the params passed to generateMetadata.'
+---
+
+You open a dynamic route — `/blog/hello` — and the slug is simply missing. No crash, no error page, a normal 200 response. The heading that should say "hello" is empty.
+
+If you are on Next.js 16 and the component reads `params.slug` directly, this is why: **`params` is a Promise.** The surprising part is that the build doesn't stop you. I reproduced this on Next.js 16.2.12 to pin down exactly what happens and what catches it.
+
+## The code that compiles and renders nothing
+
+```tsx
+// app/blog/[slug]/page.tsx
+type Props = { params: { slug: string } }
+
+export default function Page({ params }: Props) {
+  return <h1>{params.slug}</h1>
+}
+```
+
+This is the Next.js 14 shape, and plenty of older examples still show it. In 16 it passes the type check and serves `/blog/hello` with status 200 — and the rendered HTML is `<h1></h1>`. `params.slug` is reading a property off a Promise, and a Promise has no `slug`.
+
+## The error is in your terminal, not the browser
+
+The only signal is in the `next dev` output, at request time:
+
+```
+Error: Route "/blog/[slug]" used `params.slug`. `params` is a Promise and must be
+unwrapped with `await` or `React.use()` before accessing its properties.
+```
+
+It names the route and the exact property, so once you know to look there it's a fast fix. The trouble is that nothing makes you look there: the page renders, the request succeeds, and the browser console is clean.
+
+## Why TypeScript didn't catch it
+
+I expected the build's type check to reject a plain-object `params`. It doesn't. The validator Next.js generates for each route (`.next/types/validator.ts`) types the page component's props like this:
+
+```ts
+{ params: Promise<ParamMap[Route]> } & any
+```
+
+Anything intersected with `any` is `any`. So the check accepts whatever props type you wrote — including the wrong one. Your own annotation is the only thing standing between you and this bug, and the old annotation is the bug.
+
+## The fix
+
+Make the component `async` and await `params`:
+
+```tsx
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  return <h1>{slug}</h1>
+}
+```
+
+Tested: this renders `<h1>hello</h1>`.
+
+## Let Next.js write the type for you
+
+Next.js 16 generates a global `PageProps` helper for every route (run `next typegen` if your editor doesn't see it yet). It already knows `params` is a Promise and which keys it holds:
+
+```tsx
+export default async function Page({ params }: PageProps<'/blog/[slug]'>) {
+  const { slug } = await params
+  return <h1>{slug}</h1>
+}
+```
+
+This is the version that makes TypeScript do its job. With `PageProps`, writing `params.slug` without `await` is a compile error:
+
+```
+Property 'slug' does not exist on type 'Promise<{ slug: string; }>'.
+```
+
+The route string is checked too, so a typo in `'/blog/[slug]'` fails instead of silently typing everything as `any`.
+
+## The same rule applies to
+
+- **`searchParams`** on a page — also a Promise; await it before reading a key.
+- **`generateMetadata`** — it receives the same `params` Promise. An un-awaited `params.slug` reads `undefined` here too, and this time the damage is in the page's title and description rather than anything you can see on the page.
+- **Client components** — you can't `await` in one. Unwrap the Promise with `use(params)` from React, as the error message suggests.
+
+## One thing that can look like this bug
+
+If `tsc` suddenly reports errors in `.next/dev/types/routes.d.ts` for routes you never touched, the generated types are stale, not wrong. On this site the fix is to delete `.next/dev/types` and run the type check again.
+
+The other Next.js 16 error worth knowing in advance is the build failure for `useSearchParams()` without a Suspense boundary — it also only shows up at build time, and I wrote up [where that boundary actually has to go](/blog/usesearchparams-suspense-boundary-build-error). The rest of the App Router patterns I use are in [Next.js 16 App Router: Patterns I Actually Use](/blog/nextjs-16-app-router-patterns).

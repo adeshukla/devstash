@@ -4,13 +4,20 @@ slug: 'tailwind-v4-css-first-config-migration'
 description: 'DevStash runs Tailwind v4 with every token in @theme, not tailwind.config.ts. What that migration actually breaks, and one silent-failure gotcha worth knowing.'
 author: 'Adesh Shukla'
 createdAt: '2026-08-31'
-updatedAt: '2026-08-31'
+updatedAt: '2026-10-17'
 category: 'frontend'
 tags: ['tailwindcss', 'css', 'frontend', 'migration']
 readingTime: 5
 canonical: 'https://devstash.me/blog/tailwind-v4-css-first-config-migration'
 draft: false
 featured: false
+faqs:
+  - question: 'Where do custom colors go in Tailwind v4?'
+    answer: 'In an @theme block in your main CSS file, not in theme.extend in tailwind.config.ts. A variable such as --color-ds-accent declared in @theme becomes a real CSS custom property and the utilities text-ds-accent, bg-ds-accent and border-ds-accent automatically.'
+  - question: 'Why does a Tailwind arbitrary value like bg-[rgba(...)] do nothing?'
+    answer: 'Raw spaces inside the square brackets break Tailwind''s parser, and it fails silently: no build error, no warning, the class just generates no CSS. bg-[rgba(0, 0, 0, 0.5)] is inert; bg-[rgba(0,0,0,0.5)] works. Strip whitespace from any class string you build programmatically.'
+  - question: 'How do I read a Tailwind v4 theme value in JavaScript?'
+    answer: 'There is no JS theme object to import any more. Read the CSS custom property instead, for example getComputedStyle(document.documentElement).getPropertyValue("--color-ds-accent").'
 ---
 
 Every design token on this site — `ds-bg`, `ds-accent`, `ds-surface`, all of it — lives in a single `@theme` block inside `globals.css`. There is no `tailwind.config.ts` defining colors anymore. That's not a stylistic choice; it's how Tailwind v4 works now, and it changes more about a project than the changelog makes it sound like.
@@ -72,5 +79,7 @@ If you're building anything that emits Tailwind arbitrary values from user input
 - Spot-check a few pages after migrating — content-detection changes are the most likely thing to silently drop a class that used to work.
 
 The end state is genuinely nicer to work in: one file to open when you need a token, real CSS variables usable outside Tailwind's class system, and no build step between changing a color and seeing it reflected. It's just not a drop-in swap — treat it as a real migration, not a version bump.
+
+If a class does nothing after upgrading, I tested the six usual causes against the compiler in [Tailwind v4 classes not working](/blog/tailwind-v4-classes-not-working).
 
 For how this sits inside the wider stack — Next.js 16, TypeScript strict mode, and a file-based content layer — I wrote up the whole architecture in [Building DevStash](/blog/building-devstash-with-nextjs).

@@ -1,13 +1,9 @@
 // types/blog.ts
 
+import type { FAQItem } from './seo'
+
 export type BlogCategory =
-  | 'automation'
-  | 'frontend'
-  | 'performance'
-  | 'ai-workflows'
-  | 'devtools'
-  | 'tutorials'
-  | 'career'
+  'automation' | 'frontend' | 'performance' | 'ai-workflows' | 'devtools' | 'tutorials' | 'career'
 
 export const BLOG_CATEGORIES: { label: string; value: BlogCategory }[] = [
   { label: 'Automation', value: 'automation' },
@@ -33,6 +29,9 @@ export interface BlogPost {
   canonical: string
   draft: boolean
   featured: boolean
+  /** Optional short Q&A pairs, rendered as a visible section and as FAQPage
+   * JSON-LD. Each answer must restate something the post itself says. */
+  faqs?: FAQItem[]
   content: string // raw MDX string — not in frontmatter, added by parsePost()
 }
 

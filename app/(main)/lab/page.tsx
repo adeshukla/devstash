@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { buildItemListSchema } from '@/lib/schema/builders'
 import { Badge, PageHeaderGlow } from '@/components/ui'
 import { LabPreview, type PreviewKind } from '@/components/lab/LabPreview'
 
@@ -131,6 +133,12 @@ function LabEntry({ demo }: { demo: Demo }) {
 export default function LabPage() {
   return (
     <main>
+      {/* Only the flagship and the real tools: the samples are fictional brands. */}
+      <JsonLd
+        data={buildItemListSchema(
+          [FLAGSHIP, ...TOOLS].map((d) => ({ name: d.name, url: `/lab/${d.slug}` }))
+        )}
+      />
       {/* Breadcrumb emits its own BreadcrumbList JSON-LD */}
       <section className="border-ds-border relative overflow-hidden border-b py-16">
         <PageHeaderGlow side="right" />

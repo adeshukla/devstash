@@ -8,6 +8,7 @@ import type {
   CreativeWork,
   BreadcrumbList,
   FAQPage,
+  ItemList,
 } from 'schema-dts'
 import { siteConfig } from '@/content/metadata/site.config'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
@@ -184,6 +185,14 @@ export function buildProjectSchema(
         url: siteConfig.url,
       },
       ...(project.liveUrl ? { installUrl: project.liveUrl } : {}),
+      // Every 'tool' project is free to use with no signup. Saying so in
+      // markup is what lets an assistant answer "is there a free X" with it.
+      ...(project.category === 'tool'
+        ? {
+            isAccessibleForFree: true,
+            offers: { '@type': 'Offer', price: 0, priceCurrency: 'USD' },
+          }
+        : {}),
     } as WithContext<SoftwareApplication>
   }
 
@@ -212,6 +221,39 @@ export function buildBreadcrumbSchema(items: BreadcrumbItem[]): WithContext<Brea
       position: index + 1,
       name: item.name,
       item: item.url.startsWith('http') ? item.url : `${siteConfig.url}${item.url}`,
+    })),
+  }
+}
+
+// ── Services (Person.makesOffer) ──────────────────────────────
+// Hangs the offers off the same Person node rather than inventing an
+// Organization, so the services attach to the one author entity.
+export function buildServicesSchema(
+  services: { title: string; body: string }[]
+): WithContext<Person> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    '@id': PERSON_ID,
+    name: siteConfig.author.name,
+    url: siteConfig.url,
+    makesOffer: services.map(({ title, body }) => ({
+      '@type': 'Offer',
+      itemOffered: { '@type': 'Service', name: title, description: body },
+    })),
+  }
+}
+
+// ── ItemList ──────────────────────────────────────────────────
+export function buildItemListSchema(items: { name: string; url: string }[]): WithContext<ItemList> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      url: item.url.startsWith('http') ? item.url : `${siteConfig.url}${item.url}`,
     })),
   }
 }
