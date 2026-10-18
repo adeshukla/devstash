@@ -216,6 +216,7 @@ export const CONTACT_FORM_HTML = `
         <p class="field-error" id="lead-message-error" role="alert"></p>
       </div>
       <button type="submit" class="cta lead-submit">Send message</button>
+      <a id="lead-mailto" class="lead-mailto" href="mailto:hello@devstash.me">Or open an email with a drafted message</a>
       <p class="form-status" id="lead-status" role="status" aria-live="polite"></p>
     </form>
   </div>
@@ -249,7 +250,8 @@ export const CONTACT_FORM_CSS = `
     line-height: 1.2; transition: filter .2s ease, transform .2s ease;
   }
   .lead-submit:hover { filter: brightness(1.08); transform: translateY(-1px); }
-  .lead-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }`
+  .lead-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+  .lead-mailto { align-self: flex-start; color: var(--accent); font-size: .9rem; text-underline-offset: 3px; }`
 
 export const CONTACT_FORM_JS = `
 <script>
@@ -262,6 +264,23 @@ export const CONTACT_FORM_JS = `
     var FALLBACK_EMAIL = 'hello@devstash.me'
 
     var status = document.getElementById('lead-status')
+
+    // Draft the email from what this page is about, so "contact" opens a
+    // ready-to-send message instead of a blank one.
+    var h1 = document.querySelector('h1')
+    var topic = ((h1 && h1.textContent) || document.title || 'your page').trim()
+    var metaDesc = document.querySelector('meta[name="description"]')
+    var about = metaDesc ? (metaDesc.getAttribute('content') || '').trim() : ''
+    var draft = 'Hi,\\n\\nI just read "' + topic + '"' + (about ? ' (' + about + ')' : '') +
+      ' and would like to talk about it.\\n\\nWhat I am working on:\\n\\nWhat I would like help with:\\n\\nThanks,\\n'
+    var mailLink = document.getElementById('lead-mailto')
+    if (mailLink) {
+      mailLink.href = 'mailto:' + FALLBACK_EMAIL + '?subject=' + encodeURIComponent('About: ' + topic) +
+        '&body=' + encodeURIComponent(draft)
+    }
+    if (form.elements.message && !form.elements.message.value) {
+      form.elements.message.placeholder = 'e.g. I read "' + topic + '" and would like to talk about…'
+    }
     var fields = [
       { el: form.elements.name, err: 'lead-name-error', label: 'Name' },
       { el: form.elements.email, err: 'lead-email-error', label: 'Email' },
@@ -315,7 +334,7 @@ export const CONTACT_FORM_JS = `
       if (!FORM_ENDPOINT) {
         // No endpoint configured — hand off to the visitor's mail client rather
         // than pretending the message was captured.
-        var subject = encodeURIComponent('Enquiry from ' + data.name)
+        var subject = encodeURIComponent('About: ' + topic + ' (from ' + data.name + ')')
         var body = encodeURIComponent(data.message + '\\n\\n— ' + data.name + ' (' + data.email + ')')
         window.location.href = 'mailto:' + FALLBACK_EMAIL + '?subject=' + subject + '&body=' + body
         status.textContent = 'Opening your email client…'
