@@ -257,6 +257,28 @@ export function buildContentSections(markdown: string): string {
   return lead + groups.map(renderGroup).join('\n')
 }
 
+/** The article's section headings with the same ids buildContentSections gives
+ * them, so a design can link to them (a contents card, for instance). */
+export function articleOutline(
+  markdown: string
+): { id: string; heading: string; summary: string }[] {
+  return splitIntoGroups(markdown).groups.map((g, i) => ({
+    id: slugId(g.heading, i),
+    heading: g.heading,
+    summary: firstSentence(g.body),
+  }))
+}
+
+/** The first prose sentence of a block, markdown stripped — for fallback copy. */
+export function firstSentence(body: string): string {
+  const prose = withoutLists(body.replace(/```[\s\S]*?```/g, ''))
+    .replace(/[*_`#>]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  const m = prose.match(/^(.{20,200}?[.!?])(\s|$)/)
+  return (m ? m[1] : prose.slice(0, 160)).trim()
+}
+
 export const CONTENT_SECTIONS_CSS = `
   .ds-section { padding: clamp(3rem,7vw,5.5rem) 1.25rem; }
   .ds-section.ds-alt { background: var(--surface); }
@@ -289,5 +311,5 @@ export const CONTENT_SECTIONS_CSS = `
 
   .ds-step-list { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; gap: 1rem; }
   .ds-step { display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: start; background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; min-width: 0; }
-  .ds-step-n { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; font-size: .875rem; }
+  .ds-step-n { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--accent); color: var(--on-accent, #fff); font-weight: 700; font-size: .875rem; }
   .ds-step div { min-width: 0; font-size: .9375rem; line-height: 1.7; color: var(--muted); }`

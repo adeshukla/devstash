@@ -70,12 +70,12 @@ export default function AiContentPipelinePage() {
               saved anywhere; the output only exists in your browser for this run.
             </p>
             <p className="text-ds-muted mt-4 leading-relaxed">
-              Checking “also generate a standalone HTML landing page” adds a 4th, separate call that
-              turns the same content into a self-contained page — inline CSS and JS only, gradient
-              blobs instead of stock photography, explicit{' '}
-              <code className="text-ds-accent">[Image placeholder]</code> blocks instead of invented
-              image URLs, and a layout that stays usable down to a 300px viewport. It only runs when
-              you opt in — it costs its own tokens and latency on top of the three steps above.
+              With “also build a landing page” on (the default), a 4th call writes only the page
+              copy, as validated JSON restating the article. The page itself is rendered from five
+              hand-built designs — editorial, product split, bento, minimal and bold — each with its
+              own type and palette, the full copy-edited article and a contact section that opens a
+              drafted email. All five come back from one run, responsive down to 300px, so you can
+              switch styles and download the one you want without spending more tokens.
             </p>
           </div>
         </section>

@@ -5,7 +5,7 @@ import { CssCodeBlock } from '@/components/lab/CssCodeBlock'
 import { copyText } from '@/lib/utils/clipboard'
 import { AI_TELL_PHRASES } from '@/lib/ai/aiTellPhrases'
 import { HUMAN_INPUT_MARKER_SOURCE, isHumanInputMarker } from '@/lib/ai/humanInputMarkers'
-import type { PipelineResponse } from '@/types/aiPipeline'
+import type { PageDesignId, PipelineResponse } from '@/types/aiPipeline'
 
 // One combined case-insensitive pattern that captures both AI-tell phrases and
 // [TODO: ...] human-input markers, so a single split() pass can highlight each
@@ -101,8 +101,94 @@ function MetricCard({
   )
 }
 
+/**
+ * The generated page in every design, with tabs to switch between them. The
+ * preview is sandboxed without allow-same-origin, so a page's script can never
+ * reach this site's storage or cookies. allow-popups and the custom-protocol
+ * flag let its "drafted email" link open the visitor's mail app. Download and
+ * copy are client-only.
+ */
+function GeneratedPage({
+  variants,
+  initial,
+  slug,
+}: {
+  variants: PipelineResponse['htmlVariants']
+  initial: PageDesignId | null
+  slug: string
+}) {
+  const [active, setActive] = useState<PageDesignId>(initial ?? variants[0].id)
+  const [width, setWidth] = useState<'desktop' | 'mobile'>('desktop')
+  const current = variants.find((v) => v.id === active) ?? variants[0]
+
+  return (
+    <div>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <h3 className="text-ds-text text-sm font-semibold">Generated landing page</h3>
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => setWidth(width === 'desktop' ? 'mobile' : 'desktop')}
+            className="text-ds-muted hover:text-ds-accent font-mono text-xs transition-colors"
+          >
+            {width === 'desktop' ? 'Phone width' : 'Full width'}
+          </button>
+          <CopyTextButton text={current.html} label="Copy generated HTML" />
+          <button
+            type="button"
+            onClick={() => downloadHtml(current.html, `${slug}-${current.id}`)}
+            className="text-ds-muted hover:text-ds-accent font-mono text-xs transition-colors"
+          >
+            Download .html
+          </button>
+        </div>
+      </div>
+
+      {variants.length > 1 && (
+        <div role="tablist" aria-label="Page style" className="mb-3 flex flex-wrap gap-2">
+          {variants.map((v) => (
+            <button
+              key={v.id}
+              type="button"
+              role="tab"
+              aria-selected={v.id === current.id}
+              onClick={() => setActive(v.id)}
+              className={
+                v.id === current.id
+                  ? 'border-ds-accent bg-ds-accent/10 text-ds-text rounded-full border px-3 py-1.5 text-xs font-medium'
+                  : 'border-ds-border text-ds-muted hover:border-ds-accent/50 hover:text-ds-text rounded-full border px-3 py-1.5 text-xs transition-colors'
+              }
+            >
+              {v.name}
+            </button>
+          ))}
+        </div>
+      )}
+      {current.blurb && <p className="text-ds-muted mb-3 text-xs">{current.blurb}</p>}
+
+      <div className="border-ds-border bg-ds-surface2 overflow-hidden rounded-lg border">
+        <iframe
+          key={current.id}
+          srcDoc={current.html}
+          title={`Generated page preview — ${current.name}`}
+          sandbox="allow-scripts allow-popups allow-top-navigation-to-custom-protocols"
+          className={
+            width === 'mobile'
+              ? 'mx-auto block h-[640px] w-[375px] max-w-full bg-white'
+              : 'block h-[640px] w-full bg-white'
+          }
+        />
+      </div>
+      <p className="text-ds-muted mt-2 text-xs leading-relaxed">
+        Same copy and the same edited article in every style. The contact button opens an email
+        drafted from the page&apos;s topic; point the form at a real endpoint before you ship it.
+      </p>
+    </div>
+  )
+}
+
 export function AiPipelineResults({ result }: { result: PipelineResponse }) {
-  const { draft, humanized, frontmatter, htmlPage, metrics } = result
+  const { draft, humanized, frontmatter, htmlPage, htmlVariants, htmlDesign, metrics } = result
 
   return (
     <div className="mt-8 flex flex-col gap-6">
@@ -130,7 +216,7 @@ export function AiPipelineResults({ result }: { result: PipelineResponse }) {
           />
           {metrics.htmlPage && (
             <MetricCard
-              label="HTML page"
+              label="Page copy"
               tokens={metrics.htmlPage.promptTokens + metrics.htmlPage.completionTokens}
               ms={metrics.htmlPage.latencyMs}
               provider={metrics.htmlPage.provider}
@@ -189,39 +275,16 @@ export function AiPipelineResults({ result }: { result: PipelineResponse }) {
         <CssCodeBlock label="JSON" code={JSON.stringify(frontmatter, null, 2)} />
       </div>
 
-      {/* Standalone HTML landing page — only present when the consent
-          checkbox was checked. Sandboxed preview (no allow-same-origin, so
-          the generated page's script can't touch this site's storage/cookies),
-          plus a client-only download — nothing here ever touches the server. */}
       {htmlPage && (
-        <div>
-          <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-ds-text text-sm font-semibold">Generated HTML page</h3>
-            <div className="flex items-center gap-4">
-              <CopyTextButton text={htmlPage} label="Copy generated HTML" />
-              <button
-                type="button"
-                onClick={() => downloadHtml(htmlPage, frontmatter.slug)}
-                className="text-ds-muted hover:text-ds-accent font-mono text-xs transition-colors"
-              >
-                Download .html
-              </button>
-            </div>
-          </div>
-          <div className="border-ds-border overflow-hidden rounded-lg border">
-            <iframe
-              srcDoc={htmlPage}
-              title="Generated HTML page preview"
-              sandbox="allow-scripts"
-              className="h-[480px] w-full bg-white"
-            />
-          </div>
-          <p className="text-ds-muted mt-2 text-xs leading-relaxed">
-            A scaffold to review and finish — replace every{' '}
-            <span className="text-ds-accent font-mono">[Image placeholder]</span> with a real image
-            before shipping it anywhere.
-          </p>
-        </div>
+        <GeneratedPage
+          variants={
+            htmlVariants?.length
+              ? htmlVariants
+              : [{ id: htmlDesign ?? 'editorial', name: 'Page', blurb: '', html: htmlPage }]
+          }
+          initial={htmlDesign}
+          slug={frontmatter.slug}
+        />
       )}
     </div>
   )

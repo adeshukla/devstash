@@ -5,6 +5,27 @@
 
 export type PipelineTone = 'technical' | 'conversational' | 'tutorial'
 
+/** Hand-built page designs in lib/ai/landingDesigns.ts. */
+export type PageDesignId = 'editorial' | 'split' | 'bento' | 'minimal' | 'bold'
+
+/** The only part of the landing page the model writes; every design renders it. */
+export interface PageCopy {
+  brand: string
+  heroTitle: string
+  heroLead: string
+  cta: string
+  features: { title: string; body: string }[]
+  closingTitle: string
+  closingLead: string
+}
+
+export interface HtmlVariant {
+  id: PageDesignId
+  name: string
+  blurb: string
+  html: string
+}
+
 export interface PipelineRequest {
   topic: string
   keywords: string[]
@@ -16,6 +37,8 @@ export interface PipelineRequest {
   // content. Off by default because it's an extra step with its own token
   // cost and latency, not because it's unsafe.
   generateHtmlPage?: boolean
+  /** Which design to show first; 'auto' picks one at random per run. */
+  design?: PageDesignId | 'auto'
 }
 
 export interface StepMetrics {
@@ -62,6 +85,11 @@ export interface PipelineResponse {
   // for this run. Never persisted server-side — same "nothing saved" contract
   // as the rest of the pipeline.
   htmlPage: string | null
+  // The same page in every design (same copy, same article), so the visitor
+  // can switch styles without another LLM call. Empty when htmlPage is null.
+  htmlVariants: HtmlVariant[]
+  // Which variant htmlPage is.
+  htmlDesign: PageDesignId | null
   metrics: PipelineMetrics
   remainingFreeRuns: number
   usedByok: boolean

@@ -4,23 +4,16 @@ import { z } from 'zod'
 import { callGroq, callWithFallback, hasAnyProviderConfigured, GroqCallError } from '@/lib/ai/groq'
 import { AI_TELL_PHRASES, countAiTellPhrases } from '@/lib/ai/aiTellPhrases'
 import { countHumanInputMarkers } from '@/lib/ai/humanInputMarkers'
-import {
-  renderArticleHtml,
-  CONTACT_FORM_HTML,
-  CONTACT_FORM_CSS,
-  CONTACT_FORM_JS,
-} from '@/lib/ai/landingPageParts'
-import {
-  THEME_CSS,
-  LAYOUT_CSS,
-  REVEAL_SAFE_CSS,
-  THEME_TOGGLE_JS,
-  HERO_VISUAL_CSS,
-  HERO_VISUAL_HTML,
-} from '@/lib/ai/landingPageChrome'
-import { buildContentSections, CONTENT_SECTIONS_CSS } from '@/lib/ai/contentSections'
+import { articleOutline, firstSentence } from '@/lib/ai/contentSections'
+import { DESIGNS, DESIGN_IDS, renderLandingPage } from '@/lib/ai/landingDesigns'
 import { BLOG_CATEGORIES } from '@/types/blog'
-import type { PipelineMetrics, DemoFrontmatter } from '@/types/aiPipeline'
+import type {
+  PipelineMetrics,
+  DemoFrontmatter,
+  PageCopy,
+  HtmlVariant,
+  PageDesignId,
+} from '@/types/aiPipeline'
 
 // ─── Config ─────────────────────────────────────────────────────────────────
 
@@ -44,7 +37,7 @@ const TEXT_STEP_OPTIONS = { reasoningEffort: 'low' } as const
 // through — which is the intermittent "pipeline failed to complete" users hit.
 // Sizing each step to what it actually needs (reasoning is pinned low, so
 // these are close to the visible output) brings the run to well under half the
-// budget and leaves room for the 120b page step on its own separate quota.
+// budget, which leaves room for the small landing-page copy step.
 function textStepBudget(targetLengthWords: number) {
   // ~1.4 tokens per word, doubled for headroom, clamped to something sane.
   return Math.min(2200, Math.max(700, Math.round(targetLengthWords * 2.4)))
@@ -66,7 +59,11 @@ const PipelineRequestSchema = z.object({
     .min(150, 'Minimum 150 words.')
     .max(1200, 'Maximum 1200 words for this demo.'),
   userApiKey: z.string().trim().min(20).max(200).optional(),
-  generateHtmlPage: z.boolean().optional().default(false),
+  generateHtmlPage: z.boolean().optional().default(true),
+  design: z
+    .enum(['auto', ...DESIGN_IDS])
+    .optional()
+    .default('auto'),
 })
 
 const FrontmatterFromLlmSchema = z.object({
@@ -141,170 +138,81 @@ function fallbackFrontmatter(
   }
 }
 
-// Models asked for "output only HTML" still sometimes wrap it in a ```html
-// fence despite instructions — same defensive-parse posture as the JSON step.
-function stripCodeFence(raw: string): string {
-  return raw
+// ─── Landing-page copy (the only part of the page the model writes) ─────────
+
+// Lenient on length — the model overshoots — and clipped afterwards, so a
+// near-miss still yields a page instead of falling back.
+const PageCopyFromLlmSchema = z.object({
+  brand: z.string().trim().min(1),
+  heroTitle: z.string().trim().min(3),
+  heroLead: z.string().trim().min(10),
+  cta: z.string().trim().min(2),
+  features: z
+    .array(z.object({ title: z.string().trim().min(2), body: z.string().trim().min(8) }))
+    .min(3),
+  closingTitle: z.string().trim().min(3),
+  closingLead: z.string().trim().default(''),
+})
+
+/** Strip anything that must never reach a page, then clip on a word boundary. */
+function cleanCopy(s: string, max: number): string {
+  const t = s
+    .replace(/\[TODO:[^\]]*\]/gi, '')
+    .replace(/\bTODO\b:?/g, '')
+    .replace(/[*_`#]/g, '')
+    .replace(/\s+/g, ' ')
     .trim()
-    .replace(/^```(?:html)?\s*/i, '')
-    .replace(/```\s*$/i, '')
-    .trim()
+  if (t.length <= max) return t
+  const cut = t.slice(0, max)
+  return cut.slice(0, Math.max(cut.lastIndexOf(' '), max * 0.6)).replace(/[,;:—-]+$/, '') + '…'
 }
 
-// A generation that pins html/body to height:100% (or 100vh) alongside an
-// overflow rule clamps the scroll container to a single viewport — the page
-// renders but everything below the hero is unreachable, which reads as "it
-// only generated a hero". The prompt forbids it, but this class of breakage
-// is severe enough to guarantee rather than request: a last stylesheet wins
-// on equal specificity, and !important beats whatever the model wrote.
-const SCROLL_GUARD_CSS = `
-<style>
-  /* injected: guarantees the document can always scroll vertically */
-  html, body { height: auto !important; max-height: none !important; overflow-y: visible !important; }
-  /* injected: if scripting is unavailable, never leave reveal content hidden */
-  @media (scripting: none) {
-    [class*="reveal"], [class*="fade"], [class*="animate"] { opacity: 1 !important; transform: none !important; }
+function normaliseCopy(c: z.infer<typeof PageCopyFromLlmSchema>): PageCopy {
+  return {
+    brand: cleanCopy(c.brand, 32),
+    heroTitle: cleanCopy(c.heroTitle, 90),
+    heroLead: cleanCopy(c.heroLead, 240),
+    cta: cleanCopy(c.cta, 32),
+    features: c.features.slice(0, 3).map((f) => ({
+      title: cleanCopy(f.title, 60),
+      body: cleanCopy(f.body, 200),
+    })),
+    closingTitle: cleanCopy(c.closingTitle, 90),
+    closingLead: cleanCopy(c.closingLead, 200),
   }
-</style>`
-
-const ARTICLE_SECTION_CSS = `
-  .article-section { padding: clamp(4rem,10vw,7rem) 1.5rem; }
-  .article-inner { max-width: 720px; margin: 0 auto; }
-  .article-inner h2 { margin: 2.5rem 0 .75rem; }
-  .article-inner h3, .article-inner h4 { margin: 2rem 0 .5rem; }
-  .article-inner p, .article-inner li { color: var(--muted); line-height: 1.8; }
-  .article-inner p { margin: 0 0 1.1rem; }
-  .article-inner ul, .article-inner ol { margin: 0 0 1.4rem; padding-left: 1.25rem; }
-  .article-inner li { margin-bottom: .5rem; }
-  .article-inner strong { color: var(--text); }
-  .article-inner code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em;
-    background: var(--surface-2); border: 1px solid var(--border);
-    border-radius: 5px; padding: .1em .35em;
-  }
-  .article-inner pre {
-    background: var(--surface-2); border: 1px solid var(--border);
-    border-radius: 12px; padding: 1rem; overflow-x: auto; margin: 0 0 1.4rem;
-  }
-  .article-inner pre code { background: none; border: 0; padding: 0; }
-  .article-inner .table-wrap { overflow-x: auto; margin: 0 0 1.4rem; }
-  .article-inner table { width: 100%; border-collapse: collapse; font-size: .925rem; }
-  .article-inner th, .article-inner td {
-    text-align: left; padding: .6rem .75rem; border-bottom: 1px solid var(--border);
-  }
-  .article-inner th { color: var(--text); font-weight: 600; background: var(--surface-2); }
-  .article-inner td { color: var(--muted); }`
+}
 
 /**
- * Everything the page must contain regardless of what the model returned.
- *
- * The model is asked for these too, but asking is not the same as having: the
- * article body is injected verbatim from the pipeline's own output so all ~600-900
- * generated words actually reach the page instead of being summarised into three
- * cards, and the form ships hand-written so its validation behaves identically
- * on every run.
+ * Copy built from the article itself when the model's JSON doesn't validate:
+ * the frontmatter for the hero and the article's own section headings and
+ * first sentences for the three points. Plain, but never invented.
  */
-function injectRuntimeGuards(html: string, articleMarkdown: string): string {
-  // Order matters: theme tokens first, then layout, then the reveal override,
-  // then section styles. This block is injected last in <head> so it wins on
-  // equal specificity against whatever the model wrote.
-  const injectedCss = `
-<style>
-${THEME_CSS}
-${LAYOUT_CSS}
-${REVEAL_SAFE_CSS}
-${HERO_VISUAL_CSS}
-${ARTICLE_SECTION_CSS}
-${CONTENT_SECTIONS_CSS}
-${CONTACT_FORM_CSS}
-</style>`
-
-  let out = /<\/head>/i.test(html)
-    ? html.replace(/<\/head>/i, `${SCROLL_GUARD_CSS}${injectedCss}\n</head>`)
-    : /<body[^>]*>/i.test(html)
-      ? html.replace(/(<body[^>]*>)/i, `$1${SCROLL_GUARD_CSS}${injectedCss}`)
-      : html + SCROLL_GUARD_CSS + injectedCss
-
-  // Without this meta the browser lays out at ~980px and then zooms the whole
-  // page down to fit, which reads as "responsive" in a screenshot but is
-  // actually just tiny and unreadable on a phone. Force it rather than trust
-  // the model to have written it.
-  if (!/<meta[^>]+name=["']viewport["']/i.test(out)) {
-    const viewport = '\n<meta name="viewport" content="width=device-width, initial-scale=1">'
-    out = /<head[^>]*>/i.test(out)
-      ? out.replace(/(<head[^>]*>)/i, `$1${viewport}`)
-      : `${viewport}\n${out}`
+function fallbackCopy(fm: DemoFrontmatter, article: string): PageCopy {
+  const outline = articleOutline(article).filter((o) => o.summary)
+  const sentences = article
+    .replace(/\[TODO:[^\]]*\]/gi, '')
+    .split(/\n{2,}/)
+    .map(firstSentence)
+    .filter((x) => x.length > 30)
+  const points = outline.map((o) => ({ title: o.heading, body: o.summary }))
+  for (const sentence of sentences) {
+    if (points.length >= 3) break
+    points.push({ title: sentence.split(/\s+/).slice(0, 4).join(' '), body: sentence })
   }
-
-  // Footer credits the brand, not the person.
-  out = out.replace(/<footer\b[\s\S]*?<\/footer>/i, () => {
-    const year = new Date().getFullYear()
-    return `<footer class="ds-footer"><p>© ${year} DevStash. All rights reserved.</p></footer>`
+  while (points.length < 3)
+    points.push({ title: fm.tags[points.length] ?? fm.category, body: fm.description })
+  return normaliseCopy({
+    brand: fm.title
+      .split(/[\s:—-]+/)
+      .slice(0, 2)
+      .join(' '),
+    heroTitle: fm.title,
+    heroLead: fm.description,
+    cta: 'Get in touch',
+    features: points.slice(0, 3),
+    closingTitle: `Want to talk about ${fm.title.toLowerCase()}?`,
+    closingLead: 'Send a short note about what you are working on and I will reply.',
   })
-
-  // Hero visual: the model is told to leave a marker for it rather than build
-  // its own showpiece, which previously ate a full screen of height. If the
-  // marker is missing, drop it in after the first section so the hero still
-  // gets its graphic.
-  if (out.includes('<!--DS_HERO_VISUAL-->')) {
-    out = out.replace('<!--DS_HERO_VISUAL-->', HERO_VISUAL_HTML)
-  } else if (/<\/section>/i.test(out)) {
-    out = out.replace(/<\/section>/i, `${HERO_VISUAL_HTML}\n</section>`)
-  }
-
-  // Article + form go before the footer when there is one, so the footer stays
-  // last; otherwise append to the end of body.
-  const contentSections = buildContentSections(articleMarkdown)
-
-  // Reading order matters: hero -> the model's feature cards -> the real
-  // content -> the model's closing CTA band -> the form. Appending everything
-  // before the footer put the closing "ready to start?" band ahead of the
-  // content it is supposed to close, so the content goes before the LAST
-  // section the model wrote instead.
-  const lastSection = out.lastIndexOf('<section')
-  if (contentSections && lastSection > -1) {
-    out = out.slice(0, lastSection) + contentSections + '\n' + out.slice(lastSection)
-  } else if (contentSections) {
-    out = /<footer[\s>]/i.test(out)
-      ? out.replace(/(<footer[\s>])/i, `${contentSections}\n$1`)
-      : out.replace(/<\/body>/i, `${contentSections}\n</body>`)
-  }
-
-  // The form always sits last, immediately before the footer.
-  if (/<footer[\s>]/i.test(out)) {
-    out = out.replace(/(<footer[\s>])/i, `${CONTACT_FORM_HTML}\n$1`)
-  } else if (/<\/body>/i.test(out)) {
-    out = out.replace(/<\/body>/i, `${CONTACT_FORM_HTML}\n</body>`)
-  } else {
-    out += CONTACT_FORM_HTML
-  }
-
-  // Every call to action points at the form. The prompt says so, but a
-  // generated href="#" or a link to a page that doesn't exist is a dead end,
-  // so this rewrites them rather than trusting it. Anything already aimed at a
-  // real in-page anchor or an external URL is left alone.
-  out = out.replace(
-    /<a\b([^>]*?)href="([^"]*)"([^>]*)>/gi,
-    (match, pre: string, href: string, post: string) => {
-      const attrs = `${pre}${post}`
-      const looksLikeCta = /class="[^"]*\bbtn|cta\b/i.test(attrs)
-      const isDeadEnd = href === '#' || href === '' || href === 'javascript:void(0)'
-      if (!looksLikeCta && !isDeadEnd) return match
-      if (/^(https?:|mailto:|tel:)/i.test(href)) return match
-      if (href.startsWith('#') && href !== '#') return match
-      return `<a${pre}href="#contact"${post}>`
-    }
-  )
-
-  // The reveal failsafe is gone: REVEAL_SAFE_CSS means nothing is ever hidden
-  // by opacity, so there is no hidden state left to rescue. The theme toggle
-  // script adopts and rebinds whatever control the model produced.
-  const tailScripts = `${THEME_TOGGLE_JS}${CONTACT_FORM_JS}`
-  out = /<\/body>/i.test(out)
-    ? out.replace(/<\/body>/i, `${tailScripts}\n</body>`)
-    : out + tailScripts
-
-  return out
 }
 
 // ─── POST handler ───────────────────────────────────────────────────────────
@@ -325,7 +233,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const { topic, keywords, tone, targetLength, userApiKey, generateHtmlPage } = parsed.data
+  const { topic, keywords, tone, targetLength, userApiKey, generateHtmlPage, design } = parsed.data
   const counter = await readRunCounter()
 
   if (!userApiKey && counter.count >= DAILY_CAP) {
@@ -463,167 +371,91 @@ ${humanizeResult.content}
       frontmatter = fallbackFrontmatter(topic, humanizeResult.content, keywords)
     }
 
-    // ── Step 4 (opt-in only): standalone HTML landing page ──
-    // Gated behind generateHtmlPage, which the UI only sets when the visitor
-    // has explicitly checked a consent checkbox — this step is a heavier,
-    // separate LLM call with its own token cost, not something that runs by
-    // default just because a topic was submitted.
+    // ── Step 4 (on by default): landing page in every design ──
+    // The model writes only the copy, as small validated JSON. The page itself
+    // is rendered from hand-built designs (lib/ai/landingDesigns.ts), so it is
+    // responsive by construction, never repeats one look, and always carries
+    // the full humanised article. Rendering costs no tokens, so every design is
+    // returned and the visitor picks; `design` only decides which shows first.
     let htmlPage: string | null = null
-    let htmlPageResult: Awaited<ReturnType<typeof runStep>> | null = null
+    let htmlVariants: HtmlVariant[] = []
+    let htmlDesign: PageDesignId | null = null
+    let copyResult: Awaited<ReturnType<typeof runStep>> | null = null
     if (generateHtmlPage) {
-      // Groq's free tier caps at 8k tokens/minute counting the prompt, so the
-      // article can't be pasted in whole — a 1200-word post would eat the
-      // budget the page itself needs to be written. The landing page only
-      // needs the argument's shape, not every sentence. Cut on a paragraph
-      // break so a card is never sourced from a half-sentence.
-      const ARTICLE_EXCERPT_LIMIT = 1500
-      const rawArticle = humanizeResult.content.trim()
-      let articleExcerpt = rawArticle
-      if (rawArticle.length > ARTICLE_EXCERPT_LIMIT) {
-        const cut = rawArticle.slice(0, ARTICLE_EXCERPT_LIMIT)
+      // The copy only needs the argument's shape, not every sentence. Cut on a
+      // paragraph break so a point is never sourced from a half-sentence.
+      const EXCERPT_LIMIT = 2400
+      const article = humanizeResult.content.trim()
+      let excerpt = article
+      if (article.length > EXCERPT_LIMIT) {
+        const cut = article.slice(0, EXCERPT_LIMIT)
         const lastBreak = Math.max(cut.lastIndexOf('\n\n'), cut.lastIndexOf('. '))
-        articleExcerpt = (
-          lastBreak > ARTICLE_EXCERPT_LIMIT * 0.5 ? cut.slice(0, lastBreak) : cut
-        ).trim()
+        excerpt = (lastBreak > EXCERPT_LIMIT * 0.5 ? cut.slice(0, lastBreak) : cut).trim()
       }
+      const sections = articleOutline(article).map((o) => o.heading)
 
-      const htmlUserPrompt = `Design and build a single-file HTML LANDING PAGE from the article below.
-Not a blog post — a landing page: short, punchy, section-based, centred.
-
-TITLE: ${frontmatter.title}
-DESCRIPTION: ${frontmatter.description}
-SLUG: ${frontmatter.slug}
-CATEGORY: ${frontmatter.category}
-TAGS: ${frontmatter.tags.join(', ')}
-READING TIME: ${frontmatter.readingTime} min
-ARTICLE:
-"""
-${articleExcerpt}
-"""
-
-## What is added AFTER you finish — do NOT write any of it
-A stylesheet defining the full colour palette and every --token, a working
-theme toggle, the entrance animation, the full article body, and a contact
-form with id="contact" are all appended automatically.
-Therefore you MUST NOT write: :root/palette CSS, any @media
-prefers-color-scheme block, a theme-toggle script, a .reveal{opacity:0} rule,
-the article text, or a form. Use the tokens; never define them.
-
-## NON-NEGOTIABLE
-1. Every CTA is <a href="#contact" class="cta">. No other href anywhere.
-2. No nav menu, no nav links, no hamburger.
-3. No <img>, no background-image:url(), no image URL of any kind.
-4. No fixed height on html or body.
-5. Never print a "[TODO: ...]" marker.
-6. Put <!--DS_HERO_VISUAL--> immediately after the hero CTA — an animated SVG
-   is injected there. Do NOT build your own large graphic, panel or showpiece.
-
-## Required shell — use these exact class names
-<header class="ds-header">
-  <span class="ds-mark">1-3 word product-style name you derive from TITLE — never the words "SHORT WORDMARK"</span>
-  <button class="ds-toggle" type="button"></button>
-</header>
-...sections...
-<footer class="ds-footer">one short line</footer>
-The toggle's contents and behaviour are injected — leave the button empty.
-
-## Sections, in order
-1. Hero, centred, inside <div class="ds-narrow">: a mono uppercase eyebrow
-   showing CATEGORY, then h1 = TITLE verbatim, then DESCRIPTION verbatim as a
-   muted lead, then tag chips + reading time, then ONE <a href="#contact"
-   class="cta">CTA named for this subject</a>, then <!--DS_HERO_VISUAL-->.
-   Behind the hero put ONE soft blob: position:absolute, z-index:-1,
-   width:min(420px,70vw), aspect-ratio:1, border-radius:50%,
-   background:radial-gradient(circle,var(--accent),transparent 70%),
-   filter:blur(80px), opacity:.14, pointer-events:none.
-2. A 3-card grid inside <div class="ds-wrap">, one column under 720px. Each
-   card comes from a REAL point in ARTICLE: h3 heading of 2-5 words, then 1-2
-   sentences of its actual substance. Never "Fast"/"Secure"/"Scalable". Each
-   card gets a small inline SVG icon (stroke:currentColor, 20x20, no fill) —
-   never emoji. Cards: background var(--surface), 1px solid var(--border),
-   border-radius 14px, padding 1.5rem; hover translateY(-3px) + border-color
-   var(--accent), transitioned.
-3. A closing band on var(--surface-2) inside <div class="ds-narrow">, centred:
-   an h2 naming this subject and one <a href="#contact" class="cta">CTA</a>.
-
-## Style
-Use ONLY var(--bg), --surface, --surface-2, --border, --text, --muted,
---accent, --accent-2. Never a raw hex, rgb() or hsl().
-Eyebrow: font-family ui-monospace; font-size .8rem; letter-spacing .08em;
-text-transform uppercase; color var(--accent).
-.cta: inline-block; background var(--accent); color #fff; padding .8rem 1.5rem;
-border-radius 10px; font-weight 600; text-decoration none.
-Tag chips: font-size .75rem; padding .25rem .6rem; border-radius 999px;
-border 1px solid var(--border); color var(--muted).
-Keep total CSS tight — layout, header, footer and responsive basics are all
-provided for you.
-
-## Hard rules
-- ONE file: one <style> in <head>, one <script> before </body> (or no script
-  at all — you need none). Zero network requests.
-- Must be unbroken at a 300px viewport: use clamp(), %, grid/flex, and
-  min-width:0 on grid/flex children.
-- <head> must carry: title=TITLE; meta description=DESCRIPTION; keywords=TAGS;
-  author="Adesh Shukla"; robots=index,follow;
-  canonical=https://devstash.me/blog/SLUG; og:type=article + og:title/
-  og:description/og:url; twitter:card=summary_large_image + twitter:title/
-  twitter:description; article:section=CATEGORY + one article:tag per TAG; and
-  a JSON-LD BlogPosting (headline, description, keywords, articleSection,
-  author Person "Adesh Shukla", mainEntityOfPage=canonical) with no image.
-- Semantic landmarks, exactly one h1.
-- Output the complete document, <!doctype html> to </html>. Do not
-  truncate or abbreviate any section.`
-
-      // Groq rejects the request outright with 413 — not a truncation —
-      // when prompt + max_tokens exceeds the 8k-per-minute ceiling. This
-      // prompt has grown twice already and each time silently pushed the
-      // pipeline over, breaking every run. Derive the cap from the actual
-      // prompt so that cannot happen again. ~3.5 chars/token deliberately
-      // OVER-estimates the prompt, which errs toward a smaller, safe cap.
-      const TPM_CEILING = 8000
-      const SAFETY_MARGIN = 500
-      const estimatedPromptTokens = Math.ceil((htmlUserPrompt.length + 400) / 3.5)
-      const htmlMaxTokens = Math.max(
-        2000,
-        Math.min(5200, TPM_CEILING - estimatedPromptTokens - SAFETY_MARGIN)
-      )
-
-      htmlPageResult = await runStep(
+      copyResult = await runStep(
         [
           {
             role: 'system',
             content:
-              'You are a senior product designer who codes. You produce single-file HTML landing pages with the polish of a well-funded startup site — considered typography, a real dark palette, generous space, and motion that feels intentional. You never ship a generic centered-text template. Output ONLY the raw HTML — no markdown fences, no commentary.',
+              'You write landing-page copy from an article. You only restate what the article actually says: no invented statistics, customers, testimonials, prices, guarantees or personal experience. Output only valid JSON.',
           },
           {
             role: 'user',
-            content: htmlUserPrompt,
+            content: `Write the copy for a landing page that presents the article below.
+Return ONLY a JSON object with exactly these keys:
+- brand: a 1-3 word name for the page, derived from the subject. Not "DevStash", not generic ("Solutions", "Hub").
+- heroTitle: a headline of at most 70 characters that states the article's main point plainly.
+- heroLead: one or two sentences, at most 220 characters, saying who this is for and what they get from it.
+- cta: a 2-4 word button label that invites the reader to get in touch about this subject (for example "Talk through your setup").
+- features: exactly 3 objects {"title","body"}, each a different real point from the article. title: 2-6 words. body: one sentence, at most 160 characters.
+- closingTitle: a closing headline of at most 70 characters inviting the reader to talk about this subject.
+- closingLead: one sentence, at most 160 characters.
+
+Write like a person explaining it to a colleague: plain, specific, concrete.
+Never use these phrases: ${AI_TELL_PHRASES.join(', ')}.
+Never use empty claims such as "fast", "secure", "scalable", "seamless", "cutting-edge", "next-level", "unlock".
+Never include any "[TODO ...]" text.
+
+TITLE: ${frontmatter.title}
+DESCRIPTION: ${frontmatter.description}
+SECTIONS: ${sections.join(' | ') || 'none'}
+ARTICLE:
+"""
+${excerpt}
+"""`,
           },
         ],
+        // The 120b model has its own per-minute quota; on the text model this
+        // fourth call would push one run past the shared 8k-tokens ceiling.
         {
+          ...TEXT_STEP_OPTIONS,
+          jsonMode: true,
+          maxTokens: 900,
           modelOverride: 'openai/gpt-oss-120b',
-          // Derived, not hard-coded. Groq rejects a request outright with 413
-          // when prompt + max_tokens exceeds the per-minute ceiling, and this
-          // prompt has grown twice already — each time silently pushing the
-          // pipeline over and breaking every run. Computing the ceiling from
-          // the actual prompt keeps that impossible.
-          maxTokens: htmlMaxTokens,
-          temperature: 0.6,
         }
       )
-      htmlPage = injectRuntimeGuards(stripCodeFence(htmlPageResult.content), humanizeResult.content)
 
-      // If the model hit the token ceiling mid-document the HTML is cut off
-      // mid-tag and renders as a broken fragment. Close it so the preview and
-      // the downloaded file are at least valid, rather than handing back
-      // something that silently looks finished but isn't.
-      const truncated = htmlPageResult.finishReason === 'length' || !/<\/html>\s*$/i.test(htmlPage)
-      if (truncated) {
-        if (!/<\/body>/i.test(htmlPage)) htmlPage += '\n</body>'
-        if (!/<\/html>/i.test(htmlPage)) htmlPage += '\n</html>'
-        htmlPage +=
-          '\n<!-- NOTE: generation hit the token limit and this document was closed automatically. Re-run to get a complete page. -->'
+      let copy: PageCopy
+      try {
+        const validated = PageCopyFromLlmSchema.safeParse(JSON.parse(copyResult.content))
+        copy = validated.success
+          ? normaliseCopy(validated.data)
+          : fallbackCopy(frontmatter, humanizeResult.content)
+      } catch {
+        copy = fallbackCopy(frontmatter, humanizeResult.content)
       }
+
+      htmlVariants = DESIGNS.map((d) => ({
+        id: d.id,
+        name: d.name,
+        blurb: d.blurb,
+        html: renderLandingPage(d.id, copy, frontmatter, humanizeResult.content),
+      }))
+      htmlDesign =
+        design === 'auto' ? DESIGN_IDS[Math.floor(Math.random() * DESIGN_IDS.length)] : design
+      htmlPage = htmlVariants.find((v) => v.id === htmlDesign)?.html ?? htmlVariants[0].html
     }
 
     const metrics: PipelineMetrics = {
@@ -645,19 +477,19 @@ provided for you.
         latencyMs: frontmatterResult.latencyMs,
         provider: frontmatterResult.provider,
       },
-      htmlPage: htmlPageResult
+      htmlPage: copyResult
         ? {
-            promptTokens: htmlPageResult.promptTokens,
-            completionTokens: htmlPageResult.completionTokens,
-            latencyMs: htmlPageResult.latencyMs,
-            provider: htmlPageResult.provider,
+            promptTokens: copyResult.promptTokens,
+            completionTokens: copyResult.completionTokens,
+            latencyMs: copyResult.latencyMs,
+            provider: copyResult.provider,
           }
         : null,
       totalLatencyMs:
         draftResult.latencyMs +
         humanizeResult.latencyMs +
         frontmatterResult.latencyMs +
-        (htmlPageResult?.latencyMs ?? 0),
+        (copyResult?.latencyMs ?? 0),
       aiTellEval: {
         beforeCount: countAiTellPhrases(draftResult.content),
         afterCount: countAiTellPhrases(humanizeResult.content),
@@ -677,6 +509,8 @@ provided for you.
       humanized: humanizeResult.content,
       frontmatter,
       htmlPage,
+      htmlVariants,
+      htmlDesign,
       metrics,
       remainingFreeRuns,
       usedByok: Boolean(userApiKey),

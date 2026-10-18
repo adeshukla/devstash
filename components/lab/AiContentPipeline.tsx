@@ -5,12 +5,22 @@ import { Button, Input } from '@/components/ui'
 import { AiPipelineTour, TOUR_SEEN_KEY } from '@/components/lab/AiPipelineTour'
 import { AiPipelineResults } from '@/components/lab/AiPipelineResults'
 import { trackAndLog, ANALYTICS_EVENTS } from '@/lib/analytics/events'
-import type { PipelineResponse, PipelineTone } from '@/types/aiPipeline'
+import type { PageDesignId, PipelineResponse, PipelineTone } from '@/types/aiPipeline'
 
 const TONE_OPTIONS: { label: string; value: PipelineTone }[] = [
   { label: 'Technical', value: 'technical' },
   { label: 'Conversational', value: 'conversational' },
   { label: 'Tutorial', value: 'tutorial' },
+]
+
+// Mirrors DESIGNS in lib/ai/landingDesigns.ts (server-only, so not imported).
+const DESIGN_OPTIONS: { label: string; value: PageDesignId | 'auto' }[] = [
+  { label: 'Surprise me', value: 'auto' },
+  { label: 'Editorial', value: 'editorial' },
+  { label: 'Product split', value: 'split' },
+  { label: 'Bento grid', value: 'bento' },
+  { label: 'Minimal', value: 'minimal' },
+  { label: 'Bold block', value: 'bold' },
 ]
 
 const LENGTH_OPTIONS = [
@@ -34,7 +44,8 @@ export function AiContentPipeline() {
   const [tone, setTone] = useState<PipelineTone>('technical')
   const [targetLength, setTargetLength] = useState(600)
   const [topicError, setTopicError] = useState<string | undefined>()
-  const [generateHtmlPage, setGenerateHtmlPage] = useState(false)
+  const [generateHtmlPage, setGenerateHtmlPage] = useState(true)
+  const [design, setDesign] = useState<PageDesignId | 'auto'>('auto')
 
   const [capReached, setCapReached] = useState(false)
   const [byokKey, setByokKey] = useState('')
@@ -94,6 +105,7 @@ export function AiContentPipeline() {
           targetLength,
           userApiKey: capReached ? byokKey.trim() : undefined,
           generateHtmlPage,
+          design,
         }),
       })
 
@@ -210,16 +222,36 @@ export function AiContentPipeline() {
           />
           <span>
             <span className="text-ds-text block text-sm font-medium">
-              Also generate a standalone HTML landing page
+              Also build a landing page from it
             </span>
             <span className="text-ds-muted mt-0.5 block text-xs leading-relaxed">
-              Runs a 4th LLM call (extra tokens + latency) to turn this content into a
-              self-contained page — gradient blobs, image placeholders, responsive down to 300px.
-              It&apos;s a scaffold to review and finish, same as the rest of this pipeline&apos;s
-              output, not a production-ready page.
+              A 4th call writes the page copy; the page itself is rendered in five hand-built
+              designs, each carrying the full edited article, responsive down to 300px. You switch
+              between them after the run — no extra calls.
             </span>
           </span>
         </label>
+
+        {generateHtmlPage && (
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="page-design" className="text-ds-text text-[13px] font-medium">
+              Page style to show first
+            </label>
+            <select
+              id="page-design"
+              value={design}
+              onChange={(e) => setDesign(e.target.value as PageDesignId | 'auto')}
+              disabled={isLoading}
+              className={selectClass}
+            >
+              {DESIGN_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {capReached && (
           <div className="border-ds-accent/30 bg-ds-accent/10 flex flex-col gap-3 rounded-lg border p-4">

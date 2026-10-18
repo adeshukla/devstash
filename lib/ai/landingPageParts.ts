@@ -24,7 +24,7 @@ import 'server-only'
  * a visitor can download and open locally, so it is untrusted input to an HTML
  * context and must be escaped before any markup is added back.
  */
-function escapeHtml(input: string): string {
+export function escapeHtml(input: string): string {
   return input
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
