@@ -980,9 +980,6 @@ body {
     transform: scale(0.82);
     animation: labPop 3s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
   }
-  .lab-pulse {
-    animation: pulse2 2.8s ease-in-out infinite;
-  }
 }
 
 /* Static, legible fallbacks so a reduced-motion visitor sees a finished

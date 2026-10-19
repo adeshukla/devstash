@@ -10,7 +10,7 @@ import { LabPreview, type PreviewKind } from '@/components/lab/LabPreview'
 
 const title = 'Lab — Interactive Tools & Live Demos'
 const description =
-  'Things I built and shipped live in the browser: an AI content pipeline, CSS and SVG generators, SEO tooling, and conversion-focused landing-page samples.'
+  'Things I built and shipped live in the browser: an AI content pipeline, CSS and SVG generators, and SEO and marketing tooling.'
 
 export const metadata: Metadata = buildMetadata({
   title,
@@ -74,30 +74,6 @@ const TOOLS: Demo[] = [
   },
 ]
 
-const SAMPLES: Demo[] = [
-  {
-    slug: 'marketing-lead-gen',
-    name: 'Marketing Audit Lead-Gen',
-    blurb: 'A low-friction lead-magnet page for a marketing agency, with a working demo form.',
-    tag: 'Lead-gen',
-    preview: 'page-form',
-  },
-  {
-    slug: 'real-estate-listing',
-    name: 'Real-Estate Listing',
-    blurb: 'A property listing page — sticky inquiry form, key-facts strip, working demo form.',
-    tag: 'Real estate',
-    preview: 'page-listing',
-  },
-  {
-    slug: 'saas-trial-signup',
-    name: 'SaaS Free-Trial Signup',
-    blurb: 'A single-CTA, no-card-required SaaS trial signup page with a working demo form.',
-    tag: 'SaaS',
-    preview: 'page-trial',
-  },
-]
-
 /**
  * An entry leads with its own live output. The preview is the point — it is
  * what separates a lab from a list of links — so it sits above the name rather
@@ -133,7 +109,6 @@ function LabEntry({ demo }: { demo: Demo }) {
 export default function LabPage() {
   return (
     <main>
-      {/* Only the flagship and the real tools: the samples are fictional brands. */}
       <JsonLd
         data={buildItemListSchema(
           [FLAGSHIP, ...TOOLS].map((d) => ({ name: d.name, url: `/lab/${d.slug}` }))
@@ -203,23 +178,6 @@ export default function LabPage() {
           <h2 className="text-ds-text mb-8 text-2xl font-bold tracking-tight">Tools</h2>
           <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2">
             {TOOLS.map((demo) => (
-              <LabEntry key={demo.slug} demo={demo} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-ds-border border-t py-16">
-        <div className="mx-auto max-w-5xl px-6">
-          <h2 className="text-ds-text mb-3 text-2xl font-bold tracking-tight">
-            Landing-page samples
-          </h2>
-          <p className="text-ds-muted mb-8 max-w-[68ch] leading-relaxed">
-            Conversion-focused pages in the style of the 200+ PPC landing pages I&apos;ve shipped
-            for US clients — each one with a working demo form.
-          </p>
-          <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-            {SAMPLES.map((demo) => (
               <LabEntry key={demo.slug} demo={demo} />
             ))}
           </div>

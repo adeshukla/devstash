@@ -120,10 +120,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.4,
   }))
 
-  // The 5 /lab/* pages that are real, working tools (not landing-page
-  // samples) — noIndex was removed from these; the other 3 lab pages stay
-  // deliberately un-indexed and un-listed here (fictional-product demos,
-  // not something worth surfacing in search).
+  // Every /lab/* page is a real, working tool.
   const labToolRoutes: MetadataRoute.Sitemap = [
     'utm-builder',
     'css-shapes-playground',

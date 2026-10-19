@@ -11,15 +11,7 @@
 // All motion is defined in globals.css under the `lab-*` keyframes and is
 // disabled wholesale by the existing prefers-reduced-motion block there.
 
-type PreviewKind =
-  | 'pipeline'
-  | 'shapes'
-  | 'illustration'
-  | 'meta'
-  | 'utm'
-  | 'page-form'
-  | 'page-listing'
-  | 'page-trial'
+type PreviewKind = 'pipeline' | 'shapes' | 'illustration' | 'meta' | 'utm'
 
 const FRAME =
   'relative overflow-hidden rounded-lg border border-ds-border bg-ds-surface2 aspect-[16/9] w-full'
@@ -131,50 +123,6 @@ function Utm() {
   )
 }
 
-/** Landing-page samples: a browser frame with the page's own shape inside. */
-function PageFrame({ kind }: { kind: 'page-form' | 'page-listing' | 'page-trial' }) {
-  return (
-    <div className={FRAME}>
-      <div className="border-ds-border bg-ds-surface absolute inset-x-0 top-0 flex h-5 items-center gap-1 border-b px-2">
-        <span className="bg-ds-border h-1.5 w-1.5 rounded-full" />
-        <span className="bg-ds-border h-1.5 w-1.5 rounded-full" />
-        <span className="bg-ds-border h-1.5 w-1.5 rounded-full" />
-      </div>
-      <div className="absolute inset-x-0 top-5 bottom-0 p-3">
-        {kind === 'page-form' && (
-          <div className="flex h-full gap-2">
-            <div className="flex flex-1 flex-col justify-center gap-1.5">
-              <span className="bg-ds-border h-2 w-4/5 rounded" />
-              <span className="bg-ds-border/60 h-1.5 w-3/5 rounded" />
-            </div>
-            <div className="border-ds-accent/40 bg-ds-bg flex w-2/5 flex-col justify-center gap-1 rounded border p-1.5">
-              <span className="bg-ds-border h-1.5 w-full rounded" />
-              <span className="bg-ds-accent lab-pulse h-2 w-full rounded" />
-            </div>
-          </div>
-        )}
-        {kind === 'page-listing' && (
-          <div className="flex h-full gap-2">
-            <div className="bg-ds-border/40 flex-1 rounded" />
-            <div className="flex w-1/3 flex-col justify-center gap-1">
-              <span className="bg-ds-border h-1.5 w-full rounded" />
-              <span className="bg-ds-border h-1.5 w-2/3 rounded" />
-              <span className="bg-ds-accent lab-pulse h-2 w-full rounded" />
-            </div>
-          </div>
-        )}
-        {kind === 'page-trial' && (
-          <div className="flex h-full flex-col items-center justify-center gap-1.5">
-            <span className="bg-ds-border h-2 w-3/5 rounded" />
-            <span className="bg-ds-border/60 h-1.5 w-2/5 rounded" />
-            <span className="bg-ds-accent lab-pulse mt-1 h-2.5 w-1/3 rounded" />
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
 export function LabPreview({ kind }: { kind: PreviewKind }) {
   switch (kind) {
     case 'pipeline':
@@ -187,8 +135,6 @@ export function LabPreview({ kind }: { kind: PreviewKind }) {
       return <Meta />
     case 'utm':
       return <Utm />
-    default:
-      return <PageFrame kind={kind} />
   }
 }
 

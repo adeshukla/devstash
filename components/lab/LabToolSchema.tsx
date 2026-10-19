@@ -19,11 +19,6 @@ interface LabToolSchemaProps {
  * The /lab page hosts the running tool; /projects/<slug> hosts its case study.
  * Both describe the same thing, so this points `url` at the lab path rather
  * than letting the entity claim it lives on the case-study page.
- *
- * Deliberately NOT used on the landing-page samples (saas-trial-signup,
- * real-estate-listing, marketing-lead-gen): those are fictional brands, and
- * emitting schema for them would assert that Pulse and Maple Court Residences
- * are real organizations.
  */
 export function LabToolSchema({ slug, path, title, description }: LabToolSchemaProps) {
   const project = getProjectBySlug(slug)

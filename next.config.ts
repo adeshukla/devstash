@@ -34,7 +34,13 @@ const nextConfig: NextConfig = {
    */
   async redirects() {
     return [
-      // Add redirects here as routes/slugs change. Empty for now.
+      // Fictional-brand landing-page samples, removed 2026-10. They were noindex
+      // and out of the sitemap; anything still linking to them lands on the Lab.
+      ...['marketing-lead-gen', 'real-estate-listing', 'saas-trial-signup'].map((slug) => ({
+        source: `/lab/${slug}`,
+        destination: '/lab',
+        permanent: true,
+      })),
     ]
   },
 
