@@ -16,6 +16,7 @@ export const ANALYTICS_EVENTS = {
   aiPipelineTourCompleted: 'ai_pipeline_tour_completed',
   exitOfferShown: 'exit_offer_shown',
   exitOfferClicked: 'exit_offer_clicked',
+  videoWatched: 'video_watched',
 } as const
 
 export type AnalyticsEvent = (typeof ANALYTICS_EVENTS)[keyof typeof ANALYTICS_EVENTS]

@@ -16,7 +16,7 @@ export const metadata: Metadata = buildMetadata({
   ogImage: buildOgImageUrl({ title, description, type: 'website' }),
 })
 
-const LAST_UPDATED = '2026-07-19'
+const LAST_UPDATED = '2026-10-22'
 
 export default function PrivacyPage() {
   return (
@@ -68,11 +68,12 @@ export default function PrivacyPage() {
                   </li>
                   <li>
                     <strong className="text-ds-text">Interaction log</strong> — when you view or
-                    download the résumé, submit the contact form, or click an outbound link, we
-                    record the page, the referring page, your browser&apos;s timezone, your device
-                    and browser type, and the IP address the request came from. This is written to
-                    our hosting provider&apos;s server logs rather than a database, and the IP is
-                    used only to derive an approximate, city-level location.
+                    download the résumé, submit the contact form, click an outbound link, or play
+                    the intro video (we also record how many seconds of it you watched), we record
+                    the page, the referring page, your browser&apos;s timezone, your device and
+                    browser type, and the IP address the request came from. This is written to our
+                    hosting provider&apos;s server logs rather than a database, and the IP is used
+                    only to derive an approximate, city-level location.
                   </li>
                   <li>
                     <strong className="text-ds-text">Notification emails</strong> — some of those

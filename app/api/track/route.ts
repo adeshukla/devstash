@@ -45,6 +45,7 @@ const KNOWN_EVENTS = new Set([
   'ai_pipeline_tour_completed',
   'exit_offer_shown',
   'exit_offer_clicked',
+  'video_watched',
 ])
 
 const NOTIFY_EVENTS: Record<string, { icon: string; heading: string }> = {
@@ -54,6 +55,8 @@ const NOTIFY_EVENTS: Record<string, { icon: string; heading: string }> = {
   exit_offer_clicked: { icon: '🎯', heading: 'Exit-offer CTA clicked' },
   ai_pipeline_run: { icon: '🤖', heading: 'AI Content Pipeline demo run' },
   ai_pipeline_tour_completed: { icon: '🧭', heading: 'AI Content Pipeline tour completed' },
+  // Sent once per play (components/ui/IntroVideo.tsx), when the video ends or the visitor leaves.
+  video_watched: { icon: '🎬', heading: 'Intro video watched' },
 }
 
 // Best-effort in-memory de-dupe: the About page alone has two separate
@@ -76,6 +79,13 @@ function shouldNotify(key: string): boolean {
     }
   }
   return true
+}
+
+/** A whole number in [0, max], or undefined — beacon bodies are untrusted. */
+function asCount(value: unknown, max: number): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= max
+    ? Math.round(value)
+    : undefined
 }
 
 function asString(value: unknown): string | undefined {
@@ -106,6 +116,10 @@ export async function POST(request: Request) {
     label: asString(body.label),
     method: asString(body.method),
     referrer: asString(body.referrer),
+    // video_watched only: seconds actually watched, video length, and the share watched.
+    watched: asCount(body.watched, 24 * 3600),
+    duration: asCount(body.duration, 24 * 3600),
+    percent: asCount(body.percent, 100),
     ua: request.headers.get('user-agent') ?? undefined,
     ip,
     at: new Date().toISOString(),
@@ -133,6 +147,14 @@ export async function POST(request: Request) {
           { label: 'When', value: formatOwnerTime(at) },
           ...(visitorTime ? [{ label: "Visitor's local time", value: visitorTime }] : []),
           { label: 'Page', value: entry.path ?? 'Unknown', mono: true },
+          ...(entry.watched !== undefined
+            ? [
+                {
+                  label: 'Watched',
+                  value: `${entry.watched}s${entry.duration ? ` of ${entry.duration}s` : ''}${entry.percent !== undefined ? ` (${entry.percent}%)` : ''}`,
+                },
+              ]
+            : []),
           ...(entry.href
             ? [{ label: 'Link', value: entry.href, href: entry.href, mono: true }]
             : []),
@@ -152,7 +174,7 @@ export async function POST(request: Request) {
           'Automated notification from devstash.me — someone real, not you, triggered this. Location is looked up from the IP address, so it is approximate: mobile networks and VPNs often show a different city.',
       })
       await sendNotification({
-        subject: `${notify.icon} ${notify.heading} — devstash.me`,
+        subject: `${notify.icon} ${notify.heading}${entry.percent !== undefined ? ` (${entry.percent}%)` : ''} — devstash.me`,
         html,
         text,
       })

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
-import { buildPersonSchema } from '@/lib/schema/builders'
+import { buildIntroVideoSchema, buildPersonSchema } from '@/lib/schema/builders'
 import { siteConfig } from '@/content/metadata/site.config'
 import { stack } from '@/lib/site/stack'
 import {
@@ -15,6 +15,7 @@ import {
   PageHeaderGlow,
 } from '@/components/ui'
 import { Icon, type IconName } from '@/components/icons/Icon'
+import { IntroVideo } from '@/components/ui/IntroVideo'
 
 const title = 'About Adesh Shukla — UI Developer'
 const description =
@@ -102,6 +103,7 @@ export default function AboutPage() {
   return (
     <>
       <JsonLd data={buildPersonSchema()} />
+      <JsonLd data={buildIntroVideoSchema()} />
 
       <main>
         {/* ── Hero ── */}
@@ -146,6 +148,22 @@ export default function AboutPage() {
             <MouseParallax strength={12} className="mx-auto w-full max-w-sm lg:mx-0">
               <AboutProfileCard />
             </MouseParallax>
+          </div>
+        </section>
+
+        {/* ── Intro video — click-to-load, so only the poster costs the page anything ── */}
+        <section className="pt-16" aria-labelledby="intro-video-heading">
+          <div className="mx-auto max-w-4xl px-6">
+            <Reveal>
+              <h2 id="intro-video-heading" className="text-ds-text mb-2 text-2xl font-bold">
+                The 80-second version
+              </h2>
+              <p className="text-ds-muted mb-6">
+                What I build, narrated — Pare, Build Components, Praxis, Motion Lab and the AI
+                pipeline.
+              </p>
+              <IntroVideo />
+            </Reveal>
           </div>
         </section>
 

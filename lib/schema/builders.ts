@@ -9,11 +9,13 @@ import type {
   BreadcrumbList,
   FAQPage,
   ItemList,
+  VideoObject,
 } from 'schema-dts'
 import { siteConfig } from '@/content/metadata/site.config'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import type { BreadcrumbItem, FAQItem } from '@/types/seo'
 import type { ProjectCategory } from '@/types/project'
+import { INTRO_VIDEO } from '@/content/metadata/introVideo'
 
 // Stable @id for the author entity, so Person / WebSite / BlogPosting all
 // point at the SAME node instead of describing three unrelated "Adesh Shukla"s.
@@ -271,5 +273,23 @@ export function buildFAQSchema(faqs: FAQItem[]): WithContext<FAQPage> {
         text: answer,
       },
     })),
+  }
+}
+
+// ── VideoObject (the DevStash intro reel) ─────────────────────
+export function buildIntroVideoSchema(): WithContext<VideoObject> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name: INTRO_VIDEO.title,
+    description: INTRO_VIDEO.description,
+    thumbnailUrl: `${siteConfig.url}${INTRO_VIDEO.poster}`,
+    contentUrl: `${siteConfig.url}${INTRO_VIDEO.src}`,
+    uploadDate: INTRO_VIDEO.uploadDate,
+    duration: `PT${Math.floor(INTRO_VIDEO.durationSeconds / 60)}M${INTRO_VIDEO.durationSeconds % 60}S`,
+    width: { '@type': 'QuantitativeValue', value: INTRO_VIDEO.width, unitCode: 'E37' },
+    height: { '@type': 'QuantitativeValue', value: INTRO_VIDEO.height, unitCode: 'E37' },
+    inLanguage: 'en-IN',
+    creator: { '@id': PERSON_ID },
   }
 }

@@ -1,13 +1,14 @@
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { JsonLd } from '@/components/seo/JsonLd'
-import { buildWebSiteSchema, buildPersonSchema } from '@/lib/schema/builders'
+import { buildWebSiteSchema, buildPersonSchema, buildIntroVideoSchema } from '@/lib/schema/builders'
 import { HeroSection } from '@/components/sections/HeroSection'
 import { ProjectsGrid } from '@/components/sections/ProjectsGrid'
 import { FeaturedPosts } from '@/components/sections/FeaturedPosts'
 import { WhatIDoBento } from '@/components/sections/WhatIDoBento'
 import { Reveal, Button, Badge } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
+import { IntroVideo } from '@/components/ui/IntroVideo'
 import { getAllProjects, getFeaturedProjects } from '@/lib/markdown/projects'
 import { getAllPosts, getFeaturedPosts } from '@/lib/markdown/blog'
 
@@ -71,6 +72,7 @@ export default function HomePage() {
     <>
       <JsonLd data={buildWebSiteSchema()} />
       <JsonLd data={buildPersonSchema()} />
+      <JsonLd data={buildIntroVideoSchema()} />
 
       {/* Hero */}
       <HeroSection />
@@ -82,6 +84,25 @@ export default function HomePage() {
 
       {/* Featured projects (preview — links to /projects) — cards reveal individually */}
       <ProjectsGrid projects={projects} />
+
+      {/* The work above, narrated in 80 seconds. Click-to-load: only the poster ships with the page. */}
+      <Reveal>
+        <section className="border-ds-border border-t py-16" aria-labelledby="home-video-heading">
+          <div className="mx-auto max-w-4xl px-6">
+            <p className="text-ds-accent font-mono text-sm">{'// watch'}</p>
+            <h2
+              id="home-video-heading"
+              className="text-ds-text mt-2 text-3xl font-bold tracking-tight sm:text-4xl"
+            >
+              The work, in 80 seconds
+            </h2>
+            <p className="text-ds-muted mt-3 mb-8 leading-relaxed">
+              A narrated tour of the projects above — what each one does and why it was built.
+            </p>
+            <IntroVideo />
+          </div>
+        </section>
+      </Reveal>
 
       {/* Flagship build — the AI Content Pipeline demo, the strongest single proof point */}
       <Reveal>
