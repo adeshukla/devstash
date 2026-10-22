@@ -3,7 +3,8 @@ import { Button, TerminalTyping, HeroGraphic, MouseParallax, MountReveal } from 
 // Server Component — no 'use client'
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden py-16 sm:py-28 lg:py-40">
+    // pt-6 on phones: keeps "View Projects" inside a 375×667 first screen.
+    <section className="relative overflow-hidden pt-6 pb-16 sm:py-28 lg:py-40">
       {/* Subtle grid background */}
       <div
         aria-hidden="true"
@@ -28,7 +29,7 @@ export function HeroSection() {
 
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid gap-10 xl:grid-cols-[1.35fr_1.1fr] xl:items-center xl:gap-16">
-          <div className="flex flex-col gap-4 sm:gap-6">
+          <div className="flex flex-col gap-3 sm:gap-6">
             {/* Terminal typing kicker */}
             <MountReveal>
               <div className="border-ds-border bg-ds-surface/60 inline-flex w-fit items-center rounded-lg border px-3 py-1.5 text-sm backdrop-blur">
@@ -90,12 +91,12 @@ export function HeroSection() {
                   Prettier rewrites the `{' '}` that would fix it straight back
                   into that broken literal space. */}
               <p className="text-ds-muted max-w-2xl text-base leading-relaxed sm:text-lg">
-                I&apos;m Adesh Shukla — a designer-turned-developer, building for the web for{' '}
-                <strong className="text-ds-text font-semibold">6+ years</strong>. Most of that is
+                I&apos;m Adesh Shukla. I started in accounts, got drawn in by UX, and came out an
+                analyst who builds front-ends.{' '}
+                <strong className="text-ds-text font-semibold">6+ years</strong> on the web, mostly
                 landing pages at volume —{' '}
-                <strong className="text-ds-text font-semibold">200+</strong> of them for US clients
-                — plus the CSS, responsive work, accessibility fixes and page-speed cleanup that
-                keeps them working after launch.
+                <strong className="text-ds-text font-semibold">200+</strong> for US clients — plus
+                the accessibility and page-speed work that keeps them working.
               </p>
             </MountReveal>
 

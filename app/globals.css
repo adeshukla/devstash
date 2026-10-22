@@ -564,6 +564,83 @@ body {
   opacity: 0.85;
 }
 
+/* Hero build terminal (components/ui/HeroGraphic.tsx). Plays once: --d on
+   each line is when it starts. Opacity/transform/clip only. Under reduced
+   motion the global rule collapses every animation to its end state (fill
+   `both`), which is the finished build. */
+.build-type {
+  display: inline-block;
+  clip-path: inset(0 100% 0 0);
+  animation: build-type 0.55s steps(10, end) 0.5s both;
+}
+@keyframes build-type {
+  to {
+    clip-path: inset(0);
+  }
+}
+.build-bar {
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: build-bar var(--len) cubic-bezier(0.4, 0, 0.2, 1) var(--d) both;
+}
+@keyframes build-bar {
+  to {
+    transform: scaleX(1);
+  }
+}
+.build-line {
+  animation: build-in 0.35s var(--ds-ease-smooth) var(--d) both;
+}
+@keyframes build-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.build-spin {
+  width: 0.75em;
+  height: 0.75em;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--color-ds-success) 25%, transparent);
+  border-top-color: var(--color-ds-success);
+  animation:
+    build-spin 0.6s linear infinite,
+    build-hide 0.1s linear calc(var(--d) + 0.45s) both;
+}
+@keyframes build-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@keyframes build-hide {
+  to {
+    opacity: 0;
+  }
+}
+.build-tick {
+  animation: build-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--d) + 0.45s) both;
+}
+@keyframes build-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+}
+.build-detail {
+  animation: build-fade 0.3s ease calc(var(--d) + 0.45s) both;
+}
+@keyframes build-fade {
+  from {
+    opacity: 0;
+  }
+}
+.build-status-wip {
+  animation: build-hide 0.2s ease var(--d) both;
+}
+.build-status-ok {
+  animation: build-fade 0.3s ease var(--d) both;
+}
+
 /* Intro-video poster (components/ui/IntroVideo.tsx): a quiet dot grid with
    two soft corner lights, on tokens so it repaints for light theme. Static. */
 .intro-poster {
@@ -674,6 +751,28 @@ body {
 }
 .deck-inner {
   transition: transform 0.85s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+/* Hover lean on the top card (ProjectDeck setTilt) */
+.deck-wob {
+  transform: rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg));
+  transition: transform 0.3s var(--ds-ease-smooth);
+}
+.deck-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    280px circle at var(--gx, 50%) var(--gy, 30%),
+    color-mix(in srgb, var(--brand) 16%, transparent),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.deck-card[data-top]:hover .deck-face::after {
+  opacity: 1;
 }
 .deck-inner[data-flipped] {
   transform: rotateY(180deg);

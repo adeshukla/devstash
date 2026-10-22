@@ -117,10 +117,15 @@ export default function AboutPage() {
               </h1>
               <div className="text-ds-muted mt-4 flex max-w-2xl flex-col gap-3 text-base leading-relaxed sm:mt-6 sm:gap-4 sm:text-lg">
                 <p>
-                  Designer-turned-developer, 6+ years. I take a design and make it real on the web.
-                  Most of my work has been landing pages at volume — CSS, responsive layout, keeping
-                  an older codebase alive, and fixing the accessibility and speed problems that show
-                  up once a page is actually live.
+                  I started in accounts — a CA student, then tax compliance. UX is what pulled me
+                  toward the web: I tried designing in tools like Figma, and what came out was an
+                  analyst and a front-end developer. Someone who checks the numbers, then builds the
+                  page.
+                </p>
+                <p>
+                  6+ years on the web since. Most of it has been landing pages at volume — CSS,
+                  responsive layout, keeping an older codebase alive, and fixing the accessibility
+                  and speed problems that show up once a page is actually live.
                 </p>
                 <p>
                   Currently at Chetu India building landing pages for US clients. Also building{' '}

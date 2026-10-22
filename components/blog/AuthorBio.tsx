@@ -16,7 +16,7 @@ const AUTHORS: Record<
 > = {
   'Adesh Shukla': {
     name: 'Adesh Shukla',
-    bio: 'Frontend developer with a design background. Building DevStash — a developer ecosystem covering automation, AI workflows, and modern frontend systems.',
+    bio: 'Front-end developer who came to the web from accounts, by way of an interest in UX. Building DevStash — a developer ecosystem covering automation, AI workflows, and modern frontend systems.',
     avatar: '/images/avatar.webp',
     github: siteConfig.author.github,
     twitter: siteConfig.author.x,

@@ -158,12 +158,38 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
     drag.current = { x0: e.clientX, y0: e.clientY, dx: 0, dy: 0 }
     e.currentTarget.setPointerCapture(e.pointerId)
     e.currentTarget.dataset.state = 'dragging'
+    setTilt(e.currentTarget)
     setNudging(false)
+  }
+
+  // Mouse hover on the top card: a small lean toward the cursor (±5°/±6°)
+  // plus a faint highlight in the project's colour where the light "hits".
+  // Set on .deck-wob, so it composes with the stack pose and the flip.
+  function setTilt(el: HTMLDivElement, e?: PointerEvent<HTMLDivElement>) {
+    const wob = el.firstElementChild as HTMLElement | null
+    if (!wob) return
+    if (!e) {
+      wob.style.setProperty('--tx', '0deg')
+      wob.style.setProperty('--ty', '0deg')
+      return
+    }
+    const r = el.getBoundingClientRect()
+    const px = (e.clientX - r.left) / r.width
+    const py = (e.clientY - r.top) / r.height
+    wob.style.setProperty('--tx', `${(py - 0.5) * 10}deg`)
+    wob.style.setProperty('--ty', `${(0.5 - px) * 12}deg`)
+    wob.style.setProperty('--gx', `${px * 100}%`)
+    wob.style.setProperty('--gy', `${py * 100}%`)
   }
 
   function onPointerMove(e: PointerEvent<HTMLDivElement>) {
     const d = drag.current
-    if (!d) return
+    if (!d) {
+      if (e.pointerType === 'mouse' && !busy.current && !reducedMotion()) {
+        setTilt(e.currentTarget, e)
+      }
+      return
+    }
     d.dx = e.clientX - d.x0
     d.dy = e.clientY - d.y0
     const el = e.currentTarget
@@ -223,7 +249,11 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
         aria-roledescription="carousel"
         aria-label={label}
         data-nudging={nudging || undefined}
-        onPointerEnter={(e) => e.pointerType === 'mouse' && setFanned(true)}
+        onPointerEnter={(e) => {
+          if (e.pointerType !== 'mouse') return
+          setFanned(true)
+          setNudging(false) // they've found it — the hint's job is done
+        }}
         onPointerLeave={() => !drag.current && setFanned(false)}
       >
         {cards.map((card, i) => {
@@ -260,6 +290,7 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
               onPointerUp={onPointerUp}
               onPointerCancel={onPointerCancel}
               onLostPointerCapture={onPointerCancel}
+              onPointerLeave={(e) => setTilt(e.currentTarget)}
               onKeyDown={onKeyDown}
             >
               <div className="deck-wob">
