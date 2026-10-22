@@ -70,10 +70,27 @@ These are the highest-leverage upgrades, in order:
 4. **Add real social proof** once available (a quote, a shipped product, metrics).
 5. **A/B the hero CTA** later via GA4 (`view_projects` vs `contact`).
 
+## Design decision: one card interaction per page (2026-10-23)
+
+The site read as AI-template work (animated blue→purple gradients everywhere,
+the same tilt+glow on every card). Instead of a site-wide design switcher —
+rejected: most visitors never touch it, it reads as indecision, and it triples
+QA — each page gets **one signature card interaction**, all on the same tokens:
+
+| Page                    | Interaction                                                      | Status  |
+| ----------------------- | ---------------------------------------------------------------- | ------- |
+| Home — Projects section | **The Stash**: a deck; drag to throw a card back, tap to flip it | Built   |
+| `/projects` grid        | **Exploded view**: hover pulls a card apart into labelled layers | Not yet |
+| `/lab` hub              | **Elastic panels**: one demo open, the rest shrink to spines     | Not yet |
+
+The hero `<h1>` stays a plain server-rendered heading (LCP). A Lab page that
+compares all of them side by side is the one place a switcher belongs.
+
 ## Files
 
 - `app/(main)/page.tsx` — the home page (composes the sections below).
-- `components/sections/HeroSection.tsx`, `ProjectsGrid.tsx`, `FeaturedPosts.tsx`.
+- `components/sections/HeroSection.tsx`, `ProjectDeckSection.tsx`, `FeaturedPosts.tsx`.
+- `components/ui/ProjectDeck.tsx` — the deck's drag/flip/keyboard logic (client).
 
 > The old coming-soon page was **deleted** once this home page went live (it was
 > redundant and posted to a placeholder form). It's recoverable from git history

@@ -13,7 +13,7 @@ import type { Project } from '@/types/project'
 // than let next/image 400 on a missing file, or silently drop the image slot
 // entirely, check for the real file at render time (Server Component, cheap)
 // and fall back to a category illustration when it's not there.
-function hasRealImage(imagePath: string | undefined): imagePath is string {
+export function hasRealImage(imagePath: string | undefined): imagePath is string {
   if (!imagePath) return false
   const abs = path.join(process.cwd(), 'public', imagePath.replace(/^\//, ''))
   return fs.existsSync(abs)
@@ -25,7 +25,7 @@ interface ProjectsGridProps {
   showAll?: boolean
 }
 
-const statusConfig = {
+export const statusConfig = {
   live: { variant: 'green', label: 'Live' },
   wip: { variant: 'warn', label: 'WIP' },
   archived: { variant: 'muted', label: 'Archived' },

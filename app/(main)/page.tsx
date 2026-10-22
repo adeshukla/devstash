@@ -3,7 +3,7 @@ import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildWebSiteSchema, buildPersonSchema, buildIntroVideoSchema } from '@/lib/schema/builders'
 import { HeroSection } from '@/components/sections/HeroSection'
-import { ProjectsGrid } from '@/components/sections/ProjectsGrid'
+import { ProjectDeckSection } from '@/components/sections/ProjectDeckSection'
 import { FeaturedPosts } from '@/components/sections/FeaturedPosts'
 import { WhatIDoBento } from '@/components/sections/WhatIDoBento'
 import { Reveal, Button, Badge } from '@/components/ui'
@@ -82,8 +82,8 @@ export default function HomePage() {
         <WhatIDoBento />
       </Reveal>
 
-      {/* Featured projects (preview — links to /projects) — cards reveal individually */}
-      <ProjectsGrid projects={projects} />
+      {/* Featured projects as a draggable, flippable deck (links to /projects) */}
+      <ProjectDeckSection projects={projects} />
 
       {/* The work above, narrated in 80 seconds. Click-to-load: only the poster ships with the page. */}
       <Reveal>
