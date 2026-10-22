@@ -4,7 +4,6 @@ import { siteConfig } from '@/content/metadata/site.config'
 import { LogoMark } from '@/components/ui/LogoMark'
 import { Icon } from '@/components/icons/Icon'
 import type { IconName } from '@/components/icons/Icon'
-import { FooterDeskScene } from './FooterDeskScene'
 
 const navLinks = [
   { label: 'Home', href: '/' },
@@ -185,13 +184,8 @@ export function Footer() {
           </div>
         </div>
 
-        {/* The desk scene stands on the bottom row's border, which is its floor */}
-        <div className="mt-10 flex justify-center md:justify-end">
-          <FooterDeskScene />
-        </div>
-
         {/* Bottom row */}
-        <div className="border-ds-border flex flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="border-ds-border mt-12 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-ds-muted font-mono text-[12px]">
             © {year} {siteConfig.name} · crafted with <CoffeeCup /> in Ghaziabad
           </p>
