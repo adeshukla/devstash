@@ -60,7 +60,7 @@ export function HeroSection() {
                   <span className="bg-ds-success relative inline-flex h-2 w-2 rounded-full" />
                 </span>
                 <span className="text-ds-muted font-mono text-sm">
-                  Available for frontend roles · Noida / Gurugram · Remote/Hybrid
+                  Available for frontend roles · Anywhere in India · Remote/Hybrid
                 </span>
               </div>
             </MountReveal>

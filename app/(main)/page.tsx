@@ -23,7 +23,7 @@ import { getAllPosts, getFeaturedPosts } from '@/lib/markdown/blog'
 export const metadata: Metadata = buildMetadata({
   title: 'Adesh Shukla — UI Developer: Landing Pages & Web Performance',
   description:
-    'UI developer, 6+ years. 200+ PPC landing pages for US clients — CSS, responsive layout, accessibility and page-speed fixes. Based in NCR, open to roles.',
+    'UI developer, 6+ years. 200+ PPC landing pages for US clients — CSS, responsive layout, accessibility and page-speed fixes. Open to roles in India or remote.',
 })
 
 // ─── Flagship build — the AI Content Pipeline demo (/lab/ai-content-pipeline):

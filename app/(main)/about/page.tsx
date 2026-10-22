@@ -92,7 +92,7 @@ const CURRENTLY: { icon: IconName; text: string }[] = [
   { icon: 'automation', text: 'Automating workflows with n8n and local LLMs (Ollama)' },
   {
     icon: 'career',
-    text: 'Open to frontend roles · Noida / Gurugram · immediate–20 days notice',
+    text: 'Open to frontend roles · anywhere in India or remote/hybrid · immediate–20 days notice',
   },
   // TODO: Keep this section updated
 ]

@@ -18,7 +18,7 @@ const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
 
 const title = 'Contact Adesh Shukla — Frontend Developer'
 const description =
-  'Get in touch with Adesh Shukla about frontend roles, freelance projects, or collaboration. Based in Ghaziabad and open to Noida / Gurugram and remote/hybrid.'
+  'Get in touch with Adesh Shukla about frontend roles, freelance projects, or collaboration. Based in Ghaziabad, open to roles anywhere in India or remote.'
 
 export const metadata: Metadata = buildMetadata({
   title,
@@ -81,8 +81,8 @@ export default function ContactPage() {
             Get in touch
           </h1>
           <p className="text-ds-muted mt-3 max-w-lg">
-            Open to frontend roles in Noida / Gurugram, freelance projects, or just a chat about
-            code, automation, or bikes.
+            Open to frontend roles anywhere in India — on-site, hybrid or remote — freelance
+            projects, or just a chat about code, automation, or bikes.
           </p>
         </div>
       </section>
@@ -116,7 +116,7 @@ export default function ContactPage() {
                     Location
                   </h2>
                   <p className="text-ds-muted text-sm">
-                    Ghaziabad, UP — open to Noida / Gurugram roles and remote/hybrid.
+                    Ghaziabad, UP — open to roles anywhere in India: on-site, hybrid or remote.
                   </p>
                 </div>
 

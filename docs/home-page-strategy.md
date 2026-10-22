@@ -27,7 +27,7 @@ credibility → next step.
 ## The structure (top to bottom) and why
 
 1. **Hero** (`HeroSection`)
-   - Availability pill ("Available for frontend roles · Noida / Delhi NCR") —
+   - Availability pill ("Available for frontend roles · Anywhere in India · Remote/Hybrid") —
      the single most important signal for recruiters, above the fold.
    - One-line value proposition + a focused sub-line (React/Next.js/automation).
    - Two primary CTAs: **View Projects** (proof) and **Get in Touch** (convert).

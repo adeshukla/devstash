@@ -29,6 +29,42 @@ const socialLinks: { label: string; href: string; icon: IconName }[] = [
   { label: 'Twitter / X', href: siteConfig.author.x, icon: 'x' },
 ]
 
+// A hot cup with steam rising (the old ☕ emoji rendered differently on every
+// OS and sat too small in this 12px line). Drawn on tokens so it repaints for
+// light theme; the steam is CSS (.coffee-steam in globals.css), transform +
+// opacity only, and stands still under reduced motion.
+function CoffeeCup() {
+  return (
+    <svg
+      viewBox="0 0 24 26"
+      role="img"
+      aria-label="coffee"
+      className="mx-0.5 inline-block h-[22px] w-[20px] -translate-y-[3px] align-middle"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <g className="coffee-steam stroke-ds-muted" strokeWidth="1.7">
+        <path d="M7.5 9.5c-1.4-1.5 1.4-2.5 0-4s1.4-2.3 0-3.6" />
+        <path d="M11.5 9.5c-1.4-1.5 1.4-2.5 0-4s1.4-2.3 0-3.6" />
+        <path d="M15.5 9.5c-1.4-1.5 1.4-2.5 0-4s1.4-2.3 0-3.6" />
+      </g>
+      <path
+        d="M4 11.5h13.5v4.5a5 5 0 0 1-5 5h-3.5a5 5 0 0 1-5-5z"
+        className="fill-ds-surface2 stroke-ds-text"
+        strokeWidth="1.5"
+      />
+      <path d="M5.5 13.3h10.5" className="stroke-ds-warning" strokeWidth="1.6" />
+      <path
+        d="M17.5 13h1.3a2.6 2.6 0 0 1 0 5.2h-1.6"
+        className="stroke-ds-text"
+        strokeWidth="1.5"
+      />
+      <path d="M2.5 24h18.5" className="stroke-ds-text" strokeWidth="1.5" />
+    </svg>
+  )
+}
+
 export function Footer() {
   const year = new Date().getFullYear()
 
@@ -151,7 +187,7 @@ export function Footer() {
         {/* Bottom row */}
         <div className="border-ds-border mt-12 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-ds-muted font-mono text-[12px]">
-            © {year} {siteConfig.name} · crafted with ☕ in Ghaziabad
+            © {year} {siteConfig.name} · crafted with <CoffeeCup /> in Ghaziabad
           </p>
           <nav aria-label="Legal links">
             <ul className="m-0 flex list-none gap-4 p-0">
