@@ -590,24 +590,56 @@ body {
 /* Project deck (home Projects section — components/ui/ProjectDeck.tsx).
    Each card's pose comes from --x/--y/--r/--s, written by the component;
    data-state switches the transition: none while dragging (follows the
-   pointer 1:1), a quick ease-in while being thrown off, spring otherwise.
-   Transform/opacity only, so it never repaints or shifts layout. */
+   pointer 1:1), a quick ease-out while tucking out beside the stack,
+   spring otherwise. Transform only, so it never repaints or shifts layout. */
+@property --active-brand {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+/* Ambient light in the top card's brand colour, cross-fading as the stack
+   turns over — the whole section takes on the project in front. */
+.deck-stage {
+  position: relative;
+  isolation: isolate;
+  transition: --active-brand 0.9s ease;
+}
+.deck-stage::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 46%;
+  width: min(760px, 160vw);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--active-brand) 34%, transparent),
+    color-mix(in srgb, var(--active-brand) 10%, transparent) 55%,
+    transparent
+  );
+  pointer-events: none;
+}
+[data-theme='light'] .deck-stage::before {
+  opacity: 0.7;
+}
 .deck {
   position: relative;
-  height: 540px;
+  height: 520px;
 }
 .deck-card {
   --w: min(360px, 84vw);
+  --h: 440px;
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 54%;
   width: var(--w);
-  height: 470px;
-  margin: -235px 0 0 calc(var(--w) / -2);
+  height: var(--h);
+  margin: calc(var(--h) / -2) 0 0 calc(var(--w) / -2);
   transform: translate(var(--x, 0px), var(--y, 0px)) rotate(var(--r, 0deg)) scale(var(--s, 1));
-  transition:
-    transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity 0.4s ease;
+  transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1);
   perspective: 1400px;
   touch-action: pan-y;
   user-select: none;
@@ -616,15 +648,25 @@ body {
 .deck-card:not([data-top]) {
   pointer-events: none;
 }
-.deck-card[data-buried] {
-  opacity: 0;
-}
 .deck-card[data-state='dragging'] {
   transition: none;
   cursor: grabbing;
 }
-.deck-card[data-state='flying'] {
-  transition: transform 0.28s cubic-bezier(0.5, 0, 0.75, 0);
+.deck-card[data-state='tucking'] {
+  transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* A wash of the project's colour rising from the bottom of the artwork, so
+   the logo sitting on its edge reads as part of the same object. */
+.deck-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--brand) 38%, transparent),
+    color-mix(in srgb, var(--brand) 6%, transparent) 70%
+  );
+  pointer-events: none;
 }
 .deck-wob,
 .deck-inner {
@@ -663,28 +705,34 @@ body {
   overflow: hidden;
   padding: 16px;
   border-radius: 20px;
-  border: 1px solid color-mix(in srgb, var(--brand) 35%, var(--color-ds-border2));
-  background: var(--color-ds-surface);
+  border: 1px solid color-mix(in srgb, var(--brand) 40%, var(--color-ds-border2));
+  /* Each card's body is faintly its project's colour, so even the cards
+     behind read as different products, not six copies. */
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--brand) 12%, var(--color-ds-surface)),
+    var(--color-ds-surface) 55%
+  );
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   box-shadow: 0 30px 60px -28px rgb(0 0 0 / 0.55);
-  transition: box-shadow 0.5s ease;
+  transition:
+    box-shadow 0.5s ease,
+    border-color 0.5s ease;
 }
-/* --brand is each project's own colour (components/icons/ProjectMark.tsx):
-   a top bar on every card, and a glow in that colour on the one on top —
-   so the stack reads as six different products, not six copies. */
+/* --brand is each project's own colour (components/icons/ProjectMark.tsx). */
 .deck-face::before {
   content: '';
   position: absolute;
-  inset: 0 22px auto;
-  height: 3px;
-  border-radius: 0 0 3px 3px;
+  inset: 0 0 auto;
+  height: 4px;
   background: var(--brand);
 }
 .deck-card[data-top] .deck-face {
+  border-color: color-mix(in srgb, var(--brand) 65%, var(--color-ds-border2));
   box-shadow:
     0 30px 60px -28px rgb(0 0 0 / 0.55),
-    0 0 70px -18px color-mix(in srgb, var(--brand) 55%, transparent);
+    0 0 80px -16px color-mix(in srgb, var(--brand) 60%, transparent);
 }
 .deck-back {
   transform: rotateY(180deg);

@@ -27,26 +27,33 @@ interface ProjectDeckProps {
   label: string
 }
 
-// [x, y, rotate, scale] per stack position. Cards deeper than the last row
-// wait under it, hidden (data-buried), so 6 cards still read as one tidy stack.
+// [x, y, rotate, scale] per stack position. Every card stays visible — the
+// one sent to the back has to be seen landing there, or it just vanishes.
+// Decks with more cards than poses reuse the last one.
 type Pose = readonly [number, number, number, number]
 const REST: readonly Pose[] = [
   [0, 0, 0, 1],
-  [18, -14, 5, 0.95],
-  [-14, -26, -6, 0.91],
-  [6, -38, 3, 0.87],
+  [16, -12, 4, 0.96],
+  [-13, -22, -5, 0.92],
+  [9, -31, 3, 0.88],
+  [-7, -39, -3, 0.84],
+  [0, -46, 1, 0.8],
 ]
 // Fanned out while a mouse is over the deck. x is scaled down on narrow decks.
 const FAN: readonly Pose[] = [
   [0, -12, 0, 1.03],
   [-170, 14, -11, 0.9],
   [170, 14, 11, 0.9],
-  [0, -44, 0, 0.82],
+  [-95, -26, -6, 0.84],
+  [95, -26, 6, 0.84],
+  [0, -46, 0, 0.8],
 ]
-const VISIBLE = REST.length
-const THROW_PX = 110 // drag further than this and the card is thrown to the back
+const THROW_PX = 90 // drag further than this and the card goes to the back
 const TAP_PX = 6 // moved less than this = a tap, which flips the card
-const FLY_MS = 280
+// A move is two beats: the card slides out to the side (TUCK_MS), then the
+// stack re-orders and it springs into its new place — behind the others for
+// Next, in front of them for Back. That's what reads as "tucked under".
+const TUCK_MS = 260
 
 function reducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -75,6 +82,7 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([])
   const drag = useRef<{ x0: number; y0: number; dx: number; dy: number } | null>(null)
   const focusTopAfterMove = useRef(false)
+  const busy = useRef(false)
 
   const layout = useCallback(() => {
     const deck = deckRef.current
@@ -84,7 +92,7 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
     order.forEach((ci, pos) => {
       const el = cardRefs.current[ci]
       if (!el) return
-      const [x, y, r, s] = poses[Math.min(pos, VISIBLE - 1)]
+      const [x, y, r, s] = poses[Math.min(pos, poses.length - 1)]
       el.dataset.state = ''
       el.style.setProperty('--x', `${x * k}px`)
       el.style.setProperty('--y', `${y}px`)
@@ -107,25 +115,37 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
     return () => window.removeEventListener('resize', layout)
   }, [layout])
 
-  const advance = () => {
-    setFlipped(false)
-    setOrder((o) => [...o.slice(1), o[0]])
+  // Slide `el` out beside the stack, then run `reorder` once it's clear.
+  function tuck(el: HTMLDivElement | null | undefined, dir: 1 | -1, reorder: () => void) {
+    setNudging(false)
+    if (busy.current) return
+    if (!el || reducedMotion()) return reorder()
+    busy.current = true
+    const out = Math.min(el.offsetWidth * 0.82, (deckRef.current?.clientWidth ?? 400) * 0.5)
+    el.dataset.state = 'tucking'
+    el.style.setProperty('--x', `${dir * out}px`)
+    el.style.setProperty('--y', '-24px')
+    el.style.setProperty('--r', `${dir * 12}deg`)
+    window.setTimeout(() => {
+      busy.current = false
+      reorder()
+    }, TUCK_MS)
   }
 
+  // Top card out to the side, then under the stack.
   function next(dir: 1 | -1 = 1) {
-    setNudging(false)
-    const el = cardRefs.current[order[0]]
-    if (!el || reducedMotion()) return advance()
-    el.dataset.state = 'flying'
-    el.style.setProperty('--x', `${dir * Math.max(560, window.innerWidth * 0.6)}px`)
-    el.style.setProperty('--r', `${dir * 26}deg`)
-    window.setTimeout(advance, FLY_MS)
+    tuck(cardRefs.current[order[0]], dir, () => {
+      setFlipped(false)
+      setOrder((o) => [...o.slice(1), o[0]])
+    })
   }
 
+  // Bottom card out from behind the stack, then on top of it.
   function prev() {
-    setNudging(false)
-    setFlipped(false)
-    setOrder((o) => [o[o.length - 1], ...o.slice(0, -1)])
+    tuck(cardRefs.current[order[n - 1]], -1, () => {
+      setFlipped(false)
+      setOrder((o) => [o[o.length - 1], ...o.slice(0, -1)])
+    })
   }
 
   function flip() {
@@ -134,7 +154,7 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
   }
 
   function onPointerDown(e: PointerEvent<HTMLDivElement>) {
-    if (e.button !== 0 || (e.target as HTMLElement).closest('a, button')) return
+    if (busy.current || e.button !== 0 || (e.target as HTMLElement).closest('a, button')) return
     drag.current = { x0: e.clientX, y0: e.clientY, dx: 0, dy: 0 }
     e.currentTarget.setPointerCapture(e.pointerId)
     e.currentTarget.dataset.state = 'dragging'
@@ -193,7 +213,9 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
   const top = cards[order[0]]
 
   return (
-    <div>
+    // --active-brand drives the ambient light behind the stack; it's a
+    // registered colour (globals.css) so it cross-fades between projects.
+    <div className="deck-stage" style={{ '--active-brand': top.brandColor } as CSSProperties}>
       <div
         ref={deckRef}
         className="deck"
@@ -207,7 +229,7 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
         {cards.map((card, i) => {
           const pos = order.indexOf(i)
           const isTop = pos === 0
-          const [x, y, r, s] = REST[Math.min(i, VISIBLE - 1)]
+          const [x, y, r, s] = REST[Math.min(i, REST.length - 1)]
           return (
             <div
               key={card.slug}
@@ -233,7 +255,6 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
               tabIndex={isTop ? 0 : -1}
               inert={!isTop}
               data-top={isTop || undefined}
-              data-buried={pos >= VISIBLE || undefined}
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}

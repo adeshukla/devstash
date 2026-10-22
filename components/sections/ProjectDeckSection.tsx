@@ -48,11 +48,20 @@ function Mark({ slug, className }: { slug: string; className: string }) {
   )
 }
 
+// "Pare — Asset Optimization That Runs in the Browser" → name + tagline, so the
+// card leads with a short name instead of a title that wraps to four lines on
+// a phone. Titles without " — " are all name.
+function splitTitle(title: string) {
+  const [name, ...rest] = title.split(' — ')
+  return { name, tagline: rest.join(' — ') }
+}
+
 function Front({ project }: { project: Project }) {
   const status = statusConfig[project.status] ?? statusConfig.archived
+  const { name, tagline } = splitTitle(project.title)
   return (
     <>
-      <div className="border-ds-border relative h-36 shrink-0 overflow-hidden rounded-xl border">
+      <div className="deck-art border-ds-border relative h-36 shrink-0 overflow-hidden rounded-xl border">
         {hasRealImage(project.image) ? (
           <Image
             src={project.image}
@@ -79,10 +88,9 @@ function Front({ project }: { project: Project }) {
           {project.year && <span className="text-ds-muted font-mono text-xs">{project.year}</span>}
         </div>
       </div>
-      <h3 className="text-ds-text mt-3 text-xl leading-tight font-bold tracking-tight">
-        {project.title}
-      </h3>
-      <p className="text-ds-muted mt-2 line-clamp-3 text-sm leading-relaxed">
+      <h3 className="text-ds-text mt-3 text-2xl leading-tight font-bold tracking-tight">{name}</h3>
+      {tagline && <p className="text-ds-text mt-1 text-sm font-medium">{tagline}</p>}
+      <p className="text-ds-muted mt-2 line-clamp-2 text-sm leading-relaxed">
         {project.description}
       </p>
       <p className="text-ds-muted mt-2 font-mono text-[11px]" aria-hidden="true">
@@ -100,7 +108,7 @@ function Back({ project }: { project: Project }) {
       <div className="mt-2 flex items-center gap-3">
         <Mark slug={project.slug} className="h-8 w-8 overflow-hidden rounded-[9px]" />
         <p className="text-ds-text text-lg leading-tight font-bold tracking-tight">
-          {project.title}
+          {splitTitle(project.title).name}
         </p>
       </div>
       <ul className="mt-3 flex flex-col gap-2">
