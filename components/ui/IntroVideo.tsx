@@ -1,12 +1,12 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
 import { INTRO_VIDEO } from '@/content/metadata/introVideo'
+import { LogoMark } from './LogoMark'
 import { ANALYTICS_EVENTS, trackAndLog } from '@/lib/analytics/events'
 
 /**
- * Click-to-load player: only the poster image ships with the page. The <video> element — and with
+ * Click-to-load player: only a markup poster ships with the page. The <video> element — and with
  * it the 4 MB file — is created when the visitor presses play, so the video never costs a page
  * load anything.
  *
@@ -86,13 +86,30 @@ export function IntroVideo() {
           className="group focus-visible:ring-ds-accent absolute inset-0 cursor-pointer focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
           aria-label={`Play video: ${INTRO_VIDEO.title} (1 minute 21 seconds, with sound and captions)`}
         >
-          <Image
-            src={INTRO_VIDEO.poster}
-            alt=""
-            fill
-            sizes="(min-width: 1024px) 896px, 100vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-          />
+          {/* The video's opening frame, rebuilt as markup on the theme tokens
+              so it follows light/dark — the JPG poster is dark-only. Sizes are
+              in cqw (container width) so it scales like an image would. The
+              JPG still serves as <video poster> and the schema thumbnail. */}
+          <span
+            aria-hidden="true"
+            className="intro-poster [container-type:inline-size] absolute inset-0 grid place-items-center transition-transform duration-500 group-hover:scale-[1.02]"
+          >
+            <span className="flex -translate-y-[6%] flex-col items-center gap-[3.5cqw]">
+              <span className="flex items-center gap-[3cqw]">
+                <span className="shadow-ds-accent/40 block aspect-square w-[12cqw] rounded-[22%] shadow-[0_0_6cqw_-1cqw] [&>svg]:h-full [&>svg]:w-full">
+                  <LogoMark />
+                </span>
+                <span className="text-ds-text text-[10cqw] leading-none font-bold tracking-[-0.04em]">
+                  <span className="text-ds-accent">Dev</span>Stash
+                </span>
+              </span>
+              <span className="text-ds-text flex items-center gap-[1cqw] text-[2.3cqw] font-medium">
+                Adesh Shukla
+                <span className="text-ds-accent">•</span>
+                <span className="text-ds-muted font-mono font-normal">UI Developer · India</span>
+              </span>
+            </span>
+          </span>
           {/* Sits in the poster's empty lower band, clear of the wordmark. */}
           <span className="absolute inset-x-0 bottom-[5%] flex justify-center sm:bottom-[9%]">
             {/* Solid surface pill, blue only on the play disc: text on the old

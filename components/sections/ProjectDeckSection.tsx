@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { Badge, Button, Reveal } from '@/components/ui'
 import { ProjectDeck, type DeckCard } from '@/components/ui/ProjectDeck'
 import { Icon } from '@/components/icons/Icon'
+import { projectBrand } from '@/components/icons/ProjectMark'
 import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
 import { hasRealImage, statusConfig } from '@/components/sections/ProjectsGrid'
 import type { Project } from '@/types/project'
@@ -38,11 +39,20 @@ function ProjectLinks({ project }: { project: Project }) {
   )
 }
 
+function Mark({ slug, className }: { slug: string; className: string }) {
+  const { Mark: BrandMark } = projectBrand(slug)
+  return (
+    <span className={`block shrink-0 [&>svg]:h-full [&>svg]:w-full ${className}`}>
+      <BrandMark />
+    </span>
+  )
+}
+
 function Front({ project }: { project: Project }) {
   const status = statusConfig[project.status] ?? statusConfig.archived
   return (
     <>
-      <div className="border-ds-border relative h-40 shrink-0 overflow-hidden rounded-xl border">
+      <div className="border-ds-border relative h-36 shrink-0 overflow-hidden rounded-xl border">
         {hasRealImage(project.image) ? (
           <Image
             src={project.image}
@@ -56,11 +66,18 @@ function Front({ project }: { project: Project }) {
           <CategoryIllustration category={project.category} kind="project" seed={project.slug} />
         )}
       </div>
-      <div className="mt-4 flex items-center justify-between">
-        <Badge variant={status.variant} dot>
-          {status.label}
-        </Badge>
-        {project.year && <span className="text-ds-muted font-mono text-xs">{project.year}</span>}
+      {/* The project's own logo, overlapping the artwork like an app icon */}
+      <div className="relative z-10 -mt-6 flex items-end justify-between pr-1 pl-3">
+        <Mark
+          slug={project.slug}
+          className="ring-ds-surface h-12 w-12 overflow-hidden rounded-[13px] ring-4"
+        />
+        <div className="flex items-center gap-3">
+          <Badge variant={status.variant} dot>
+            {status.label}
+          </Badge>
+          {project.year && <span className="text-ds-muted font-mono text-xs">{project.year}</span>}
+        </div>
       </div>
       <h3 className="text-ds-text mt-3 text-xl leading-tight font-bold tracking-tight">
         {project.title}
@@ -80,9 +97,12 @@ function Back({ project }: { project: Project }) {
   return (
     <>
       <p className="text-ds-muted font-mono text-[11px] tracking-widest uppercase">Spec sheet</p>
-      <p className="text-ds-text mt-2 text-lg leading-tight font-bold tracking-tight">
-        {project.title}
-      </p>
+      <div className="mt-2 flex items-center gap-3">
+        <Mark slug={project.slug} className="h-8 w-8 overflow-hidden rounded-[9px]" />
+        <p className="text-ds-text text-lg leading-tight font-bold tracking-tight">
+          {project.title}
+        </p>
+      </div>
       <ul className="mt-3 flex flex-col gap-2">
         {project.highlights.slice(0, 3).map((h) => (
           <li key={h} className="text-ds-muted flex gap-2 text-sm leading-snug">
@@ -115,6 +135,7 @@ export function ProjectDeckSection({ projects }: { projects: Project[] }) {
   const cards: DeckCard[] = projects.map((project) => ({
     slug: project.slug,
     title: project.title,
+    brandColor: projectBrand(project.slug).color,
     front: <Front project={project} />,
     back: <Back project={project} />,
   }))

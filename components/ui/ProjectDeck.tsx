@@ -16,6 +16,8 @@ import { Button } from './Button'
 export interface DeckCard {
   slug: string
   title: string
+  /** The project's own colour — tints the card's edge, top bar and glow */
+  brandColor: string
   front: ReactNode
   back: ReactNode
 }
@@ -221,6 +223,7 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
                   '--y': `${y}px`,
                   '--r': `${r}deg`,
                   '--s': s,
+                  '--brand': card.brandColor,
                   zIndex: n - i,
                 } as CSSProperties
               }
