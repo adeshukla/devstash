@@ -75,7 +75,7 @@ export function HeroSection() {
                 the headline just doesn't wait its turn. */}
             <h1 className="text-ds-text text-4xl leading-tight font-bold tracking-tight sm:text-5xl">
               Web interfaces that ship —{' '}
-              <span className="text-gradient-animate">fast, accessible, built to last.</span>
+              <span className="text-gradient">fast, accessible, built to last.</span>
             </h1>
 
             {/* Sub-copy */}

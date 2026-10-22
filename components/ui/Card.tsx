@@ -17,13 +17,13 @@ interface CardProps {
 // card real edge definition instead of relying solely on the border token,
 // which is too close to the surface color to read as a boundary on its own —
 // especially in light mode where border + surface + bg sit close together.
-// Every variant uses the animated accent→purple gradient border
-// (.gradient-border-animated in globals.css) instead of a flat border color.
+// Flat border on purpose: an animated gradient border on every card read as
+// AI-template styling and repainted every frame.
 const variantStyles: Record<CardVariant, string> = {
-  default: 'bg-ds-surface gradient-border-animated shadow-sm',
-  hover: ['bg-ds-surface gradient-border-animated shadow-sm', 'card-glow cursor-pointer'].join(' '),
+  default: 'bg-ds-surface border-ds-border border shadow-sm',
+  hover: ['bg-ds-surface border-ds-border border shadow-sm', 'card-glow cursor-pointer'].join(' '),
   accent: [
-    'bg-ds-surface gradient-border-animated shadow-sm',
+    'bg-ds-surface border-ds-border border shadow-sm',
     'shadow-[0_0_0_1px] shadow-ds-accent/5',
   ].join(' '),
   // No border/animated gradient at rest — a cursor-tracked radial glow

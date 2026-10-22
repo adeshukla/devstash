@@ -147,7 +147,7 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
           <article
             key={t.linkedinUrl + t.name}
             data-testimonial-card
-            className="border-ds-border bg-ds-surface gradient-border-animated flex w-[85vw] shrink-0 flex-col gap-6 rounded-2xl border p-7 shadow-sm select-none sm:w-[400px]"
+            className="border-ds-border bg-ds-surface flex w-[85vw] shrink-0 flex-col gap-6 rounded-2xl border p-7 shadow-sm select-none sm:w-[400px]"
           >
             <svg
               viewBox="0 0 24 24"

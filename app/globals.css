@@ -389,16 +389,11 @@ body {
 }
 
 /* Aurora background blob */
-/* NOTE on the infinite animations below (.animate-aurora, .text-gradient-animate,
-   .animate-float, .gradient-border-animated): these are decorative and, in the
-   case of the gradient ones, animate `background-position` — a PAINT-triggering
-   property that is NOT GPU-composited, so it repaints on the main thread every
-   frame. On the homepage `.gradient-border-animated` alone runs on 10+ cards at
-   once. On a throttled mobile CPU that constant repaint inflates LCP (the hero
-   H1 uses .text-gradient-animate and never "settles") and Speed Index. So the
-   BASE rules render a STATIC gradient (still on-brand), and the animation is
-   layered back on only at >=768px with motion allowed — see the @media block
-   right after. Mobile/watch stay static and cheap. */
+/* NOTE on the infinite animations below (.animate-aurora, .animate-float):
+   decorative, so they only run at >=768px with motion allowed — see the
+   @media block after .text-gradient. Never animate `background-position` on
+   always-visible elements: it's a PAINT-triggering, non-composited property
+   that repaints every frame (it kept the hero H1 from settling for LCP). */
 .animate-aurora {
   will-change: transform;
 }
@@ -419,41 +414,13 @@ body {
   }
 }
 
-/* Blue→purple gradient text (hero accent word, etc.) — static by default */
-.text-gradient-animate {
-  background-image: linear-gradient(
-    100deg,
-    var(--color-ds-accent),
-    var(--color-ds-purple),
-    var(--color-ds-accent),
-    var(--color-ds-purple)
-  );
-  background-size: 250% 100%;
+/* Blue→purple gradient text (hero accent phrase). Static on purpose — the
+   animated sweep read as AI-template styling. */
+.text-gradient {
+  background-image: linear-gradient(100deg, var(--color-ds-accent), var(--color-ds-purple));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-
-/* Animated accent→purple gradient border — same gradient as
-   .text-gradient-animate, applied as a 2px ring via the padding-box/
-   border-box double-background trick so it works regardless of what's
-   rendered inside. Used on every Card variant. Static by default. */
-.gradient-border-animated {
-  border: 2px solid transparent;
-  background-image:
-    linear-gradient(var(--color-ds-surface), var(--color-ds-surface)),
-    linear-gradient(
-      100deg,
-      var(--color-ds-accent),
-      var(--color-ds-purple),
-      var(--color-ds-accent),
-      var(--color-ds-purple)
-    );
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
-  background-size:
-    100% 100%,
-    250% 100%;
 }
 
 /* Layer the infinite decorative motion back on only where it's affordable:
@@ -463,14 +430,8 @@ body {
   .animate-aurora {
     animation: auroraDrift 18s ease-in-out infinite;
   }
-  .text-gradient-animate {
-    animation: gradientShift 6s ease infinite;
-  }
   .animate-float {
     animation: floatY 5s ease-in-out infinite;
-  }
-  .gradient-border-animated {
-    animation: gradientShift 8s ease infinite;
   }
 }
 
@@ -605,8 +566,8 @@ body {
 
 /* Gradient ring on hover/active — for elements that aren't cards (nav tabs,
    filter pills) but should still pick up the site's signature accent→purple
-   motion on interaction. Uses a masked ::before ring (not the background
-   double-layer trick .gradient-border-animated uses) specifically so it
+   motion on interaction. Uses a masked ::before ring (not a background
+   double-layer trick) specifically so it
    never needs to know or match the element's own background color — it
    only ever paints the 2px ring itself, so it drops onto any surface
    (translucent header, filter pill, anything) without a visible seam.
@@ -786,8 +747,7 @@ body {
    CTA button interaction — shared by every <Button> variant so every
    CTA site-wide gets the same signature motion: a smooth lift, a
    one-shot diagonal shine sweep, and a duotone accent→purple glow
-   (same gradient pair as .text-gradient-animate / .gradient-border-
-   animated). Built only from transform/opacity/box-shadow/background-
+   (same gradient pair as .text-gradient). Built only from transform/opacity/box-shadow/background-
    position — nothing that triggers layout — so it never jerks.
    ────────────────────────────────────────────────────────────── */
 :root {
