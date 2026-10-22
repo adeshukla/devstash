@@ -25,8 +25,60 @@
 // `left`/`top`), reading as "a request moving through the pipeline" rather
 // than decoration.
 
+import Link from 'next/link'
 import { Icon } from '@/components/icons/Icon'
 import type { IconName } from '@/components/icons/Icon'
+import { projectBrand } from '@/components/icons/ProjectMark'
+
+// Each claim points at the shipped work that backs it, with that project's
+// own logo — the same marks as the Projects deck above.
+type Proof = { slug: string; name: string; href: string }
+const PROOF: Record<'frontend' | 'seo' | 'automation', Proof[]> = {
+  frontend: [
+    { slug: 'pare', name: 'Pare', href: '/projects/pare' },
+    { slug: 'build-components', name: 'Build Components', href: '/projects/build-components' },
+  ],
+  seo: [
+    {
+      slug: 'meta-tag-generator',
+      name: 'Meta Tag Generator',
+      href: '/projects/meta-tag-generator',
+    },
+    { slug: 'utm-builder', name: 'UTM Link Builder', href: '/projects/utm-builder' },
+  ],
+  automation: [
+    {
+      slug: 'ai-content-pipeline',
+      name: 'AI content pipeline',
+      href: '/lab/ai-content-pipeline',
+    },
+  ],
+}
+
+function ProofLinks({ items }: { items: Proof[] }) {
+  return (
+    <div className="mt-6 flex flex-wrap items-center gap-2">
+      <span className="text-ds-muted mr-1 font-mono text-xs tracking-wide uppercase">
+        See it in
+      </span>
+      {items.map(({ slug, name, href }) => {
+        const { Mark } = projectBrand(slug)
+        return (
+          <Link
+            key={slug}
+            href={href}
+            className="border-ds-border bg-ds-surface2 text-ds-text hover:border-ds-accent focus-visible:outline-ds-accent inline-flex items-center gap-2 rounded-full border py-1 pr-3 pl-1 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            <span className="block h-6 w-6 shrink-0 overflow-hidden rounded-full [&>svg]:h-full [&>svg]:w-full">
+              <Mark />
+            </span>
+            {name}
+          </Link>
+        )
+      })}
+    </div>
+  )
+}
 
 const STACK: { name: string; icon: IconName }[] = [
   { name: 'React', icon: 'react' },
@@ -99,12 +151,18 @@ export function WhatIDoBento() {
               React and Next.js apps built to a real performance budget — Lighthouse 90+, tight Core
               Web Vitals, accessible by default.
             </p>
-            <div className="border-ds-border mt-6 flex flex-wrap gap-x-6 gap-y-3 border-t pt-6 sm:gap-x-8">
+            {/* These are Google's "good" thresholds, used as the budget every
+                page is held to — labelled as such so they can't read as a
+                measured result. */}
+            <p className="border-ds-border text-ds-muted mt-6 border-t pt-6 font-mono text-xs tracking-wide uppercase">
+              Performance budget · every page
+            </p>
+            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-3 sm:gap-x-8">
               {(
                 [
-                  { label: 'LCP', value: '<2.5s' },
-                  { label: 'CLS', value: '<0.1' },
-                  { label: 'INP', value: '<200ms' },
+                  { label: 'LCP under', value: '2.5s' },
+                  { label: 'CLS under', value: '0.1' },
+                  { label: 'INP under', value: '200ms' },
                 ] as const
               ).map(({ label, value }) => (
                 <div key={label}>
@@ -115,6 +173,7 @@ export function WhatIDoBento() {
                 </div>
               ))}
             </div>
+            <ProofLinks items={PROOF.frontend} />
           </div>
 
           {/* ── SEO-Ready — an actual SERP preview, the thing this claim produces ── */}
@@ -141,6 +200,7 @@ export function WhatIDoBento() {
               Structured data, metadata, and sitemaps wired in from day one on every page — this
               site&apos;s own search visibility runs on the same system.
             </p>
+            <ProofLinks items={PROOF.seo} />
           </div>
 
           {/* ── Workflow Automation — the actual pipeline shape, not a lightning-bolt icon ── */}
@@ -162,6 +222,7 @@ export function WhatIDoBento() {
                   n8n and LLM pipelines that handle the repetitive parts — from deploy-triggered
                   search-engine notifications to AI-assisted content workflows.
                 </p>
+                <ProofLinks items={PROOF.automation} />
               </div>
 
               <div

@@ -77,13 +77,15 @@ export default function HomePage() {
       {/* Hero */}
       <HeroSection />
 
-      {/* What I do — client-facing framing between the hero and the project grid */}
+      {/* Featured projects as a draggable, flippable deck (links to /projects).
+          Straight after the hero: proof before claims, and the page's one
+          signature interaction is the first thing a visitor can touch. */}
+      <ProjectDeckSection projects={projects} />
+
+      {/* What I do — the claims, each linked to the projects that prove it */}
       <Reveal>
         <WhatIDoBento />
       </Reveal>
-
-      {/* Featured projects as a draggable, flippable deck (links to /projects) */}
-      <ProjectDeckSection projects={projects} />
 
       {/* The work above, narrated in 80 seconds. Click-to-load: only the poster ships with the page. */}
       <Reveal>
