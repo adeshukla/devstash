@@ -593,6 +593,13 @@ body {
   }
 }
 
+/* Footer Lottie (components/layout/FooterLottie.tsx): the artwork's pale
+   lavender backdrop circle glares on the dark footer, so it takes a quiet
+   tint of the site accent instead — in both themes, for one look. */
+.footer-lottie .lottie-bg path {
+  fill: color-mix(in srgb, var(--color-ds-accent) 12%, var(--color-ds-surface2));
+}
+
 /* Hero build terminal (components/ui/HeroGraphic.tsx). Plays once: --d on
    each line is when it starts. Opacity/transform/clip only. Under reduced
    motion the global rule collapses every animation to its end state (fill
