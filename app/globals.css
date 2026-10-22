@@ -564,27 +564,26 @@ body {
   opacity: 0.85;
 }
 
-/* Intro-video poster (components/ui/IntroVideo.tsx): the video's sunburst
-   opening frame, on tokens so it repaints for light theme. Static. */
+/* Intro-video poster (components/ui/IntroVideo.tsx): a quiet dot grid with
+   two soft corner lights, on tokens so it repaints for light theme. Static. */
 .intro-poster {
   background-color: var(--color-ds-bg);
   background-image:
     radial-gradient(
-      circle at 50% 42%,
-      color-mix(in srgb, var(--color-ds-accent) 16%, transparent),
-      transparent 55%
-    ),
-    radial-gradient(
-      circle at 75% 95%,
-      color-mix(in srgb, var(--color-ds-purple) 12%, transparent),
+      circle at 8% 0%,
+      color-mix(in srgb, var(--color-ds-accent) 15%, transparent),
       transparent 45%
     ),
-    radial-gradient(circle at 50% 42%, transparent 15%, var(--color-ds-bg) 70%),
-    repeating-conic-gradient(
-      from 0deg at 50% 42%,
-      color-mix(in srgb, var(--color-ds-accent) 7%, transparent) 0deg 2.5deg,
-      transparent 2.5deg 10deg
-    );
+    radial-gradient(
+      circle at 100% 100%,
+      color-mix(in srgb, var(--color-ds-purple) 11%, transparent),
+      transparent 45%
+    ),
+    radial-gradient(var(--color-ds-border) 1px, transparent 1.3px);
+  background-size:
+    auto,
+    auto,
+    22px 22px;
 }
 
 /* Project deck (home Projects section — components/ui/ProjectDeck.tsx).
@@ -610,20 +609,19 @@ body {
   z-index: -1;
   left: 50%;
   top: 46%;
-  width: min(760px, 160vw);
+  width: min(620px, 150vw);
   aspect-ratio: 1;
   translate: -50% -50%;
   border-radius: 50%;
+  /* Kept faint on purpose: at ~30% it read as a neon spotlight on the
+     restrained navy page (amber especially). It should tint, not shine. */
   background: radial-gradient(
     closest-side,
-    color-mix(in srgb, var(--active-brand) 34%, transparent),
-    color-mix(in srgb, var(--active-brand) 10%, transparent) 55%,
+    color-mix(in srgb, var(--active-brand) 13%, transparent),
+    color-mix(in srgb, var(--active-brand) 4%, transparent) 60%,
     transparent
   );
   pointer-events: none;
-}
-[data-theme='light'] .deck-stage::before {
-  opacity: 0.7;
 }
 .deck {
   position: relative;
@@ -728,11 +726,13 @@ body {
   height: 4px;
   background: var(--brand);
 }
+/* Light cast below the card (like a lit object on a table), not a halo all
+   round it — reads as depth rather than glow. */
 .deck-card[data-top] .deck-face {
-  border-color: color-mix(in srgb, var(--brand) 65%, var(--color-ds-border2));
+  border-color: color-mix(in srgb, var(--brand) 50%, var(--color-ds-border2));
   box-shadow:
     0 30px 60px -28px rgb(0 0 0 / 0.55),
-    0 0 80px -16px color-mix(in srgb, var(--brand) 60%, transparent);
+    0 26px 50px -30px color-mix(in srgb, var(--brand) 45%, transparent);
 }
 .deck-back {
   transform: rotateY(180deg);
@@ -743,7 +743,7 @@ body {
 [data-theme='light'] .deck-card[data-top] .deck-face {
   box-shadow:
     0 24px 48px -26px rgb(15 23 42 / 0.3),
-    0 18px 50px -20px color-mix(in srgb, var(--brand) 45%, transparent);
+    0 24px 46px -28px color-mix(in srgb, var(--brand) 38%, transparent);
 }
 @media (prefers-color-scheme: light) {
   :root:not([data-theme='dark']) .deck-face {
@@ -752,7 +752,7 @@ body {
   :root:not([data-theme='dark']) .deck-card[data-top] .deck-face {
     box-shadow:
       0 24px 48px -26px rgb(15 23 42 / 0.3),
-      0 18px 50px -20px color-mix(in srgb, var(--brand) 45%, transparent);
+      0 24px 46px -28px color-mix(in srgb, var(--brand) 38%, transparent);
   }
 }
 
