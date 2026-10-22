@@ -288,7 +288,10 @@ export default function AboutPage() {
                 DevStash (devstash.me) is the personal site of Adesh Shukla, a UI developer in
                 Ghaziabad, India. It holds his project case studies, a blog about frontend
                 development, Next.js and workflow automation, and a set of free browser tools in the{' '}
-                <Link href="/lab" className="text-ds-accent hover:underline">
+                <Link
+                  href="/lab"
+                  className="text-ds-accent decoration-ds-accent/40 hover:decoration-ds-accent underline underline-offset-2"
+                >
                   Lab
                 </Link>
                 .

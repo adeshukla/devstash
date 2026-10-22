@@ -95,8 +95,10 @@ export function IntroVideo() {
           />
           {/* Sits in the poster's empty lower band, clear of the wordmark. */}
           <span className="absolute inset-x-0 bottom-[5%] flex justify-center sm:bottom-[9%]">
-            <span className="bg-ds-accent shadow-ds-accent/40 text-ds-text flex items-center gap-2 rounded-full py-1 pr-4 pl-1 font-semibold shadow-lg transition-transform duration-200 group-hover:scale-105 sm:gap-3 sm:py-2.5 sm:pr-6 sm:pl-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 sm:h-10 sm:w-10">
+            {/* Solid surface pill, blue only on the play disc: text on the old
+                all-blue pill measured ~3.4:1 in both themes (WCAG AA needs 4.5). */}
+            <span className="bg-ds-bg text-ds-text border-ds-border2 flex items-center gap-2 rounded-full border py-1 pr-4 pl-1 font-semibold shadow-lg transition-transform duration-200 group-hover:scale-105 sm:gap-3 sm:py-2 sm:pr-6 sm:pl-2">
+              <span className="bg-ds-accent flex h-6 w-6 items-center justify-center rounded-full sm:h-10 sm:w-10">
                 <svg
                   viewBox="0 0 24 24"
                   className="ml-0.5 h-3 w-3 fill-white sm:h-5 sm:w-5"
@@ -106,7 +108,7 @@ export function IntroVideo() {
                 </svg>
               </span>
               <span className="text-xs sm:text-base">
-                Watch <span className="font-mono font-normal opacity-80">· 1:21</span>
+                Watch <span className="text-ds-muted font-mono font-normal">· 1:21</span>
               </span>
             </span>
           </span>
