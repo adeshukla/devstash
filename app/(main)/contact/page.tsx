@@ -90,9 +90,23 @@ export default function ContactPage() {
       {/* ── Two-column layout ── */}
       <section className="py-16">
         <div className="mx-auto max-w-5xl px-6">
+          {/* The form comes first in the source, so phones/tablets (and
+              keyboard / screen-reader users) reach it straight away — with
+              the panel first it started ~1.7 screens down on a 375px phone.
+              On desktop, lg:order-first puts the panel back in the left
+              column. */}
           <div className="grid grid-cols-1 gap-16 lg:grid-cols-3">
-            {/* Left — meta info */}
-            <Reveal as="aside" className="lg:col-span-1">
+            {/* Form (right column on desktop) */}
+            <Reveal className="lg:col-span-2">
+              <p className="text-ds-muted mb-5 flex items-center gap-2 font-mono text-sm lg:hidden">
+                <Icon name="clock" className="text-ds-accent h-4 w-4 flex-shrink-0" />I aim to reply
+                within 48 hours.
+              </p>
+              <ContactForm />
+            </Reveal>
+
+            {/* Meta info (left column on desktop) */}
+            <Reveal as="aside" delay={80} className="lg:order-first lg:col-span-1">
               {/* Same gradient-ring-hover treatment as the About page's
                   skill cards — a labeled info group, not a link, so it gets
                   a felt border glow rather than the card-glow lift+shadow
@@ -171,11 +185,6 @@ export default function ContactPage() {
                   </ul>
                 </div>
               </div>
-            </Reveal>
-
-            {/* Right — form */}
-            <Reveal delay={80} className="lg:col-span-2">
-              <ContactForm />
             </Reveal>
           </div>
         </div>
