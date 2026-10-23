@@ -79,21 +79,6 @@ export function Footer() {
         aria-hidden="true"
         className="from-ds-accent/40 via-ds-purple/40 absolute inset-x-0 top-0 h-px bg-gradient-to-r to-transparent"
       />
-      {/* Same subtle grid + aurora-glow treatment as the hero, toned down —
-          fills the empty margin outside the centered content wrapper on wide
-          desktop screens instead of leaving flat, empty background there. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_right,var(--color-ds-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-ds-border)_1px,transparent_1px)] bg-[size:64px_64px] opacity-[0.15]"
-      />
-      <div
-        aria-hidden="true"
-        className="bg-ds-accent absolute -top-32 left-1/2 -z-10 h-[460px] w-[460px] -translate-x-1/2 rounded-full opacity-[0.12] blur-3xl"
-      />
-      <div
-        aria-hidden="true"
-        className="bg-ds-purple absolute right-0 -bottom-24 -z-10 h-[360px] w-[360px] rounded-full opacity-[0.09] blur-3xl"
-      />
 
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         {/* Top row */}

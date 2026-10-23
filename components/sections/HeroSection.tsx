@@ -48,7 +48,7 @@ const icoClass = 'grid h-8 w-8 place-items-center rounded-lg font-mono text-[11p
 function EvidencePanel() {
   return (
     <section
-      className="hero-panel border-ds-border bg-ds-surface overflow-hidden rounded-[20px] border shadow-[0_40px_80px_-50px_rgb(0_0_0/0.6)]"
+      className="hero-panel border-ds-border bg-ds-surface rounded-card overflow-hidden border shadow-[0_40px_80px_-50px_rgb(0_0_0/0.6)]"
       aria-label="What each promise means in practice"
     >
       <div className="border-ds-border relative flex border-b" role="tablist">
@@ -222,7 +222,7 @@ function DesignView() {
           </span>
         </div>
       </div>
-      <div className="outline-ds-accent/55 bg-ds-surface/60 relative hidden rounded-[20px] p-5 outline-1 outline-offset-[10px] outline-dashed lg:block">
+      <div className="outline-ds-accent/55 bg-ds-surface/60 rounded-card relative hidden p-5 outline-1 outline-offset-[10px] outline-dashed lg:block">
         <span className={tag}>Evidence panel · tabs × 3</span>
         <div className="mb-5 grid grid-cols-3 gap-3">
           <i className={`${block} h-3.5`} />

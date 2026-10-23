@@ -91,10 +91,9 @@ export default function HomePage() {
       <Reveal>
         <section className="border-ds-border border-t py-16" aria-labelledby="home-video-heading">
           <div className="mx-auto max-w-4xl px-6">
-            <p className="text-ds-accent font-mono text-sm">{'// watch'}</p>
             <h2
               id="home-video-heading"
-              className="text-ds-text mt-2 text-3xl font-bold tracking-tight sm:text-4xl"
+              className="text-ds-text text-3xl font-bold tracking-tight sm:text-4xl"
             >
               The work, in 80 seconds
             </h2>

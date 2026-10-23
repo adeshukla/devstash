@@ -103,7 +103,6 @@ export default function AboutPage() {
         <section className="border-ds-border border-b py-10 sm:py-20">
           <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-10 px-6 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
             <div>
-              <p className="text-ds-accent mb-2 font-mono text-sm sm:mb-3">{'// about'}</p>
               <h1 className="text-ds-text text-4xl font-bold tracking-tight sm:text-5xl">
                 Hey, I&apos;m Adesh.
               </h1>
@@ -176,11 +175,8 @@ export default function AboutPage() {
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {Object.entries(SKILLS).map(([category, items], i) => (
                 <Reveal key={category} delay={i * 60}>
-                  {/* Same gradient-ring treatment the desktop nav's icon
-                      buttons use on hover — reused here instead of a new
-                      hover system, so a category "card" that's really just
-                      a labeled group still gets a felt interaction. */}
-                  <div className="gradient-ring-hover border-ds-border bg-ds-surface/60 rounded-xl border p-5">
+                  {/* A labelled group, not a link — so no hover state */}
+                  <div className="border-ds-border bg-ds-surface/60 rounded-card border p-5">
                     <h3 className="text-ds-accent mb-3 flex items-center gap-2 font-mono text-sm font-medium">
                       <Icon name={CATEGORY_ICONS[category]} className="h-4 w-4 flex-shrink-0" />
                       {category}

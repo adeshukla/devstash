@@ -271,7 +271,7 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
               ref={(el) => {
                 cardRefs.current[i] = el
               }}
-              className="deck-card focus-visible:outline-ds-accent rounded-[20px] focus-visible:outline-2 focus-visible:outline-offset-4"
+              className="deck-card focus-visible:outline-ds-accent rounded-card focus-visible:outline-2 focus-visible:outline-offset-4"
               // Initial pose only (static, so React never re-applies it over
               // a drag) — gives the server render a real stack before JS.
               style={

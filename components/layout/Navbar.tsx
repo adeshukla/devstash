@@ -77,16 +77,16 @@ export function Navbar() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="GitHub"
-            className="gradient-ring-hover border-ds-border text-ds-muted hover:text-ds-accent ml-2 flex h-10 w-10 items-center justify-center rounded-lg border transition-colors"
+            className="ring-hover border-ds-border text-ds-muted hover:text-ds-accent ml-2 flex h-10 w-10 items-center justify-center rounded-lg border transition-colors"
           >
             <Icon name="github" className="h-5 w-5" />
           </a>
-          <ThemeToggle className="gradient-ring-hover border-ds-border text-ds-muted hover:text-ds-accent ml-2 flex h-10 w-10 items-center justify-center rounded-lg border transition-colors" />
+          <ThemeToggle className="ring-hover border-ds-border text-ds-muted hover:text-ds-accent ml-2 flex h-10 w-10 items-center justify-center rounded-lg border transition-colors" />
           <a
             href="/resume-adesh-shukla.pdf"
             download
             data-analytics-event="cv_viewed"
-            className="gradient-ring-hover border-ds-border text-ds-muted hover:text-ds-accent ml-3 inline-flex h-10 items-center rounded-lg border px-3.5 text-[13px] font-medium whitespace-nowrap transition-colors"
+            className="ring-hover border-ds-border text-ds-muted hover:text-ds-accent ml-3 inline-flex h-10 items-center rounded-lg border px-3.5 text-[13px] font-medium whitespace-nowrap transition-colors"
           >
             Résumé ↓
           </a>

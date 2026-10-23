@@ -103,11 +103,8 @@ export default function ContactPage() {
 
             {/* Meta info (left column on desktop) */}
             <Reveal as="aside" delay={80} className="lg:order-first lg:col-span-1">
-              {/* Same gradient-ring-hover treatment as the About page's
-                  skill cards — a labeled info group, not a link, so it gets
-                  a felt border glow rather than the card-glow lift+shadow
-                  the actually-clickable project/tool cards use. */}
-              <div className="gradient-ring-hover border-ds-border bg-ds-surface flex flex-col gap-8 rounded-2xl border p-6 sm:p-8">
+              {/* A labelled info group, not a link — so no hover state */}
+              <div className="border-ds-border bg-ds-surface rounded-card flex flex-col gap-8 border p-6 sm:p-8">
                 {/* Response time */}
                 <div>
                   <h2 className="text-ds-accent mb-2 flex items-center gap-2 font-mono text-sm font-medium">

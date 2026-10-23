@@ -195,15 +195,15 @@ export function MobileNav({ items }: MobileNavProps) {
       {/* Hamburger / Close button — carries the site's own signature
           accent→purple gradient (the same treatment the "Dev" in the
           wordmark and the active-nav-tab dot use) instead of a plain
-          single-color icon, and picks up `.gradient-ring-hover`'s ring —
+          single-color icon, and picks up `.ring-hover`'s ring —
           the exact same ring the desktop GitHub/theme-toggle buttons use on
           hover — as a persistent "activated" state while the drawer is
           open. Reusing an existing system beats inventing a one-off. */}
       <button
         onClick={() => (open ? requestClose() : setOpen(true))}
         className={cn(
-          'gradient-ring-hover border-ds-border flex h-9 w-9 items-center justify-center rounded-lg border transition-shadow duration-300',
-          open && 'gradient-ring-active shadow-[0_0_16px_-2px_var(--color-ds-accent)]'
+          'ring-hover border-ds-border flex h-9 w-9 items-center justify-center rounded-lg border transition-shadow duration-300',
+          open && 'ring-active shadow-[0_0_16px_-2px_var(--color-ds-accent)]'
         )}
         aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
         aria-expanded={open}
@@ -335,13 +335,8 @@ export function MobileNav({ items }: MobileNavProps) {
             transition: `opacity ${entered ? ENTER_MS : EXIT_MS}ms ${EASE}`,
           }}
         >
-          {/* Header — just the grid texture (same atmosphere every page
-              header carries), no blob. */}
-          <div className="border-ds-border relative flex h-[84px] shrink-0 items-center justify-between overflow-hidden border-b px-5 sm:px-6">
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--color-ds-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-ds-border)_1px,transparent_1px)] bg-[size:32px_32px] opacity-25"
-            />
+          {/* Header — plain, like every page header since the grid/glow went */}
+          <div className="border-ds-border relative flex h-[84px] shrink-0 items-center justify-between border-b px-5 sm:px-6">
             <span
               className="text-ds-text text-[20px] font-bold tracking-tight"
               style={{ letterSpacing: '-0.04em' }}

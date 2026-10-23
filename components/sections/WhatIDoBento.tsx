@@ -136,8 +136,7 @@ export function WhatIDoBento() {
     <section className="py-16">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-12 max-w-2xl">
-          <p className="text-ds-accent font-mono text-sm">{'// what i do'}</p>
-          <h2 className="text-ds-text mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="text-ds-text text-3xl font-bold tracking-tight sm:text-4xl">
             Frontend, SEO, and the automation that ties it together
           </h2>
         </div>
@@ -149,7 +148,7 @@ export function WhatIDoBento() {
               {STACK.map(({ name, icon }) => (
                 <div
                   key={name}
-                  className="gradient-ring-hover border-ds-border bg-ds-surface2 flex items-center gap-2.5 rounded-lg border px-3.5 py-2.5"
+                  className="ring-hover border-ds-border bg-ds-surface2 flex items-center gap-2.5 rounded-lg border px-3.5 py-2.5"
                 >
                   <Icon name={icon} className="text-ds-accent h-5 w-5 shrink-0" />
                   <span className="text-ds-text font-mono text-sm">{name}</span>

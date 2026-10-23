@@ -184,7 +184,7 @@ export default async function BlogPage({ searchParams }: Props) {
                 <a
                   href="/feed.xml"
                   aria-label="RSS feed"
-                  className="gradient-ring-hover border-ds-border text-ds-muted hover:text-ds-accent flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border transition-colors"
+                  className="ring-hover border-ds-border text-ds-muted hover:text-ds-accent flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border transition-colors"
                 >
                   <Icon name="rss" className="h-3.5 w-3.5" />
                 </a>

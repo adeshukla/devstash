@@ -50,7 +50,7 @@ export function BlogFilter({ categories, tags, selectedCategory, selectedTag }: 
         </p>
         {/* `overflow-x-auto` forces overflow-y to `auto` too (CSS spec: if
             one axis isn't `visible`, the other can't stay `visible` either),
-            which was clipping the top of .gradient-ring-hover's -2px ::before
+            which was clipping the top of .ring-hover's -2px ::before
             ring. `-m-1 p-1` gives it room on every side, not just left/right/
             bottom, while keeping the row's visual position unchanged. */}
         <div className="-m-1 flex [scrollbar-width:none] gap-2 overflow-x-auto p-1 lg:m-0 lg:flex-wrap lg:overflow-visible lg:p-0 [&::-webkit-scrollbar]:hidden">
@@ -58,7 +58,7 @@ export function BlogFilter({ categories, tags, selectedCategory, selectedTag }: 
             onClick={() => setParam('category', null)}
             aria-current={!selectedCategory ? 'true' : undefined}
             className={cn(
-              'gradient-ring-hover shrink-0 rounded-full border px-3 py-1 text-sm whitespace-nowrap transition-colors',
+              'ring-hover shrink-0 rounded-full border px-3 py-1 text-sm whitespace-nowrap transition-colors',
               !selectedCategory
                 ? 'border-ds-accent bg-ds-accent text-white'
                 : 'border-ds-border bg-ds-surface text-ds-muted hover:border-ds-border2 hover:text-ds-text'
@@ -75,13 +75,13 @@ export function BlogFilter({ categories, tags, selectedCategory, selectedTag }: 
                   onClick={() => setParam('category', selectedCategory === value ? null : value)}
                   aria-current={selectedCategory === value ? 'true' : undefined}
                   className={cn(
-                    'gradient-ring-hover shrink-0 rounded-full border px-3 py-1 text-sm whitespace-nowrap transition-colors',
+                    'ring-hover shrink-0 rounded-full border px-3 py-1 text-sm whitespace-nowrap transition-colors',
                     selectedCategory === value
                       ? 'border-ds-accent bg-ds-accent text-white'
                       : 'border-ds-border bg-ds-surface text-ds-muted hover:border-ds-border2 hover:text-ds-text'
                   )}
                 >
-                  {label} <span className="text-xs opacity-60">({count})</span>
+                  {label} <span className="text-xs">({count})</span>
                 </button>
               )
             }
@@ -124,13 +124,13 @@ export function BlogFilter({ categories, tags, selectedCategory, selectedTag }: 
                 onClick={() => setParam('tag', selectedTag === tag ? null : tag)}
                 aria-current={selectedTag === tag ? 'true' : undefined}
                 className={cn(
-                  'gradient-ring-hover rounded border px-2.5 py-0.5 font-mono text-xs transition-colors',
+                  'ring-hover rounded border px-2.5 py-0.5 font-mono text-xs transition-colors',
                   selectedTag === tag
                     ? 'border-ds-accent bg-ds-accent/10 text-ds-accent'
                     : 'border-ds-border bg-ds-surface2 text-ds-muted hover:border-ds-border2 hover:text-ds-text'
                 )}
               >
-                #{tag} <span className="opacity-60">({count})</span>
+                #{tag} <span>({count})</span>
               </button>
             ))}
           </div>

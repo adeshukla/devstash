@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Card, Badge, Button, Reveal, CardTilt } from '@/components/ui'
+import { Card, Badge, Button, Reveal } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
 import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
 import { TECH_ICONS } from '@/lib/utils/techIcons'
@@ -70,127 +70,125 @@ export function ProjectsGrid({ projects, showAll = false }: ProjectsGridProps) {
 
               return (
                 <Reveal key={project.slug} delay={(i % 6) * 60}>
-                  <CardTilt>
-                    {/* Stretched-link pattern: the whole card links to the case
+                  {/* Stretched-link pattern: the whole card links to the case
                         study via an absolutely-positioned overlay, so the footer
                         can hold REAL links (Try it live / GitHub) without
                         nesting <a> inside <a>. Footer sits above it via z-index. */}
-                    <Card
-                      variant="spotlight"
-                      className="group relative flex h-full flex-col"
-                      padding="none"
-                    >
-                      <Link
-                        href={`/projects/${project.slug}`}
-                        aria-label={`${project.title} — case study`}
-                        className="focus-visible:ring-ds-accent absolute inset-0 z-[1] focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
-                      />
-                      <div className="relative h-56 w-full overflow-hidden">
-                        {hasRealImage(project.image) ? (
-                          <Image
-                            src={project.image}
-                            alt={project.title}
-                            fill
-                            className="object-cover transition-transform duration-300 group-hover:scale-105"
-                            sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"
+                  <Card
+                    variant="hover"
+                    className="group relative flex h-full flex-col"
+                    padding="none"
+                  >
+                    <Link
+                      href={`/projects/${project.slug}`}
+                      aria-label={`${project.title} — case study`}
+                      className="focus-visible:ring-ds-accent absolute inset-0 z-[1] focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
+                    />
+                    <div className="relative h-56 w-full overflow-hidden">
+                      {hasRealImage(project.image) ? (
+                        <Image
+                          src={project.image}
+                          alt={project.title}
+                          fill
+                          className="object-cover"
+                          sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"
+                        />
+                      ) : (
+                        <div className="h-full w-full">
+                          <CategoryIllustration
+                            category={project.category}
+                            kind="project"
+                            seed={project.slug}
                           />
-                        ) : (
-                          <div className="h-full w-full transition-transform duration-300 group-hover:scale-105">
-                            <CategoryIllustration
-                              category={project.category}
-                              kind="project"
-                              seed={project.slug}
-                            />
-                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-1 flex-col gap-4 p-6">
+                      {/* Status + year */}
+                      <div className="flex items-center justify-between">
+                        {status && (
+                          <Badge variant={status.variant} dot>
+                            {status.label}
+                          </Badge>
+                        )}
+                        {project.year && (
+                          <span className="text-ds-muted font-mono text-xs">{project.year}</span>
                         )}
                       </div>
-                      <div className="flex flex-1 flex-col gap-4 p-6">
-                        {/* Status + year */}
-                        <div className="flex items-center justify-between">
-                          {status && (
-                            <Badge variant={status.variant} dot>
-                              {status.label}
-                            </Badge>
-                          )}
-                          {project.year && (
-                            <span className="text-ds-muted font-mono text-xs">{project.year}</span>
-                          )}
-                        </div>
 
-                        {/* Title + description */}
-                        <div>
-                          <h2 className="text-ds-text group-hover:text-ds-accent text-lg font-semibold transition-colors">
-                            {project.title}
-                          </h2>
-                          <p className="text-ds-muted mt-1 line-clamp-2 text-sm">
-                            {project.description}
-                          </p>
-                        </div>
+                      {/* Title + description */}
+                      <div>
+                        <h2 className="text-ds-text group-hover:text-ds-accent text-lg font-semibold transition-colors">
+                          {project.title}
+                        </h2>
+                        <p className="text-ds-muted mt-1 line-clamp-2 text-sm">
+                          {project.description}
+                        </p>
+                      </div>
 
-                        {/* Tech stack pills */}
-                        {project.tech && project.tech.length > 0 && (
-                          <div className="mt-auto flex flex-wrap gap-1.5 pt-2">
-                            {project.tech.slice(0, 4).map((t) => {
-                              const iconName = TECH_ICONS[t]
-                              return (
-                                <Badge
-                                  key={t}
-                                  variant="default"
-                                  className="font-mono text-xs"
-                                  icon={iconName ? <Icon name={iconName} /> : undefined}
-                                >
-                                  {t}
-                                </Badge>
-                              )
-                            })}
-                            {project.tech.length > 4 && (
-                              <Badge variant="muted" className="text-xs">
-                                +{project.tech.length - 4} more
+                      {/* Tech stack pills */}
+                      {project.tech && project.tech.length > 0 && (
+                        <div className="mt-auto flex flex-wrap gap-1.5 pt-2">
+                          {project.tech.slice(0, 4).map((t) => {
+                            const iconName = TECH_ICONS[t]
+                            return (
+                              <Badge
+                                key={t}
+                                variant="default"
+                                className="font-mono text-xs"
+                                icon={iconName ? <Icon name={iconName} /> : undefined}
+                              >
+                                {t}
                               </Badge>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Footer links — real, independently clickable (above
-                            the stretched case-study link via z-index) */}
-                      {(project.githubUrl || project.liveUrl) && (
-                        <div className="border-ds-border relative z-[2] flex items-center gap-5 border-t px-5 py-3">
-                          {project.liveUrl &&
-                            (liveIsInternal ? (
-                              <Link
-                                href={project.liveUrl}
-                                className="text-ds-muted hover:text-ds-accent inline-flex items-center gap-1.5 text-xs font-medium transition-colors"
-                              >
-                                <Icon name="external-link" className="h-3.5 w-3.5" />
-                                Try it live →
-                              </Link>
-                            ) : (
-                              <a
-                                href={project.liveUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-ds-muted hover:text-ds-accent inline-flex items-center gap-1.5 text-xs font-medium transition-colors"
-                              >
-                                <Icon name="external-link" className="h-3.5 w-3.5" />
-                                Try it live →
-                              </a>
-                            ))}
-                          {project.githubUrl && (
-                            <a
-                              href={project.githubUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-ds-muted hover:text-ds-accent inline-flex items-center gap-1.5 text-xs transition-colors"
-                            >
-                              <Icon name="github" className="h-3.5 w-3.5" />
-                              GitHub
-                            </a>
+                            )
+                          })}
+                          {project.tech.length > 4 && (
+                            <Badge variant="muted" className="text-xs">
+                              +{project.tech.length - 4} more
+                            </Badge>
                           )}
                         </div>
                       )}
-                    </Card>
-                  </CardTilt>
+                    </div>
+
+                    {/* Footer links — real, independently clickable (above
+                            the stretched case-study link via z-index) */}
+                    {(project.githubUrl || project.liveUrl) && (
+                      <div className="border-ds-border relative z-[2] flex items-center gap-5 border-t px-5 py-3">
+                        {project.liveUrl &&
+                          (liveIsInternal ? (
+                            <Link
+                              href={project.liveUrl}
+                              className="text-ds-muted hover:text-ds-accent inline-flex items-center gap-1.5 text-xs font-medium transition-colors"
+                            >
+                              <Icon name="external-link" className="h-3.5 w-3.5" />
+                              Try it live →
+                            </Link>
+                          ) : (
+                            <a
+                              href={project.liveUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-ds-muted hover:text-ds-accent inline-flex items-center gap-1.5 text-xs font-medium transition-colors"
+                            >
+                              <Icon name="external-link" className="h-3.5 w-3.5" />
+                              Try it live →
+                            </a>
+                          ))}
+                        {project.githubUrl && (
+                          <a
+                            href={project.githubUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-ds-muted hover:text-ds-accent inline-flex items-center gap-1.5 text-xs transition-colors"
+                          >
+                            <Icon name="github" className="h-3.5 w-3.5" />
+                            GitHub
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </Card>
                 </Reveal>
               )
             })}

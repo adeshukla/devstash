@@ -124,8 +124,8 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                   <Badge
                     variant={isActive ? 'blue' : 'default'}
                     className={cn(
-                      'gradient-ring-hover hover:border-ds-accent hover:text-ds-accent cursor-pointer transition-colors',
-                      isActive && 'gradient-ring-active'
+                      'ring-hover hover:border-ds-accent hover:text-ds-accent cursor-pointer transition-colors',
+                      isActive && 'ring-active'
                     )}
                   >
                     {label}
