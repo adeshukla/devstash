@@ -76,6 +76,10 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
   const n = cards.length
   const [order, setOrder] = useState(() => cards.map((_, i) => i))
   const [flipped, setFlipped] = useState(false)
+  // Back faces mount the first time their card is flipped, then stay. Six
+  // backs were ~240 elements in the first render and hydration that nobody
+  // sees until they flip; their links repeat the front's, so SEO loses nothing.
+  const [opened, setOpened] = useState<number[]>([])
   const [fanned, setFanned] = useState(false)
   const [nudging, setNudging] = useState(true)
   const deckRef = useRef<HTMLDivElement>(null)
@@ -150,6 +154,7 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
 
   function flip() {
     setNudging(false)
+    setOpened((o) => (o.includes(order[0]) ? o : [...o, order[0]]))
     setFlipped((f) => !f)
   }
 
@@ -299,7 +304,7 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
                     {card.front}
                   </div>
                   <div className="deck-face deck-back" inert={!(isTop && flipped)}>
-                    {card.back}
+                    {opened.includes(i) && card.back}
                   </div>
                 </div>
               </div>
