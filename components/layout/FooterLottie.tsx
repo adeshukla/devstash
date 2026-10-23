@@ -12,12 +12,12 @@ import type { AnimationItem } from 'lottie-web'
 // the backdrop circle so CSS can theme it, numbers rounded to 3 decimals.
 const SRC = '/images/animations/working-coffee.json'
 // Frames 0–58 build the scene (desk, screen, then the developer appears);
-// 58–154 is the loop: reach for the mug, sip (head tips back ~90), put it
-// down, keep typing.
-const INTRO_END = 58
+// 58–140: reach for the mug, sip (head tips back ~90), put it down. It plays
+// once and holds on STILL_FRAME — looping back to 58 made the monitor's
+// scrolling page jump ("swipe up") on every restart.
 const STILL_FRAME = 140 // everything on screen, mug back on the desk
-// Once the intro has played in this tab, later visits to the footer (other
-// pages, a reload) go straight to the loop instead of rebuilding the scene.
+// Once it has played in this tab, later visits to the footer (other pages,
+// a reload) just show the finished frame.
 const SEEN_KEY = 'ds-footer-intro-seen'
 
 // Roughly where the original tags floated in the 750×500 artwork, as % of
@@ -40,9 +40,9 @@ function readSeen() {
 /**
  * Footer illustration. Costs nothing on page load: lottie-web (light SVG
  * build) and the animation file are fetched only once the visitor is within
- * ~600px of the footer. It starts when the footer is actually in view, runs
- * the build-up intro once, then loops — pausing off screen and resuming
- * where it left off, never restarting. Reduced motion gets a still frame.
+ * ~600px of the footer. It starts when the footer is actually in view and
+ * plays once per tab — pausing off screen and resuming where it left off,
+ * never restarting. Reduced motion and later visits get the still frame.
  */
 export function FooterLottie() {
   const wrap = useRef<HTMLDivElement>(null)
@@ -57,13 +57,7 @@ export function FooterLottie() {
     let cancelled = false
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const seen = readSeen()
-    if (!reduce) root.dataset.armed = ''
-    if (seen) root.dataset.seen = ''
-
-    const loopForever = (a: AnimationItem) => {
-      a.loop = true
-      a.playSegments([INTRO_END, a.totalFrames], true)
-    }
+    if (!reduce && !seen) root.dataset.armed = '' // tags wait for the play-through
 
     const onScreen = new IntersectionObserver(
       ([entry]) => {
@@ -73,9 +67,8 @@ export function FooterLottie() {
         if (started) return a.play() // resume, don't restart
         started = true
         root.dataset.play = ''
-        if (seen) return loopForever(a)
-        a.addEventListener('complete', () => loopForever(a))
-        a.play()
+        a.addEventListener('complete', () => onScreen.disconnect())
+        a.playSegments([0, STILL_FRAME], true)
         try {
           sessionStorage.setItem(SEEN_KEY, '1')
         } catch {}
@@ -103,7 +96,7 @@ export function FooterLottie() {
           })
           // Show a finished frame until it starts (and for reduced motion, for good)
           anim.goToAndStop(reduce || seen ? STILL_FRAME : 0, true)
-          if (!reduce) onScreen.observe(el)
+          if (!reduce && !seen) onScreen.observe(el)
         } catch {
           // Decorative — if it can't load, the footer simply has no illustration.
         }

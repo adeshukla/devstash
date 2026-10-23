@@ -828,9 +828,6 @@ html[data-hero-intro] .hero-ov-design {
     footer-tag-in 0.5s var(--ds-ease-smooth) calc(var(--base) + var(--i) * 0.18s) both,
     footer-tag-bob 3.2s ease-in-out calc(var(--base) + 0.6s + var(--i) * 0.4s) infinite alternate;
 }
-.footer-lottie[data-armed][data-play][data-seen] .footer-tag {
-  --base: 0.2s;
-}
 @keyframes footer-tag-in {
   from {
     opacity: 0;

@@ -4,12 +4,12 @@ import { Button } from '@/components/ui'
 import { HeroStage } from '@/components/ui/HeroStage'
 import { projectBrand } from '@/components/icons/ProjectMark'
 
-// Server Component. Everything visible â€” including the <h1>, the page's LCP
-// element â€” is server-rendered and painted from the first frame. HeroStage
-// (client) only adds behaviour: the first-visit design â†’ code â†’ live intro,
+// Server Component. Everything visible — including the <h1>, the page's LCP
+// element — is server-rendered and painted from the first frame. HeroStage
+// (client) only adds behaviour: the first-visit design → code → live intro,
 // the "View as" switch, the word animations and the evidence-panel cycling.
 //
-// Never wrap the <h1> in MountReveal or anything that starts it hidden â€”
+// Never wrap the <h1> in MountReveal or anything that starts it hidden —
 // that has cost LCP twice before. The intro overlays sit ON TOP of the live
 // hero instead, so the heading is already painted underneath them.
 
@@ -33,7 +33,7 @@ function Word({ k, text, children }: { k: string; text: string; children?: React
     <span className={`hero-w hero-w-${k}`} data-k={k}>
       {[...text].map((c, n) => (
         <span key={n} className="ch" style={i(n)}>
-          {c === ' ' ? 'Â ' : c}
+          {c === ' ' ? ' ' : c}
         </span>
       ))}
       {children}
@@ -89,7 +89,7 @@ function EvidencePanel() {
             The speed budget every page is held to
           </h2>
           <p className="text-ds-muted -mt-1.5 text-[13.5px] leading-snug">
-            Google&apos;s &ldquo;good&rdquo; thresholds, used as hard limits â€” not one-off scores.
+            Google&apos;s &ldquo;good&rdquo; thresholds, used as hard limits — not one-off scores.
           </p>
           {(
             [
@@ -143,7 +143,7 @@ function EvidencePanel() {
                 <small className="text-ds-muted text-xs">{sub}</small>
               </span>
               <span className="text-ds-text font-mono text-[13px] font-semibold whitespace-nowrap">
-                <span className="hero-ratio">â€”</span>
+                <span className="hero-ratio">—</span>
                 <span className="hero-grade ml-2 rounded-md px-1.5 py-0.5 text-[11px]" />
               </span>
             </div>
@@ -163,7 +163,7 @@ function EvidencePanel() {
         >
           <h2 className="text-ds-text text-lg font-bold tracking-tight">What keeps it standing</h2>
           <p className="text-ds-muted -mt-1.5 text-[13.5px] leading-snug">
-            Checks the site actually runs â€” not adjectives.
+            Checks the site actually runs — not adjectives.
           </p>
           {(
             [
@@ -180,7 +180,7 @@ function EvidencePanel() {
                 <small className="text-ds-muted text-xs">{sub}</small>
               </span>
               <span className="text-ds-success font-mono text-sm" aria-label="passing">
-                âœ“
+                ✓
               </span>
             </div>
           ))}
@@ -190,7 +190,7 @@ function EvidencePanel() {
   )
 }
 
-// â”€â”€ Design overlay: the same hero as a wireframe with spec labels â”€â”€
+// ── Design overlay: the same hero as a wireframe with spec labels ──
 const tag =
   'bg-ds-accent absolute -top-[22px] left-0 z-[2] rounded px-1.5 py-1 font-mono text-[10.5px] leading-none font-semibold whitespace-nowrap text-white'
 const block = 'bg-ds-surface2 block rounded-md'
@@ -199,16 +199,16 @@ function DesignView() {
   return (
     <div className="grid h-full gap-12 pt-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center">
       <div className="outline-ds-accent/55 relative outline-1 outline-offset-[10px] outline-dashed">
-        <span className={tag}>Frame Â· 1.15fr column</span>
+        <span className={tag}>Frame · 1.15fr column</span>
         <i className={`${block} mb-6 h-3 w-[58%]`} />
         <div className="relative mb-6 grid gap-3">
-          <span className={tag}>h1 Â· DM Sans 700 Â· 80 / 1.03</span>
+          <span className={tag}>h1 · DM Sans 700 · 80 / 1.03</span>
           <i className={`${block} bg-ds-text/15 h-[clamp(30px,4.4vw,62px)] w-[72%]`} />
           <i className={`${block} bg-ds-text/15 h-[clamp(30px,4.4vw,62px)] w-[96%]`} />
           <i className={`${block} bg-ds-text/15 h-[clamp(30px,4.4vw,62px)] w-[64%]`} />
         </div>
         <div className="relative mb-6 grid gap-3">
-          <span className={tag}>p Â· 17 / 1.65 Â· muted</span>
+          <span className={tag}>p · 17 / 1.65 · muted</span>
           <i className={`${block} h-3 w-[98%]`} />
           <i className={`${block} h-3 w-[90%]`} />
           <i className={`${block} h-3 w-[56%]`} />
@@ -223,7 +223,7 @@ function DesignView() {
         </div>
       </div>
       <div className="outline-ds-accent/55 bg-ds-surface/60 relative hidden rounded-[20px] p-5 outline-1 outline-offset-[10px] outline-dashed lg:block">
-        <span className={tag}>Evidence panel Â· tabs Ã— 3</span>
+        <span className={tag}>Evidence panel · tabs × 3</span>
         <div className="mb-5 grid grid-cols-3 gap-3">
           <i className={`${block} h-3.5`} />
           <i className={`${block} h-3.5`} />
@@ -239,7 +239,7 @@ function DesignView() {
   )
 }
 
-// â”€â”€ Code overlay: a simplified version of the component that renders it â”€â”€
+// ── Code overlay: a simplified version of the component that renders it ──
 const k = (s: string) => <span className="text-ds-purple">{s}</span>
 const t = (s: string) => <span className="text-ds-accent">{s}</span>
 const a = (s: string) => <span className="text-ds-warning">{s}</span>
@@ -260,7 +260,7 @@ const CODE: ReactNode[] = [
   <>
     {'      <'}
     {t('Status')}
-    {'>'}Available for frontend roles Â· Anywhere in India{'</'}
+    {'>'}Available for frontend roles · Anywhere in India{'</'}
     {t('Status')}
     {'>'}
   </>,
@@ -269,7 +269,7 @@ const CODE: ReactNode[] = [
     {t('h1')}
     {'>'}
   </>,
-  <>{'        Web interfaces that ship â€”'}</>,
+  <>{'        Web interfaces that ship —'}</>,
   <>
     {'        <'}
     {t('Word')} {a('fx')}={s('"streak"')}
@@ -357,12 +357,12 @@ export function HeroSection() {
                   <span className="bg-ds-success absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
                   <span className="bg-ds-success relative inline-flex h-2 w-2 rounded-full" />
                 </span>
-                Available for frontend roles Â· Anywhere in India Â· Remote/Hybrid
+                Available for frontend roles · Anywhere in India · Remote/Hybrid
               </p>
 
               <h1 className="text-ds-text mt-5 mb-6 text-[clamp(36px,5.6vw,80px)] leading-[1.03] font-bold tracking-[-0.035em]">
                 <span className="text-ds-muted mb-[0.14em] block text-[0.58em] font-semibold tracking-[-0.02em]">
-                  Web interfaces that ship â€”
+                  Web interfaces that ship —
                 </span>
                 <Word k="fast" text="fast" />,{' '}
                 <Word k="acc" text="accessible">
@@ -382,7 +382,7 @@ export function HeroSection() {
                 I&apos;m Adesh Shukla. I started in accounts, got drawn in by UX, and came out an
                 analyst who builds front-ends.{' '}
                 <strong className="text-ds-text font-semibold">6+ years</strong> on the web, mostly
-                landing pages at volume â€”{' '}
+                landing pages at volume —{' '}
                 <strong className="text-ds-text font-semibold">200+</strong> for US clients.
               </p>
 
