@@ -107,7 +107,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      message: "Message received! I'll reply within 48 hours.",
+      message: "Message received! I'll reply within 24 hours.",
     })
   } catch (err) {
     console.error('[contact/route] Unexpected error:', err)

@@ -83,7 +83,7 @@ export default function ServicesPage() {
             Let&apos;s talk about your project
           </h2>
           <p className="text-ds-muted mb-6 text-sm">
-            Tell me what you&apos;re building — I&apos;ll reply within 48 hours.
+            Tell me what you&apos;re building — I&apos;ll reply within 24 hours.
           </p>
           <Button href="/contact" variant="primary" size="lg">
             Get in Touch

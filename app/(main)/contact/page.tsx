@@ -100,7 +100,7 @@ export default function ContactPage() {
             <Reveal className="lg:col-span-2">
               <p className="text-ds-muted mb-5 flex items-center gap-2 font-mono text-sm lg:hidden">
                 <Icon name="clock" className="text-ds-accent h-4 w-4 flex-shrink-0" />I aim to reply
-                within 48 hours.
+                within 24 hours.
               </p>
               <ContactForm />
             </Reveal>
@@ -119,7 +119,7 @@ export default function ContactPage() {
                     Response time
                   </h2>
                   <p className="text-ds-muted text-sm">
-                    I aim to reply within 48 hours. For urgent inquiries, DM me on LinkedIn.
+                    I aim to reply within 24 hours. For urgent inquiries, DM me on LinkedIn.
                   </p>
                 </div>
 

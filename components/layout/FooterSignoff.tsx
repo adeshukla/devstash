@@ -100,7 +100,7 @@ export function FooterSignoff({ email }: { email: string }) {
           <span className="text-ds-accent">$</span> <span className="so-cmd">date</span>
         </p>
         <p className="so-out text-ds-muted" style={delay(2.65)}>
-          <span className="text-ds-text">{time ?? '—'}</span> IST · replies within 48h
+          <span className="text-ds-text">{time ?? '—'}</span> IST · replies within 24h
           <span className="bg-ds-accent animate-blink ml-1 inline-block h-3.5 w-1.5 translate-y-[2px]" />
         </p>
       </div>
