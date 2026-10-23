@@ -13,7 +13,7 @@ import { JsonLd } from '@/components/seo/JsonLd'
 import { buildBlogPostingSchema, buildFAQSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
 import { Badge, Reveal, MountReveal } from '@/components/ui'
-import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
+import { PostCover } from '@/components/blog/PostCover'
 import { TOC } from '@/components/blog/TOC'
 import { AuthorBio } from '@/components/blog/AuthorBio'
 import { RelatedPosts } from '@/components/blog/RelatedPosts'
@@ -126,7 +126,7 @@ export default async function BlogPostPage({ params }: Props) {
                     sizes="(min-width: 1280px) 1152px, (min-width: 768px) 90vw, 100vw"
                   />
                 ) : (
-                  <CategoryIllustration category={post.category} kind="blog" seed={post.slug} />
+                  <PostCover post={post} size="hero" />
                 )}
               </div>
             </MountReveal>

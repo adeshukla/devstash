@@ -13,7 +13,7 @@ import { buildProjectSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
 import { getAllProjects, getProjectBySlug, parseCaseStudyOutcome } from '@/lib/markdown/projects'
 import { Badge, Button, ImageGallery, Reveal, MountReveal, Separator } from '@/components/ui'
-import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
+import { ProjectCover } from '@/components/sections/ProjectCover'
 import { Icon } from '@/components/icons/Icon'
 import { TECH_ICONS } from '@/lib/utils/techIcons'
 import { mdxComponents } from '@/components/blog/MDXComponents'
@@ -117,11 +117,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             {(!project.interface || project.interface.length === 0) && (
               <MountReveal delay={80}>
                 <div className="border-ds-border bg-ds-surface2 mt-6 h-56 overflow-hidden rounded-2xl border sm:h-64">
-                  <CategoryIllustration
-                    category={project.category}
-                    kind="project"
-                    seed={project.slug}
-                  />
+                  <ProjectCover slug={project.slug} />
                 </div>
               </MountReveal>
             )}

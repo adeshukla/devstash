@@ -33,11 +33,14 @@ export interface BlogPost {
    * JSON-LD. Each answer must restate something the post itself says. */
   faqs?: FAQItem[]
   content: string // raw MDX string — not in frontmatter, added by parsePost()
+  /** Issue number: position among published posts, oldest = 1. Computed by
+   * getAllPosts(), never in frontmatter; drafts have none. */
+  number?: number
 }
 
 // Frontmatter shape used by lib/automation/utils.ts validateFrontmatter()
-// All the same fields as BlogPost except the runtime-added 'content' string
-export type BlogFrontmatter = Omit<BlogPost, 'content'>
+// All the same fields as BlogPost except the runtime-added 'content' and 'number'
+export type BlogFrontmatter = Omit<BlogPost, 'content' | 'number'>
 
 export interface TOCItem {
   id: string

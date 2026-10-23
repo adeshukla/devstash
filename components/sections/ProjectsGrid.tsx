@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Card, Badge, Button, Reveal, CardTilt } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
-import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
+import { ProjectCover } from '@/components/sections/ProjectCover'
 import { TECH_ICONS } from '@/lib/utils/techIcons'
 import type { Project } from '@/types/project'
 
@@ -96,11 +96,7 @@ export function ProjectsGrid({ projects, showAll = false }: ProjectsGridProps) {
                           />
                         ) : (
                           <div className="h-full w-full transition-transform duration-300 group-hover:scale-105">
-                            <CategoryIllustration
-                              category={project.category}
-                              kind="project"
-                              seed={project.slug}
-                            />
+                            <ProjectCover slug={project.slug} />
                           </div>
                         )}
                       </div>

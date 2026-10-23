@@ -2,8 +2,9 @@ import { LogoMark } from '@/components/ui/LogoMark'
 
 // Each project's own brand colour and mark, copied from its repo (sources
 // below) so a card is recognisable at a glance — these are other products'
-// identities, not DevStash design tokens. Projects without a brand of their
-// own (the DevStash Lab tools) fall back to the DevStash mark and accent.
+// identities, not DevStash design tokens. The DevStash Lab tools get a
+// monogram in the DevStash accent (below); anything else unlisted falls back
+// to the DevStash mark.
 
 interface ProjectBrand {
   /** Any CSS colour. Used only for decoration (bar, glow), never text. */
@@ -84,6 +85,35 @@ const BRANDS: Record<string, ProjectBrand> = {
     ),
   },
 }
+
+// The Lab tools are DevStash's own and have no logos. A plain monogram in the
+// DevStash accent (like Motion Lab's) keeps them apart on covers and in the
+// deck, where four identical DevStash marks read as one product four times.
+function monogram(text: string): ProjectBrand {
+  return {
+    color: 'var(--color-ds-accent)',
+    Mark: () => (
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="8" fill="var(--color-ds-accent)" />
+        <text
+          x="16"
+          y={text.length > 2 ? 20.5 : 21}
+          textAnchor="middle"
+          fontSize={text.length > 2 ? 10 : 13}
+          fontWeight="700"
+          fontFamily="var(--font-sans), sans-serif"
+          fill="#fff"
+        >
+          {text}
+        </text>
+      </svg>
+    ),
+  }
+}
+BRANDS['css-shapes-playground'] = monogram('CSS')
+BRANDS['illustration-generator'] = monogram('IG')
+BRANDS['meta-tag-generator'] = monogram('MT')
+BRANDS['utm-builder'] = monogram('UTM')
 
 const DEVSTASH: ProjectBrand = { color: 'var(--color-ds-accent)', Mark: () => <LogoMark /> }
 
