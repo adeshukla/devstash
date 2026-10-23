@@ -32,7 +32,7 @@ export function CopyCodeButton() {
         onClick={handleCopy}
         aria-label={copied ? 'Copied' : 'Copy code'}
         className={cn(
-          'btn-cta btn-cta-ghost border-ds-border/60 bg-ds-surface text-ds-muted hover:border-ds-accent hover:text-ds-accent',
+          'border-ds-border/60 bg-ds-surface text-ds-muted hover:border-ds-accent hover:text-ds-accent',
           // Dimly visible by default (not opacity-0) so it's discoverable
           // without requiring a hover to reveal it exists at all — full
           // opacity on hover/focus.

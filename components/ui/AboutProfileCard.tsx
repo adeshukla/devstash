@@ -1,9 +1,8 @@
-// Companion to HeroGraphic's "build status" window — same non-decorative
-// principle applied to the About hero: a themed readout of facts already
-// stated in this exact page's copy (role, location, experience, stack,
-// current status), not invented flavor text standing in for a real photo.
-// Pure CSS stagger (animate-fade-up + per-line delay, identical technique to
-// HeroGraphic) — no client JS, stays a Server Component, never touches LCP.
+// A non-decorative "terminal" for the About hero: a themed readout of facts
+// already stated in this exact page's copy (role, location, experience,
+// stack, current status), not invented flavor text standing in for a real
+// photo. Pure CSS stagger (animate-fade-up + per-line delay) — no client JS,
+// stays a Server Component, never touches LCP.
 
 const FIELDS: { key: string; value: string }[] = [
   { key: 'role', value: "'Frontend Developer'" },
@@ -20,8 +19,8 @@ export function AboutProfileCard() {
       aria-hidden="true"
       className="border-ds-border bg-ds-surface animate-float w-full overflow-hidden rounded-xl border shadow-2xl shadow-black/40"
     >
-      {/* Window chrome — same three-dot treatment as HeroGraphic's terminal,
-          so the two feel like one system rather than two different widgets. */}
+      {/* Window chrome — the same three-dot treatment the site's other
+          terminal-style panels use, so they read as one system. */}
       <div className="border-ds-border flex h-12 items-center gap-3 border-b px-5">
         <div className="flex gap-2">
           <span className="bg-ds-error/80 h-3 w-3 rounded-full" />

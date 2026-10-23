@@ -4,8 +4,7 @@
 // the "DevStash" text next to it changes theme.
 //
 // The bar reads as a terminal cursor (">_") next to the arrow, so it blinks
-// continuously via the existing `animate-blink` keyframe (already used for
-// the cursor in HeroGraphic) — a small always-on animation that ties directly
+// continuously via the existing `animate-blink` keyframe — a small always-on animation that ties directly
 // into the terminal branding instead of being motion for its own sake.
 export function LogoMark({ size = 30 }: { size?: number }) {
   return (

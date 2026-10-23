@@ -26,6 +26,11 @@
      also under AA's 4.5:1. */
   --color-ds-warning-strong: #f59e0b;
   --color-ds-error: #ef4444;
+  /* Solid button fill — deliberately NOT --color-ds-accent: white text on
+     #3b82f6 is only 3.7:1 (fails WCAG AA for button-size text). #2563eb is
+     5.2:1 and the same in both themes, so it needs no light override. */
+  --color-ds-cta: #2563eb;
+  --color-ds-cta-hover: #1d4ed8;
 
   /* ── Fonts ── */
   --font-sans: var(--font-sans), system-ui, sans-serif;
@@ -391,7 +396,7 @@ body {
 /* Aurora background blob */
 /* NOTE on the infinite animations below (.animate-aurora, .animate-float):
    decorative, so they only run at >=768px with motion allowed — see the
-   @media block after .text-gradient. Never animate `background-position` on
+   @media block below. Never animate `background-position` on
    always-visible elements: it's a PAINT-triggering, non-composited property
    that repaints every frame (it kept the hero H1 from settling for LCP). */
 .animate-aurora {
@@ -412,15 +417,6 @@ body {
       animation-name: flowDot;
     }
   }
-}
-
-/* Blue→purple gradient text (hero accent phrase). Static on purpose — the
-   animated sweep read as AI-template styling. */
-.text-gradient {
-  background-image: linear-gradient(100deg, var(--color-ds-accent), var(--color-ds-purple));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 
 /* Layer the infinite decorative motion back on only where it's affordable:
@@ -564,6 +560,224 @@ body {
   opacity: 0.85;
 }
 
+/* ═══ Home hero (components/sections/HeroSection.tsx + ui/HeroStage.tsx) ═══
+   The live hero is always rendered and painted (the <h1> is the LCP element
+   from the first frame). Design and Code are overlays drawn on top of it:
+   on a first visit they wipe in/out as an intro (design → code → live), and
+   the "View as" switch brings them back on demand. */
+.hero-stage {
+  position: relative;
+}
+.hero-ov {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: var(--color-ds-bg);
+  clip-path: inset(0 100% 0 0);
+  visibility: hidden;
+  transition:
+    clip-path 0.7s var(--ds-ease-smooth),
+    visibility 0s 0.7s;
+}
+.hero-stage[data-view='design'] .hero-ov-design,
+.hero-stage[data-view='code'] .hero-ov-code,
+html[data-hero-intro] .hero-ov-design {
+  clip-path: inset(0);
+  visibility: visible;
+  transition:
+    clip-path 0.7s var(--ds-ease-smooth),
+    visibility 0s;
+}
+.hero-stage[data-view='code'] .hero-ov-code {
+  z-index: 6;
+}
+.hero-vb-ind {
+  transition:
+    left 0.45s var(--ds-ease-smooth),
+    width 0.45s var(--ds-ease-smooth);
+}
+
+/* The three promises act out what they mean (.on is toggled by HeroStage) */
+.hero-w {
+  position: relative;
+  display: inline-block;
+}
+.hero-w .ch {
+  display: inline-block;
+}
+.hero-w-fast::before {
+  content: '';
+  position: absolute;
+  left: -0.9em;
+  right: 100%;
+  top: 50%;
+  height: 0.2em;
+  translate: 0 -50%;
+  opacity: 0;
+  background:
+    linear-gradient(var(--color-ds-accent), var(--color-ds-accent)) 0 0 / 100% 2px no-repeat,
+    linear-gradient(var(--color-ds-accent), var(--color-ds-accent)) 30% 50% / 70% 2px no-repeat,
+    linear-gradient(var(--color-ds-accent), var(--color-ds-accent)) 60% 100% / 40% 2px no-repeat;
+}
+.hero-w-fast.on::before {
+  animation: hero-streak 0.7s var(--ds-ease-smooth);
+}
+.hero-w-fast.on .ch {
+  animation: hero-zoom 0.7s var(--ds-ease-smooth) both;
+  animation-delay: calc(var(--i) * 30ms);
+}
+@keyframes hero-zoom {
+  0% {
+    transform: translateX(-0.5em) skewX(-18deg);
+    opacity: 0.15;
+    filter: blur(4px);
+  }
+  60% {
+    transform: translateX(0.06em) skewX(5deg);
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes hero-streak {
+  0% {
+    right: 30%;
+    opacity: 0.9;
+  }
+  100% {
+    right: 100%;
+    opacity: 0;
+  }
+}
+.hero-ring {
+  position: absolute;
+  inset: -0.06em -0.12em 0;
+  border-radius: 0.16em;
+  border: 0.045em solid var(--color-ds-accent);
+  opacity: 0;
+  clip-path: inset(0 100% 0 0 round 0.16em);
+  transition:
+    clip-path 0.6s var(--ds-ease-smooth),
+    opacity 0.2s;
+  pointer-events: none;
+}
+.hero-w-acc.on .hero-ring {
+  opacity: 1;
+  clip-path: inset(0 0 0 0 round 0.16em);
+}
+.hero-base {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.1em;
+  height: 0.035em;
+  background: var(--color-ds-purple);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s var(--ds-ease-smooth);
+}
+.hero-w-last.on .ch {
+  animation: hero-drop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(var(--i) * 45ms);
+}
+.hero-w-last.on .hero-base {
+  transform: scaleX(1);
+  transition-delay: 0.7s;
+}
+@keyframes hero-drop {
+  0% {
+    transform: translateY(-1.1em) rotate(-8deg);
+    opacity: 0;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* Evidence panel: one underline under the active tab doubles as the
+   countdown to the next one (fills while cycling, solid when the visitor
+   has taken over). All views share one grid cell, so the panel is as tall
+   as its tallest view and never jumps. */
+.hero-ind {
+  --c: var(--color-ds-accent);
+  background: color-mix(in srgb, var(--c) 28%, transparent);
+  transition:
+    left 0.45s var(--ds-ease-smooth),
+    width 0.45s var(--ds-ease-smooth);
+}
+.hero-ind i {
+  display: block;
+  height: 100%;
+  background: var(--c);
+  transform-origin: left;
+}
+.hero-panel[data-cycling] .hero-ind i {
+  animation: hero-prog var(--cycle, 4.2s) linear both;
+}
+@keyframes hero-prog {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.hero-view {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.35s,
+    transform 0.5s var(--ds-ease-smooth);
+}
+.hero-view.on {
+  opacity: 1;
+  transform: none;
+}
+.hero-item {
+  opacity: 0;
+  transform: translateX(10px);
+}
+.hero-view.on .hero-item {
+  animation: hero-item-in 0.5s var(--ds-ease-smooth) both;
+  animation-delay: calc(0.12s + var(--i) * 90ms);
+}
+@keyframes hero-item-in {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Code overlay: lines type in each time it's shown */
+.hero-code code {
+  white-space: normal;
+}
+.hero-ln {
+  display: block;
+  white-space: pre;
+  min-height: 1.85em;
+  opacity: 0;
+  transform: translateX(-6px);
+}
+.hero-stage[data-view='code'] .hero-ln {
+  animation: hero-item-in 0.3s var(--ds-ease-smooth) both;
+  animation-delay: calc(0.25s + var(--i) * 80ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-item,
+  .hero-ln {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Footer coffee cup steam (components/layout/Footer.tsx). Base opacity is
    the visible state, so when reduced motion cancels the animation the steam
    still shows — just still. */
@@ -643,32 +857,11 @@ body {
   animation: build-type 0.4s steps(7, end) calc(var(--d) + 0.1s) both;
 }
 
-/* Hero build terminal (components/ui/HeroGraphic.tsx). Plays once: --d on
-   each line is when it starts. Opacity/transform/clip only. Under reduced
-   motion the global rule collapses every animation to its end state (fill
-   `both`), which is the finished build. */
-.build-type {
-  display: inline-block;
-  clip-path: inset(0 100% 0 0);
-  animation: build-type 0.55s steps(10, end) 0.5s both;
-}
+/* Keyframes shared by the footer sign-off terminal (FooterSignoff) */
 @keyframes build-type {
   to {
     clip-path: inset(0);
   }
-}
-.build-bar {
-  transform: scaleX(0);
-  transform-origin: left;
-  animation: build-bar var(--len) cubic-bezier(0.4, 0, 0.2, 1) var(--d) both;
-}
-@keyframes build-bar {
-  to {
-    transform: scaleX(1);
-  }
-}
-.build-line {
-  animation: build-in 0.35s var(--ds-ease-smooth) var(--d) both;
 }
 @keyframes build-in {
   from {
@@ -676,50 +869,6 @@ body {
     transform: translateY(6px);
   }
 }
-.build-spin {
-  width: 0.75em;
-  height: 0.75em;
-  border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--color-ds-success) 25%, transparent);
-  border-top-color: var(--color-ds-success);
-  animation:
-    build-spin 0.6s linear infinite,
-    build-hide 0.1s linear calc(var(--d) + 0.45s) both;
-}
-@keyframes build-spin {
-  to {
-    transform: rotate(1turn);
-  }
-}
-@keyframes build-hide {
-  to {
-    opacity: 0;
-  }
-}
-.build-tick {
-  animation: build-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--d) + 0.45s) both;
-}
-@keyframes build-pop {
-  from {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-}
-.build-detail {
-  animation: build-fade 0.3s ease calc(var(--d) + 0.45s) both;
-}
-@keyframes build-fade {
-  from {
-    opacity: 0;
-  }
-}
-.build-status-wip {
-  animation: build-hide 0.2s ease var(--d) both;
-}
-.build-status-ok {
-  animation: build-fade 0.3s ease var(--d) both;
-}
-
 /* Intro-video poster (components/ui/IntroVideo.tsx): a quiet dot grid with
    two soft corner lights, on tokens so it repaints for light theme. Static. */
 .intro-poster {
@@ -1113,109 +1262,11 @@ body {
   transform: translateY(0);
 }
 
-/* ──────────────────────────────────────────────────────────────
-   CTA button interaction — shared by every <Button> variant so every
-   CTA site-wide gets the same signature motion: a smooth lift, a
-   one-shot diagonal shine sweep, and a duotone accent→purple glow
-   (same gradient pair as .text-gradient). Built only from transform/opacity/box-shadow/background-
-   position — nothing that triggers layout — so it never jerks.
-   ────────────────────────────────────────────────────────────── */
+/* Shared easing for the site's hover/entrance motion. (Buttons used to get a
+   lift + shine + accent→purple glow here; removed 2026-10-23 — buttons are
+   solid brand colour and only change colour on hover, see Button.tsx.) */
 :root {
   --ds-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.btn-cta {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  transition:
-    transform 0.32s var(--ds-ease-smooth),
-    box-shadow 0.32s var(--ds-ease-smooth),
-    color 0.32s var(--ds-ease-smooth),
-    border-color 0.32s var(--ds-ease-smooth),
-    background-position 0.32s var(--ds-ease-smooth);
-}
-.btn-cta > * {
-  position: relative;
-  z-index: 1;
-}
-.btn-cta:hover {
-  transform: translateY(-2px);
-}
-.btn-cta:active {
-  transform: translateY(0) scale(0.97);
-  transition-duration: 0.12s;
-}
-.btn-cta:disabled,
-.btn-cta[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-/* Diagonal shine — one clean light pass across the button on hover,
-   parked off-canvas at rest so it never loops or draws attention idle. */
-.btn-cta::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: linear-gradient(
-    115deg,
-    transparent 25%,
-    color-mix(in srgb, white 35%, transparent) 50%,
-    transparent 75%
-  );
-  transform: translateX(-130%);
-  transition: transform 0.65s var(--ds-ease-smooth);
-  pointer-events: none;
-}
-.btn-cta:hover::after {
-  transform: translateX(130%);
-}
-
-/* Primary — the accent half of the brand gradient at rest, sliding to
-   reveal its purple half on hover (background-position, not a color
-   swap, so it never jumps) plus a matching duotone glow. */
-.btn-cta-primary {
-  background-image: linear-gradient(100deg, var(--color-ds-accent), var(--color-ds-purple));
-  background-size: 220% 100%;
-  background-position: 0% 0%;
-}
-.btn-cta-primary:hover {
-  background-position: 100% 0%;
-  box-shadow:
-    0 10px 28px -8px color-mix(in srgb, var(--color-ds-accent) 55%, transparent),
-    0 4px 16px -6px color-mix(in srgb, var(--color-ds-purple) 45%, transparent);
-}
-
-/* Outline — the accent/purple duo fills in behind the text on hover
-   instead of a flat single-color fill. */
-.btn-cta-outline::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-image: linear-gradient(100deg, var(--color-ds-accent), var(--color-ds-purple));
-  opacity: 0;
-  transition: opacity 0.32s var(--ds-ease-smooth);
-}
-.btn-cta-outline:hover::before {
-  opacity: 1;
-}
-.btn-cta-outline:hover {
-  color: white;
-  border-color: transparent;
-  box-shadow: 0 8px 22px -10px color-mix(in srgb, var(--color-ds-accent) 45%, transparent);
-}
-
-/* Ghost — stays the subtlest variant (border/text shift only), just
-   picks up the shared lift/shine plus a faint single-color glow. */
-.btn-cta-ghost:hover {
-  box-shadow: 0 6px 16px -10px color-mix(in srgb, var(--color-ds-accent) 30%, transparent);
-}
-
-/* Danger keeps its own red family — same lift/shine, no accent/purple mixing. */
-.btn-cta-danger:hover {
-  box-shadow: 0 10px 26px -8px color-mix(in srgb, var(--color-ds-error) 50%, transparent);
 }
 
 /* reCAPTCHA v3's floating badge is redundant with the visible disclosure

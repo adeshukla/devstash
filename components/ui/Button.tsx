@@ -28,18 +28,20 @@ interface ButtonProps {
 
 // ── Style maps ────────────────────────────────────────────────
 
+// Solid brand buttons: hover only changes colour — no lift, shine, glow or
+// gradient (those read as template styling). Primary uses --color-ds-cta,
+// not the accent: white on the accent blue fails WCAG AA (3.7:1).
 const variantStyles: Record<Variant, string> = {
-  primary: ['btn-cta btn-cta-primary text-white', 'disabled:opacity-50'].join(' '),
+  primary: 'bg-ds-cta hover:bg-ds-cta-hover text-white disabled:opacity-50',
   ghost: [
-    'btn-cta btn-cta-ghost bg-transparent text-ds-muted',
-    'border border-ds-border',
+    'bg-transparent text-ds-muted border border-ds-border',
     'hover:border-ds-accent hover:text-ds-accent',
     'disabled:opacity-50',
   ].join(' '),
-  danger: ['btn-cta btn-cta-danger bg-ds-error text-white', 'disabled:opacity-50'].join(' '),
+  danger: 'bg-ds-error hover:bg-ds-error/90 text-white disabled:opacity-50',
   outline: [
-    'btn-cta btn-cta-outline bg-transparent text-ds-accent',
-    'border border-ds-accent',
+    'bg-transparent text-ds-text border border-ds-border2',
+    'hover:border-ds-text',
     'disabled:opacity-50',
   ].join(' '),
 }
@@ -86,7 +88,8 @@ export function Button({
   onClick,
 }: ButtonProps) {
   const base = cn(
-    'inline-flex items-center justify-center font-medium select-none',
+    'inline-flex items-center justify-center font-medium select-none transition-colors duration-150',
+    'aria-disabled:pointer-events-none disabled:pointer-events-none',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ds-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ds-bg',
     'disabled:cursor-not-allowed',
     variantStyles[variant],
