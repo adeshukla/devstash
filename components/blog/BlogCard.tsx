@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { type BlogPost } from '@/types/blog'
-import { Badge } from '@/components/ui'
+import { Badge, CardTilt } from '@/components/ui'
 import { Icon, type IconName } from '@/components/icons/Icon'
 import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
 import { cn } from '@/lib/utils/cn'
@@ -47,90 +47,92 @@ export function BlogCard({ post, featured = false, className }: BlogCardProps) {
   const badgeIcon = CATEGORY_ICONS[post.category]
 
   return (
-    <article
-      className={cn(
-        'group bg-ds-surface border-ds-border rounded-card card-hover flex flex-col overflow-hidden border',
-        'shadow-sm',
-        featured && 'md:flex-row',
-        className
-      )}
-    >
-      {/* Featured Image */}
-      <Link
-        href={`/blog/${post.slug}`}
-        aria-hidden="true"
-        tabIndex={-1}
+    <CardTilt>
+      <article
         className={cn(
-          'relative block shrink-0 overflow-hidden',
-          featured ? 'h-64 md:h-auto md:w-80' : 'h-64'
+          'group bg-ds-surface rounded-card flex flex-col overflow-hidden',
+          'card-spotlight card-glow shadow-sm',
+          featured && 'md:flex-row',
+          className
         )}
       >
-        {post.featuredImage ? (
-          <Image
-            src={post.featuredImage}
-            alt={post.title}
-            fill
-            className="object-cover"
-            sizes={
-              featured ? '(min-width: 768px) 288px, 100vw' : '(min-width: 1024px) 384px, 100vw'
-            }
-          />
-        ) : (
-          <div className="h-full w-full">
-            <CategoryIllustration category={post.category} kind="blog" seed={post.slug} />
-          </div>
-        )}
-        {post.featured && (
-          <span className="bg-ds-accent absolute top-3 left-3 rounded-md px-2 py-0.5 text-xs font-semibold text-white">
-            Featured
-          </span>
-        )}
-      </Link>
-
-      {/* Content */}
-      <div className="flex flex-1 flex-col p-6">
-        {/* Category + read time */}
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <Badge variant={badgeVariant} icon={badgeIcon ? <Icon name={badgeIcon} /> : undefined}>
-            {post.category.replace('-', ' ')}
-          </Badge>
-          <span className="text-ds-muted text-xs">{post.readingTime} min read</span>
-        </div>
-
-        {/* Title */}
-        <Link href={`/blog/${post.slug}`} className="group/title">
-          <h2 className="text-ds-text group-hover/title:text-ds-accent mb-2 line-clamp-2 font-sans text-xl leading-snug font-semibold transition-colors">
-            {post.title}
-          </h2>
+        {/* Featured Image */}
+        <Link
+          href={`/blog/${post.slug}`}
+          aria-hidden="true"
+          tabIndex={-1}
+          className={cn(
+            'relative block shrink-0 overflow-hidden',
+            featured ? 'h-64 md:h-auto md:w-80' : 'h-64'
+          )}
+        >
+          {post.featuredImage ? (
+            <Image
+              src={post.featuredImage}
+              alt={post.title}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              sizes={
+                featured ? '(min-width: 768px) 288px, 100vw' : '(min-width: 1024px) 384px, 100vw'
+              }
+            />
+          ) : (
+            <div className="h-full w-full transition-transform duration-300 group-hover:scale-105">
+              <CategoryIllustration category={post.category} kind="blog" seed={post.slug} />
+            </div>
+          )}
+          {post.featured && (
+            <span className="bg-ds-accent absolute top-3 left-3 rounded-md px-2 py-0.5 text-xs font-semibold text-white">
+              Featured
+            </span>
+          )}
         </Link>
 
-        {/* Description */}
-        <p className="text-ds-muted mb-4 line-clamp-2 flex-1 text-sm leading-relaxed">
-          {post.description}
-        </p>
-
-        {/* Tags */}
-        {post.tags.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-1.5">
-            {post.tags.slice(0, 3).map((tag) => (
-              <Link
-                key={tag}
-                href={`/blog/tag/${tag}`}
-                className="bg-ds-surface2 text-ds-muted hover:text-ds-accent rounded px-2 py-0.5 font-mono text-xs transition-colors"
-              >
-                #{tag}
-              </Link>
-            ))}
+        {/* Content */}
+        <div className="flex flex-1 flex-col p-6">
+          {/* Category + read time */}
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <Badge variant={badgeVariant} icon={badgeIcon ? <Icon name={badgeIcon} /> : undefined}>
+              {post.category.replace('-', ' ')}
+            </Badge>
+            <span className="text-ds-muted text-xs">{post.readingTime} min read</span>
           </div>
-        )}
 
-        {/* Meta footer */}
-        <div className="border-ds-border text-ds-muted flex items-center gap-2 border-t pt-4 text-xs">
-          <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
-          <span>·</span>
-          <span>{post.author}</span>
+          {/* Title */}
+          <Link href={`/blog/${post.slug}`} className="group/title">
+            <h2 className="text-ds-text group-hover/title:text-ds-accent mb-2 line-clamp-2 font-sans text-xl leading-snug font-semibold transition-colors">
+              {post.title}
+            </h2>
+          </Link>
+
+          {/* Description */}
+          <p className="text-ds-muted mb-4 line-clamp-2 flex-1 text-sm leading-relaxed">
+            {post.description}
+          </p>
+
+          {/* Tags */}
+          {post.tags.length > 0 && (
+            <div className="mb-4 flex flex-wrap gap-1.5">
+              {post.tags.slice(0, 3).map((tag) => (
+                <Link
+                  key={tag}
+                  href={`/blog/tag/${tag}`}
+                  className="bg-ds-surface2 text-ds-muted hover:text-ds-accent rounded px-2 py-0.5 font-mono text-xs transition-colors"
+                >
+                  #{tag}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Meta footer */}
+          <div className="border-ds-border text-ds-muted flex items-center gap-2 border-t pt-4 text-xs">
+            <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
+            <span>·</span>
+            <span>{post.author}</span>
+          </div>
         </div>
-      </div>
-    </article>
+      </article>
+    </CardTilt>
   )
 }

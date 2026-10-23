@@ -5,7 +5,7 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildItemListSchema } from '@/lib/schema/builders'
-import { Badge } from '@/components/ui'
+import { Badge, CardTilt } from '@/components/ui'
 import { LabPreview, type PreviewKind } from '@/components/lab/LabPreview'
 
 const title = 'Lab — Interactive Tools & Live Demos'
@@ -81,28 +81,30 @@ const TOOLS: Demo[] = [
  */
 function LabEntry({ demo }: { demo: Demo }) {
   return (
-    <Link
-      href={`/lab/${demo.slug}`}
-      className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-    >
-      <article className="flex h-full flex-col gap-4">
-        <div className="group-hover:border-ds-accent/50 rounded-lg transition-colors">
-          <LabPreview kind={demo.preview} />
-        </div>
-        <div className="flex flex-1 flex-col gap-2">
-          <div className="flex items-baseline justify-between gap-3">
-            <h3 className="text-ds-text group-hover:text-ds-accent font-semibold transition-colors">
-              {demo.name}
-            </h3>
-            <span className="text-ds-muted shrink-0 text-xs">{demo.tag}</span>
+    <CardTilt>
+      <Link
+        href={`/lab/${demo.slug}`}
+        className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+      >
+        <article className="flex h-full flex-col gap-4">
+          <div className="card-spotlight card-glow rounded-lg">
+            <LabPreview kind={demo.preview} />
           </div>
-          <p className="text-ds-muted flex-1 text-sm leading-relaxed">{demo.blurb}</p>
-          <span className="text-ds-accent text-sm font-medium opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-            Open it &rarr;
-          </span>
-        </div>
-      </article>
-    </Link>
+          <div className="flex flex-1 flex-col gap-2">
+            <div className="flex items-baseline justify-between gap-3">
+              <h3 className="text-ds-text group-hover:text-ds-accent font-semibold transition-colors">
+                {demo.name}
+              </h3>
+              <span className="text-ds-muted shrink-0 text-xs">{demo.tag}</span>
+            </div>
+            <p className="text-ds-muted flex-1 text-sm leading-relaxed">{demo.blurb}</p>
+            <span className="text-ds-accent text-sm font-medium opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+              Open it &rarr;
+            </span>
+          </div>
+        </article>
+      </Link>
+    </CardTilt>
   )
 }
 
@@ -138,37 +140,39 @@ export default function LabPage() {
           show its own three-stage shape. */}
       <section className="py-16">
         <div className="mx-auto max-w-5xl px-6">
-          <Link
-            href={`/lab/${FLAGSHIP.slug}`}
-            className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-2xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-          >
-            <article className="border-ds-border bg-ds-surface hover:border-ds-accent/40 grid gap-8 rounded-2xl border p-6 transition-colors sm:p-8 lg:grid-cols-[1.1fr_1fr] lg:items-center">
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-3">
-                  <Badge variant="purple">Flagship</Badge>
-                  <span className="text-ds-muted text-xs">Runs server-side on every request</span>
+          <CardTilt>
+            <Link
+              href={`/lab/${FLAGSHIP.slug}`}
+              className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg rounded-card block focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+            >
+              <article className="bg-ds-surface card-spotlight card-glow rounded-card grid gap-8 p-6 shadow-sm sm:p-8 lg:grid-cols-[1.1fr_1fr] lg:items-center">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-3">
+                    <Badge variant="purple">Flagship</Badge>
+                    <span className="text-ds-muted text-xs">Runs server-side on every request</span>
+                  </div>
+                  <h2 className="text-ds-text group-hover:text-ds-accent text-2xl font-bold tracking-tight transition-colors sm:text-3xl">
+                    {FLAGSHIP.name}
+                  </h2>
+                  <p className="text-ds-muted max-w-[60ch] leading-relaxed">{FLAGSHIP.blurb}</p>
+                  <ol className="border-ds-border mt-1 flex flex-col divide-y divide-[var(--color-ds-border)] border-y">
+                    {FLAGSHIP.steps.map((step) => (
+                      <li key={step.name} className="flex items-baseline gap-3 py-2.5">
+                        <span className="text-ds-text w-24 shrink-0 text-sm font-medium">
+                          {step.name}
+                        </span>
+                        <span className="text-ds-muted text-sm">{step.detail}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  <span className="text-ds-accent mt-1 text-sm font-medium">
+                    Run the pipeline &rarr;
+                  </span>
                 </div>
-                <h2 className="text-ds-text group-hover:text-ds-accent text-2xl font-bold tracking-tight transition-colors sm:text-3xl">
-                  {FLAGSHIP.name}
-                </h2>
-                <p className="text-ds-muted max-w-[60ch] leading-relaxed">{FLAGSHIP.blurb}</p>
-                <ol className="border-ds-border mt-1 flex flex-col divide-y divide-[var(--color-ds-border)] border-y">
-                  {FLAGSHIP.steps.map((step) => (
-                    <li key={step.name} className="flex items-baseline gap-3 py-2.5">
-                      <span className="text-ds-text w-24 shrink-0 text-sm font-medium">
-                        {step.name}
-                      </span>
-                      <span className="text-ds-muted text-sm">{step.detail}</span>
-                    </li>
-                  ))}
-                </ol>
-                <span className="text-ds-accent mt-1 text-sm font-medium">
-                  Run the pipeline &rarr;
-                </span>
-              </div>
-              <LabPreview kind="pipeline" />
-            </article>
-          </Link>
+                <LabPreview kind="pipeline" />
+              </article>
+            </Link>
+          </CardTilt>
         </div>
       </section>
 

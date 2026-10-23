@@ -505,19 +505,23 @@ body {
   }
 }
 
-/* The one hover for clickable cards: the border takes the accent. Colour
-   only — no lift, tilt, glow or image zoom — the same rule as the buttons.
-   (Replaced card-glow's lift + tinted shadow, card-spotlight's cursor-
-   tracking accent→purple ring and CardTilt's 3D tilt, which were three
-   hover languages for one kind of element.) Non-clickable panels get no
-   hover at all, so hover always means "this goes somewhere". */
-.card-hover {
-  transition: border-color 0.15s ease;
+/* Card hover lift + accent glow — pair with the `group`/hover utilities.
+   Tried a heavier dual-color (accent+purple) version here — read as a loud,
+   heavy shadow rather than a lift. Back to a single soft accent tint, low
+   opacity, tight blur, and the same smooth easing token the rest of the
+   site's hover motion uses (--ds-ease-smooth, see the CTA button section
+   below) instead of a linear `ease` — that's the actual "heavy" vs
+   "smooth" difference, not just the color count. */
+.card-glow {
+  transition:
+    transform 0.4s var(--ds-ease-smooth),
+    box-shadow 0.4s var(--ds-ease-smooth),
+    border-color 0.3s var(--ds-ease-smooth);
 }
-.card-hover:hover,
-.group:focus-visible .card-hover,
-.card-hover:focus-within {
-  border-color: color-mix(in srgb, var(--color-ds-accent) 55%, var(--color-ds-border));
+.card-glow:hover,
+[data-touched] .card-glow {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px -13px color-mix(in srgb, var(--color-ds-accent) 32%, transparent);
 }
 /* Light theme: a REST-state ambient shadow on every rounded-card surface
    (Card.tsx, WhatIDoBento's card divs) — not just on hover. Dark theme's
@@ -538,6 +542,97 @@ body {
       0 1px 2px -1px rgb(15 23 42 / 0.06),
       0 8px 20px -12px rgb(15 23 42 / 0.1);
   }
+}
+
+/* A tinted shadow this soft all but disappears against a white/near-white
+   surface — dark backgrounds give a colored glow contrast for free, light
+   ones don't, so it needs a stronger mix to read as the same felt effect
+   rather than "no hover happened". Covers both an explicit light-theme
+   choice and the system-preference default, matching the pattern the
+   color tokens above already use. */
+[data-theme='light'] .card-glow:hover,
+[data-theme='light'] [data-touched] .card-glow {
+  box-shadow:
+    0 14px 26px -14px color-mix(in srgb, var(--color-ds-accent) 38%, transparent),
+    0 2px 10px -4px color-mix(in srgb, var(--color-ds-accent) 20%, transparent);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) .card-glow:hover,
+  :root:not([data-theme='dark']) [data-touched] .card-glow {
+    box-shadow:
+      0 14px 26px -14px color-mix(in srgb, var(--color-ds-accent) 38%, transparent),
+      0 2px 10px -4px color-mix(in srgb, var(--color-ds-accent) 20%, transparent);
+  }
+}
+
+/* Registering --spot-x/--spot-y as real <percentage> custom properties (not
+   just untyped strings) is what lets the `transition` below actually
+   interpolate the radial-gradient's position instead of snapping it on
+   every mousemove tick — the glow visibly glides toward the cursor rather
+   than teleporting. Unsupported browsers (older Firefox) just keep the old
+   snap behavior; no functional loss, only a smoothness downgrade. */
+@property --spot-x {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 50%;
+}
+@property --spot-y {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 50%;
+}
+
+/* Cursor-tracking border glow ("Praxis-style" card hover) — no border at
+   rest; on hover, a soft radial gradient traces the cursor position but is
+   masked to a 1px ring at the card's own edge (same content-box/border-box
+   + mask-composite:exclude technique as .gradient-ring-hover above, just a
+   radial gradient instead of a rotating linear one). Reads as a glow
+   following the cursor around the card, brightest near whichever edge/
+   corner it's closest to — not a flat wash across the whole face. Position
+   comes from --spot-x/--spot-y, written by CardTilt on mousemove (a
+   per-event style write, not a running animation, so it doesn't carry the
+   background-position perf cost noted above .animate-float). inset:0 (not
+   negative) on purpose — Card's root has overflow-hidden for its image
+   slot, and a ring extending past the box would get clipped by that.
+
+   Touch has no cursor, so `:hover` never meaningfully fires there —
+   CardTilt sets [data-touched] on tap, and also automatically as a card
+   scrolls through the viewport center (see CardTilt.tsx), so the
+   glow still shows, briefly, as real feedback instead of the card going
+   completely inert on mobile. */
+.card-spotlight {
+  position: relative;
+  border: 1px solid transparent;
+}
+.card-spotlight::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    260px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    var(--color-ds-accent),
+    var(--color-ds-purple) 55%,
+    transparent 75%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  /* --spot-x/--spot-y are NOT transitioned here — CardTilt already eases
+     them via a per-frame RAF lerp before writing the custom property, so a
+     second CSS-level transition here would just double-smooth (and lag)
+     the same motion. Only opacity (show/hide) needs a transition. */
+  transition: opacity 0.35s var(--ds-ease-smooth);
+  pointer-events: none;
+}
+.card-spotlight:hover::before,
+[data-touched] .card-spotlight::before {
+  opacity: 0.85;
 }
 
 /* ═══ Home hero (components/sections/HeroSection.tsx + ui/HeroStage.tsx) ═══
@@ -1063,8 +1158,8 @@ html[data-hero-intro] .hero-ov-design {
 /* Ring on hover/active — for interactive elements that aren't cards (nav
    tabs, filter pills, chips). A solid 1px accent ring drawn with box-shadow,
    so it never shifts layout or needs to know the element's background. Was
-   an animated accent→purple gradient ring; colour-only now, like the buttons
-   and .card-hover. */
+   an animated accent→purple gradient ring; solid now. Clickable cards have
+   their own hover: CardTilt + .card-spotlight + .card-glow. */
 .ring-hover {
   transition: box-shadow 0.15s ease;
 }
