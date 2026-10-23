@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { type BlogPost } from '@/types/blog'
 import { Badge, CardTilt } from '@/components/ui'
 import { Icon, type IconName } from '@/components/icons/Icon'
-import { PostCover } from '@/components/blog/PostCover'
+import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
 import { cn } from '@/lib/utils/cn'
 
 interface BlogCardProps {
@@ -78,11 +78,11 @@ export function BlogCard({ post, featured = false, className }: BlogCardProps) {
             />
           ) : (
             <div className="h-full w-full transition-transform duration-300 group-hover:scale-105">
-              <PostCover post={post} />
+              <CategoryIllustration category={post.category} kind="blog" seed={post.slug} />
             </div>
           )}
           {post.featured && (
-            <span className="bg-ds-accent absolute right-3 bottom-3 rounded-md px-2 py-0.5 text-xs font-semibold text-white">
+            <span className="bg-ds-accent absolute top-3 left-3 rounded-md px-2 py-0.5 text-xs font-semibold text-white">
               Featured
             </span>
           )}

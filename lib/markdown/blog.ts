@@ -74,17 +74,13 @@ function parsePost(fileName: string): BlogPost | null {
 export function getAllPosts(includeDrafts = false): BlogPost[] {
   if (!fs.existsSync(BLOGS_DIR)) return []
 
-  const posts = fs
+  return fs
     .readdirSync(BLOGS_DIR)
     .filter((f) => f.endsWith('.mdx') || f.endsWith('.md'))
     .map((f) => parsePost(f))
     .filter((post): post is BlogPost => post !== null)
     .filter((post) => includeDrafts || !post.draft)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-
-  // Issue numbers for the card covers: newest published post = highest.
-  const published = posts.filter((p) => !p.draft)
-  return posts.map((p) => (p.draft ? p : { ...p, number: published.length - published.indexOf(p) }))
 }
 
 export function getPostBySlug(slug: string): BlogPost | null {

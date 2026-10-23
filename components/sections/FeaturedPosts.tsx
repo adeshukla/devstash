@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Card, Badge, Button, Reveal, CardTilt } from '@/components/ui'
-import { PostCover } from '@/components/blog/PostCover'
+import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
 import type { BlogPost } from '@/types/blog'
 
 interface FeaturedPostsProps {
@@ -54,7 +54,11 @@ export function FeaturedPosts({ posts }: FeaturedPostsProps) {
                         />
                       ) : (
                         <div className="h-full w-full transition-transform duration-300 group-hover:scale-105">
-                          <PostCover post={post} />
+                          <CategoryIllustration
+                            category={post.category}
+                            kind="blog"
+                            seed={post.slug}
+                          />
                         </div>
                       )}
                     </div>
