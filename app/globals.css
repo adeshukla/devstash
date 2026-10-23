@@ -599,6 +599,49 @@ body {
 .footer-lottie .lottie-bg path {
   fill: color-mix(in srgb, var(--color-ds-accent) 12%, var(--color-ds-surface2));
 }
+/* The overlaid tech tags (replacing the artwork's HTML/CSS/JS/PHP). Visible
+   by default (no JS / reduced motion); when armed they wait for play, rise
+   in after the intro (or straight away if it was already seen), then bob. */
+.footer-tag {
+  translate: -50% -50%;
+}
+.footer-lottie[data-armed]:not([data-play]) .footer-tag {
+  opacity: 0;
+}
+.footer-lottie[data-armed][data-play] .footer-tag {
+  --base: 2.5s;
+  animation:
+    footer-tag-in 0.5s var(--ds-ease-smooth) calc(var(--base) + var(--i) * 0.18s) both,
+    footer-tag-bob 3.2s ease-in-out calc(var(--base) + 0.6s + var(--i) * 0.4s) infinite alternate;
+}
+.footer-lottie[data-armed][data-play][data-seen] .footer-tag {
+  --base: 0.2s;
+}
+@keyframes footer-tag-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+}
+@keyframes footer-tag-bob {
+  to {
+    transform: translateY(-4px);
+  }
+}
+
+/* Footer sign-off terminal (components/layout/FooterSignoff.tsx): visible by
+   default; when armed, hidden until the footer is in view, then each line
+   arrives at its --d and each command types itself out. */
+.signoff[data-armed]:not([data-play]) :is(.so-line, .so-out, .so-actions) {
+  opacity: 0;
+}
+.signoff[data-armed][data-play] :is(.so-line, .so-out, .so-actions) {
+  animation: build-in 0.35s var(--ds-ease-smooth) var(--d) both;
+}
+.signoff[data-armed][data-play] .so-cmd {
+  display: inline-block;
+  animation: build-type 0.4s steps(7, end) calc(var(--d) + 0.1s) both;
+}
 
 /* Hero build terminal (components/ui/HeroGraphic.tsx). Plays once: --d on
    each line is when it starts. Opacity/transform/clip only. Under reduced

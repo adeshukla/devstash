@@ -5,6 +5,7 @@ import { LogoMark } from '@/components/ui/LogoMark'
 import { Icon } from '@/components/icons/Icon'
 import type { IconName } from '@/components/icons/Icon'
 import { FooterLottie } from './FooterLottie'
+import { FooterSignoff } from './FooterSignoff'
 
 const navLinks = [
   { label: 'Home', href: '/' },
@@ -185,9 +186,13 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Illustration — loads and plays only as the visitor reaches the footer */}
-        <div className="mt-10 flex justify-center md:justify-end">
-          <FooterLottie />
+        {/* Closing band: sign-off on the left, illustration on the right.
+            Both start only when the visitor actually reaches the footer. */}
+        <div className="border-ds-border mt-14 grid items-center gap-10 border-t pt-12 md:grid-cols-2 md:gap-12">
+          <FooterSignoff email={siteConfig.author.email} />
+          <div className="flex justify-center md:justify-end">
+            <FooterLottie />
+          </div>
         </div>
 
         {/* Bottom row */}
