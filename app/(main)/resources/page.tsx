@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
-import { PageHeaderGlow } from '@/components/ui'
+import { PageFacts } from '@/components/ui/PageFacts'
 import { Icon, type IconName } from '@/components/icons/Icon'
 import resourcesData from '@/content/resources/resources.json'
 
@@ -81,8 +81,7 @@ export default function ResourcesPage() {
   return (
     <main>
       {/* Breadcrumb handles its own buildBreadcrumbSchema JsonLd internally */}
-      <section className="border-ds-border relative overflow-hidden border-b py-16">
-        <PageHeaderGlow />
+      <section className="border-ds-border border-b py-16">
         <div className="mx-auto max-w-3xl px-6">
           <Breadcrumb
             items={[
@@ -90,16 +89,19 @@ export default function ResourcesPage() {
               { name: 'Resources', url: 'https://devstash.me/resources' },
             ]}
           />
-          <h1 className="text-ds-text mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
+          <h1 className="text-ds-text mt-6 text-[clamp(44px,6vw,72px)] leading-[1.02] font-bold tracking-[-0.035em]">
             Resources
           </h1>
           <p className="text-ds-muted mt-4 max-w-[68ch] text-lg leading-relaxed">
             The docs, articles and references I actually go back to — not a link dump. Every entry
             here earned its place by being useful more than once.
           </p>
-          <p className="text-ds-muted mt-6 text-sm">
-            {resources.length} resources across {orderedCats.length} categories
-          </p>
+          <PageFacts
+            items={[
+              { value: resources.length, label: 'resources' },
+              { value: orderedCats.length, label: 'categories' },
+            ]}
+          />
         </div>
       </section>
 

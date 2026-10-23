@@ -4,7 +4,6 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildWebSiteSchema } from '@/lib/schema/builders'
 import { siteConfig } from '@/content/metadata/site.config'
-import { PageHeaderGlow } from '@/components/ui'
 
 const title = 'Terms of Service — Using the DevStash Website'
 const description =
@@ -25,8 +24,7 @@ export default function TermsPage() {
       <JsonLd data={buildWebSiteSchema()} />
 
       <main>
-        <section className="border-ds-border relative overflow-hidden border-b py-16">
-          <PageHeaderGlow side="right" />
+        <section className="border-ds-border border-b py-16">
           <div className="mx-auto max-w-3xl px-6">
             <p className="text-ds-accent font-mono text-sm">Legal</p>
             <h1 className="text-ds-text mt-2 text-4xl font-bold tracking-tight sm:text-5xl">

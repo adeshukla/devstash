@@ -319,20 +319,6 @@ body {
    Interactive / decorative animations
    ────────────────────────────────────────────────────────────── */
 
-/* Aurora blob drift (hero background) */
-@keyframes auroraDrift {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  33% {
-    transform: translate(6%, -4%) scale(1.08);
-  }
-  66% {
-    transform: translate(-5%, 5%) scale(0.96);
-  }
-}
-
 /* Animated gradient sweep (for gradient text / bars) */
 @keyframes gradientShift {
   0% {
@@ -393,15 +379,11 @@ body {
   }
 }
 
-/* Aurora background blob */
-/* NOTE on the infinite animations below (.animate-aurora, .animate-float):
-   decorative, so they only run at >=768px with motion allowed — see the
-   @media block below. Never animate `background-position` on
-   always-visible elements: it's a PAINT-triggering, non-composited property
-   that repaints every frame (it kept the hero H1 from settling for LCP). */
-.animate-aurora {
-  will-change: transform;
-}
+/* NOTE on the infinite .animate-float below: decorative, so it only runs at
+   >=768px with motion allowed — see the @media block below. Never animate
+   `background-position` on always-visible elements: it's a PAINT-triggering,
+   non-composited property that repaints every frame (it kept the hero H1
+   from settling for LCP). */
 
 /* Automation card's node strip (WhatIDoBento.tsx): one run, once, when the
    strip's Reveal turns .is-visible — Trigger fires, the payload travels,
@@ -518,9 +500,6 @@ body {
    larger screens, and only when the user hasn't asked for reduced motion.
    Small screens (phones/watches) keep the cheap static gradients above. */
 @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
-  .animate-aurora {
-    animation: auroraDrift 18s ease-in-out infinite;
-  }
   .animate-float {
     animation: floatY 5s ease-in-out infinite;
   }
@@ -611,7 +590,7 @@ body {
    corner it's closest to — not a flat wash across the whole face. Position
    comes from --spot-x/--spot-y, written by CardTilt on mousemove (a
    per-event style write, not a running animation, so it doesn't carry the
-   background-position perf cost noted above .animate-aurora). inset:0 (not
+   background-position perf cost noted above .animate-float). inset:0 (not
    negative) on purpose — Card's root has overflow-hidden for its image
    slot, and a ring extending past the box would get clipped by that.
 

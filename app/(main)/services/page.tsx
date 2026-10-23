@@ -4,7 +4,7 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildServicesSchema } from '@/lib/schema/builders'
-import { Button, PageHeaderGlow } from '@/components/ui'
+import { Button } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
 import type { IconName } from '@/components/icons/Icon'
 
@@ -41,8 +41,7 @@ export default function ServicesPage() {
   return (
     <main>
       <JsonLd data={buildServicesSchema(OFFERINGS)} />
-      <section className="border-ds-border relative overflow-hidden border-b py-16">
-        <PageHeaderGlow />
+      <section className="border-ds-border border-b py-16">
         <div className="mx-auto max-w-3xl px-6">
           <Breadcrumb
             items={[

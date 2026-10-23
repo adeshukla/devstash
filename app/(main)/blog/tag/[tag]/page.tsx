@@ -6,7 +6,6 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildBreadcrumbSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
-import { PageHeaderGlow } from '@/components/ui'
 import { BlogList } from '@/components/blog/BlogList'
 import { getAllPosts, getPostsByTag, getAllTags, isTagIndexable } from '@/lib/markdown/blog'
 
@@ -60,8 +59,7 @@ export default async function TagPage({ params }: Props) {
     <>
       <JsonLd data={buildBreadcrumbSchema(breadcrumbs)} />
 
-      <section className="border-ds-border relative overflow-hidden border-b py-16">
-        <PageHeaderGlow />
+      <section className="border-ds-border border-b py-16">
         <div className="mx-auto max-w-6xl px-6">
           <Breadcrumb
             items={[
@@ -72,7 +70,7 @@ export default async function TagPage({ params }: Props) {
 
           <div className="mt-6">
             <p className="text-ds-muted mb-2 font-mono text-sm">Tag</p>
-            <h1 className="text-ds-text mb-3 font-sans text-4xl font-bold tracking-tight sm:text-5xl">
+            <h1 className="text-ds-text mb-3 font-sans text-[clamp(44px,6vw,72px)] leading-[1.02] font-bold tracking-[-0.035em]">
               <span className="text-ds-muted">#</span>
               {tag}
             </h1>

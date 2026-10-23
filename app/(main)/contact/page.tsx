@@ -5,7 +5,7 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { siteConfig } from '@/content/metadata/site.config'
 import { Breadcrumb } from '@/components/layout'
 import { ContactForm } from '@/components/contact/ContactForm'
-import { Reveal, Separator, PageHeaderGlow } from '@/components/ui'
+import { Reveal, Separator } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
 import type { IconName } from '@/components/icons/Icon'
 
@@ -64,12 +64,8 @@ export default function ContactPage() {
 
       {/* ── Header ── */}
       {/* Breadcrumb handles its own buildBreadcrumbSchema JsonLd internally.
-          Same atmosphere every page header now shares (grid texture + one
-          cursor-parallax blob, not the homepage's full three) via
-          PageHeaderGlow — first introduced here, now extracted for
-          site-wide consistency. */}
-      <section className="border-ds-border relative overflow-hidden border-b py-16">
-        <PageHeaderGlow side="right" />
+          Plain header, no background effects — same as every inner page. */}
+      <section className="border-ds-border border-b py-16">
         <div className="mx-auto max-w-5xl px-6">
           <Breadcrumb
             items={[
@@ -77,7 +73,7 @@ export default function ContactPage() {
               { name: 'Contact', url: 'https://devstash.me/contact' },
             ]}
           />
-          <h1 className="text-ds-text mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
+          <h1 className="text-ds-text mt-6 text-[clamp(44px,6vw,72px)] leading-[1.02] font-bold tracking-[-0.035em]">
             Get in touch
           </h1>
           <p className="text-ds-muted mt-3 max-w-lg">

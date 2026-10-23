@@ -6,15 +6,30 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildBreadcrumbSchema, buildWebSiteSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
-import { PageHeaderGlow } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
 import { Pagination } from '@/components/ui/Pagination'
+import { PageFacts } from '@/components/ui/PageFacts'
 import { BlogList } from '@/components/blog/BlogList'
 import { BlogFilter } from '@/components/blog/BlogFilter'
 import { getAllPosts, getAllCategories, getAllTags } from '@/lib/markdown/blog'
-import { type BlogCategory } from '@/types/blog'
+import { type BlogCategory, type BlogPost } from '@/types/blog'
 
 const POSTS_PER_PAGE = 9
+
+// "17 Oct" — newest createdAt, formatted in UTC so the build machine's
+// timezone can't shift the day.
+function latestPostDate(posts: BlogPost[]) {
+  const latest = posts
+    .map((p) => p.createdAt)
+    .sort()
+    .at(-1)
+  if (!latest) return '—'
+  return new Date(latest).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  })
+}
 
 const title = 'Blog — Frontend, Automation & AI Workflows'
 const description =
@@ -93,15 +108,15 @@ export default async function BlogPage({ searchParams }: Props) {
       <JsonLd data={buildWebSiteSchema()} />
 
       {/* ── Header — same bordered-section rhythm as every other page header
-          (Tools, Resources, Lab): border-b py-16, mx-auto px-6, glow behind
-          it. Blog used to run a flat unbordered container here instead. ── */}
-      <section className="border-ds-border relative overflow-hidden border-b py-16">
-        <PageHeaderGlow side="right" />
+          (Tools, Resources, Lab): border-b py-16, mx-auto px-6. The facts
+          row describes the whole blog, so it stays the same on filtered and
+          paginated views. ── */}
+      <section className="border-ds-border border-b py-16">
         <div className="mx-auto max-w-6xl px-6">
           <Breadcrumb items={[{ name: 'Blog', url: 'https://devstash.me/blog' }]} />
 
           <div className="mt-6">
-            <h1 className="text-ds-text mb-3 font-sans text-4xl font-bold tracking-tight sm:text-5xl">
+            <h1 className="text-ds-text mb-3 font-sans text-[clamp(44px,6vw,72px)] leading-[1.02] font-bold tracking-[-0.035em]">
               Blog
             </h1>
             <p className="text-ds-muted max-w-xl">
@@ -109,6 +124,17 @@ export default async function BlogPage({ searchParams }: Props) {
               while building.
             </p>
           </div>
+          <PageFacts
+            items={[
+              { value: allPosts.length, label: 'posts' },
+              { value: categories.length, label: 'topics' },
+              {
+                value: allPosts.reduce((min, p) => min + p.readingTime, 0),
+                label: 'min of reading',
+              },
+              { value: latestPostDate(allPosts), label: 'latest post' },
+            ]}
+          />
         </div>
       </section>
 

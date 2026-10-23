@@ -17,7 +17,7 @@ export function AboutProfileCard() {
   return (
     <div
       aria-hidden="true"
-      className="border-ds-border bg-ds-surface animate-float w-full overflow-hidden rounded-xl border shadow-2xl shadow-black/40"
+      className="border-ds-border bg-ds-surface w-full overflow-hidden rounded-xl border shadow-2xl shadow-black/40"
     >
       {/* Window chrome — the same three-dot treatment the site's other
           terminal-style panels use, so they read as one system. */}

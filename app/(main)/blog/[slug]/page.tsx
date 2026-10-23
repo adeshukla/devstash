@@ -12,7 +12,7 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildBlogPostingSchema, buildFAQSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
-import { Badge, Reveal, MountReveal, PageHeaderGlow } from '@/components/ui'
+import { Badge, Reveal, MountReveal } from '@/components/ui'
 import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
 import { TOC } from '@/components/blog/TOC'
 import { AuthorBio } from '@/components/blog/AuthorBio'
@@ -94,8 +94,7 @@ export default async function BlogPostPage({ params }: Props) {
       <ReadingProgress />
       <ReadTracker slug={post.slug} />
 
-      <section className="border-ds-border relative overflow-hidden border-b py-16">
-        <PageHeaderGlow side="right" />
+      <section className="border-ds-border border-b py-16">
         {/* max-w-6xl, matching the content section below — only the text
             block (badge/h1/description/meta, its own max-w-3xl further
             down) was ever meant to read narrow; the image/breadcrumb were

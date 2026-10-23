@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
-import { PageHeaderGlow } from '@/components/ui'
+import { PageFacts } from '@/components/ui/PageFacts'
 import { Icon, type IconName } from '@/components/icons/Icon'
 import toolsData from '@/content/tools/tools.json'
 
@@ -76,8 +76,7 @@ export default function ToolsPage() {
   return (
     <main>
       {/* Breadcrumb handles its own buildBreadcrumbSchema JsonLd internally */}
-      <section className="border-ds-border relative overflow-hidden border-b py-16">
-        <PageHeaderGlow side="right" />
+      <section className="border-ds-border border-b py-16">
         <div className="mx-auto max-w-3xl px-6">
           <Breadcrumb
             items={[
@@ -92,9 +91,13 @@ export default function ToolsPage() {
             The stack I reach for every day, and what each thing is genuinely for. No affiliate
             links, no sponsored picks, nothing I don&apos;t open in a normal week.
           </p>
-          <p className="text-ds-muted mt-6 text-sm">
-            {tools.length} tools · {freeCount} free
-          </p>
+          <PageFacts
+            items={[
+              { value: tools.length, label: 'tools' },
+              { value: freeCount, label: 'free' },
+              { value: orderedCats.length, label: 'categories' },
+            ]}
+          />
         </div>
       </section>
 

@@ -5,7 +5,7 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildItemListSchema } from '@/lib/schema/builders'
-import { Badge, PageHeaderGlow } from '@/components/ui'
+import { Badge } from '@/components/ui'
 import { LabPreview, type PreviewKind } from '@/components/lab/LabPreview'
 
 const title = 'Lab — Interactive Tools & Live Demos'
@@ -115,8 +115,7 @@ export default function LabPage() {
         )}
       />
       {/* Breadcrumb emits its own BreadcrumbList JSON-LD */}
-      <section className="border-ds-border relative overflow-hidden border-b py-16">
-        <PageHeaderGlow side="right" />
+      <section className="border-ds-border border-b py-16">
         <div className="mx-auto max-w-5xl px-6">
           <Breadcrumb
             items={[
