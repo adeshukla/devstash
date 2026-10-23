@@ -403,19 +403,114 @@ body {
   will-change: transform;
 }
 
-/* Runs at all breakpoints (transform/opacity only, not gated like the
-   badge/gradient animations below — see the perf note above). Vertical by
-   default (mobile stack), switches to the horizontal keyframe from sm up —
-   animation-name only, same duration/easing both ways so the swap itself
-   is invisible. */
+/* Automation card's node strip (WhatIDoBento.tsx): one run, once, when the
+   strip's Reveal turns .is-visible — Trigger fires, the payload travels,
+   the pipeline node works, the draft travels, Output checks. It then rests
+   on the finished state (connectors filled, Output green) instead of
+   looping. Connector k (0 or 1) starts at 0.6s + k × 1.9s. Transform,
+   opacity and a few one-off border/shadow changes only. Vertical below sm
+   (nodes stack), horizontal from sm up — same timing both ways. */
+.flow-fill {
+  transform: scaleY(0);
+  transform-origin: top;
+}
+@media (min-width: 640px) {
+  .flow-fill {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+}
+.flow.is-visible .flow-fill {
+  transform: none;
+  transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1) calc(0.6s + var(--k) * 1.9s);
+}
+.flow.is-visible .flow-label {
+  color: var(--color-ds-text);
+  transition: color 0.3s ease calc(0.9s + var(--k) * 1.9s);
+}
+.flow.is-visible .flow-node {
+  animation: flow-hit 0.7s ease-out forwards;
+}
+.flow.is-visible .flow-node-0 {
+  animation-delay: 0.3s;
+}
+.flow.is-visible .flow-node-1 {
+  animation:
+    flow-hit 0.7s ease-out 1.3s forwards,
+    flow-work 0.6s ease-in-out 1.6s 2;
+}
+.flow.is-visible .flow-node-2 {
+  animation: flow-done 0.7s ease-out 3.2s forwards;
+}
+.flow.is-visible .flow-node-0 .flow-icon,
+.flow.is-visible .flow-node-2 .flow-icon {
+  animation: flow-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s;
+}
+.flow.is-visible .flow-node-1 .flow-icon {
+  animation: flow-spin 1.2s cubic-bezier(0.65, 0, 0.35, 1) 1.3s;
+}
+.flow.is-visible .flow-node-2 .flow-icon {
+  animation-delay: 3.2s;
+  color: var(--color-ds-success);
+  transition: color 0.3s ease 3.2s;
+}
 @media (prefers-reduced-motion: no-preference) {
-  .pipeline-dot {
-    animation: flowDotVertical 1.8s ease-in-out infinite;
+  .flow.is-visible .pipeline-dot {
+    animation: flowDotVertical 0.7s cubic-bezier(0.65, 0, 0.35, 1) calc(0.6s + var(--k) * 1.9s);
   }
   @media (min-width: 640px) {
-    .pipeline-dot {
+    .flow.is-visible .pipeline-dot {
       animation-name: flowDot;
     }
+  }
+}
+@keyframes flow-hit {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-ds-accent) 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 8px transparent;
+    border-color: color-mix(in srgb, var(--color-ds-accent) 55%, var(--color-ds-border));
+  }
+}
+@keyframes flow-work {
+  50% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-ds-accent) 22%, transparent);
+  }
+}
+@keyframes flow-done {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-ds-success) 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 8px transparent;
+    border-color: color-mix(in srgb, var(--color-ds-success) 60%, var(--color-ds-border));
+  }
+}
+@keyframes flow-pop {
+  50% {
+    transform: scale(1.25);
+  }
+}
+@keyframes flow-spin {
+  to {
+    transform: rotate(180deg);
+  }
+}
+/* Reduced motion: straight to the finished state */
+@media (prefers-reduced-motion: reduce) {
+  .flow .flow-fill {
+    transform: none;
+  }
+  .flow .flow-node {
+    animation: none !important;
+    border-color: color-mix(in srgb, var(--color-ds-accent) 55%, var(--color-ds-border));
+  }
+  .flow .flow-node-2 {
+    border-color: color-mix(in srgb, var(--color-ds-success) 60%, var(--color-ds-border));
+  }
+  .flow .flow-node-2 .flow-icon {
+    color: var(--color-ds-success);
   }
 }
 

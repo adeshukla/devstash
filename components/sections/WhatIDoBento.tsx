@@ -20,15 +20,17 @@
 // whitespace, and real content, not motion. Cut the ambient glow entirely.
 // The three independently-bobbing nodes were also reported as jittery —
 // three uncoordinated loops don't read as one thing, they read as noise.
-// Replaced with one coherent moment: a small dot traveling along each
-// connector line in sequence (transform/opacity only, no layout-triggering
-// `left`/`top`), reading as "a request moving through the pipeline" rather
-// than decoration.
+// Replaced with one coherent moment: a request moving through the pipeline
+// once — each node reacts as the dot reaches it, the connectors fill behind
+// it, Output ends checked — and then it stays finished. The earlier version
+// looped two dots forever, which still read as decoration, not a run.
 
+import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { Icon } from '@/components/icons/Icon'
 import type { IconName } from '@/components/icons/Icon'
 import { projectBrand } from '@/components/icons/ProjectMark'
+import { Reveal } from '@/components/ui/Reveal'
 
 // Each claim points at the shipped work that backs it, with that project's
 // own logo — the same marks as the Projects deck above.
@@ -100,18 +102,28 @@ const STACK: { name: string; icon: IconName }[] = [
 // glowing) carrying something with a name, not an abstract line. The label
 // only shows at sm+ where there's room for it without crowding the stacked
 // mobile layout.
-function FlowConnector({ delay = '0s', flowLabel }: { delay?: string; flowLabel?: string }) {
+// `step` (0 or 1) picks this connector's slot in the one-shot sequence — see
+// the .flow rules in globals.css. The grey track is always there; the
+// gradient fills it as the dot passes and stays filled.
+function FlowConnector({ step, flowLabel }: { step: number; flowLabel?: string }) {
+  const k = { '--k': step } as CSSProperties
   return (
     <div className="flex flex-col items-center gap-1.5 sm:w-16" aria-hidden="true">
-      <span className="relative h-8 w-1 shrink-0 overflow-visible rounded-full sm:h-1 sm:w-12">
-        <span className="from-ds-accent to-ds-purple absolute inset-0 rounded-full bg-gradient-to-b opacity-70 sm:bg-gradient-to-r" />
+      <span className="bg-ds-border2 relative h-8 w-1 shrink-0 overflow-visible rounded-full sm:h-1 sm:w-12">
+        <span
+          className="flow-fill from-ds-accent to-ds-purple absolute inset-0 rounded-full bg-gradient-to-b sm:bg-gradient-to-r"
+          style={k}
+        />
         <span
           className="pipeline-dot bg-ds-accent absolute top-0 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full opacity-0 shadow-[0_0_10px_3px_var(--color-ds-accent)] sm:top-1/2 sm:left-0 sm:translate-x-0 sm:-translate-y-1/2"
-          style={{ animationDelay: delay }}
+          style={k}
         />
       </span>
       {flowLabel && (
-        <span className="text-ds-muted hidden font-mono text-[10px] tracking-wide whitespace-nowrap sm:block">
+        <span
+          className="flow-label text-ds-muted hidden font-mono text-[10px] tracking-wide whitespace-nowrap sm:block"
+          style={k}
+        >
           {flowLabel}
         </span>
       )}
@@ -225,34 +237,41 @@ export function WhatIDoBento() {
                 <ProofLinks items={PROOF.automation} />
               </div>
 
-              <div
-                className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center lg:shrink-0 lg:justify-start"
-                aria-hidden="true"
-              >
-                {(
-                  [
-                    { label: 'Trigger', icon: 'automation' as IconName, flowLabel: 'payload' },
-                    { label: 'LLM pipeline', icon: 'ai' as IconName, flowLabel: 'draft' },
-                    { label: 'Output', icon: 'check' as IconName, flowLabel: undefined },
-                  ] as const
-                ).map(({ label, icon, flowLabel }, i, arr) => (
-                  <div key={label} className="flex flex-col items-center gap-2 sm:flex-row">
-                    {/* Fixed width on every node (not content-driven) so the
+              {/* Plays once as the strip scrolls into view: Trigger fires, the
+                  payload travels, the pipeline node works, the draft travels,
+                  Output checks — then it rests on that finished state. Its own
+                  Reveal, not the bento's: that one fires when the section top
+                  arrives, long before this card at the bottom is on screen. */}
+              <Reveal className="flow lg:shrink-0">
+                <div
+                  className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center lg:justify-start"
+                  aria-hidden="true"
+                >
+                  {(
+                    [
+                      { label: 'Trigger', icon: 'automation' as IconName, flowLabel: 'payload' },
+                      { label: 'LLM pipeline', icon: 'ai' as IconName, flowLabel: 'draft' },
+                      { label: 'Output', icon: 'check' as IconName, flowLabel: undefined },
+                    ] as const
+                  ).map(({ label, icon, flowLabel }, i, arr) => (
+                    <div key={label} className="flex flex-col items-center gap-2 sm:flex-row">
+                      {/* Fixed width on every node (not content-driven) so the
                         three stay visually even regardless of label length —
                         "Trigger" and "LLM pipeline" sizing themselves
                         independently was the "uneven boxes" of it. */}
-                    <div className="border-ds-border bg-ds-surface2 flex w-40 flex-col items-center gap-2.5 rounded-xl border px-6 py-4">
-                      <Icon name={icon} className="text-ds-accent h-6 w-6" />
-                      <span className="text-ds-muted font-mono text-xs whitespace-nowrap">
-                        {label}
-                      </span>
+                      <div
+                        className={`flow-node flow-node-${i} border-ds-border bg-ds-surface2 flex w-40 flex-col items-center gap-2.5 rounded-xl border px-6 py-4`}
+                      >
+                        <Icon name={icon} className="flow-icon text-ds-accent h-6 w-6" />
+                        <span className="text-ds-muted font-mono text-xs whitespace-nowrap">
+                          {label}
+                        </span>
+                      </div>
+                      {i < arr.length - 1 && <FlowConnector step={i} flowLabel={flowLabel} />}
                     </div>
-                    {i < arr.length - 1 && (
-                      <FlowConnector delay={i === 0 ? '0s' : '0.9s'} flowLabel={flowLabel} />
-                    )}
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </Reveal>
             </div>
           </div>
         </div>
