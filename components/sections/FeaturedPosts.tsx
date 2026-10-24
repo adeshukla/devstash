@@ -36,7 +36,7 @@ export function FeaturedPosts({ posts }: FeaturedPostsProps) {
 
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
           {posts.slice(0, 4).map((post, i) => (
-            <Reveal key={post.slug} delay={i * 60}>
+            <Reveal key={post.slug} delay={i * 60} blueprint="post card">
               <CardTilt>
                 <Link
                   href={`/blog/${post.slug}`}

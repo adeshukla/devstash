@@ -82,7 +82,7 @@ export function ProjectsGrid({ projects, showAll = false }: ProjectsGridProps) {
                   } as CSSProperties)
 
               return (
-                <Reveal key={project.slug} delay={(i % 6) * 60}>
+                <Reveal key={project.slug} delay={(i % 6) * 60} blueprint="project card">
                   <CardTilt>
                     {/* Stretched-link pattern: the whole card links to the case
                         study via an absolutely-positioned overlay, so the footer

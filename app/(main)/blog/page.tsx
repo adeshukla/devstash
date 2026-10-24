@@ -120,7 +120,10 @@ export default async function BlogPage({ searchParams }: Props) {
               // Evergreen on purpose — a "latest post" date ages the whole
               // site the moment posting slows down.
               {
-                value: `${Math.round(allPosts.reduce((min, p) => min + p.readingTime, 0) / Math.max(allPosts.length, 1))} min`,
+                value: Math.round(
+                  allPosts.reduce((min, p) => min + p.readingTime, 0) / Math.max(allPosts.length, 1)
+                ),
+                suffix: ' min',
                 label: 'avg. read',
               },
             ]}

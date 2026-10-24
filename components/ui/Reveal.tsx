@@ -1,6 +1,13 @@
 'use client'
 
-import { useEffect, useRef, useState, type ElementType, type ReactNode } from 'react'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ElementType,
+  type ReactNode,
+} from 'react'
 import { cn } from '@/lib/utils/cn'
 
 interface RevealProps {
@@ -10,14 +17,24 @@ interface RevealProps {
   delay?: number
   /** Element/landmark to render as. Defaults to 'div'. */
   as?: ElementType
+  /** Cards: show a dashed spec outline with this label before the content
+   * wipes in (blueprint → live). Omit for section-sized blocks. */
+  blueprint?: string
 }
 
 /**
- * Fades + slides its children into view once on scroll (IntersectionObserver).
- * Content is always in the DOM (only visually animated), and users with
- * `prefers-reduced-motion` see it immediately via the `.reveal` CSS guard.
+ * Wipes its children into view once on scroll (IntersectionObserver) — the
+ * site's blueprint → live scroll-in, see `.reveal` in globals.css. Content is
+ * always in the DOM (only visually clipped), and `prefers-reduced-motion`
+ * shows it immediately via the `.reveal` CSS guard.
  */
-export function Reveal({ children, className, delay = 0, as: Tag = 'div' }: RevealProps) {
+export function Reveal({
+  children,
+  className,
+  delay = 0,
+  as: Tag = 'div',
+  blueprint,
+}: RevealProps) {
   const ref = useRef<HTMLElement | null>(null)
   const [visible, setVisible] = useState(false)
 
@@ -40,23 +57,23 @@ export function Reveal({ children, className, delay = 0, as: Tag = 'div' }: Reve
           }
         }
       },
-      // A section that starts a few px below the fold was staying invisible
-      // until the user scrolled it 8-12% into view — read as "page still
-      // loading" rather than a scroll animation. Trigger the moment any
-      // sliver crosses the viewport (and slightly before, via the positive
-      // bottom margin) so content already close to the fold isn't hidden.
-      { threshold: 0.01, rootMargin: '0px 0px 120px 0px' }
+      // Sections trigger the moment a sliver is near the viewport (120px
+      // early), so content close to the fold never reads as "still loading".
+      // Blueprint cards wait until a third of the card is on screen — the
+      // outline is the point, and it would otherwise play off-screen.
+      blueprint ? { threshold: 0.35 } : { threshold: 0.01, rootMargin: '0px 0px 120px 0px' }
     )
 
     observer.observe(el)
     return () => observer.disconnect()
-  }, [])
+  }, [blueprint])
 
   return (
     <Tag
       ref={ref}
       className={cn('reveal', visible && 'is-visible', className)}
-      style={delay ? { transitionDelay: `${delay}ms` } : undefined}
+      data-blueprint={blueprint}
+      style={delay ? ({ '--reveal-delay': `${delay}ms` } as CSSProperties) : undefined}
     >
       {children}
     </Tag>

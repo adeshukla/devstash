@@ -31,6 +31,8 @@
      5.2:1 and the same in both themes, so it needs no light override. */
   --color-ds-cta: #2563eb;
   --color-ds-cta-hover: #1d4ed8;
+  /* Bottom edge of the primary keycap button (.keycap) */
+  --color-ds-cta-edge: #1e3a8a;
 
   /* ── Fonts ── */
   --font-sans: var(--font-sans), system-ui, sans-serif;
@@ -640,6 +642,54 @@ body {
 .card-spotlight:hover::before,
 [data-touched] .card-spotlight::before {
   opacity: 0.85;
+}
+
+/* Arrival trace: the hover ring runs once around the card's border when it
+   first scrolls into view (CardTilt sets [data-arrived]), in the card's brand
+   colour where it has one (--ring-a/--ring-b) — the hover moment, shown to
+   everyone, phones included. Starts after the blueprint scroll-in finishes. */
+@property --trace-ang {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.card-spotlight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--trace-ang),
+    transparent 0deg,
+    var(--ring-a, var(--color-ds-accent)) 40deg,
+    var(--ring-b, var(--color-ds-purple)) 80deg,
+    transparent 120deg
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  pointer-events: none;
+}
+[data-arrived] .card-spotlight::after {
+  animation: card-trace 1.6s var(--ds-ease-smooth) calc(var(--reveal-delay, 0ms) + 1s) forwards;
+}
+@keyframes card-trace {
+  0% {
+    --trace-ang: 0deg;
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    --trace-ang: 360deg;
+    opacity: 0;
+  }
 }
 
 /* ═══ Home hero (components/sections/HeroSection.tsx + ui/HeroStage.tsx) ═══
@@ -1292,24 +1342,136 @@ html[data-hero-intro] .hero-ov-design {
   transform: scaleX(1);
 }
 
-/* Reveal-on-scroll (toggled by the <Reveal> client component) */
-.reveal {
-  opacity: 0;
-  transform: translateY(20px);
-  transition:
-    opacity 0.7s ease,
-    transform 0.7s ease;
+/* Scroll-in: blueprint → live (toggled by the <Reveal> client component).
+   Replaces fade-up, which nearly every template ships. Content wipes in
+   left-to-right — the home hero's design → live idea as the site's one
+   motion language. Cards (`blueprint` prop) first show their dashed spec
+   outline + a small label, then the content wipes in under it.
+   The clip is only an animation (fill `backwards`), so once it ends nothing
+   stays clipped — hover lifts, tilts and shadows are free again.
+   --reveal-delay comes from Reveal's `delay` prop. */
+.reveal:not(.is-visible),
+.reveal[data-blueprint]:not(.is-visible) > * {
+  clip-path: inset(0 100% 0 0);
+}
+.reveal[data-blueprint]:not(.is-visible) {
+  clip-path: none;
 }
 .reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0);
+  animation: reveal-wipe 0.75s var(--ds-ease-smooth) var(--reveal-delay, 0ms) backwards;
+}
+.reveal[data-blueprint].is-visible {
+  animation: none;
+}
+.reveal[data-blueprint].is-visible > * {
+  animation: reveal-wipe 0.75s var(--ds-ease-smooth) calc(var(--reveal-delay, 0ms) + 320ms)
+    backwards;
+}
+@keyframes reveal-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+.reveal[data-blueprint] {
+  position: relative;
+}
+.reveal[data-blueprint]::before,
+.reveal[data-blueprint]::after {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+.reveal[data-blueprint]::before {
+  content: '';
+  inset: 0;
+  border: 1.5px dashed color-mix(in srgb, var(--color-ds-accent) 65%, transparent);
+  border-radius: var(--radius-card);
+}
+.reveal[data-blueprint]::after {
+  content: attr(data-blueprint);
+  top: -10px;
+  left: 16px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--color-ds-cta);
+  color: #fff;
+  font: 500 10.5px/1.4 var(--font-mono);
+}
+.reveal[data-blueprint].is-visible::before,
+.reveal[data-blueprint].is-visible::after {
+  animation: reveal-draft 1.5s var(--ds-ease-smooth) var(--reveal-delay, 0ms) both;
+}
+@keyframes reveal-draft {
+  0% {
+    opacity: 0;
+  }
+  12%,
+  62% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
-/* Shared easing for the site's hover/entrance motion. (Buttons used to get a
-   lift + shine + accent→purple glow here; removed 2026-10-23 — buttons are
-   solid brand colour and only change colour on hover, see Button.tsx.) */
+/* Shared easing for the site's hover/entrance motion. */
 :root {
   --ds-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Count-up numbers (CountUp.tsx): hidden until the count starts so the
+   server-rendered value never flashes before dropping to 0; if JS never runs,
+   the fallback animation reveals the real value after 1.5s. */
+.count-up {
+  opacity: 0;
+  animation: count-fallback 0s 1.5s forwards;
+}
+.count-up[data-counting],
+.count-up[data-done] {
+  opacity: 1;
+  animation: none;
+}
+@keyframes count-fallback {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Keycap buttons (Button.tsx). Replaced the gradient + shine + glow buttons
+   (the template signature): solid colour, and the life comes from physical
+   behaviour — a darker bottom edge, a 1px lift on hover, a press on click.
+   --edge is the edge colour; primary sets it to --color-ds-cta-edge. */
+.keycap {
+  box-shadow: 0 3px 0 var(--edge, var(--color-ds-border2));
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.keycap:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 var(--edge, var(--color-ds-border2));
+}
+.keycap:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--edge, var(--color-ds-border2));
+}
+.keycap:disabled,
+.keycap[aria-disabled='true'] {
+  transform: none;
+  box-shadow: 0 3px 0 var(--edge, var(--color-ds-border2));
+}
+@media (prefers-reduced-motion: reduce) {
+  .keycap:hover,
+  .keycap:active {
+    transform: none;
+  }
 }
 
 /* reCAPTCHA v3's floating badge is redundant with the visible disclosure
@@ -1364,9 +1526,14 @@ html[data-hero-intro] .hero-ov-design {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
-  .reveal {
-    opacity: 1 !important;
-    transform: none !important;
+  .reveal,
+  .reveal > * {
+    clip-path: none !important;
+    animation: none !important;
+  }
+  .reveal::before,
+  .reveal::after {
+    display: none !important;
   }
 }
 

@@ -174,7 +174,7 @@ export default function AboutPage() {
             </Reveal>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {Object.entries(SKILLS).map(([category, items], i) => (
-                <Reveal key={category} delay={i * 60}>
+                <Reveal key={category} delay={i * 60} blueprint="skill group">
                   {/* A labelled group, not a link — so no hover state */}
                   <div className="border-ds-border bg-ds-surface/60 rounded-card border p-5">
                     <h3 className="text-ds-accent mb-3 flex items-center gap-2 font-mono text-sm font-medium">

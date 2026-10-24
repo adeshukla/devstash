@@ -10,10 +10,11 @@ import { Icon } from '@/components/icons/Icon'
 // the two things a visitor who read this far might want: the email, one
 // click to copy, and the contact page.
 //
+// It types each time the footer comes into view on a page (it used to play
+// once per tab, so on later pages visitors only ever saw it already typed).
 // Without JS the lines are simply visible (the base CSS); with reduced
-// motion, or once it has played in this tab, they show without typing.
+// motion they show without typing.
 
-const SEEN_KEY = 'ds-footer-signoff-seen'
 const IST = new Intl.DateTimeFormat('en-IN', {
   timeZone: 'Asia/Kolkata',
   weekday: 'short',
@@ -42,20 +43,13 @@ export function FooterSignoff({ email }: { email: string }) {
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    let seen = false
-    try {
-      seen = sessionStorage.getItem(SEEN_KEY) === '1'
-    } catch {}
-    if (seen || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     el.dataset.armed = ''
     const io = new IntersectionObserver(
       ([entry]) => {
         if (!entry?.isIntersecting) return
         el.dataset.play = ''
         io.disconnect()
-        try {
-          sessionStorage.setItem(SEEN_KEY, '1')
-        } catch {}
       },
       { threshold: 0.5 }
     )

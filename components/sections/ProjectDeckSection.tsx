@@ -151,17 +151,20 @@ export function ProjectDeckSection({ projects }: { projects: Project[] }) {
   return (
     // overflow-x-clip: fanned and thrown cards travel past the viewport edge,
     // which would otherwise add a horizontal scrollbar on phones.
+    // Layout: a fixed-width intro with the deck right beside it. The deck used
+    // to sit centred in a wide right column, which left ~385px of empty
+    // middle on wide screens once the site container grew to max-w-site.
     <section className="overflow-x-clip py-16" aria-labelledby="home-projects-heading">
-      <div className="max-w-site mx-auto grid items-center gap-10 px-6 lg:grid-cols-[1fr_1.15fr] lg:gap-16">
+      <div className="max-w-site mx-auto grid items-center gap-10 px-6 lg:grid-cols-[minmax(0,30rem)_minmax(0,1fr)] lg:gap-20">
         <Reveal>
           <p className="text-ds-accent font-mono text-sm">{'// the stash'}</p>
           <h2
             id="home-projects-heading"
-            className="text-ds-text mt-2 text-3xl font-bold tracking-tight sm:text-4xl"
+            className="text-ds-text mt-2 text-[clamp(36px,4.4vw,64px)] leading-[1.02] font-bold tracking-[-0.035em]"
           >
             Projects
           </h2>
-          <p className="text-ds-muted mt-3 max-w-md leading-relaxed">
+          <p className="text-ds-muted mt-4 max-w-[30rem] text-lg leading-relaxed">
             Things I&apos;ve built and shipped. Drag the top card away to dig through the stack, or
             tap it to flip it over for the details.
           </p>
@@ -169,7 +172,11 @@ export function ProjectDeckSection({ projects }: { projects: Project[] }) {
             View all projects →
           </Button>
         </Reveal>
-        <ProjectDeck cards={cards} label="Featured projects" />
+        {/* 600px is enough room for the fan-out; any wider only pushes the
+            centred card away from the intro. */}
+        <div className="w-full lg:max-w-[600px]">
+          <ProjectDeck cards={cards} label="Featured projects" />
+        </div>
       </div>
     </section>
   )

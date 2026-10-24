@@ -21,7 +21,7 @@ export function BlogList({ posts, emptyMessage = 'No posts found.' }: BlogListPr
   return (
     <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
       {posts.map((post, i) => (
-        <Reveal key={post.slug} delay={(i % 6) * 60}>
+        <Reveal key={post.slug} delay={(i % 6) * 60} blueprint="post card">
           <BlogCard post={post} />
         </Reveal>
       ))}

@@ -54,6 +54,7 @@ const TAP_PX = 6 // moved less than this = a tap, which flips the card
 // stack re-orders and it springs into its new place — behind the others for
 // Next, in front of them for Back. That's what reads as "tucked under".
 const TUCK_MS = 260
+const FAN_ON_ARRIVAL_MS = 1600 // how long the deck stays fanned when it first scrolls into view
 
 function reducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -118,6 +119,31 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
     window.addEventListener('resize', layout)
     return () => window.removeEventListener('resize', layout)
   }, [layout])
+
+  // The hover moment, once for everyone: when the deck first comes into view
+  // it fans out, holds, and folds back — phones have no hover, and most
+  // desktop visitors never hover it, so this is how they learn it's a stack.
+  useEffect(() => {
+    const deck = deckRef.current
+    if (!deck || reducedMotion()) return
+    let fold: number | undefined
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return
+        io.disconnect()
+        setFanned(true)
+        fold = window.setTimeout(() => {
+          if (!deck.matches(':hover')) setFanned(false)
+        }, FAN_ON_ARRIVAL_MS)
+      },
+      { threshold: 0.6 }
+    )
+    io.observe(deck)
+    return () => {
+      io.disconnect()
+      window.clearTimeout(fold)
+    }
+  }, [])
 
   // Slide `el` out beside the stack, then run `reorder` once it's clear.
   function tuck(el: HTMLDivElement | null | undefined, dir: 1 | -1, reorder: () => void) {

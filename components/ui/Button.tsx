@@ -28,19 +28,21 @@ interface ButtonProps {
 
 // ── Style maps ────────────────────────────────────────────────
 
-// Solid brand buttons: hover only changes colour — no lift, shine, glow or
-// gradient (those read as template styling). Primary uses --color-ds-cta,
-// not the accent: white on the accent blue fails WCAG AA (3.7:1).
+// Solid brand colours, no gradient/shine/glow (those read as template
+// styling). Life comes from `.keycap` (globals.css): a darker bottom edge, a
+// 1px lift on hover and a press on click, like a real key. Primary uses
+// --color-ds-cta, not the accent: white on the accent blue fails AA (3.7:1).
 const variantStyles: Record<Variant, string> = {
-  primary: 'bg-ds-cta hover:bg-ds-cta-hover text-white disabled:opacity-50',
+  primary:
+    'keycap [--edge:var(--color-ds-cta-edge)] bg-ds-cta hover:bg-ds-cta-hover text-white disabled:opacity-50',
   ghost: [
-    'bg-transparent text-ds-muted border border-ds-border',
+    'keycap bg-transparent text-ds-muted border border-ds-border',
     'hover:border-ds-accent hover:text-ds-accent',
     'disabled:opacity-50',
   ].join(' '),
   danger: 'bg-ds-error hover:bg-ds-error/90 text-white disabled:opacity-50',
   outline: [
-    'bg-transparent text-ds-text border border-ds-border2',
+    'keycap bg-ds-surface2 text-ds-text border border-ds-border2',
     'hover:border-ds-text',
     'disabled:opacity-50',
   ].join(' '),
