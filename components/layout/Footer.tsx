@@ -80,7 +80,7 @@ export function Footer() {
         className="from-ds-accent/40 via-ds-purple/40 absolute inset-x-0 top-0 h-px bg-gradient-to-r to-transparent"
       />
 
-      <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+      <div className="max-w-site mx-auto px-4 py-20 sm:px-6">
         {/* Top row */}
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
           {/* Brand */}

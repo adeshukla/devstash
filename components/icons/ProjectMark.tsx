@@ -10,6 +10,9 @@ interface ProjectBrand {
   /** Any CSS colour. Used only for decoration (bar, glow), never text. */
   color: string
   Mark: () => React.JSX.Element
+  /** No identity of its own (Lab tools, the DevStash fallback): UI that would
+   * take the brand colour keeps the site's default accent→purple instead. */
+  generic?: boolean
 }
 
 const BRANDS: Record<string, ProjectBrand> = {
@@ -91,6 +94,7 @@ const BRANDS: Record<string, ProjectBrand> = {
 // deck, where four identical DevStash marks read as one product four times.
 function monogram(text: string): ProjectBrand {
   return {
+    generic: true,
     color: 'var(--color-ds-accent)',
     Mark: () => (
       <svg viewBox="0 0 32 32" aria-hidden="true">
@@ -115,7 +119,11 @@ BRANDS['illustration-generator'] = monogram('IG')
 BRANDS['meta-tag-generator'] = monogram('MT')
 BRANDS['utm-builder'] = monogram('UTM')
 
-const DEVSTASH: ProjectBrand = { color: 'var(--color-ds-accent)', Mark: () => <LogoMark /> }
+const DEVSTASH: ProjectBrand = {
+  generic: true,
+  color: 'var(--color-ds-accent)',
+  Mark: () => <LogoMark />,
+}
 
 export function projectBrand(slug: string): ProjectBrand {
   return BRANDS[slug] ?? DEVSTASH

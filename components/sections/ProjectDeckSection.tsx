@@ -153,7 +153,7 @@ export function ProjectDeckSection({ projects }: { projects: Project[] }) {
     // overflow-x-clip: fanned and thrown cards travel past the viewport edge,
     // which would otherwise add a horizontal scrollbar on phones.
     <section className="overflow-x-clip py-16" aria-labelledby="home-projects-heading">
-      <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 lg:grid-cols-[1fr_1.15fr] lg:gap-16">
+      <div className="max-w-site mx-auto grid items-center gap-10 px-6 lg:grid-cols-[1fr_1.15fr] lg:gap-16">
         <Reveal>
           <p className="text-ds-accent font-mono text-sm">{'// the stash'}</p>
           <h2

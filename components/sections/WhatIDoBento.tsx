@@ -134,7 +134,7 @@ function FlowConnector({ step, flowLabel }: { step: number; flowLabel?: string }
 export function WhatIDoBento() {
   return (
     <section className="py-16">
-      <div className="mx-auto max-w-6xl px-6">
+      <div className="max-w-site mx-auto px-6">
         <div className="mb-12 max-w-2xl">
           <h2 className="text-ds-text text-3xl font-bold tracking-tight sm:text-4xl">
             Frontend, SEO, and the automation that ties it together

@@ -1,6 +1,6 @@
 // components/ui/Card.tsx
 import { cn } from '@/lib/utils/cn'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 
 type CardVariant = 'default' | 'hover' | 'accent' | 'spotlight'
 
@@ -11,6 +11,7 @@ interface CardProps {
   children: ReactNode
   onClick?: () => void
   as?: 'div' | 'article' | 'section' | 'li'
+  style?: CSSProperties
 }
 
 // shadow-black/5 (light) + shadow-black/20 (dark via the CSS below) gives every
@@ -47,10 +48,12 @@ export function Card({
   children,
   onClick,
   as: Tag = 'div',
+  style,
 }: CardProps) {
   return (
     <Tag
       onClick={onClick}
+      style={style}
       className={cn(
         'rounded-card overflow-hidden',
         variantStyles[variant],

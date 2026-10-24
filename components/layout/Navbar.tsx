@@ -60,7 +60,7 @@ export function Navbar() {
         className="from-ds-accent/40 via-ds-purple/40 absolute inset-x-0 bottom-0 h-px bg-gradient-to-r to-transparent"
       />
       <nav
-        className="mx-auto flex h-[84px] max-w-6xl items-center justify-between px-4 sm:px-6"
+        className="max-w-site mx-auto flex h-[84px] items-center justify-between px-4 sm:px-6"
         aria-label="Main navigation"
       >
         {/* Left — Logo */}

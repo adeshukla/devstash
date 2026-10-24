@@ -1,10 +1,12 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Card, Badge, Button, Reveal, CardTilt } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
 import { ProjectCover } from '@/components/sections/ProjectCover'
+import { projectBrand } from '@/components/icons/ProjectMark'
 import { TECH_ICONS } from '@/lib/utils/techIcons'
 import type { Project } from '@/types/project'
 
@@ -68,6 +70,17 @@ export function ProjectsGrid({ projects, showAll = false }: ProjectsGridProps) {
 
               const liveIsInternal = project.liveUrl?.startsWith('/')
 
+              // Hover ring + glow in the project's own colour, matching its
+              // cover. Lab tools have no brand, so they keep the default
+              // accent→purple ring (see .card-spotlight in globals.css).
+              const brand = projectBrand(project.slug)
+              const ring = brand.generic
+                ? undefined
+                : ({
+                    '--ring-a': brand.color,
+                    '--ring-b': `color-mix(in srgb, ${brand.color} 55%, white)`,
+                  } as CSSProperties)
+
               return (
                 <Reveal key={project.slug} delay={(i % 6) * 60}>
                   <CardTilt>
@@ -77,6 +90,7 @@ export function ProjectsGrid({ projects, showAll = false }: ProjectsGridProps) {
                         nesting <a> inside <a>. Footer sits above it via z-index. */}
                     <Card
                       variant="spotlight"
+                      style={ring}
                       className="group relative flex h-full flex-col"
                       padding="none"
                     >

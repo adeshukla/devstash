@@ -108,7 +108,7 @@ export default function HomePage() {
       {/* Flagship build — the AI Content Pipeline demo, the strongest single proof point */}
       <Reveal>
         <section className="border-ds-border border-t py-16">
-          <div className="mx-auto max-w-6xl px-6">
+          <div className="max-w-site mx-auto px-6">
             <div className="border-ds-border bg-ds-surface overflow-hidden rounded-2xl border">
               <div className="grid grid-cols-1 gap-10 p-8 sm:p-10 lg:grid-cols-[1.2fr_1fr] lg:gap-16">
                 <div>
@@ -158,7 +158,7 @@ export default function HomePage() {
       {/* Lab teaser — surfaces the interactive demos (the strongest differentiator) */}
       <Reveal>
         <section className="border-ds-border border-t py-20">
-          <div className="mx-auto max-w-6xl px-6">
+          <div className="max-w-site mx-auto px-6">
             <div className="border-ds-border bg-ds-surface flex flex-col items-start gap-6 rounded-2xl border p-8 sm:flex-row sm:items-center sm:justify-between sm:p-10">
               <div className="max-w-xl">
                 <p className="text-ds-accent font-mono text-sm">{'// lab'}</p>

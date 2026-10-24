@@ -348,7 +348,7 @@ export function HeroSection() {
         suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: INTRO_INIT }}
       />
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="max-w-site mx-auto px-6">
         <HeroStage design={<DesignView />} code={<CodeView />}>
           <div className="grid gap-12 pt-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center lg:gap-14">
             <div>

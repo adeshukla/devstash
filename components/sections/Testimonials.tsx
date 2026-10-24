@@ -18,7 +18,7 @@ export function Testimonials() {
 
   return (
     <section className="border-ds-border border-t py-16">
-      <div className="mx-auto max-w-6xl px-6">
+      <div className="max-w-site mx-auto px-6">
         <div className="mb-10 max-w-2xl">
           <p className="text-ds-accent font-mono text-sm">{'// what people say'}</p>
           <h2 className="text-ds-text mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
