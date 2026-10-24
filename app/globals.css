@@ -962,65 +962,300 @@ html[data-hero-intro] .hero-ov-design {
   }
 }
 
-/* Footer Lottie (components/layout/FooterLottie.tsx): the artwork's pale
-   lavender backdrop circle glares on the dark footer, so it takes a quiet
-   tint of the site accent instead — in both themes, for one look. */
+/* ═══ Footer room (components/layout/FooterRoom.tsx) ═══
+   The closing band as one room: a wall on the left (window, pinboard, sticky
+   note) and the desk on the right (FooterLottie). Visible at rest; arrival
+   only adds motion — pins settle onto the board, the note swings, the screen
+   boots and the stack bursts out of the monitor. */
+.footer-floor {
+  position: absolute;
+  inset: auto 0 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-ds-border2) 6%,
+    var(--color-ds-border2) 94%,
+    transparent
+  );
+}
+@media (max-width: 1023px) {
+  .footer-floor {
+    display: none;
+  }
+}
+
+/* Window onto Ghaziabad — colours come from FooterWindow (real IST time) */
+.footer-window {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  max-height: 280px;
+  overflow: hidden;
+  border: 6px solid var(--color-ds-surface2);
+  border-radius: 14px;
+  outline: 1px solid var(--color-ds-border2);
+  background: var(--sky);
+}
+.footer-window::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      transparent calc(50% - 3px),
+      var(--color-ds-surface2) calc(50% - 3px) calc(50% + 3px),
+      transparent 0
+    ),
+    linear-gradient(
+      0deg,
+      transparent calc(50% - 3px),
+      var(--color-ds-surface2) calc(50% - 3px) calc(50% + 3px),
+      transparent 0
+    );
+}
+.footer-window-stars {
+  position: absolute;
+  inset: 0;
+  opacity: var(--stars, 0);
+  background-image:
+    radial-gradient(1.5px 1.5px at 18% 22%, #fff, transparent),
+    radial-gradient(1px 1px at 70% 15%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 40% 40%, #fff, transparent),
+    radial-gradient(1px 1px at 82% 48%, #fff, transparent),
+    radial-gradient(1px 1px at 28% 60%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 60% 30%, #fff, transparent);
+}
+.footer-window-orb {
+  position: absolute;
+  left: var(--ox);
+  top: var(--oy);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--orb);
+  box-shadow: 0 0 28px 6px color-mix(in srgb, var(--orb) 55%, transparent);
+}
+.footer-window-city {
+  position: absolute;
+  inset: auto 0 0;
+  width: 100%;
+  height: 38%;
+  fill: var(--city);
+}
+.footer-window-city .lit {
+  fill: var(--lit);
+}
+@media (max-width: 639px) {
+  .footer-window {
+    aspect-ratio: 16 / 10;
+    max-height: 200px;
+  }
+}
+
+/* Pinboard of shipped work */
+.footer-board {
+  position: relative;
+  padding: 18px 16px 20px;
+  border: 1px solid var(--color-ds-border2);
+  border-radius: 14px;
+  background-color: color-mix(in srgb, var(--color-ds-surface2) 70%, var(--color-ds-bg));
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--color-ds-muted) 18%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 14px 14px;
+}
+.footer-pin {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--color-ds-border2);
+  border-radius: 10px;
+  background: var(--color-ds-surface);
+  color: var(--color-ds-text);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transform: rotate(var(--r));
+  box-shadow: 0 8px 16px -10px rgb(0 0 0 / 0.45);
+  transition:
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    border-color 0.2s ease;
+}
+.footer-pin::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 11px;
+  height: 11px;
+  margin-left: -5.5px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.4);
+}
+.footer-pin:hover,
+.footer-pin:focus-visible {
+  transform: rotate(0deg) translateY(-3px);
+  border-color: var(--c);
+  outline: none;
+}
+.footer-pin:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-ds-accent);
+}
+
+/* Sticky note with the email */
+.footer-note {
+  display: grid;
+  gap: 6px;
+  max-width: 300px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 4px 4px 10px 4px;
+  background: color-mix(in srgb, var(--color-ds-warning) 22%, var(--color-ds-surface));
+  color: var(--color-ds-text);
+  font-size: 14px;
+  line-height: 1.4;
+  transform: rotate(-1.5deg);
+  box-shadow: 0 10px 18px -12px rgb(0 0 0 / 0.5);
+}
+.footer-note-btn {
+  justify-self: start;
+  padding: 5px 9px;
+  border: 1px solid color-mix(in srgb, var(--color-ds-text) 25%, transparent);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--color-ds-bg) 45%, transparent);
+  color: var(--color-ds-text);
+  font: 600 12.5px var(--font-mono);
+  text-align: left;
+  cursor: pointer;
+}
+.footer-note-btn:hover {
+  border-color: var(--color-ds-accent);
+}
+.footer-note-link {
+  color: var(--color-ds-accent-strong);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Arrival (the board sits in a Reveal): pins settle, the note swings */
+.reveal.is-visible .footer-pin {
+  animation: pin-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--i) * 110ms + 200ms) backwards;
+}
+@keyframes pin-in {
+  from {
+    transform: translateY(-14px) rotate(calc(var(--r) * 3));
+  }
+}
+.reveal.is-visible .footer-note {
+  animation: note-in 0.7s cubic-bezier(0.34, 1.4, 0.64, 1) 0.75s backwards;
+}
+@keyframes note-in {
+  from {
+    transform: rotate(-9deg) translateY(-10px);
+  }
+}
+
+/* Desk (FooterLottie). The artwork's pale lavender backdrop circle glares on
+   the dark footer, so it takes a quiet tint of the site accent instead. */
 .footer-lottie .lottie-bg path {
   fill: color-mix(in srgb, var(--color-ds-accent) 12%, var(--color-ds-surface2));
 }
-/* The overlaid tech tags (replacing the artwork's HTML/CSS/JS/PHP). Visible
-   by default (no JS / reduced motion); when armed they wait for play, rise
-   in after the intro (or straight away if it was already seen), then bob. */
-.footer-tag {
-  translate: -50% -50%;
+.footer-lottie:not([data-ready]) :is(.footer-screen, .footer-chip) {
+  visibility: hidden;
 }
-.footer-lottie[data-armed]:not([data-play]) .footer-tag {
+/* DevStash on the monitor's tilted face (position tuned to the artwork) */
+.footer-screen {
+  position: absolute;
+  left: 39.5%;
+  top: 27%;
+  width: 22%;
+  aspect-ratio: 16 / 10;
+  transform: skewY(-24deg);
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+.footer-lottie[data-ready]:not([data-screen]) .footer-screen {
   opacity: 0;
 }
-.footer-lottie[data-armed][data-play] .footer-tag {
-  --base: 2.5s;
-  animation:
-    footer-tag-in 0.5s var(--ds-ease-smooth) calc(var(--base) + var(--i) * 0.18s) both,
-    footer-tag-bob 3.2s ease-in-out calc(var(--base) + 0.6s + var(--i) * 0.4s) infinite alternate;
+.footer-screen-face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5%;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  background: #0b0f19;
+  box-shadow: 0 0 18px 2px color-mix(in srgb, var(--color-ds-accent) 45%, transparent);
 }
-@keyframes footer-tag-in {
+.footer-screen-wm {
+  display: block;
+  width: 4.4em;
+  overflow: hidden;
+  color: #f3f4f6;
+  font: 700 clamp(8px, 2.4cqw, 15px) / 1 var(--font-sans);
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+.footer-lottie[data-screen]:not([data-still]) .footer-screen-wm {
+  animation: screen-type 0.6s steps(8) 0.35s backwards;
+}
+@keyframes screen-type {
   from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.9);
+    width: 0;
   }
 }
-@keyframes footer-tag-bob {
+/* The stack bursts out of the monitor, then bobs */
+.footer-chip {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.7cqw 1.4cqw;
+  border: 1px solid var(--color-ds-border2);
+  border-radius: 7px;
+  background: var(--color-ds-surface);
+  color: var(--color-ds-text);
+  font: 600 clamp(9px, 2.1cqw, 12px) / 1 var(--font-mono);
+  white-space: nowrap;
+  translate: -50% -50%;
+  box-shadow: 0 6px 14px -8px rgb(0 0 0 / 0.5);
+}
+.footer-chip-ai {
+  border-color: color-mix(in srgb, var(--color-ds-purple) 70%, var(--color-ds-border2));
+}
+.footer-lottie[data-ready]:not([data-chips]) .footer-chip {
+  opacity: 0;
+}
+.footer-lottie[data-chips]:not([data-still]) .footer-chip {
+  animation:
+    chip-burst 0.7s cubic-bezier(0.34, 1.4, 0.64, 1) calc(var(--i) * 140ms) backwards,
+    chip-bob 3.2s ease-in-out calc(var(--i) * 140ms + 0.9s) infinite alternate;
+}
+.footer-lottie[data-still] .footer-chip {
+  animation: chip-bob 3.2s ease-in-out calc(var(--i) * 0.4s) infinite alternate;
+}
+@keyframes chip-burst {
+  from {
+    opacity: 0;
+    transform: translate(var(--fx), var(--fy)) scale(0.3);
+  }
+}
+@keyframes chip-bob {
   to {
     transform: translateY(-4px);
   }
 }
 
-/* Footer sign-off terminal (components/layout/FooterSignoff.tsx): visible by
-   default; when armed, hidden until the footer is in view, then each line
-   arrives at its --d and each command types itself out. */
-.signoff[data-armed]:not([data-play]) :is(.so-line, .so-out, .so-actions) {
-  opacity: 0;
-}
-.signoff[data-armed][data-play] :is(.so-line, .so-out, .so-actions) {
-  animation: build-in 0.35s var(--ds-ease-smooth) var(--d) both;
-}
-.signoff[data-armed][data-play] .so-cmd {
-  display: inline-block;
-  animation: build-type 0.4s steps(7, end) calc(var(--d) + 0.1s) both;
-}
-
-/* Keyframes shared by the footer sign-off terminal (FooterSignoff) */
-@keyframes build-type {
-  to {
-    clip-path: inset(0);
-  }
-}
-@keyframes build-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-}
 /* Intro-video poster (components/ui/IntroVideo.tsx): a quiet dot grid with
    two soft corner lights, on tokens so it repaints for light theme. Static. */
 .intro-poster {

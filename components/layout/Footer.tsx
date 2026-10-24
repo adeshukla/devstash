@@ -4,8 +4,7 @@ import { siteConfig } from '@/content/metadata/site.config'
 import { LogoMark } from '@/components/ui/LogoMark'
 import { Icon } from '@/components/icons/Icon'
 import type { IconName } from '@/components/icons/Icon'
-import { FooterLottie } from './FooterLottie'
-import { FooterSignoff } from './FooterSignoff'
+import { FooterRoom } from './FooterRoom'
 
 const navLinks = [
   { label: 'Home', href: '/' },
@@ -171,16 +170,10 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Closing band: sign-off on the left, illustration on the right.
-            Both start only when the visitor actually reaches the footer. */}
-        <div className="border-ds-border mt-14 grid grid-cols-[minmax(0,1fr)] items-center gap-10 border-t pt-12 md:grid-cols-2 md:gap-12">
-          <FooterSignoff email={siteConfig.author.email} />
-          {/* Starts at the right half's left edge — the same line as the
-              Navigation column above — instead of pinned to the far right,
-              which left a ~500px gap beside the terminal on wide screens. */}
-          <div className="flex justify-center md:justify-start">
-            <FooterLottie />
-          </div>
+        {/* Closing band: the footer room — a wall (window, shipped-work board,
+            sticky note) and the desk illustration, as one full-width scene. */}
+        <div className="border-ds-border mt-14 border-t pt-12">
+          <FooterRoom email={siteConfig.author.email} />
         </div>
 
         {/* Bottom row */}
