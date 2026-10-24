@@ -12,24 +12,9 @@ import { PageFacts } from '@/components/ui/PageFacts'
 import { BlogList } from '@/components/blog/BlogList'
 import { BlogFilter } from '@/components/blog/BlogFilter'
 import { getAllPosts, getAllCategories, getAllTags } from '@/lib/markdown/blog'
-import { type BlogCategory, type BlogPost } from '@/types/blog'
+import { type BlogCategory } from '@/types/blog'
 
 const POSTS_PER_PAGE = 9
-
-// "17 Oct" — newest createdAt, formatted in UTC so the build machine's
-// timezone can't shift the day.
-function latestPostDate(posts: BlogPost[]) {
-  const latest = posts
-    .map((p) => p.createdAt)
-    .sort()
-    .at(-1)
-  if (!latest) return '—'
-  return new Date(latest).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    timeZone: 'UTC',
-  })
-}
 
 const title = 'Blog — Frontend, Automation & AI Workflows'
 const description =
@@ -132,7 +117,12 @@ export default async function BlogPage({ searchParams }: Props) {
                 value: allPosts.reduce((min, p) => min + p.readingTime, 0),
                 label: 'min of reading',
               },
-              { value: latestPostDate(allPosts), label: 'latest post' },
+              // Evergreen on purpose — a "latest post" date ages the whole
+              // site the moment posting slows down.
+              {
+                value: `${Math.round(allPosts.reduce((min, p) => min + p.readingTime, 0) / Math.max(allPosts.length, 1))} min`,
+                label: 'avg. read',
+              },
             ]}
           />
         </div>

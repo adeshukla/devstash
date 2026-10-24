@@ -62,13 +62,14 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       : allProjects.filter((p) => p.category === activeCategory)
 
   // Header facts, all counted from the project files: total (+ how many are
-  // live), the two biggest categories, and the newest build year.
+  // live), the two biggest categories, and how many run standalone.
   const live = allProjects.filter((p) => p.status === 'live').length
   const byCategory = [...new Set(allProjects.map((p) => p.category))]
     .map((c) => ({ c, n: allProjects.filter((p) => p.category === c).length }))
     .sort((a, b) => b.n - a.n)
     .slice(0, 2)
-  const latestYear = Math.max(...allProjects.map((p) => p.year ?? 0))
+  // Evergreen: a "latest build" year reads as stale the following January.
+  const standalone = allProjects.filter((p) => p.liveUrl?.startsWith('http')).length
 
   return (
     <main>
@@ -104,7 +105,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                 note: live === allProjects.length ? 'all live' : `${live} live`,
               },
               ...byCategory.map(({ c, n }) => ({ value: n, label: CATEGORY_PLURALS[c] })),
-              ...(latestYear > 0 ? [{ value: latestYear, label: 'latest build' }] : []),
+              ...(standalone > 0 ? [{ value: standalone, label: 'standalone apps' }] : []),
             ]}
           />
 
