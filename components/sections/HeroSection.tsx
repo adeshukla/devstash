@@ -13,10 +13,8 @@ import { projectBrand } from '@/components/icons/ProjectMark'
 // that has cost LCP twice before. The intro overlays sit ON TOP of the live
 // hero instead, so the heading is already painted underneath them.
 
-// Set before first paint on a first visit this session (same plain-<script>
-// pattern as the theme init in app/layout.tsx), so the design overlay is up
-// from the very first frame instead of flashing in after hydration.
-const INTRO_INIT = `(function(){try{if(!sessionStorage.getItem('ds-hero-intro-seen')&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.setAttribute('data-hero-intro','')}catch(e){}})()`
+// The first-visit intro flag is set before first paint by a script in
+// app/layout.tsx (see HERO_INTRO_INIT_SCRIPT).
 
 const SHIPPED = ['pare', 'praxis', 'build-components', 'motion-lab'] as const
 const SHIPPED_NAMES: Record<(typeof SHIPPED)[number], string> = {
@@ -343,14 +341,9 @@ function CodeView() {
 export function HeroSection() {
   return (
     <section className="relative pt-6 pb-16 sm:pt-10 sm:pb-24 lg:pb-28">
-      <script
-        id="hero-intro-init"
-        suppressHydrationWarning
-        dangerouslySetInnerHTML={{ __html: INTRO_INIT }}
-      />
       <div className="max-w-site mx-auto px-6">
         <HeroStage design={<DesignView />} code={<CodeView />}>
-          <div className="grid gap-12 pt-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center lg:gap-14">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-12 pt-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center lg:gap-14">
             <div>
               <p className="text-ds-muted flex items-center gap-2 font-mono text-[13px]">
                 <span className="relative flex h-2 w-2 shrink-0">
@@ -395,7 +388,7 @@ export function HeroSection() {
                     Get in Touch
                   </Button>
                 </div>
-                <div className="flex items-center gap-2.5">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <span className="text-ds-muted font-mono text-xs">shipped:</span>
                   {SHIPPED.map((slug) => {
                     const { Mark } = projectBrand(slug)

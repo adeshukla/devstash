@@ -250,9 +250,12 @@ export function HeroStage({
         ref={bar}
         role="group"
         aria-label="View this hero as"
-        className="border-ds-border bg-ds-surface relative inline-flex items-center gap-0.5 rounded-xl border p-1"
+        // max-w-full + overflow-x-auto: on watch-size screens (~200px) the
+        // three buttons can't fit, so the switch scrolls within itself
+        // instead of pushing the whole page sideways.
+        className="border-ds-border bg-ds-surface relative inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-xl border p-1"
       >
-        <span className="text-ds-muted px-2 font-mono text-[11px] tracking-wider uppercase">
+        <span className="text-ds-muted px-2 font-mono text-[11px] tracking-wider uppercase max-[360px]:hidden">
           view as
         </span>
         <span

@@ -23,6 +23,12 @@ const THEME_STORAGE_KEY = 'devstash-theme'
 // actually prevents the flash.
 const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('${THEME_STORAGE_KEY}');var d=t==='light'||t==='dark'?t:(window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',d)}catch(e){}})()`
 
+// Home hero's first-visit intro (components/ui/HeroStage.tsx): raised before
+// first paint so the design overlay is up from frame one. Lives here, not in
+// HeroSection — React never runs a <script> rendered inside a component on
+// client navigation, and warns about it.
+const HERO_INTRO_INIT_SCRIPT = `;(function(){try{if(location.pathname==='/'&&!sessionStorage.getItem('ds-hero-intro-seen')&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.setAttribute('data-hero-intro','')}catch(e){}})()`
+
 const dmSans = DM_Sans({
   variable: '--font-sans',
   subsets: ['latin'],
@@ -105,7 +111,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           id="theme-init"
           suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT + HERO_INTRO_INIT_SCRIPT }}
         />
         <GtmNoScript />
         {children}

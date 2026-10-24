@@ -173,7 +173,7 @@ export function Footer() {
 
         {/* Closing band: sign-off on the left, illustration on the right.
             Both start only when the visitor actually reaches the footer. */}
-        <div className="border-ds-border mt-14 grid items-center gap-10 border-t pt-12 md:grid-cols-2 md:gap-12">
+        <div className="border-ds-border mt-14 grid grid-cols-[minmax(0,1fr)] items-center gap-10 border-t pt-12 md:grid-cols-2 md:gap-12">
           <FooterSignoff email={siteConfig.author.email} />
           {/* Starts at the right half's left edge — the same line as the
               Navigation column above — instead of pinned to the far right,

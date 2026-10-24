@@ -103,7 +103,7 @@ export function FooterSignoff({ email }: { email: string }) {
         <button
           type="button"
           onClick={copyEmail}
-          className="border-ds-border2 bg-ds-surface text-ds-text hover:border-ds-accent focus-visible:outline-ds-accent inline-flex items-center gap-2 rounded-lg border px-3.5 py-2 font-mono text-[13px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+          className="border-ds-border2 bg-ds-surface text-ds-text hover:border-ds-accent focus-visible:outline-ds-accent inline-flex max-w-full items-center gap-2 rounded-lg border px-3.5 py-2 font-mono text-[13px] [overflow-wrap:anywhere] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
         >
           <Icon
             name={copied ? 'check' : 'copy'}

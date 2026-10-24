@@ -55,7 +55,9 @@ export function Badge({
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center font-mono font-medium whitespace-nowrap',
+        // max-w-full: a badge only wraps when it's wider than its container
+        // (watch-size screens); everywhere else it stays on one line.
+        'inline-flex max-w-full shrink-0 items-center font-mono font-medium',
         'rounded-pill border tracking-wide',
         variantStyles[variant],
         sizeStyles[size],

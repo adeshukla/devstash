@@ -60,7 +60,10 @@ const nextConfig: NextConfig = {
    * blocks the request and logs a CSP error to the console on every page load,
    * which Lighthouse then reports under "Browser errors were logged to the
    * console". Scoped to img-src only (one host, images only) rather than
-   * widening script-src or connect-src.
+   * widening script-src or connect-src. Same reason for googletagmanager.com
+   * and *.google-analytics.com in img-src: GTM/GA4 send some hits as image
+   * pixels (/td, /a), which were being blocked — lost analytics plus console
+   * errors on most page loads (found by the 2026-10-24 full-site QA run).
    * `<script type="application/ld+json">` is exempt from script-src by spec
    * (browsers never parse it as JS), so JSON-LD needs no allowance at all.
    * 'unsafe-inline' in script-src covers only the 3 first-party analytics
@@ -75,7 +78,7 @@ const nextConfig: NextConfig = {
       default-src 'self';
       script-src 'self' 'unsafe-inline'${devEval} https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms https://*.clarity.ms https://www.google.com https://www.gstatic.com;
       style-src 'self' 'unsafe-inline';
-      img-src 'self' data: https://*.clarity.ms https://c.bing.com;
+      img-src 'self' data: https://*.clarity.ms https://c.bing.com https://www.googletagmanager.com https://*.google-analytics.com;
       font-src 'self' data:;
       connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://*.clarity.ms;
       frame-src https://www.google.com;

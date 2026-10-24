@@ -13,28 +13,24 @@ import { cn } from '@/lib/utils/cn'
 interface RevealProps {
   children: ReactNode
   className?: string
-  /** Delay before the reveal animation starts, in milliseconds. */
+  /** Delay before the arrival animation starts, in milliseconds. */
   delay?: number
   /** Element/landmark to render as. Defaults to 'div'. */
   as?: ElementType
-  /** Cards: show a dashed spec outline with this label before the content
-   * wipes in (blueprint → live). Omit for section-sized blocks. */
-  blueprint?: string
 }
 
 /**
- * Wipes its children into view once on scroll (IntersectionObserver) — the
- * site's blueprint → live scroll-in, see `.reveal` in globals.css. Content is
- * always in the DOM (only visually clipped), and `prefers-reduced-motion`
- * shows it immediately via the `.reveal` CSS guard.
+ * Marks its children `.is-visible` the first time they scroll into view,
+ * which plays a short settle (`.reveal` in globals.css) and lets children
+ * key their own arrival moments off it (e.g. the automation strip).
+ *
+ * Content is NEVER hidden while waiting: an earlier version clipped it to
+ * zero width until the observer fired, and Chrome's IntersectionObserver
+ * reports an element clipped to zero area as not intersecting — so it never
+ * fired and whole sections (the contact form) stayed blank. Arrival only adds
+ * motion; if JS is slow, broken or scrolled past, the content is already there.
  */
-export function Reveal({
-  children,
-  className,
-  delay = 0,
-  as: Tag = 'div',
-  blueprint,
-}: RevealProps) {
+export function Reveal({ children, className, delay = 0, as: Tag = 'div' }: RevealProps) {
   const ref = useRef<HTMLElement | null>(null)
   const [visible, setVisible] = useState(false)
 
@@ -42,37 +38,23 @@ export function Reveal({
     const el = ref.current
     if (!el) return
 
-    // No IntersectionObserver (or SSR) → just show it.
-    if (typeof IntersectionObserver === 'undefined') {
-      setVisible(true)
-      return
-    }
-
     const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setVisible(true)
-            observer.disconnect()
-          }
-        }
+      ([entry]) => {
+        if (!entry?.isIntersecting) return
+        setVisible(true)
+        observer.disconnect()
       },
-      // Sections trigger the moment a sliver is near the viewport (120px
-      // early), so content close to the fold never reads as "still loading".
-      // Blueprint cards wait until a third of the card is on screen — the
-      // outline is the point, and it would otherwise play off-screen.
-      blueprint ? { threshold: 0.35 } : { threshold: 0.01, rootMargin: '0px 0px 120px 0px' }
+      { threshold: 0.15 }
     )
 
     observer.observe(el)
     return () => observer.disconnect()
-  }, [blueprint])
+  }, [])
 
   return (
     <Tag
       ref={ref}
       className={cn('reveal', visible && 'is-visible', className)}
-      data-blueprint={blueprint}
       style={delay ? ({ '--reveal-delay': `${delay}ms` } as CSSProperties) : undefined}
     >
       {children}
