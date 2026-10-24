@@ -4,7 +4,7 @@ import { Badge, Button, Reveal } from '@/components/ui'
 import { ProjectDeck, type DeckCard } from '@/components/ui/ProjectDeck'
 import { Icon } from '@/components/icons/Icon'
 import { projectBrand } from '@/components/icons/ProjectMark'
-import { ProjectCover } from '@/components/sections/ProjectCover'
+import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
 import { hasRealImage, statusConfig } from '@/components/sections/ProjectsGrid'
 import type { Project } from '@/types/project'
 
@@ -72,8 +72,7 @@ function Front({ project }: { project: Project }) {
             sizes="360px"
           />
         ) : (
-          // Brand field only — the deck overlaps the project's own mark on it below
-          <ProjectCover slug={project.slug} showMark={false} />
+          <CategoryIllustration category={project.category} kind="project" seed={project.slug} />
         )}
       </div>
       {/* The project's own logo, overlapping the artwork like an app icon */}
