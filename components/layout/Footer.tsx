@@ -4,7 +4,7 @@ import { siteConfig } from '@/content/metadata/site.config'
 import { LogoMark } from '@/components/ui/LogoMark'
 import { Icon } from '@/components/icons/Icon'
 import type { IconName } from '@/components/icons/Icon'
-import { FooterRoom } from './FooterRoom'
+import { FooterScene } from './FooterScene'
 
 const navLinks = [
   { label: 'Home', href: '/' },
@@ -170,10 +170,15 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Closing band: the footer room — a wall (window, shipped-work board,
-            sticky note) and the desk illustration, as one full-width scene. */}
+        {/* Closing band: the footer room, an animated night scene (FooterScene). */}
         <div className="border-ds-border mt-14 border-t pt-12">
-          <FooterRoom email={siteConfig.author.email} />
+          <p className="text-ds-accent font-mono text-xs tracking-widest uppercase">
+            {'// end of page'}
+          </p>
+          <p className="text-ds-text mt-3 mb-8 text-2xl leading-tight font-bold tracking-tight sm:text-3xl">
+            Thanks for scrolling all the way down.
+          </p>
+          <FooterScene />
         </div>
 
         {/* Bottom row */}
