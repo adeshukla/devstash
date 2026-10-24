@@ -33,12 +33,12 @@ export function CopyCodeButton() {
         aria-label={copied ? 'Copied' : 'Copy code'}
         className={cn(
           'border-ds-border/60 bg-ds-surface text-ds-muted hover:border-ds-accent hover:text-ds-accent',
-          // Dimly visible by default (not opacity-0) so it's discoverable
-          // without requiring a hover to reveal it exists at all — full
-          // opacity on hover/focus.
-          'inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-xs opacity-40 backdrop-blur transition-opacity',
-          'group-hover:opacity-100 focus-visible:opacity-100',
-          copied && 'border-ds-success text-ds-success opacity-100'
+          // Always fully visible: it used to sit at opacity-40 until hover,
+          // which put its label at 1.77:1 in light theme (axe failure) and
+          // left touch/keyboard users with a near-invisible control. The
+          // muted text colour already keeps it quiet.
+          'inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-xs backdrop-blur transition-colors',
+          copied && 'border-ds-success text-ds-success'
         )}
       >
         <Icon name={copied ? 'check' : 'copy'} className="h-3.5 w-3.5" />

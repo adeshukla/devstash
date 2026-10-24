@@ -6,7 +6,7 @@ import { HeroSection } from '@/components/sections/HeroSection'
 import { ProjectDeckSection } from '@/components/sections/ProjectDeckSection'
 import { FeaturedPosts } from '@/components/sections/FeaturedPosts'
 import { WhatIDoBento } from '@/components/sections/WhatIDoBento'
-import { Reveal, Button, Badge } from '@/components/ui'
+import { Reveal, Button } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
 import { IntroVideo } from '@/components/ui/IntroVideo'
 import { getAllProjects, getFeaturedProjects } from '@/lib/markdown/projects'
@@ -25,30 +25,6 @@ export const metadata: Metadata = buildMetadata({
   description:
     'UI developer, 6+ years. 200+ PPC landing pages for US clients — CSS, responsive layout, accessibility and page-speed fixes. Open to roles in India or remote.',
 })
-
-// ─── Flagship build — the AI Content Pipeline demo (/lab/ai-content-pipeline):
-// a real 3-step Groq LLM chain, not a mockup. Facts below match the demo's own
-// page copy and types/aiPipeline.ts exactly — nothing here is invented.
-const PIPELINE_STEPS: { step: string; title: string; description: string }[] = [
-  {
-    step: '01',
-    title: 'Scaffold',
-    description:
-      "Writes an honest first draft — and leaves [TODO: …] markers wherever it would otherwise fake code or metrics it doesn't have.",
-  },
-  {
-    step: '02',
-    title: 'Copy-edit',
-    description:
-      'A pass that strips common AI tells — "in conclusion", "delve into", "leverage" — with a before/after phrase count shown.',
-  },
-  {
-    step: '03',
-    title: 'Frontmatter',
-    description:
-      "Outputs SEO frontmatter matching this blog's real schema — title, slug, description, category, tags, reading time.",
-  },
-]
 
 export default function HomePage() {
   // Prefer featured items; gracefully fall back to the latest if none flagged.
@@ -101,53 +77,6 @@ export default function HomePage() {
               A narrated tour of the projects above — what each one does and why it was built.
             </p>
             <IntroVideo />
-          </div>
-        </section>
-      </Reveal>
-
-      {/* Flagship build — the AI Content Pipeline demo, the strongest single proof point */}
-      <Reveal>
-        <section className="border-ds-border border-t py-16">
-          <div className="max-w-site mx-auto px-6">
-            <div className="border-ds-border bg-ds-surface overflow-hidden rounded-2xl border">
-              <div className="grid grid-cols-1 gap-10 p-8 sm:p-10 lg:grid-cols-[1.2fr_1fr] lg:gap-16">
-                <div>
-                  <div className="mb-4 flex items-center gap-3">
-                    <Badge variant="purple" dot>
-                      Flagship build
-                    </Badge>
-                  </div>
-                  <h2 className="text-ds-text text-3xl font-bold tracking-tight sm:text-4xl">
-                    A real AI pipeline, not a mockup
-                  </h2>
-                  <p className="text-ds-muted mt-4 leading-relaxed">
-                    Three sequential Groq LLM calls run server-side for every request — scaffold,
-                    copy-edit, frontmatter — with real token usage and latency shown for each step,
-                    and an automatic fallback to Cerebras if Groq is unavailable.
-                  </p>
-                  <Button
-                    href="/lab/ai-content-pipeline"
-                    size="lg"
-                    className="mt-8 font-semibold"
-                    iconRight={<Icon name="external-link" className="h-4 w-4" />}
-                  >
-                    Try it live
-                  </Button>
-                </div>
-
-                <ol className="flex flex-col gap-6">
-                  {PIPELINE_STEPS.map(({ step, title, description }) => (
-                    <li key={step} className="flex gap-4">
-                      <span className="text-ds-accent font-mono text-sm">{step}</span>
-                      <div>
-                        <h3 className="text-ds-text font-semibold">{title}</h3>
-                        <p className="text-ds-muted mt-1 text-sm leading-relaxed">{description}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            </div>
           </div>
         </section>
       </Reveal>
