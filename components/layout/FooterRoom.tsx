@@ -19,7 +19,7 @@ const PINS: { slug: string; name: string; tilt: number }[] = [
  * The footer's closing band, drawn as one room across the full width: a wall
  * on the left (a window onto Ghaziabad's real-time sky, a pinboard of shipped
  * work, a sticky note with the email) and the desk on the right (the Lottie,
- * with DevStash on its screen and the stack bursting out of the monitor).
+ * with the stack bursting out of the monitor).
  * One floor line runs under both. Replaced the sign-off terminal.
  * Everything is visible at rest; arrival only adds motion (`.footer-room`).
  */

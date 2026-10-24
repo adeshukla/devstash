@@ -965,8 +965,8 @@ html[data-hero-intro] .hero-ov-design {
 /* ═══ Footer room (components/layout/FooterRoom.tsx) ═══
    The closing band as one room: a wall on the left (window, pinboard, sticky
    note) and the desk on the right (FooterLottie). Visible at rest; arrival
-   only adds motion — pins settle onto the board, the note swings, the screen
-   boots and the stack bursts out of the monitor. */
+   only adds motion — pins settle onto the board, the note swings and the
+   stack bursts out of the monitor. */
 .footer-floor {
   position: absolute;
   inset: auto 0 0;
@@ -1169,50 +1169,8 @@ html[data-hero-intro] .hero-ov-design {
 .footer-lottie .lottie-bg path {
   fill: color-mix(in srgb, var(--color-ds-accent) 12%, var(--color-ds-surface2));
 }
-.footer-lottie:not([data-ready]) :is(.footer-screen, .footer-chip) {
+.footer-lottie:not([data-ready]) .footer-chip {
   visibility: hidden;
-}
-/* DevStash on the monitor's tilted face (position tuned to the artwork) */
-.footer-screen {
-  position: absolute;
-  left: 39.5%;
-  top: 27%;
-  width: 22%;
-  aspect-ratio: 16 / 10;
-  transform: skewY(-24deg);
-  pointer-events: none;
-  transition: opacity 0.35s ease;
-}
-.footer-lottie[data-ready]:not([data-screen]) .footer-screen {
-  opacity: 0;
-}
-.footer-screen-face {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5%;
-  width: 100%;
-  height: 100%;
-  border-radius: 4px;
-  background: #0b0f19;
-  box-shadow: 0 0 18px 2px color-mix(in srgb, var(--color-ds-accent) 45%, transparent);
-}
-.footer-screen-wm {
-  display: block;
-  width: 4.4em;
-  overflow: hidden;
-  color: #f3f4f6;
-  font: 700 clamp(8px, 2.4cqw, 15px) / 1 var(--font-sans);
-  letter-spacing: -0.04em;
-  white-space: nowrap;
-}
-.footer-lottie[data-screen]:not([data-still]) .footer-screen-wm {
-  animation: screen-type 0.6s steps(8) 0.35s backwards;
-}
-@keyframes screen-type {
-  from {
-    width: 0;
-  }
 }
 /* The stack bursts out of the monitor, then bobs */
 .footer-chip {

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, type CSSProperties } from 'react'
 import type { AnimationItem } from 'lottie-web'
-import { LogoMark } from '@/components/ui/LogoMark'
 
 // "Working and Drinking Coffee in Office" by Muhammad Tahir —
 // https://lottiefiles.com/free-animation/working-and-drinking-coffee-in-office-rFMTfNZTfQ
@@ -16,9 +15,8 @@ const SRC = '/images/animations/working-coffee.json'
 // 58–140: reach for the mug, sip, put it down. It plays once and holds on
 // STILL_FRAME — looping made the monitor's scrolling page jump on restart.
 const STILL_FRAME = 140
-// Synced to the artwork: the monitor is in place by SCREEN_FRAME, so the
-// DevStash logo boots on it; the stack bursts out once the developer is seated.
-const SCREEN_FRAME = 44
+// Synced to the artwork: the stack bursts out of the monitor once the
+// developer is seated.
 const CHIPS_FRAME = 62
 // After one play-through in this tab, later footers show the finished scene.
 const SEEN_KEY = 'ds-footer-intro-seen'
@@ -45,8 +43,8 @@ function readSeen() {
  * The desk half of the footer room. Costs nothing on page load: lottie-web
  * (light SVG build) and the animation file load only when the visitor is
  * within ~600px of the footer. It plays once per tab when the footer is in
- * view, pausing off screen; the screen logo and chip burst key off its frames
- * (`data-screen` / `data-chips`). Reduced motion and later visits get the
+ * view, pausing off screen; the chip burst keys off its frames (`data-chips`).
+ * Reduced motion and later visits get the
  * finished scene (`data-still`). The overlays only show once the artwork has
  * loaded (`data-ready`), so they never float over an empty box.
  */
@@ -72,7 +70,6 @@ export function FooterLottie() {
         if (started) return a.play() // resume, don't restart
         started = true
         a.addEventListener('enterFrame', (e) => {
-          if (e.currentTime >= SCREEN_FRAME) root.dataset.screen = ''
           if (e.currentTime >= CHIPS_FRAME) root.dataset.chips = ''
         })
         a.addEventListener('complete', () => onScreen.disconnect())
@@ -106,7 +103,6 @@ export function FooterLottie() {
           root.dataset.ready = ''
           if (still) {
             root.dataset.still = ''
-            root.dataset.screen = ''
             root.dataset.chips = ''
           } else onScreen.observe(el)
         } catch {
@@ -129,21 +125,10 @@ export function FooterLottie() {
     <div
       ref={wrap}
       role="img"
-      aria-label="Illustration: a developer at a desk with a cup of coffee; the DevStash logo is on the screen, with React, Next.js, TypeScript, Tailwind CSS and AI floating above"
+      aria-label="Illustration: a developer at a desk with a cup of coffee, with React, Next.js, TypeScript, Tailwind CSS and AI floating above"
       className="footer-lottie [container-type:inline-size] relative aspect-[3/2] w-full max-w-[600px]"
     >
       <div ref={box} className="absolute inset-0" />
-      {/* The monitor's tilted face in the artwork, tuned by eye */}
-      <div aria-hidden="true" className="footer-screen">
-        <div className="footer-screen-face">
-          <span className="block w-[24%] [&>svg]:h-auto [&>svg]:w-full">
-            <LogoMark />
-          </span>
-          <span className="footer-screen-wm">
-            <span className="text-[#3b82f6]">Dev</span>Stash
-          </span>
-        </div>
-      </div>
       {CHIPS.map(({ label, x, y, fx, fy, ai }, i) => (
         <span
           key={label}
