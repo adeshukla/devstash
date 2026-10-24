@@ -13,7 +13,7 @@ const SEEN_KEY = 'ds-footer-intro-seen'
 const VIEWS = [
   { query: '(min-width: 1024px)', box: '0 0 1920 560' },
   { query: '(min-width: 640px)', box: '560 0 1360 560' },
-  { query: 'all', box: '1000 0 800 560' },
+  { query: 'all', box: '1010 0 700 560' }, // phones: the brief's 5:4 mobile frame, on the desk
 ]
 
 function readSeen() {
@@ -100,6 +100,16 @@ export function FooterScene() {
           if (window.matchMedia('(prefers-reduced-motion: reduce)').matches)
             return setPlaying(svg, true)
           if (readSeen()) skipIntro(svg)
+          // Phones crop to the desk, so the walk across the room is off frame: start
+          // the intro as he walks in under the third light instead of on an empty desk.
+          else if (!queries[1]?.matches) {
+            for (const a of svg.getAnimations({ subtree: true }))
+              if (
+                a.effect?.getComputedTiming().iterations !== Infinity &&
+                Number(a.currentTime ?? 0) < 4200
+              )
+                a.currentTime = 4200
+          }
           onScreen.observe(el)
         } catch {
           // Decorative: if it can't load, the footer simply has no scene.
@@ -118,7 +128,7 @@ export function FooterScene() {
   }, [])
 
   return (
-    <div className="border-ds-border bg-ds-surface2 relative aspect-[800/560] overflow-hidden rounded-2xl border sm:aspect-[1360/560] lg:aspect-[1920/560]">
+    <div className="border-ds-border bg-ds-surface2 relative aspect-[700/560] overflow-hidden rounded-2xl border sm:aspect-[1360/560] lg:aspect-[1920/560]">
       <div ref={host} className="absolute inset-0 [&>svg]:block [&>svg]:h-full [&>svg]:w-full" />
       {ready && (
         <button
