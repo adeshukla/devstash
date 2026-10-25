@@ -24,6 +24,20 @@ const restart = (a: Animation) => {
   a.play()
 }
 
+// Run after the browser has painted the next frame. Hydration often finishes
+// before the first paint, so mount work done synchronously (measuring, starting
+// animations) delays the hero's first paint — and with it LCP.
+const afterNextPaint = (fn: () => void) => {
+  let t: number | undefined
+  const raf = requestAnimationFrame(() => {
+    t = window.setTimeout(fn, 0)
+  })
+  return () => {
+    cancelAnimationFrame(raf)
+    window.clearTimeout(t)
+  }
+}
+
 // WCAG 2 relative-luminance contrast. Tokens can come back as short hex
 // (#fff) once the CSS is minified, so expand those first.
 const lum = (raw: string) => {
@@ -69,13 +83,18 @@ export function HeroStage({
   // Switch indicator follows the selected view
   useEffect(() => {
     viewRef.current = view
-    const btn = bar.current?.querySelector<HTMLButtonElement>(`[data-view="${view}"]`)
-    if (btn && ind.current) {
-      ind.current.style.left = `${btn.offsetLeft}px`
-      ind.current.style.width = `${btn.offsetWidth}px`
-    }
+    // Measure inside the frame (not straight after the state change), so the
+    // read doesn't force an extra layout
+    const raf = requestAnimationFrame(() => {
+      const btn = bar.current?.querySelector<HTMLButtonElement>(`[data-view="${view}"]`)
+      if (btn && ind.current) {
+        ind.current.style.left = `${btn.offsetLeft}px`
+        ind.current.style.width = `${btn.offsetWidth}px`
+      }
+    })
     if (view === 'live') startCycle.current()
     else stopCycle.current()
+    return () => cancelAnimationFrame(raf)
   }, [view])
 
   // Words ↔ tabs ↔ panel views, auto-cycling, live contrast
@@ -93,7 +112,8 @@ export function HeroStage({
     let resume: number | undefined
     // Tab geometry, measured once (and on resize) rather than read on every
     // cycle — a read right after the class changes below forces a layout.
-    let tabBoxes = tabs.map((t) => [t.offsetLeft, t.offsetWidth] as const)
+    const measureTabs = () => tabs.map((t) => [t.offsetLeft, t.offsetWidth] as const)
+    let tabBoxes: ReturnType<typeof measureTabs> = []
 
     const activate = (n: number, fromUser = false) => {
       cur = n
@@ -194,22 +214,29 @@ export function HeroStage({
         }
       })
     }
-    measure()
     const themeWatch = new MutationObserver(measure)
     themeWatch.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['data-theme'],
     })
 
-    activate(0)
-    start()
+    // The words, tabs and contrast badges are already server-rendered; starting
+    // them one frame late is invisible, starting them before the first paint is
+    // not free.
+    const cancelBoot = afterNextPaint(() => {
+      tabBoxes = measureTabs()
+      measure()
+      activate(0)
+      start()
+    })
     const onResize = () => {
-      tabBoxes = tabs.map((t) => [t.offsetLeft, t.offsetWidth] as const)
+      tabBoxes = measureTabs()
       activate(cur)
     }
     window.addEventListener('resize', onResize)
 
     return () => {
+      cancelBoot()
       stop()
       window.clearTimeout(resume)
       themeWatch.disconnect()
