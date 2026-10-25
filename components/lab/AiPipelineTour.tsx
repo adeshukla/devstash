@@ -1,5 +1,6 @@
 'use client'
 
+import './AiPipelineTour.css'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui'
 import { trackAndLog, ANALYTICS_EVENTS } from '@/lib/analytics/events'

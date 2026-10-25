@@ -1,5 +1,6 @@
 'use client'
 
+import './TestimonialsCarousel.css'
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { Icon } from '@/components/icons/Icon'
 import type { Testimonial } from '@/types/testimonial'

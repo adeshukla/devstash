@@ -59,12 +59,14 @@ export default function HomePage() {
       <ProjectDeckSection projects={projects} />
 
       {/* What I do — the claims, each linked to the projects that prove it */}
-      <Reveal>
+      {/* Everything below the deck is .cv-auto: server-rendered as usual, but
+          not styled/laid out/painted until it nears the viewport. */}
+      <Reveal className="cv-auto">
         <WhatIDoBento />
       </Reveal>
 
       {/* The work above, narrated in 80 seconds. Click-to-load: only the poster ships with the page. */}
-      <Reveal>
+      <Reveal className="cv-auto">
         <section className="border-ds-border border-t py-16" aria-labelledby="home-video-heading">
           <div className="mx-auto max-w-4xl px-6">
             <h2
@@ -82,10 +84,12 @@ export default function HomePage() {
       </Reveal>
 
       {/* Latest writing (renders nothing if there are no posts) — cards reveal individually */}
-      <FeaturedPosts posts={posts} />
+      <div className="cv-auto">
+        <FeaturedPosts posts={posts} />
+      </div>
 
       {/* Lab teaser — surfaces the interactive demos (the strongest differentiator) */}
-      <Reveal>
+      <Reveal className="cv-auto">
         <section className="border-ds-border border-t py-20">
           <div className="max-w-site mx-auto px-6">
             <div className="border-ds-border bg-ds-surface flex flex-col items-start gap-6 rounded-2xl border p-8 sm:flex-row sm:items-center sm:justify-between sm:p-10">
@@ -113,7 +117,7 @@ export default function HomePage() {
           Adesh — component kept for later, not deleted. */}
 
       {/* Closing CTA */}
-      <Reveal>
+      <Reveal className="cv-auto">
         <section className="border-ds-border bg-ds-surface border-t py-20">
           <div className="mx-auto max-w-3xl px-6 text-center">
             <h2 className="text-ds-text text-3xl font-bold tracking-tight sm:text-4xl">

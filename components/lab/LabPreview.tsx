@@ -8,8 +8,10 @@
 // output (a pipeline filling, a shape morphing, a SERP result resolving), never
 // a fake screenshot of a result the tool didn't produce.
 //
-// All motion is defined in globals.css under the `lab-*` keyframes and is
-// disabled wholesale by the existing prefers-reduced-motion block there.
+// All motion is defined in ./LabPreview.css (the `lab-*` keyframes, gated on
+// prefers-reduced-motion: no-preference), so it only ships with /lab.
+
+import './LabPreview.css'
 
 type PreviewKind = 'pipeline' | 'shapes' | 'illustration' | 'meta' | 'utm'
 

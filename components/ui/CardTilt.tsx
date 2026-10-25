@@ -64,6 +64,9 @@ function recomputeCentered() {
   let winner: HTMLElement | null = null
   let winnerDist = Infinity
   for (const el of centeredRegistry.keys()) {
+    // A card inside a not-yet-rendered .cv-auto section is off screen anyway;
+    // measuring it would force that whole section to render.
+    if (el.checkVisibility && !el.checkVisibility({ contentVisibilityAuto: true })) continue
     const rect = el.getBoundingClientRect()
     if (rect.height === 0 || rect.bottom <= 0 || rect.top >= viewportH) continue
     const dist = Math.abs(rect.top + rect.height / 2 - viewportCenter)
