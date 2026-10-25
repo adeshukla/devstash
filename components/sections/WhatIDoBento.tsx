@@ -69,7 +69,7 @@ function ProofLinks({ items }: { items: Proof[] }) {
           <Link
             key={slug}
             href={href}
-            className="border-ds-border bg-ds-surface2 text-ds-text hover:border-ds-accent focus-visible:outline-ds-accent inline-flex items-center gap-2 rounded-full border py-1 pr-3 pl-1 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+            className="ring-hover border-ds-border bg-ds-surface2 text-ds-text focus-visible:outline-ds-accent inline-flex items-center gap-2 rounded-full border py-1 pr-3 pl-1 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2"
           >
             <span className="block h-6 w-6 shrink-0 overflow-hidden rounded-full [&>svg]:h-full [&>svg]:w-full">
               <Mark />
@@ -109,13 +109,15 @@ function FlowConnector({ step, flowLabel }: { step: number; flowLabel?: string }
   const k = { '--k': step } as CSSProperties
   return (
     <div className="flex flex-col items-center gap-1.5 sm:w-16" aria-hidden="true">
-      <span className="bg-ds-border2 relative h-8 w-1 shrink-0 overflow-visible rounded-full sm:h-1 sm:w-12">
+      {/* 2px track (was 4px): a 4px gradient bar between 1px-bordered boxes
+          was the heaviest line in the card. */}
+      <span className="bg-ds-border2 relative h-8 w-0.5 shrink-0 overflow-visible rounded-full sm:h-0.5 sm:w-12">
         <span
           className="flow-fill from-ds-accent to-ds-purple absolute inset-0 rounded-full bg-gradient-to-b sm:bg-gradient-to-r"
           style={k}
         />
         <span
-          className="pipeline-dot bg-ds-accent absolute top-0 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full opacity-0 shadow-[0_0_10px_3px_var(--color-ds-accent)] sm:top-1/2 sm:left-0 sm:translate-x-0 sm:-translate-y-1/2"
+          className="pipeline-dot bg-ds-accent absolute top-0 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full opacity-0 shadow-[0_0_8px_2px_var(--color-ds-accent)] sm:top-1/2 sm:left-0 sm:translate-x-0 sm:-translate-y-1/2"
           style={k}
         />
       </span>
@@ -259,7 +261,7 @@ export function WhatIDoBento() {
                         "Trigger" and "LLM pipeline" sizing themselves
                         independently was the "uneven boxes" of it. */}
                       <div
-                        className={`flow-node flow-node-${i} border-ds-border bg-ds-surface2 flex w-40 flex-col items-center gap-2.5 rounded-xl border px-6 py-4`}
+                        className={`flow-node flow-node-${i} border-ds-border2 bg-ds-surface2 flex w-40 flex-col items-center gap-2.5 rounded-xl border-[1.5px] px-6 py-4`}
                       >
                         <Icon name={icon} className="flow-icon text-ds-accent h-6 w-6" />
                         <span className="text-ds-muted font-mono text-xs whitespace-nowrap">

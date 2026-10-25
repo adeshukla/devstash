@@ -1203,15 +1203,27 @@ html[data-hero-intro] .hero-ov-design {
    so it never shifts layout or needs to know the element's background. Was
    an animated accent→purple gradient ring; solid now. Clickable cards have
    their own hover: CardTilt + .card-spotlight + .card-glow. */
+/* 1.5px border (crisp on HiDPI, snaps to 1px on 1x screens). Hover turns the
+   border itself accent and adds a soft 3px halo outside it — it used to draw
+   a second 1px ring around the existing 1px border, which read as two thin
+   wireframe lines. */
 .ring-hover {
-  transition: box-shadow 0.15s ease;
+  border-width: 1.5px;
+  transition:
+    box-shadow 0.18s ease,
+    border-color 0.18s ease,
+    background-color 0.18s ease;
 }
 .ring-hover:hover,
 .ring-hover[aria-current='page'],
 .ring-hover[aria-current='true'],
 .ring-hover[aria-selected='true'],
 .ring-hover.ring-active {
-  box-shadow: 0 0 0 1px var(--color-ds-accent);
+  border-color: var(--color-ds-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-ds-accent) 22%, transparent);
+}
+.ring-hover:hover {
+  background-color: color-mix(in srgb, var(--color-ds-accent) 6%, transparent);
 }
 
 /* Active-nav-tab indicator (the little bar/dot under the current page's

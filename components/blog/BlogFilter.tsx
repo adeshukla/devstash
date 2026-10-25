@@ -60,7 +60,7 @@ export function BlogFilter({ categories, tags, selectedCategory, selectedTag }: 
             className={cn(
               'ring-hover shrink-0 rounded-full border px-3 py-1 text-sm whitespace-nowrap transition-colors',
               !selectedCategory
-                ? 'border-ds-accent bg-ds-accent text-white'
+                ? 'border-ds-cta bg-ds-cta text-white'
                 : 'border-ds-border bg-ds-surface text-ds-muted hover:border-ds-border2 hover:text-ds-text'
             )}
           >
@@ -77,7 +77,7 @@ export function BlogFilter({ categories, tags, selectedCategory, selectedTag }: 
                   className={cn(
                     'ring-hover shrink-0 rounded-full border px-3 py-1 text-sm whitespace-nowrap transition-colors',
                     selectedCategory === value
-                      ? 'border-ds-accent bg-ds-accent text-white'
+                      ? 'border-ds-cta bg-ds-cta text-white'
                       : 'border-ds-border bg-ds-surface text-ds-muted hover:border-ds-border2 hover:text-ds-text'
                   )}
                 >
