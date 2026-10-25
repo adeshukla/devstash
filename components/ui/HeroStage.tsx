@@ -155,7 +155,10 @@ export function HeroStage({
     }
     const start = () => {
       stop()
-      if (reduced || viewRef.current !== 'live') return
+      // The cycle is decorative: it waits for the first interaction, like the
+      // other loops (see ENGAGE_INIT_SCRIPT in app/layout.tsx).
+      const engaged = document.documentElement.hasAttribute('data-engaged')
+      if (reduced || viewRef.current !== 'live' || !engaged) return
       panel?.setAttribute('data-cycling', '')
       panel?.style.setProperty('--cycle', `${CYCLE_MS}ms`)
       activate(cur)
@@ -229,6 +232,15 @@ export function HeroStage({
       activate(0)
       start()
     })
+    const html = document.documentElement
+    const engageWatch = new MutationObserver(() => {
+      if (!html.hasAttribute('data-engaged')) return
+      engageWatch.disconnect()
+      start()
+    })
+    if (!html.hasAttribute('data-engaged')) {
+      engageWatch.observe(html, { attributes: true, attributeFilter: ['data-engaged'] })
+    }
     const onResize = () => {
       tabBoxes = measureTabs()
       activate(cur)
@@ -237,6 +249,7 @@ export function HeroStage({
 
     return () => {
       cancelBoot()
+      engageWatch.disconnect()
       stop()
       window.clearTimeout(resume)
       themeWatch.disconnect()

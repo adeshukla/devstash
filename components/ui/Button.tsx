@@ -35,15 +35,25 @@ interface ButtonProps {
 const variantStyles: Record<Variant, string> = {
   primary:
     'keycap [--edge:var(--color-ds-cta-edge)] bg-ds-cta hover:bg-ds-cta-hover text-white disabled:opacity-50',
+  // Hover keeps the keycap whole: the bottom edge (--edge) takes the same
+  // colour as the hover border. A border that changed alone (blue on ghost,
+  // full text-colour on outline) sat on a still-grey ledge and read as a box
+  // on a shelf.
   ghost: [
     'keycap bg-transparent text-ds-muted border border-ds-border',
-    'hover:border-ds-accent hover:text-ds-accent',
+    'hover:border-ds-accent/70 hover:text-ds-accent-strong hover:bg-ds-accent/5',
+    'hover:[--edge:color-mix(in_srgb,var(--color-ds-accent)_55%,var(--color-ds-border2))]',
     'disabled:opacity-50',
   ].join(' '),
-  danger: 'bg-ds-error hover:bg-ds-error/90 text-white disabled:opacity-50',
+  danger: [
+    'keycap [--edge:color-mix(in_srgb,var(--color-ds-error)_60%,black)]',
+    'bg-ds-error hover:bg-ds-error/90 text-white disabled:opacity-50',
+  ].join(' '),
   outline: [
     'keycap bg-ds-surface2 text-ds-text border border-ds-border2',
-    'hover:border-ds-text',
+    'hover:bg-[color-mix(in_srgb,var(--color-ds-text)_6%,var(--color-ds-surface2))]',
+    'hover:border-[color-mix(in_srgb,var(--color-ds-text)_28%,var(--color-ds-border2))]',
+    'hover:[--edge:color-mix(in_srgb,var(--color-ds-text)_28%,var(--color-ds-border2))]',
     'disabled:opacity-50',
   ].join(' '),
 }

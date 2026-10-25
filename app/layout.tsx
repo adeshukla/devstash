@@ -27,7 +27,18 @@ const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('${THEME_S
 // first paint so the design overlay is up from frame one. Lives here, not in
 // HeroSection — React never runs a <script> rendered inside a component on
 // client navigation, and warns about it.
-const HERO_INTRO_INIT_SCRIPT = `;(function(){try{if(location.pathname==='/'&&!sessionStorage.getItem('ds-hero-intro-seen')&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.setAttribute('data-hero-intro','')}catch(e){}})()`
+// Desktop only (>=1024px): on phones the auto-playing wipes kept the hero
+// changing for ~4s of a mobile page load (Speed Index 2.1s -> 5.6s on
+// Lighthouse). Phones get the live hero at once; "View as" still shows the
+// design and code views on tap.
+const HERO_INTRO_INIT_SCRIPT = `;(function(){try{if(location.pathname==='/'&&!sessionStorage.getItem('ds-hero-intro-seen')&&matchMedia('(min-width: 1024px)').matches&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.setAttribute('data-hero-intro','')}catch(e){}})()`
+
+// Decorative loops (pulsing dots, blinking cursors, the hero word cycle, the
+// deck nudge, ...) wait for the visitor's first interaction: html gets
+// [data-engaged] and the pause rule in globals.css lifts. Until then they
+// hold their first frame, so nothing looks broken, and the page load isn't
+// spent repainting motion nobody is looking at yet.
+const ENGAGE_INIT_SCRIPT = `;(function(){var d=document.documentElement,e=['pointermove','pointerdown','keydown','wheel','touchstart','scroll'];function go(){d.setAttribute('data-engaged','');e.forEach(function(n){removeEventListener(n,go,true)})}e.forEach(function(n){addEventListener(n,go,{capture:true,passive:true})})})()`
 
 const dmSans = DM_Sans({
   variable: '--font-sans',
@@ -111,7 +122,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           id="theme-init"
           suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT + HERO_INTRO_INIT_SCRIPT }}
+          dangerouslySetInnerHTML={{
+            __html: THEME_INIT_SCRIPT + HERO_INTRO_INIT_SCRIPT + ENGAGE_INIT_SCRIPT,
+          }}
         />
         <GtmNoScript />
         {children}
