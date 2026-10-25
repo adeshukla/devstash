@@ -172,9 +172,9 @@ export function ProjectDeckSection({ projects }: { projects: Project[] }) {
             View all projects →
           </Button>
         </Reveal>
-        {/* 600px is enough room for the fan-out; any wider only pushes the
-            centred card away from the intro. */}
-        <div className="w-full lg:max-w-[600px]">
+        {/* 600px is enough room for the fan-out. Centred in its column: left-
+            aligned, the deck sat 100px left of the column's centre at 1440px. */}
+        <div className="w-full lg:max-w-[600px] lg:justify-self-center">
           <ProjectDeck cards={cards} label="Featured projects" />
         </div>
       </div>

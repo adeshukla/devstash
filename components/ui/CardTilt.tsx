@@ -34,6 +34,11 @@ const MAX_TILT_DEG = 8
 // initial 0.15) closes the gap fast enough to feel responsive on a quick
 // hover rather than always lagging a beat behind the cursor.
 const LERP = 0.22
+// MAX_TILT_DEG is tuned for card-sized boxes. On a wide panel (the ~980px
+// /lab feature card) the same angle slopes the 1px gradient border enough
+// that Chrome draws it as a visible staircase, so the angle scales down past
+// this width. A ~360px card still gets the full tilt.
+const TILT_FULL_UNTIL_PX = 400
 const SETTLE_EPSILON = 0.01
 
 // ── Scroll-centered touch glow ──────────────────────────────────
@@ -64,9 +69,6 @@ function recomputeCentered() {
   let winner: HTMLElement | null = null
   let winnerDist = Infinity
   for (const el of centeredRegistry.keys()) {
-    // A card inside a not-yet-rendered .cv-auto section is off screen anyway;
-    // measuring it would force that whole section to render.
-    if (el.checkVisibility && !el.checkVisibility({ contentVisibilityAuto: true })) continue
     const rect = el.getBoundingClientRect()
     if (rect.height === 0 || rect.bottom <= 0 || rect.top >= viewportH) continue
     const dist = Math.abs(rect.top + rect.height / 2 - viewportCenter)
@@ -199,7 +201,7 @@ export function CardTilt({ children, className }: CardTiltProps) {
     const py = (clientY - rect.top) / rect.height - 0.5
     target.current.spotX = (px + 0.5) * 100
     target.current.spotY = (py + 0.5) * 100
-    return { px, py }
+    return { px, py, width: rect.width }
   }
 
   function handleMove(e: MouseEvent<HTMLDivElement>) {
@@ -207,9 +209,10 @@ export function CardTilt({ children, className }: CardTiltProps) {
     if (!el) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-    const { px, py } = setSpotTarget(el, e.clientX, e.clientY)
-    target.current.tiltX = py * MAX_TILT_DEG
-    target.current.tiltY = -px * MAX_TILT_DEG
+    const { px, py, width } = setSpotTarget(el, e.clientX, e.clientY)
+    const maxTilt = MAX_TILT_DEG * Math.min(1, TILT_FULL_UNTIL_PX / width)
+    target.current.tiltX = py * maxTilt
+    target.current.tiltY = -px * maxTilt
     ensureLoop()
   }
 

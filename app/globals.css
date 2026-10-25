@@ -6,14 +6,12 @@
   --color-ds-surface: #111827;
   --color-ds-surface2: #161f2e;
   --color-ds-accent: #3b82f6;
-  /* Same blue as --color-ds-accent in dark mode (already AA-compliant there),
-     but a token of its own so the light-theme override below can darken it
-     independently — text-ds-accent on a solid/dark background is fine, but
-     on the pale accent/10 tint used by Badge's "blue" variant, light theme's
-     #2563eb only hits ~4.31:1 against ~#4.5:1 needed (caught by the a11y
-     Playwright suite). Use this token instead of text-ds-accent anywhere
-     accent-colored text sits on a light accent-tinted background. */
-  --color-ds-accent-strong: #3b82f6;
+  /* Accent-coloured TEXT that must pass AA on an accent tint (Badge "blue",
+     hero badges/grades, lab chips). Light theme darkens it (see below); dark
+     theme lightens it to Tailwind blue-400, because #3b82f6 on the dark
+     accent/15 tint measured 4.41:1 (Lighthouse) — #60a5fa is 6.4:1 there.
+     Use it instead of text-ds-accent for small accent text on a tint. */
+  --color-ds-accent-strong: #60a5fa;
   --color-ds-purple: #8b5cf6;
   --color-ds-text: #f3f4f6;
   --color-ds-muted: #9ca3af;
@@ -192,7 +190,7 @@
   --color-ds-surface: #111827;
   --color-ds-surface2: #161f2e;
   --color-ds-accent: #3b82f6;
-  --color-ds-accent-strong: #3b82f6;
+  --color-ds-accent-strong: #60a5fa;
   --color-ds-purple: #8b5cf6;
   --color-ds-text: #f3f4f6;
   --color-ds-muted: #9ca3af;
@@ -900,25 +898,30 @@ html[data-hero-intro] .hero-ov-design {
     transform: scaleX(1);
   }
 }
+/* Views swap with visibility and their items WIPE in (clip-path + slide)
+   instead of fading: text is never half-transparent, so an accessibility
+   scan that lands mid-animation still measures the real contrast (the old
+   opacity fades failed Lighthouse color-contrast whenever it sampled one). */
 .hero-view {
   grid-area: 1 / 1;
-  opacity: 0;
-  transform: translateY(10px);
-  transition:
-    opacity 0.35s,
-    transform 0.5s var(--ds-ease-smooth);
+  visibility: hidden;
 }
 .hero-view.on {
-  opacity: 1;
-  transform: none;
+  visibility: visible;
 }
 .hero-item {
-  opacity: 0;
+  clip-path: inset(0 100% 0 0 round 0.75rem);
   transform: translateX(10px);
 }
 .hero-view.on .hero-item {
-  animation: hero-item-in 0.5s var(--ds-ease-smooth) both;
+  animation: hero-item-wipe 0.5s var(--ds-ease-smooth) both;
   animation-delay: calc(0.12s + var(--i) * 90ms);
+}
+@keyframes hero-item-wipe {
+  to {
+    clip-path: inset(0 0 0 0 round 0.75rem);
+    transform: none;
+  }
 }
 @keyframes hero-item-in {
   to {
@@ -947,6 +950,7 @@ html[data-hero-intro] .hero-ov-design {
   .hero-item,
   .hero-ln {
     opacity: 1;
+    clip-path: none;
     transform: none;
   }
 }
@@ -1271,15 +1275,6 @@ html[data-hero-intro] .hero-ov-design {
   from {
     transform: translateY(14px);
   }
-}
-
-/* Below-the-fold sections: they stay in the HTML (crawlers, find-in-page,
-   screen readers), but the browser skips their style/layout/paint until they
-   come near the viewport, so the first paint only pays for what is on screen.
-   `auto` remembers the real height once rendered, so the scrollbar settles. */
-.cv-auto {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 700px;
 }
 
 /* Shared easing for the site's hover/entrance motion. */

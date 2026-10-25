@@ -196,7 +196,7 @@ export function WhatIDoBento() {
               <p className="text-ds-success truncate font-mono text-xs">
                 devstash.me › projects › css-shapes-playground
               </p>
-              <p className="text-ds-accent mt-1.5 truncate text-base">
+              <p className="text-ds-accent-strong mt-1.5 truncate text-base">
                 CSS Shapes &amp; Animation Playground | DevStash
               </p>
               <p className="text-ds-muted mt-1 line-clamp-2 text-sm leading-relaxed">
