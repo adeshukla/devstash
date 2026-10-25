@@ -917,6 +917,14 @@ html[data-hero-intro] .hero-ov-design {
   animation: hero-item-wipe 0.5s var(--ds-ease-smooth) both;
   animation-delay: calc(0.12s + var(--i) * 90ms);
 }
+/* Until the panel has played once (HeroStage sets [data-played] on the first
+   real step), the view on screen is simply there: no wipe on page load, so
+   the hero isn't still changing after first paint (Speed Index). */
+.hero-panel:not([data-played]) .hero-view.on .hero-item {
+  animation: none;
+  clip-path: none;
+  transform: none;
+}
 @keyframes hero-item-wipe {
   to {
     clip-path: inset(0 0 0 0 round 0.75rem);

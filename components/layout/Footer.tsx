@@ -4,7 +4,13 @@ import { siteConfig } from '@/content/metadata/site.config'
 import { LogoMark } from '@/components/ui/LogoMark'
 import { Icon } from '@/components/icons/Icon'
 import type { IconName } from '@/components/icons/Icon'
-import { FooterScene } from './FooterScene'
+import { Suspense } from 'react'
+import dynamic from 'next/dynamic'
+
+// Below-the-fold client island: its own chunk (next/dynamic) inside a Suspense
+// boundary, so React hydrates it after the hero instead of in the one pass
+// that runs before first paint. Still server-rendered (HTML, links, SEO).
+const FooterScene = dynamic(() => import('./FooterScene').then((m) => m.FooterScene))
 
 const navLinks = [
   { label: 'Home', href: '/' },
@@ -178,7 +184,9 @@ export function Footer() {
           <p className="text-ds-text mt-3 mb-8 text-2xl leading-tight font-bold tracking-tight sm:text-3xl">
             Thanks for scrolling all the way down.
           </p>
-          <FooterScene />
+          <Suspense>
+            <FooterScene />
+          </Suspense>
         </div>
 
         {/* Bottom row */}

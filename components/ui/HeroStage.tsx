@@ -115,10 +115,15 @@ export function HeroStage({
     const measureTabs = () => tabs.map((t) => [t.offsetLeft, t.offsetWidth] as const)
     let tabBoxes: ReturnType<typeof measureTabs> = []
 
-    const activate = (n: number, fromUser = false) => {
+    // settle: place the tab underline/views without playing anything (the
+    // first paint and resizes). Any other call marks the panel as played, and
+    // only then do the view wipes run (globals.css) — on load the hero sits
+    // still, so it isn't still changing after the page has painted.
+    const activate = (n: number, fromUser = false, settle = false) => {
       cur = n
       const k = KEYS[n]
-      for (const w of words) {
+      if (!settle) panel?.setAttribute('data-played', '')
+      for (const w of settle ? [] : words) {
         const on = w.dataset.k === k && !reduced
         // Same word again: restart its animations without a forced reflow
         if (on && w.classList.contains('on')) {
@@ -161,7 +166,9 @@ export function HeroStage({
       if (reduced || viewRef.current !== 'live' || !engaged) return
       panel?.setAttribute('data-cycling', '')
       panel?.style.setProperty('--cycle', `${CYCLE_MS}ms`)
-      activate(cur)
+      // First start after load: the settled view stays put (the countdown bar
+      // starts on its own via [data-cycling]); motion begins with the next step.
+      activate(cur, false, !panel?.hasAttribute('data-played'))
       timer = window.setInterval(() => activate((cur + 1) % KEYS.length), CYCLE_MS)
     }
     startCycle.current = start
@@ -229,7 +236,7 @@ export function HeroStage({
     const cancelBoot = afterNextPaint(() => {
       tabBoxes = measureTabs()
       measure()
-      activate(0)
+      activate(0, false, true)
       start()
     })
     const html = document.documentElement
@@ -243,7 +250,7 @@ export function HeroStage({
     }
     const onResize = () => {
       tabBoxes = measureTabs()
-      activate(cur)
+      activate(cur, false, true)
     }
     window.addEventListener('resize', onResize)
 
