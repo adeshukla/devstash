@@ -1,19 +1,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Badge, Button, Reveal } from '@/components/ui'
-import { Suspense } from 'react'
-import dynamic from 'next/dynamic'
-import type { DeckCard } from '@/components/ui/ProjectDeck'
+import { ProjectDeck, type DeckCard } from '@/components/ui/ProjectDeck'
 import { Icon } from '@/components/icons/Icon'
 import { projectBrand } from '@/components/icons/ProjectMark'
 import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
 import { hasRealImage, statusConfig } from '@/components/sections/ProjectsGrid'
 import type { Project } from '@/types/project'
-
-// Below-the-fold client island: its own chunk (next/dynamic) inside a Suspense
-// boundary, so React hydrates it after the hero instead of in the one pass
-// that runs before first paint. Still server-rendered (HTML, links, SEO).
-const ProjectDeck = dynamic(() => import('@/components/ui/ProjectDeck').then((m) => m.ProjectDeck))
 
 const linkClass =
   'text-ds-muted hover:text-ds-accent inline-flex items-center gap-1.5 text-xs font-medium transition-colors'
@@ -182,9 +175,7 @@ export function ProjectDeckSection({ projects }: { projects: Project[] }) {
         {/* 600px is enough room for the fan-out. Centred in its column: left-
             aligned, the deck sat 100px left of the column's centre at 1440px. */}
         <div className="w-full lg:max-w-[600px] lg:justify-self-center">
-          <Suspense>
-            <ProjectDeck cards={cards} label="Featured projects" />
-          </Suspense>
+          <ProjectDeck cards={cards} label="Featured projects" />
         </div>
       </div>
     </section>

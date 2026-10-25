@@ -1,6 +1,4 @@
 import type { Metadata } from 'next'
-import { Suspense } from 'react'
-import dynamic from 'next/dynamic'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildWebSiteSchema, buildPersonSchema, buildIntroVideoSchema } from '@/lib/schema/builders'
@@ -10,13 +8,9 @@ import { FeaturedPosts } from '@/components/sections/FeaturedPosts'
 import { WhatIDoBento } from '@/components/sections/WhatIDoBento'
 import { Reveal, Button } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
+import { IntroVideo } from '@/components/ui/IntroVideo'
 import { getAllProjects, getFeaturedProjects } from '@/lib/markdown/projects'
 import { getAllPosts, getFeaturedPosts } from '@/lib/markdown/blog'
-
-// Below-the-fold client island: its own chunk (next/dynamic) inside a Suspense
-// boundary, so React hydrates it after the hero instead of in the one pass
-// that runs before first paint. Still server-rendered (HTML, links, SEO).
-const IntroVideo = dynamic(() => import('@/components/ui/IntroVideo').then((m) => m.IntroVideo))
 
 // Home metadata — canonical is deliberately omitted so it defaults to the site
 // root with no trailing slash.
@@ -82,9 +76,7 @@ export default function HomePage() {
             <p className="text-ds-muted mt-3 mb-8 leading-relaxed">
               A narrated tour of the projects above — what each one does and why it was built.
             </p>
-            <Suspense>
-              <IntroVideo />
-            </Suspense>
+            <IntroVideo />
           </div>
         </section>
       </Reveal>
