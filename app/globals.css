@@ -548,6 +548,11 @@ body {
 .card-glow:hover,
 [data-touched] .card-glow {
   transform: translateY(-3px);
+}
+/* The shadow is hover-only: on touch, [data-touched] follows the scroll
+   (CardTilt), and a box-shadow transition repaints the card every frame while
+   it runs — the lift alone is a composited transform. */
+.card-glow:hover {
   box-shadow: 0 10px 24px -13px
     color-mix(in srgb, var(--ring-a, var(--color-ds-accent)) 32%, transparent);
 }
@@ -578,15 +583,13 @@ body {
    rather than "no hover happened". Covers both an explicit light-theme
    choice and the system-preference default, matching the pattern the
    color tokens above already use. */
-[data-theme='light'] .card-glow:hover,
-[data-theme='light'] [data-touched] .card-glow {
+[data-theme='light'] .card-glow:hover {
   box-shadow:
     0 14px 26px -14px color-mix(in srgb, var(--ring-a, var(--color-ds-accent)) 38%, transparent),
     0 2px 10px -4px color-mix(in srgb, var(--ring-a, var(--color-ds-accent)) 20%, transparent);
 }
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme='dark']) .card-glow:hover,
-  :root:not([data-theme='dark']) [data-touched] .card-glow {
+  :root:not([data-theme='dark']) .card-glow:hover {
     box-shadow:
       0 14px 26px -14px color-mix(in srgb, var(--ring-a, var(--color-ds-accent)) 38%, transparent),
       0 2px 10px -4px color-mix(in srgb, var(--ring-a, var(--color-ds-accent)) 20%, transparent);
@@ -662,12 +665,20 @@ body {
 [data-touched] .card-spotlight::before {
   opacity: 0.85;
 }
+/* On touch the ring fades in/out as cards pass the viewport centre while
+   scrolling. Its own layer keeps that fade a compositor-only opacity change
+   instead of repainting the masked gradient every frame. */
+@media (hover: none) {
+  .card-spotlight::before {
+    will-change: opacity;
+  }
+}
 
-/* Arrival trace: the hover ring runs once around the card's border when it
-   first scrolls into view (CardTilt sets [data-arrived]), in the card's brand
-   colour where it has one (--ring-a/--ring-b) — the hover moment, shown to
-   everyone, phones included. Short and starts right away, so it is done
-   before the visitor moves on to hover the next card. */
+/* Hover trace: the ring runs once around the card's border when the pointer
+   (or keyboard focus) arrives, in the card's brand colour where it has one
+   (--ring-a/--ring-b). Hover/focus only, never on scroll: it used to play as
+   cards scrolled into view, and an animated conic-gradient angle is a paint
+   per frame, so a whole row "chimed" at once and dropped frames on phones. */
 @property --trace-ang {
   syntax: '<angle>';
   inherits: false;
@@ -695,8 +706,11 @@ body {
   opacity: 0;
   pointer-events: none;
 }
-[data-arrived] .card-spotlight::after {
-  animation: card-trace 1.2s var(--ds-ease-smooth) calc(var(--reveal-delay, 0ms) + 150ms) forwards;
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .card-spotlight:hover::after,
+  .card-spotlight:focus-within::after {
+    animation: card-trace 1.2s var(--ds-ease-smooth) forwards;
+  }
 }
 @keyframes card-trace {
   0% {

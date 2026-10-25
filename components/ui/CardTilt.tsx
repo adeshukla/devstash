@@ -116,9 +116,6 @@ export function CardTilt({ children, className }: CardTiltProps) {
   const touchTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const [touched, setTouched] = useState(false)
   const [scrollCentered, setScrollCentered] = useState(false)
-  // First time the card is half on screen: `data-arrived` makes the hover
-  // ring trace once around its border (.card-spotlight::after in globals.css).
-  const [arrived, setArrived] = useState(false)
 
   const target = useRef({ tiltX: 0, tiltY: 0, spotX: 50, spotY: 50 })
   const current = useRef({ tiltX: 0, tiltY: 0, spotX: 50, spotY: 50 })
@@ -193,21 +190,6 @@ export function CardTilt({ children, className }: CardTiltProps) {
     }
   }, [])
 
-  useEffect(() => {
-    const el = ref.current
-    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry?.isIntersecting) return
-        io.disconnect()
-        setArrived(true)
-      },
-      { threshold: 0.5 }
-    )
-    io.observe(el)
-    return () => io.disconnect()
-  }, [])
-
   function setSpotTarget(el: HTMLDivElement, clientX: number, clientY: number) {
     const rect = el.getBoundingClientRect()
     const px = (clientX - rect.left) / rect.width - 0.5
@@ -260,7 +242,6 @@ export function CardTilt({ children, className }: CardTiltProps) {
       onTouchStart={handleTouchStart}
       className={className}
       data-touched={touched || scrollCentered || undefined}
-      data-arrived={arrived || undefined}
       style={{
         transform: 'perspective(1400px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg))',
         willChange: 'transform',
