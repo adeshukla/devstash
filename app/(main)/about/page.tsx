@@ -133,7 +133,7 @@ export default function AboutPage() {
                   href="/resume-adesh-shukla.pdf"
                   download
                   data-analytics-event="cv_viewed"
-                  variant="ghost"
+                  variant="resume"
                   iconRight={<Icon name="download" className="h-4 w-4" />}
                 >
                   Download résumé
@@ -322,7 +322,7 @@ export default function AboutPage() {
                 href="/resume-adesh-shukla.pdf"
                 download
                 data-analytics-event="cv_viewed"
-                variant="outline"
+                variant="resume"
                 size="lg"
                 iconRight={<Icon name="download" className="h-4 w-4" />}
               >

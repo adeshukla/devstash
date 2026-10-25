@@ -1370,6 +1370,21 @@ html:not([data-engaged])
   }
 }
 
+/* Résumé download (Button variant="resume"): the download icon drops once on
+   hover, like a file landing in the tray. Hover-triggered, so it costs nothing
+   on load; the global reduced-motion rule shortens it to nothing. */
+.resume-btn:hover svg {
+  animation: resume-drop 0.45s var(--ds-ease-smooth);
+}
+@keyframes resume-drop {
+  45% {
+    transform: translateY(3px);
+  }
+  70% {
+    transform: translateY(-1px);
+  }
+}
+
 /* reCAPTCHA v3's floating badge is redundant with the visible disclosure
    text ContactForm renders next to the submit button — Google's terms
    allow hiding the badge as long as that text is shown, so this only

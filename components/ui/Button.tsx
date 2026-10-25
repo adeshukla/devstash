@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils/cn'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
-type Variant = 'primary' | 'ghost' | 'danger' | 'outline'
+type Variant = 'primary' | 'ghost' | 'danger' | 'outline' | 'resume'
 type Size = 'sm' | 'md' | 'lg'
 
 interface ButtonProps {
@@ -48,6 +48,17 @@ const variantStyles: Record<Variant, string> = {
   danger: [
     'keycap [--edge:color-mix(in_srgb,var(--color-ds-error)_60%,black)]',
     'bg-ds-error hover:bg-ds-error/90 text-white disabled:opacity-50',
+  ].join(' '),
+  // Every résumé download (nav, mobile nav, home CTA, /about): accent-tinted
+  // so it stands out from outline/ghost buttons, but not a solid fill, so the
+  // Contact CTA stays the one primary action. .resume-btn drops the download
+  // icon once on hover (globals.css).
+  resume: [
+    'keycap resume-btn border-[1.5px] border-ds-accent/45 text-ds-accent-strong font-semibold',
+    'bg-[color-mix(in_srgb,var(--color-ds-accent)_14%,var(--color-ds-surface2))]',
+    '[--edge:color-mix(in_srgb,var(--color-ds-accent)_45%,var(--color-ds-border2))]',
+    'hover:border-ds-accent/80 hover:bg-[color-mix(in_srgb,var(--color-ds-accent)_18%,var(--color-ds-surface2))]',
+    'disabled:opacity-50',
   ].join(' '),
   outline: [
     'keycap bg-ds-surface2 text-ds-text border border-ds-border2',
@@ -118,8 +129,11 @@ export function Button({
   )
 
   if (href) {
+    // A file download isn't a route: a plain <a>, so next/link doesn't prefetch
+    // the PDF as a page (the nav résumé button is on screen on every page).
+    const Anchor = download ? 'a' : Link
     return (
-      <Link
+      <Anchor
         href={href}
         target={target}
         rel={rel ?? (target === '_blank' ? 'noopener noreferrer' : undefined)}
@@ -129,7 +143,7 @@ export function Button({
         aria-disabled={disabled}
       >
         {inner}
-      </Link>
+      </Anchor>
     )
   }
 

@@ -448,14 +448,17 @@ export function MobileNav({ items }: MobileNavProps) {
                 sitting right after the nav in normal flow — still reachable
                 by scrolling, never forced off-screen either way. */}
             <div className="border-ds-border mt-auto flex flex-col gap-2.5 border-t p-4 sm:px-6 sm:py-6">
-              <a
+              <Button
                 href="/resume-adesh-shukla.pdf"
                 download
                 data-analytics-event="cv_viewed"
-                className="border-ds-border text-ds-muted active:border-ds-accent active:text-ds-accent flex h-12 w-full items-center justify-center rounded-lg border text-[15px] font-medium transition-colors"
+                variant="resume"
+                size="lg"
+                className="w-full"
+                iconRight={<Icon name="download" className="h-4 w-4" />}
               >
-                Download résumé ↓
-              </a>
+                Download résumé
+              </Button>
               <Button href="/contact" size="lg" className="w-full font-semibold">
                 Contact
               </Button>

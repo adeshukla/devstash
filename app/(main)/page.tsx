@@ -131,7 +131,7 @@ export default function HomePage() {
                 href="/resume-adesh-shukla.pdf"
                 download
                 data-analytics-event="cv_viewed"
-                variant="outline"
+                variant="resume"
                 size="lg"
                 iconRight={<Icon name="download" className="h-4 w-4" />}
               >
