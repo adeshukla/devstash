@@ -778,11 +778,14 @@ html[data-hero-intro] .hero-ov-design {
   content: '';
   position: absolute;
   left: -0.9em;
-  right: 100%;
+  right: 30%;
   top: 50%;
   height: 0.2em;
   translate: 0 -50%;
   opacity: 0;
+  /* hero-streak shrinks it toward the left with scaleX (was an animated
+     `right`, which re-laid out the line every frame) */
+  transform-origin: left;
   background:
     linear-gradient(var(--color-ds-accent), var(--color-ds-accent)) 0 0 / 100% 2px no-repeat,
     linear-gradient(var(--color-ds-accent), var(--color-ds-accent)) 30% 50% / 70% 2px no-repeat,
@@ -812,11 +815,12 @@ html[data-hero-intro] .hero-ov-design {
 }
 @keyframes hero-streak {
   0% {
-    right: 30%;
+    transform: scaleX(1);
     opacity: 0.9;
   }
   100% {
-    right: 100%;
+    /* ≈ the old end width (0.9em of a ~2.3em line) */
+    transform: scaleX(0.4);
     opacity: 0;
   }
 }
@@ -875,9 +879,9 @@ html[data-hero-intro] .hero-ov-design {
 .hero-ind {
   --c: var(--color-ds-accent);
   background: color-mix(in srgb, var(--c) 28%, transparent);
-  transition:
-    left 0.45s var(--ds-ease-smooth),
-    width 0.45s var(--ds-ease-smooth);
+  /* HeroStage moves it with translateX + scaleX (compositor only) */
+  transform-origin: left;
+  transition: transform 0.45s var(--ds-ease-smooth);
 }
 .hero-ind i {
   display: block;

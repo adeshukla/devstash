@@ -70,7 +70,7 @@ function EvidencePanel() {
             {label}
           </button>
         ))}
-        <span className="hero-ind absolute -bottom-px left-0 h-0.5 w-1/3 overflow-hidden rounded-sm">
+        <span className="hero-ind absolute -bottom-px left-0 h-0.5 w-[100px] overflow-hidden rounded-sm">
           <i />
         </span>
       </div>
@@ -393,9 +393,13 @@ export function HeroSection() {
                   {SHIPPED.map((slug) => {
                     const { Mark } = projectBrand(slug)
                     return (
+                      // No prefetch: four above-the-fold project links fan out
+                      // into ~20 segment requests at hydration, which land
+                      // inside mobile Lighthouse's simulated LCP window.
                       <Link
                         key={slug}
                         href={`/projects/${slug}`}
+                        prefetch={false}
                         aria-label={SHIPPED_NAMES[slug]}
                         title={SHIPPED_NAMES[slug]}
                         className="block h-7 w-7 overflow-hidden rounded-lg transition-transform duration-300 hover:-translate-y-0.5 hover:-rotate-6 [&>svg]:h-full [&>svg]:w-full"

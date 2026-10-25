@@ -14,6 +14,15 @@ const SEEN_KEY = 'ds-hero-intro-seen'
 const CYCLE_MS = 4200
 const RESUME_MS = 6000 // auto-play picks up again after this long without interaction
 const INTRO = { toCode: 1300, toLive: 2900 } // design → code → live, first visit only
+// The tab underline's laid-out width (w-[100px] in HeroSection); it is scaled
+// to each tab's width, so moving it never triggers a layout.
+const IND_BASE_PX = 100
+
+// Restart a running CSS animation from 0 without the remove/reflow/re-add trick
+const restart = (a: Animation) => {
+  a.cancel()
+  a.play()
+}
 
 // WCAG 2 relative-luminance contrast. Tokens can come back as short hex
 // (#fff) once the CSS is minified, so expand those first.
@@ -82,31 +91,31 @@ export function HeroStage({
     let cur = 0
     let timer: number | undefined
     let resume: number | undefined
+    // Tab geometry, measured once (and on resize) rather than read on every
+    // cycle — a read right after the class changes below forces a layout.
+    let tabBoxes = tabs.map((t) => [t.offsetLeft, t.offsetWidth] as const)
 
     const activate = (n: number, fromUser = false) => {
       cur = n
       const k = KEYS[n]
       for (const w of words) {
-        w.classList.remove('on')
-        if (w.dataset.k === k && !reduced) {
-          void w.offsetWidth // restart the animation
-          w.classList.add('on')
+        const on = w.dataset.k === k && !reduced
+        // Same word again: restart its animations without a forced reflow
+        if (on && w.classList.contains('on')) {
+          w.getAnimations({ subtree: true }).forEach(restart)
         }
+        w.classList.toggle('on', on)
       }
-      tabs.forEach((t) => {
+      tabs.forEach((t, i) => {
         const on = t.dataset.k === k
         t.setAttribute('aria-selected', String(on))
         t.tabIndex = on ? 0 : -1
-        if (on && tabInd) {
-          tabInd.style.left = `${t.offsetLeft}px`
-          tabInd.style.width = `${t.offsetWidth}px`
+        const box = tabBoxes[i]
+        if (on && tabInd && box) {
+          // transform, not left/width: the underline moves on the compositor
+          tabInd.style.transform = `translateX(${box[0]}px) scaleX(${box[1] / IND_BASE_PX})`
           tabInd.style.setProperty('--c', IND_COLOR[k])
-          const fill = tabInd.firstElementChild as HTMLElement | null
-          if (fill) {
-            fill.style.animation = 'none'
-            void fill.offsetWidth
-            fill.style.animation = ''
-          }
+          tabInd.firstElementChild?.getAnimations().forEach(restart)
         }
       })
       views.forEach((v) => {
@@ -194,7 +203,10 @@ export function HeroStage({
 
     activate(0)
     start()
-    const onResize = () => activate(cur)
+    const onResize = () => {
+      tabBoxes = tabs.map((t) => [t.offsetLeft, t.offsetWidth] as const)
+      activate(cur)
+    }
     window.addEventListener('resize', onResize)
 
     return () => {
@@ -232,11 +244,9 @@ export function HeroStage({
   // Restart the code typing whenever Code is shown
   useEffect(() => {
     if (view !== 'code') return
-    stage.current?.querySelectorAll<HTMLElement>('.hero-ln').forEach((l) => {
-      l.style.animation = 'none'
-      void l.offsetWidth
-      l.style.animation = ''
-    })
+    stage.current
+      ?.querySelectorAll<HTMLElement>('.hero-ln')
+      .forEach((l) => l.getAnimations().forEach(restart))
   }, [view])
 
   const choose = (v: View) => {
