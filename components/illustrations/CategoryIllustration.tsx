@@ -45,6 +45,8 @@ export type Scene =
   | 'component-parts'
   | 'motion-timeline'
   | 'asset-shrink'
+  | 'promise-params'
+  | 'class-debug'
 
 const BLOG_SCENE: Record<BlogCategory, Scene> = {
   frontend: 'frontend',
@@ -126,6 +128,10 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   // scene. Its own scene is the job: a big file goes through a browser tab
   // and comes out smaller, with no cloud involved.
   pare: 'asset-shrink',
+  // Both 'frontend' posts, both rendering the generic browser scene next to
+  // each other on /blog. Each gets the bug it is actually about.
+  'nextjs-16-params-promise-undefined': 'promise-params',
+  'tailwind-v4-classes-not-working': 'class-debug',
 }
 
 interface CategoryIllustrationProps {
@@ -270,6 +276,10 @@ export function SceneContent({ scene }: { scene: Scene }) {
       return <MotionTimelineScene />
     case 'asset-shrink':
       return <AssetShrinkScene />
+    case 'promise-params':
+      return <PromiseParamsScene />
+    case 'class-debug':
+      return <ClassDebugScene />
   }
 }
 
@@ -312,6 +322,8 @@ export const ALL_SCENES: Scene[] = [
   'component-parts',
   'motion-timeline',
   'asset-shrink',
+  'promise-params',
+  'class-debug',
 ]
 
 // Keyword index — maps a scene to the words a topic string is checked
@@ -399,6 +411,15 @@ export const SCENE_KEYWORDS: Record<Scene, string[]> = {
     'minify',
     'font subset',
     'page weight',
+  ],
+  'promise-params': ['params', 'promise', 'await', 'dynamic route', 'slug', 'undefined', 'async'],
+  'class-debug': [
+    'classes not working',
+    'tailwind',
+    'utility class',
+    'debugging',
+    'missing styles',
+    'checklist',
   ],
   'component-parts': [
     'component library',
@@ -2014,6 +2035,229 @@ function AssetShrinkScene() {
       {/* Before / after bytes. */}
       <path d="M92 170h206" className="stroke-ds-border2" strokeWidth="4" strokeLinecap="round" />
       <path d="M92 180h58" className="stroke-ds-success" strokeWidth="4" strokeLinecap="round" />
+    </g>
+  )
+}
+
+// ── Promise params — Next.js 16's params is a Promise you have to await ────
+// The route on the left, the still-pending params object, `await` resolving it
+// to { slug }, and the bug the post is about: params.slug read straight off
+// the Promise comes back undefined.
+function PromiseParamsScene() {
+  const mono = { fontFamily: 'var(--font-mono)' }
+  return (
+    <g>
+      <rect
+        x="70"
+        y="40"
+        width="132"
+        height="22"
+        rx="11"
+        className="fill-ds-surface stroke-ds-border"
+        strokeWidth="2"
+      />
+      <text x="84" y="55" className="fill-ds-muted" fontSize="11" style={mono}>
+        /blog/[slug]
+      </text>
+      {/* params: a Promise, still pending */}
+      <rect
+        x="70"
+        y="76"
+        width="120"
+        height="68"
+        rx="10"
+        className="fill-ds-surface stroke-ds-accent"
+        strokeWidth="2"
+        strokeDasharray="7 6"
+      />
+      <text x="84" y="98" className="fill-ds-text" fontSize="12" fontWeight="700" style={mono}>
+        params
+      </text>
+      <text x="84" y="120" className="fill-ds-accent" fontSize="11" style={mono}>
+        Promise
+      </text>
+      {[0, 1, 2].map((i) => (
+        <circle
+          key={i}
+          cx={152 + i * 11}
+          cy={116}
+          r="3.5"
+          className="fill-ds-accent animate-pulse2"
+          style={{ animationDelay: `${i * 200}ms` }}
+        />
+      ))}
+      {/* await → resolved */}
+      <text x="203" y="104" className="fill-ds-purple" fontSize="11" style={mono}>
+        await
+      </text>
+      <path d="M198 112h38" className="stroke-ds-purple" strokeWidth="2.5" strokeLinecap="round" />
+      <path
+        d="M230 106l7 6-7 6"
+        className="stroke-ds-purple"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+      <rect
+        x="244"
+        y="76"
+        width="96"
+        height="68"
+        rx="10"
+        className="fill-ds-surface stroke-ds-success"
+        strokeWidth="2"
+      />
+      <text x="258" y="104" className="fill-ds-text" fontSize="12" style={mono}>
+        {'{ slug }'}
+      </text>
+      <text x="258" y="126" className="fill-ds-success" fontSize="11" style={mono}>
+        &apos;hello&apos;
+      </text>
+      <g className="animate-float">
+        <circle cx="338" cy="76" r="13" className="fill-ds-success/20" />
+        <path
+          d="M332 76l4.5 4.5 8-9"
+          className="stroke-ds-success"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      </g>
+      {/* The bug: reading straight off the Promise */}
+      <text x="70" y="176" className="fill-ds-muted" fontSize="11" style={mono}>
+        params.slug
+      </text>
+      <text x="154" y="176" className="fill-ds-error" fontSize="11" style={mono}>
+        undefined
+      </text>
+      <path d="M152 172h62" className="stroke-ds-error" strokeWidth="1.5" />
+    </g>
+  )
+}
+
+// ── Class debug — Tailwind v4 utilities that silently do nothing ───────────
+// An unstyled button whose classes have no effect, a magnifier on them, and
+// the post's checklist of six causes, each tested (the culprit highlighted).
+function ClassDebugScene() {
+  const mono = { fontFamily: 'var(--font-mono)' }
+  const rows = [0, 1, 2, 3, 4, 5]
+  const culprit = 3
+  return (
+    <g>
+      {/* The element that should be a blue, padded button */}
+      <rect
+        x="62"
+        y="48"
+        width="124"
+        height="44"
+        rx="8"
+        className="fill-ds-surface2 stroke-ds-border2"
+        strokeWidth="2"
+        strokeDasharray="6 5"
+      />
+      <text x="100" y="75" className="fill-ds-muted" fontSize="12" style={mono}>
+        Button
+      </text>
+      {/* Its classes — present in the markup, doing nothing */}
+      <rect
+        x="62"
+        y="104"
+        width="76"
+        height="20"
+        rx="6"
+        className="fill-ds-error/10 stroke-ds-error/60"
+        strokeWidth="1.5"
+      />
+      <text x="70" y="118" className="fill-ds-error" fontSize="10" style={mono}>
+        bg-brand
+      </text>
+      <path d="M68 114h64" className="stroke-ds-error" strokeWidth="1.2" />
+      <rect
+        x="144"
+        y="104"
+        width="40"
+        height="20"
+        rx="6"
+        className="fill-ds-error/10 stroke-ds-error/60"
+        strokeWidth="1.5"
+      />
+      <text x="152" y="118" className="fill-ds-error" fontSize="10" style={mono}>
+        p-4
+      </text>
+      <path d="M150 114h28" className="stroke-ds-error" strokeWidth="1.2" />
+      {/* Inspecting them */}
+      <g className="animate-float">
+        <circle
+          cx="160"
+          cy="152"
+          r="15"
+          className="fill-ds-accent/10 stroke-ds-accent"
+          strokeWidth="3"
+        />
+        <path
+          d="M171 163l14 14"
+          className="stroke-ds-accent"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+      </g>
+      {/* Six causes, each tested */}
+      <rect
+        x="212"
+        y="40"
+        width="128"
+        height="146"
+        rx="10"
+        className="fill-ds-surface stroke-ds-border"
+        strokeWidth="2"
+      />
+      <text x="226" y="60" className="fill-ds-text" fontSize="11" fontWeight="700" style={mono}>
+        6 causes
+      </text>
+      {rows.map((i) => {
+        const y = 74 + i * 18
+        const hit = i === culprit
+        return (
+          <g key={i}>
+            {hit && (
+              <rect
+                x="220"
+                y={y - 3}
+                width="112"
+                height="16"
+                rx="4"
+                className="fill-ds-accent/15 animate-pulse2"
+              />
+            )}
+            <rect
+              x="226"
+              y={y}
+              width="10"
+              height="10"
+              rx="2"
+              className={hit ? 'fill-ds-accent' : 'fill-ds-success/20'}
+            />
+            <path
+              d={`M228 ${y + 5}l2.5 2.5 4-5`}
+              className={hit ? 'stroke-ds-bg' : 'stroke-ds-success'}
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+            <rect
+              x="242"
+              y={y + 3}
+              width={[70, 56, 82, 64, 48, 74][i]}
+              height="4"
+              rx="2"
+              className={hit ? 'fill-ds-accent/70' : 'fill-ds-muted/30'}
+            />
+          </g>
+        )
+      })}
     </g>
   )
 }

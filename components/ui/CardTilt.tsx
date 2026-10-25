@@ -34,11 +34,14 @@ const MAX_TILT_DEG = 8
 // initial 0.15) closes the gap fast enough to feel responsive on a quick
 // hover rather than always lagging a beat behind the cursor.
 const LERP = 0.22
-// MAX_TILT_DEG is tuned for card-sized boxes. On a wide panel (the ~980px
-// /lab feature card) the same angle slopes the 1px gradient border enough
-// that Chrome draws it as a visible staircase, so the angle scales down past
-// this width. A ~360px card still gets the full tilt.
+// MAX_TILT_DEG is tuned for card-sized boxes. On a wide panel any rotation
+// slopes its long 1px gradient border enough that Chrome draws it as a
+// visible staircase (measured on the ~980px /lab feature card: scaling the
+// angle down only made the steps rarer). So the angle eases off past
+// TILT_FULL_UNTIL_PX and panels wider than NO_TILT_FROM_PX don't rotate —
+// they keep the lift, the cursor ring and the hover trace.
 const TILT_FULL_UNTIL_PX = 400
+const NO_TILT_FROM_PX = 640
 const SETTLE_EPSILON = 0.01
 
 // ── Scroll-centered touch glow ──────────────────────────────────
@@ -210,7 +213,8 @@ export function CardTilt({ children, className }: CardTiltProps) {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
     const { px, py, width } = setSpotTarget(el, e.clientX, e.clientY)
-    const maxTilt = MAX_TILT_DEG * Math.min(1, TILT_FULL_UNTIL_PX / width)
+    const maxTilt =
+      width > NO_TILT_FROM_PX ? 0 : MAX_TILT_DEG * Math.min(1, TILT_FULL_UNTIL_PX / width)
     target.current.tiltX = py * maxTilt
     target.current.tiltY = -px * maxTilt
     ensureLoop()

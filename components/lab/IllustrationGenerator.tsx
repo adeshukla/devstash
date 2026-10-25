@@ -123,6 +123,8 @@ const SCENE_LABELS: Record<Scene, string> = {
   'component-parts': 'Component Parts',
   'motion-timeline': 'Motion Timeline',
   'asset-shrink': 'Asset Shrink',
+  'promise-params': 'Promise Params',
+  'class-debug': 'Class Debug',
 }
 
 const DENSITY_LABELS: Record<Density, string> = { 1: 'Minimal', 2: 'Balanced', 3: 'Rich' }
