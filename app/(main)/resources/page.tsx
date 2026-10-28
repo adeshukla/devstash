@@ -28,6 +28,8 @@ interface Resource {
   category: 'docs' | 'article' | 'course' | 'repo' | 'video' | 'tool'
   tags: string[]
   free: boolean
+  /** Brand colour for the card hover: a hex, or "mono" for black-and-white brands. */
+  brand?: string
 }
 
 const CATEGORY_LABELS: Record<Resource['category'], string> = {
@@ -118,6 +120,7 @@ export default function ResourcesPage() {
               meta: hostOf(r.url),
               paid: !r.free,
               description: r.description,
+              brand: r.brand,
             })),
           }))}
         />

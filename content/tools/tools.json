@@ -6,7 +6,8 @@
     "url": "https://cursor.sh",
     "category": "editor",
     "tags": ["ai", "editor", "vscode"],
-    "free": false
+    "free": false,
+    "brand": "mono"
   },
   {
     "id": "claude",
@@ -15,7 +16,8 @@
     "url": "https://claude.ai",
     "category": "ai",
     "tags": ["ai", "llm", "coding"],
-    "free": false
+    "free": false,
+    "brand": "#D97757"
   },
   {
     "id": "ollama",
@@ -24,7 +26,8 @@
     "url": "https://ollama.ai",
     "category": "ai",
     "tags": ["llm", "local", "ai", "offline"],
-    "free": true
+    "free": true,
+    "brand": "mono"
   },
   {
     "id": "n8n",
@@ -33,7 +36,8 @@
     "url": "https://n8n.io",
     "category": "devtools",
     "tags": ["automation", "no-code", "workflows"],
-    "free": true
+    "free": true,
+    "brand": "#EA4B71"
   },
   {
     "id": "git-bash",
@@ -42,7 +46,8 @@
     "url": "https://git-scm.com",
     "category": "terminal",
     "tags": ["shell", "git", "windows"],
-    "free": true
+    "free": true,
+    "brand": "#F05032"
   },
   {
     "id": "figma",
@@ -51,7 +56,8 @@
     "url": "https://figma.com",
     "category": "design",
     "tags": ["design", "ui", "ux", "prototyping"],
-    "free": false
+    "free": false,
+    "brand": "#A259FF"
   },
   {
     "id": "vercel",
@@ -60,7 +66,8 @@
     "url": "https://vercel.com",
     "category": "devtools",
     "tags": ["hosting", "deployment", "next.js"],
-    "free": false
+    "free": false,
+    "brand": "mono"
   },
   {
     "id": "cloudflare",
@@ -69,7 +76,8 @@
     "url": "https://cloudflare.com",
     "category": "devtools",
     "tags": ["dns", "security", "cdn"],
-    "free": true
+    "free": true,
+    "brand": "#F38020"
   },
   {
     "id": "pnpm",
@@ -78,6 +86,7 @@
     "url": "https://pnpm.io",
     "category": "devtools",
     "tags": ["package-manager", "node", "performance"],
-    "free": true
+    "free": true,
+    "brand": "#F69220"
   }
 ]

@@ -28,6 +28,8 @@ interface Tool {
   category: 'editor' | 'terminal' | 'browser' | 'design' | 'productivity' | 'ai' | 'devtools'
   tags: string[]
   free: boolean
+  /** Brand colour for the card hover: a hex, or "mono" for black-and-white brands. */
+  brand?: string
 }
 
 const CATEGORY_LABELS: Record<Tool['category'], string> = {
@@ -111,8 +113,10 @@ export default function ToolsPage() {
               id: t.id,
               title: t.name,
               href: t.url,
+              meta: new URL(t.url).hostname.replace(/^www\./, ''),
               paid: !t.free,
               description: t.description,
+              brand: t.brand,
             })),
           }))}
         />

@@ -6,7 +6,8 @@
     "url": "https://nextjs.org/docs",
     "category": "docs",
     "tags": ["next.js", "react", "app-router"],
-    "free": true
+    "free": true,
+    "brand": "mono"
   },
   {
     "id": "typescript-handbook",
@@ -15,7 +16,8 @@
     "url": "https://www.typescriptlang.org/docs/handbook/",
     "category": "docs",
     "tags": ["typescript"],
-    "free": true
+    "free": true,
+    "brand": "#3178C6"
   },
   {
     "id": "tailwind-v4-docs",
@@ -24,7 +26,8 @@
     "url": "https://tailwindcss.com/docs",
     "category": "docs",
     "tags": ["tailwind", "css"],
-    "free": true
+    "free": true,
+    "brand": "#38BDF8"
   },
   {
     "id": "n8n-docs",
@@ -33,7 +36,8 @@
     "url": "https://docs.n8n.io",
     "category": "docs",
     "tags": ["automation", "n8n", "no-code"],
-    "free": true
+    "free": true,
+    "brand": "#EA4B71"
   },
   {
     "id": "web-dev",
@@ -42,7 +46,8 @@
     "url": "https://web.dev",
     "category": "article",
     "tags": ["performance", "cwv", "seo"],
-    "free": true
+    "free": true,
+    "brand": "#1A73E8"
   },
   {
     "id": "josh-css",
@@ -60,7 +65,8 @@
     "url": "https://developer.mozilla.org",
     "category": "docs",
     "tags": ["html", "css", "javascript"],
-    "free": true
+    "free": true,
+    "brand": "mono"
   },
   {
     "id": "total-typescript",
@@ -87,7 +93,8 @@
     "url": "https://github.com/restyler/awesome-n8n",
     "category": "repo",
     "tags": ["automation", "n8n"],
-    "free": true
+    "free": true,
+    "brand": "mono"
   },
   {
     "id": "shadcn-ui",
@@ -96,7 +103,8 @@
     "url": "https://ui.shadcn.com",
     "category": "repo",
     "tags": ["react", "components", "tailwind"],
-    "free": true
+    "free": true,
+    "brand": "mono"
   },
   {
     "id": "theo-t3",
@@ -105,7 +113,8 @@
     "url": "https://www.youtube.com/@t3dotgg",
     "category": "video",
     "tags": ["react", "nextjs", "ecosystem"],
-    "free": true
+    "free": true,
+    "brand": "#FF0000"
   },
   {
     "id": "cubic-bezier",

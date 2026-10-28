@@ -1379,6 +1379,44 @@ html:not([data-engaged])
   }
 }
 
+/* /resources and /tools cards (CategoryIndex): each entry carries its own
+   brand colour in --brand (from the content JSON; the site accent when it has
+   none). At rest only a small brand dot shows it; on hover/focus the border,
+   a faint tint, a soft glow and the corner icon take the brand colour. The
+   title stays in the text colour: many brand colours fail AA as text here. */
+.brand-card {
+  --brand: var(--color-ds-accent);
+  border-width: 1.5px;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+.brand-card .brand-dot {
+  background: var(--brand);
+}
+.brand-card .brand-icon {
+  transition: color 0.2s ease;
+}
+.brand-card:hover,
+.brand-card:focus-visible {
+  border-color: var(--brand);
+  background-color: color-mix(in srgb, var(--brand) 7%, var(--color-ds-surface));
+  box-shadow: 0 14px 30px -18px color-mix(in srgb, var(--brand) 70%, transparent);
+  transform: translateY(-2px);
+}
+.brand-card:hover .brand-icon,
+.brand-card:focus-visible .brand-icon {
+  color: var(--brand);
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-card:hover,
+  .brand-card:focus-visible {
+    transform: none;
+  }
+}
+
 /* Résumé download (Button variant="resume"): the download icon drops once on
    hover, like a file landing in the tray. Hover-triggered, so it costs nothing
    on load; the global reduced-motion rule shortens it to nothing. */
