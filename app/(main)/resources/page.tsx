@@ -79,7 +79,7 @@ export default function ResourcesPage() {
   const orderedCats = CATEGORY_ORDER.filter((cat) => grouped[cat]?.length)
 
   return (
-    <main>
+    <div>
       {/* Breadcrumb handles its own buildBreadcrumbSchema JsonLd internally */}
       <section className="border-ds-border border-b py-16">
         <div className="mx-auto max-w-3xl px-6">
@@ -155,6 +155,6 @@ export default function ResourcesPage() {
           ))}
         </div>
       </section>
-    </main>
+    </div>
   )
 }

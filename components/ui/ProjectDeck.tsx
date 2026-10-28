@@ -54,7 +54,7 @@ const TAP_PX = 6 // moved less than this = a tap, which flips the card
 // stack re-orders and it springs into its new place — behind the others for
 // Next, in front of them for Back. That's what reads as "tucked under".
 const TUCK_MS = 260
-const FAN_ON_ARRIVAL_MS = 1600 // how long the deck stays fanned each time it scrolls into view
+const FAN_ON_ARRIVAL_MS = 2400 // how long the deck stays fanned each time it scrolls into view (from 30% visible)
 
 function reducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -138,7 +138,7 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
           armed = true
           return
         }
-        if (!armed || entry.intersectionRatio < 0.6) return
+        if (!armed || entry.intersectionRatio < 0.3) return
         armed = false
         setFanned(true)
         setGreeting(true)
@@ -148,7 +148,7 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
           if (!deck.matches(':hover')) setFanned(false)
         }, FAN_ON_ARRIVAL_MS)
       },
-      { threshold: [0, 0.6] }
+      { threshold: [0, 0.3] }
     )
     io.observe(deck)
     return () => {

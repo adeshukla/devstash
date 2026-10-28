@@ -61,7 +61,7 @@ const STACK: UsesSection[] = [
 
 export default function UsesPage() {
   return (
-    <main>
+    <div>
       <section className="border-ds-border border-b py-16">
         <div className="mx-auto max-w-3xl px-6">
           <Breadcrumb
@@ -107,6 +107,6 @@ export default function UsesPage() {
           ))}
         </div>
       </section>
-    </main>
+    </div>
   )
 }

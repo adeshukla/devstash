@@ -22,7 +22,7 @@ export default function PrivacyPage() {
     <>
       <JsonLd data={buildWebSiteSchema()} />
 
-      <main>
+      <div>
         <section className="border-ds-border border-b py-16">
           <div className="mx-auto max-w-3xl px-6">
             <p className="text-ds-accent font-mono text-sm">Legal</p>
@@ -167,7 +167,7 @@ export default function PrivacyPage() {
             </div>
           </div>
         </section>
-      </main>
+      </div>
     </>
   )
 }

@@ -1,16 +1,24 @@
-// A non-decorative "terminal" for the About hero: a themed readout of facts
-// already stated in this exact page's copy (role, location, experience,
-// stack, current status), not invented flavor text standing in for a real
-// photo. Pure CSS stagger (animate-fade-up + per-line delay) — no client JS,
-// stays a Server Component, never touches LCP.
+// The About hero's right-hand card: the career path as four steps — accounts
+// → UX → analyst + front-end → DevStash. It replaced an `adesh.ts` code object
+// that only repeated the copy beside it (role, location, stack) in a common
+// portfolio trope. Every line is a fact Adesh has stated (see the About copy);
+// no dates for the accounts years. Pure CSS stagger (animate-fade-up + delay),
+// no client JS, stays a Server Component, never touches LCP. aria-hidden: the
+// paragraphs next to it already say all of this to screen readers.
 
-const FIELDS: { key: string; value: string }[] = [
-  { key: 'role', value: "'Frontend Developer'" },
-  { key: 'based', value: "'Ghaziabad, India'" },
-  { key: 'experience', value: "'6+ years'" },
-  { key: 'stack', value: "['React', 'Next.js', 'TypeScript']" },
-  { key: 'building', value: "'DevStash'" },
-  { key: 'status', value: "'open to frontend roles'" },
+const STEPS: { kicker: string; title: string; detail: string; now?: boolean }[] = [
+  {
+    kicker: 'accounts',
+    title: 'CA student, then tax compliance',
+    detail: 'Where checking the numbers started.',
+  },
+  { kicker: 'ux', title: 'Pulled toward the web', detail: 'Tried designing in tools like Figma.' },
+  {
+    kicker: 'front-end',
+    title: 'An analyst who builds front-ends',
+    detail: '6+ years · 200+ landing pages for US clients at Chetu India.',
+  },
+  { kicker: 'now', title: 'Building DevStash', detail: 'Open to frontend roles.', now: true },
 ]
 
 export function AboutProfileCard() {
@@ -19,47 +27,52 @@ export function AboutProfileCard() {
       aria-hidden="true"
       className="border-ds-border bg-ds-surface w-full overflow-hidden rounded-xl border shadow-2xl shadow-black/40"
     >
-      {/* Window chrome — the same three-dot treatment the site's other
-          terminal-style panels use, so they read as one system. */}
-      <div className="border-ds-border flex h-12 items-center gap-3 border-b px-5">
-        <div className="flex gap-2">
-          <span className="bg-ds-error/80 h-3 w-3 rounded-full" />
-          <span className="bg-ds-warning/80 h-3 w-3 rounded-full" />
-          <span className="bg-ds-success/80 h-3 w-3 rounded-full" />
-        </div>
-        <span className="text-ds-muted font-mono text-xs tracking-wide">adesh.ts</span>
+      <div className="border-ds-border flex h-12 items-center justify-between border-b px-5">
+        <span className="text-ds-muted font-mono text-xs tracking-wide">
+          {'// the path so far'}
+        </span>
+        <span className="text-ds-muted font-mono text-xs">4 steps</span>
       </div>
 
-      <div className="flex flex-col gap-2.5 px-6 py-8 font-mono text-[13.5px] leading-relaxed sm:text-[15px]">
-        <p
-          className="animate-fade-up motion-reduce:animate-none"
-          style={{ animationDelay: '80ms' }}
-        >
-          <span className="text-ds-purple">const</span> <span className="text-ds-text">adesh</span>{' '}
-          <span className="text-ds-muted">= {'{'}</span>
-        </p>
-        {FIELDS.map(({ key, value }, i) => (
-          <p
-            key={key}
-            className="animate-fade-up pl-4 motion-reduce:animate-none"
-            style={{ animationDelay: `${200 + i * 130}ms` }}
-          >
-            <span className="text-ds-accent">{key}</span>
-            <span className="text-ds-muted">: </span>
-            <span className="text-ds-success">{value}</span>
-            <span className="text-ds-muted">,</span>
-          </p>
-        ))}
-        <p
-          className="animate-fade-up text-ds-muted flex items-center motion-reduce:animate-none"
-          style={{ animationDelay: `${200 + FIELDS.length * 130 + 100}ms` }}
-        >
-          {'}'}
-          <span
-            aria-hidden="true"
-            className="bg-ds-accent animate-blink ml-1.5 inline-block h-4 w-2"
-          />
-        </p>
+      <div className="relative px-6 py-7">
+        {/* The rail: one line behind the step dots, fading into the accent at "now". */}
+        <span className="from-ds-border2 to-ds-accent absolute top-10 bottom-[5.25rem] left-[2.15rem] w-[1.5px] bg-gradient-to-b" />
+        <ol>
+          {STEPS.map(({ kicker, title, detail, now }, i) => (
+            <li
+              key={kicker}
+              className="animate-fade-up relative flex gap-4 pb-6 last:pb-0 motion-reduce:animate-none"
+              style={{ animationDelay: `${120 + i * 160}ms` }}
+            >
+              <span
+                className={
+                  now
+                    ? 'bg-ds-accent ring-ds-accent/25 relative z-10 mt-1 grid h-5 w-5 shrink-0 place-items-center rounded-full ring-4'
+                    : 'border-ds-border2 bg-ds-surface2 relative z-10 mt-1 grid h-5 w-5 shrink-0 place-items-center rounded-full border-[1.5px]'
+                }
+              >
+                <span
+                  className={
+                    now
+                      ? 'h-1.5 w-1.5 rounded-full bg-white'
+                      : 'bg-ds-muted h-1.5 w-1.5 rounded-full'
+                  }
+                />
+              </span>
+              <div className="min-w-0">
+                <p
+                  className={`font-mono text-[11px] tracking-wider uppercase ${now ? 'text-ds-accent-strong' : 'text-ds-muted'}`}
+                >
+                  {String(i + 1).padStart(2, '0')} · {kicker}
+                </p>
+                <p className="text-ds-text mt-0.5 text-[15px] font-semibold sm:text-base">
+                  {title}
+                </p>
+                <p className="text-ds-muted mt-0.5 text-sm leading-relaxed">{detail}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
       </div>
     </div>
   )

@@ -74,7 +74,7 @@ export default function ToolsPage() {
   const freeCount = tools.filter((t) => t.free).length
 
   return (
-    <main>
+    <div>
       {/* Breadcrumb handles its own buildBreadcrumbSchema JsonLd internally */}
       <section className="border-ds-border border-b py-16">
         <div className="mx-auto max-w-3xl px-6">
@@ -145,6 +145,6 @@ export default function ToolsPage() {
           ))}
         </div>
       </section>
-    </main>
+    </div>
   )
 }

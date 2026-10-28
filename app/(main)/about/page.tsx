@@ -98,7 +98,7 @@ export default function AboutPage() {
       <JsonLd data={buildPersonSchema()} />
       <JsonLd data={buildIntroVideoSchema()} />
 
-      <main>
+      <div>
         {/* ── Hero ── */}
         <section className="border-ds-border border-b py-10 sm:py-20">
           <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-10 px-6 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
@@ -339,7 +339,7 @@ export default function AboutPage() {
             </div>
           </Reveal>
         </section>
-      </main>
+      </div>
     </>
   )
 }

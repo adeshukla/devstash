@@ -72,7 +72,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   const standalone = allProjects.filter((p) => p.liveUrl?.startsWith('http')).length
 
   return (
-    <main>
+    <div>
       {/* ── Page header ── */}
       {/* Breadcrumb handles its own buildBreadcrumbSchema JsonLd internally */}
       <section className="border-ds-border border-b py-16">
@@ -140,6 +140,6 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
       {/* ── Grid ── */}
       <ProjectsGrid projects={filtered} showAll />
-    </main>
+    </div>
   )
 }

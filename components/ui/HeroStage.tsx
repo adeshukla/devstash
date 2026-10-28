@@ -10,10 +10,9 @@ const IND_COLOR = {
   acc: 'var(--color-ds-success)',
   last: 'var(--color-ds-purple)',
 }
-const SEEN_KEY = 'ds-hero-intro-seen'
 const CYCLE_MS = 4200
 const RESUME_MS = 6000 // auto-play picks up again after this long without interaction
-const INTRO = { toCode: 1300, toLive: 2900 } // design → code → live, first visit only
+const INTRO = { toCode: 1300, toLive: 2900 } // design → code → live, every home page load (>=1024px)
 // The tab underline's laid-out width (w-[100px] in HeroSection); it is scaled
 // to each tab's width, so moving it never triggers a layout.
 const IND_BASE_PX = 100
@@ -55,7 +54,7 @@ const contrast = (a: string, b: string) => {
 
 /**
  * Behaviour for the home hero; all markup comes from HeroSection (server).
- * - First visit this session: design → code → live intro over the live hero
+ * - Every home page load (>=1024px): design → code → live intro over the live hero
  *   (the inline script in HeroSection already raised the design overlay
  *   before first paint). Later visits and reduced motion start on Live.
  * - "View as" switch: Design / Code / Live on demand.
@@ -269,13 +268,11 @@ export function HeroStage({
     }
   }, [])
 
-  // First-visit intro: design (already up from first paint) → code → live
+  // Intro on every home page load (>=1024px): design (already up from first
+  // paint) → code → live. It used to play once per tab session.
   useEffect(() => {
     const html = document.documentElement
     if (!html.hasAttribute('data-hero-intro')) return
-    try {
-      sessionStorage.setItem(SEEN_KEY, '1')
-    } catch {}
     const t0 = window.setTimeout(() => setView('design'), 0)
     const t1 = window.setTimeout(() => {
       setView('code')

@@ -110,7 +110,7 @@ function LabEntry({ demo }: { demo: Demo }) {
 
 export default function LabPage() {
   return (
-    <main>
+    <div>
       <JsonLd
         data={buildItemListSchema(
           [FLAGSHIP, ...TOOLS].map((d) => ({ name: d.name, url: `/lab/${d.slug}` }))
@@ -186,6 +186,6 @@ export default function LabPage() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   )
 }

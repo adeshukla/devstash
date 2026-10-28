@@ -39,7 +39,7 @@ const OFFERINGS: { icon: IconName; title: string; body: string }[] = [
 
 export default function ServicesPage() {
   return (
-    <main>
+    <div>
       <JsonLd data={buildServicesSchema(OFFERINGS)} />
       <section className="border-ds-border border-b py-16">
         <div className="mx-auto max-w-3xl px-6">
@@ -89,6 +89,6 @@ export default function ServicesPage() {
           </Button>
         </div>
       </section>
-    </main>
+    </div>
   )
 }

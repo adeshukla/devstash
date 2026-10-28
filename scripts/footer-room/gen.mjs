@@ -83,7 +83,7 @@ const HEEL = [-9, 8],
   TOE = [28, 8],
   TOE_OFF = 26,
   HEEL_STRIKE = -12,
-  LIFT = 5
+  LIFT = 9 // swing-foot clearance (5 read as shuffling)
 const XN = 1128 // last planted foot: he stops left of the coaster so the mug lands in view
 const STOP_X = 1130
 const hipLin = (t) => 200 + V * (t - 1.9) // passes the light switch as light 1 comes on
@@ -209,9 +209,12 @@ const W = F.map((t, i) => {
 
 // profile upper body: slight forward lean while walking, near (right) arm carries the mug
 // tall, upright posture: barely any lean, a light nod to the music
-const lean = (i) => 1.2 * W[i].sp
-const carry = (t) => [-6 + 1.2 * Math.sin((Math.PI * t) / T), -86]
-const farU = (i) => clamp(0.2 * (W[i].legs.B.fx - W[i].hx), -16, 16)
+const lean = (i) => 2.6 * W[i].sp
+const carry = (t) => [
+  -6 + 2.6 * Math.sin((Math.PI * t) / T),
+  -86 + 1.6 * Math.sin((2 * Math.PI * t) / T),
+]
+const farU = (i) => clamp(0.34 * (W[i].legs.B.fx - W[i].hx), -24, 24)
 const nod = (t) => 1.3 * Math.sin((Math.PI * t) / 0.5) ** 2
 
 // ------------------------------------------------- back view: turn, mug, headphones, chair, sit
@@ -255,21 +258,24 @@ const cdy = keys([
   [11.4, 4],
   [11.9, 0],
 ])
+// Standing lift. The back-view legs are 24 px shorter than the profile legs, so the
+// upper body stands 28 px higher than it was (-52 -> -80): he no longer shrinks when
+// he turns around. It overlaps the leg tops by ~6 px, so no gap opens. Seated keys unchanged.
 const uy = keys([
-  [6.6, -52],
-  [6.95, -52],
-  [7.15, -49.5],
-  [7.36, -49.5],
-  [7.6, -52], // knees give a little as he sets the mug down
-  [9.0, -52],
-  [9.25, -53.5],
-  [9.45, -52], // effort of pulling the chair
-  [9.75, -52],
-  [9.87, -54.5],
-  [10.0, -52],
-  [10.12, -54.5],
-  [10.25, -52], // two side steps
-  [10.45, -52],
+  [6.6, -80],
+  [6.95, -80],
+  [7.15, -77.5],
+  [7.36, -77.5],
+  [7.6, -80], // knees give a little as he sets the mug down
+  [9.0, -80],
+  [9.25, -81.5],
+  [9.45, -80], // effort of pulling the chair
+  [9.75, -80],
+  [9.87, -82.5],
+  [10.0, -80],
+  [10.12, -82.5],
+  [10.25, -80], // two side steps
+  [10.45, -80],
   [10.95, 0, 'io'],
   [11.03, 3, 'o'],
   [11.12, -0.6],
@@ -425,7 +431,7 @@ const rightArm = armTrack(SR, [
   [12.2, C3(44, -151, 12), PR.rest, 'l'],
   [12.6, kbR, PR.key],
 ])
-const lips = B3(-32, -229, 10)
+const lips = B3(-16, -226, 34) // in front of the face: from behind, the head hides most of the mug
 const leftArm = armTrack(SL, [
   [7.8, hangL, PL.hang],
   [8.1, cupL, PL.ear],
@@ -437,9 +443,13 @@ const leftArm = armTrack(SL, [
   [12.6, kbL, PL.key],
   [16.0, kbL, PL.key],
   [16.45, mugAt, [-0.5, 0.5, -0.8]], // reaches forward for the mug
-  [17.05, lips, [-0.55, 1, -0.45]],
-  [17.95, lips, [-0.55, 1, -0.45]],
-  [18.45, mugAt, [-0.5, 0.5, -0.8]],
+  [16.62, W3(1184, 296, 58), [-0.45, 0.8, -0.2], 'o'], // lifts it off the desk
+  [16.9, B3(-30, -196, 30), [-0.35, 1, 0.4]], // brings it in past the chest
+  [17.12, lips, [-0.3, 1, 0.55], 'o'], // slows into the mouth, elbow low and forward
+  [17.95, lips, [-0.3, 1, 0.55]],
+  [18.15, B3(-30, -196, 30), [-0.35, 1, 0.4]],
+  [18.32, W3(1184, 296, 58), [-0.45, 0.8, -0.2]],
+  [18.45, mugAt, [-0.5, 0.5, -0.8], 'o'], // sets it down
   [18.9, kbL, PL.key],
 ])
 const tap = keys([
@@ -457,15 +467,15 @@ function unwrapArm(arr) {
   return arr
 }
 const tilt = keys([
-  [17.05, 0],
-  [17.35, 20],
-  [17.75, 28, 'l'],
-  [17.95, 0],
+  [17.12, 0],
+  [17.42, 18, 'o'],
+  [17.85, 30],
+  [18.12, 0, 'io'], // levels off while lowering, not while still at his lips
 ])
 const headTilt = keys([
-  [17.05, 0],
-  [17.35, 5],
-  [17.95, 5],
+  [17.1, 0],
+  [17.42, 7, 'o'],
+  [17.9, 8],
   [18.2, 0],
 ])
 const faceL = keys([

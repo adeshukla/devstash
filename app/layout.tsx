@@ -31,7 +31,7 @@ const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('${THEME_S
 // changing for ~4s of a mobile page load (Speed Index 2.1s -> 5.6s on
 // Lighthouse). Phones get the live hero at once; "View as" still shows the
 // design and code views on tap.
-const HERO_INTRO_INIT_SCRIPT = `;(function(){try{if(location.pathname==='/'&&!sessionStorage.getItem('ds-hero-intro-seen')&&matchMedia('(min-width: 1024px)').matches&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.setAttribute('data-hero-intro','')}catch(e){}})()`
+const HERO_INTRO_INIT_SCRIPT = `;(function(){try{if(location.pathname==='/'&&matchMedia('(min-width: 1024px)').matches&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.setAttribute('data-hero-intro','')}catch(e){}})()`
 
 // Decorative loops (pulsing dots, blinking cursors, the hero word cycle, the
 // deck nudge, ...) wait for the visitor's first interaction: html gets

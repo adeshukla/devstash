@@ -54,7 +54,7 @@ const SOCIAL_LINKS: { label: string; href: string; handle: string; icon: IconNam
 
 export default function ContactPage() {
   return (
-    <main>
+    <div>
       {RECAPTCHA_SITE_KEY ? (
         <Script
           src={`https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`}
@@ -182,6 +182,6 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   )
 }

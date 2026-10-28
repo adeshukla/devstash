@@ -94,7 +94,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       {/* Project schema — Breadcrumb handles its own JsonLd internally */}
       <JsonLd data={buildProjectSchema(project)} />
 
-      <main>
+      <div>
         {/* ── Header ── */}
         <section className="border-ds-border border-b py-16">
           <div className="mx-auto max-w-4xl px-6">
@@ -306,7 +306,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             </Link>
           </div>
         </div>
-      </main>
+      </div>
     </>
   )
 }
