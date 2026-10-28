@@ -1122,7 +1122,8 @@ html[data-hero-intro] .hero-ov-design {
   transition: opacity 0.35s ease;
   pointer-events: none;
 }
-.deck-card[data-top]:hover .deck-face::after {
+.deck-card[data-top]:hover .deck-face::after,
+.deck[data-greeting] .deck-card[data-top] .deck-face::after {
   opacity: 1;
 }
 .deck-inner[data-flipped] {

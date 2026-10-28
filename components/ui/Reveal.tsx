@@ -17,6 +17,9 @@ interface RevealProps {
   delay?: number
   /** Element/landmark to render as. Defaults to 'div'. */
   as?: ElementType
+  /** Replay the arrival every time it comes back into view (it resets once
+   *  fully off screen). Default: once per page load. */
+  repeat?: boolean
 }
 
 /**
@@ -30,7 +33,13 @@ interface RevealProps {
  * fired and whole sections (the contact form) stayed blank. Arrival only adds
  * motion; if JS is slow, broken or scrolled past, the content is already there.
  */
-export function Reveal({ children, className, delay = 0, as: Tag = 'div' }: RevealProps) {
+export function Reveal({
+  children,
+  className,
+  delay = 0,
+  as: Tag = 'div',
+  repeat = false,
+}: RevealProps) {
   const ref = useRef<HTMLElement | null>(null)
   const [visible, setVisible] = useState(false)
 
@@ -40,16 +49,20 @@ export function Reveal({ children, className, delay = 0, as: Tag = 'div' }: Reve
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry?.isIntersecting) return
-        setVisible(true)
-        observer.disconnect()
+        if (!entry) return
+        if (entry.intersectionRatio >= 0.15) {
+          setVisible(true)
+          if (!repeat) observer.disconnect()
+        } else if (repeat && !entry.isIntersecting) {
+          setVisible(false)
+        }
       },
-      { threshold: 0.15 }
+      { threshold: [0, 0.15] }
     )
 
     observer.observe(el)
     return () => observer.disconnect()
-  }, [])
+  }, [repeat])
 
   return (
     <Tag

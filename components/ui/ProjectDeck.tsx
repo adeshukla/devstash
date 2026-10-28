@@ -54,7 +54,7 @@ const TAP_PX = 6 // moved less than this = a tap, which flips the card
 // stack re-orders and it springs into its new place — behind the others for
 // Next, in front of them for Back. That's what reads as "tucked under".
 const TUCK_MS = 260
-const FAN_ON_ARRIVAL_MS = 1600 // how long the deck stays fanned when it first scrolls into view
+const FAN_ON_ARRIVAL_MS = 1600 // how long the deck stays fanned each time it scrolls into view
 
 function reducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -120,23 +120,35 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
     return () => window.removeEventListener('resize', layout)
   }, [layout])
 
-  // The hover moment, once for everyone: when the deck first comes into view
-  // it fans out, holds, and folds back — phones have no hover, and most
-  // desktop visitors never hover it, so this is how they learn it's a stack.
+  // The hover moment, for everyone, every time the deck arrives in view: it
+  // fans out with the top card's brand glow (the same look as hovering it),
+  // holds, and folds back. Phones have no hover, and most desktop visitors
+  // never hover it, so this is how they learn it's a stack. It re-arms once
+  // the deck has fully left the screen.
+  const [greeting, setGreeting] = useState(false)
   useEffect(() => {
     const deck = deckRef.current
     if (!deck || reducedMotion()) return
     let fold: number | undefined
+    let armed = true
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (!entry?.isIntersecting) return
-        io.disconnect()
+        if (!entry) return
+        if (!entry.isIntersecting) {
+          armed = true
+          return
+        }
+        if (!armed || entry.intersectionRatio < 0.6) return
+        armed = false
         setFanned(true)
+        setGreeting(true)
+        window.clearTimeout(fold)
         fold = window.setTimeout(() => {
+          setGreeting(false)
           if (!deck.matches(':hover')) setFanned(false)
         }, FAN_ON_ARRIVAL_MS)
       },
-      { threshold: 0.6 }
+      { threshold: [0, 0.6] }
     )
     io.observe(deck)
     return () => {
@@ -280,6 +292,7 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
         aria-roledescription="carousel"
         aria-label={label}
         data-nudging={nudging || undefined}
+        data-greeting={greeting || undefined}
         onPointerEnter={(e) => {
           if (e.pointerType !== 'mouse') return
           setFanned(true)

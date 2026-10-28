@@ -6,8 +6,6 @@ import { useEffect, useRef, useState } from 'react'
 // .fs-root, starting paused (.is-paused). Same-origin, so CSP's style-src
 // 'unsafe-inline' covers its <style>.
 const SRC = '/images/animations/footer-room.svg'
-// After one play-through in this tab, later footers open on the finished scene.
-const SEEN_KEY = 'ds-footer-intro-seen'
 // The room is 1920×560. Narrower screens crop toward the desk rather than
 // shrinking the whole room; the aspect classes on the frame below must match.
 const VIEWS = [
@@ -16,34 +14,16 @@ const VIEWS = [
   { query: 'all', box: '1010 0 700 560' }, // phones: the brief's 5:4 mobile frame, on the desk
 ]
 
-function readSeen() {
-  try {
-    return sessionStorage.getItem(SEEN_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-
 function setPlaying(svg: SVGSVGElement | null, play: boolean) {
   svg?.classList.toggle('is-paused', !play)
-}
-
-// Jump the one-shot intro to its end; start the ambient loops now instead of
-// waiting out their intro delays.
-function skipIntro(svg: SVGSVGElement) {
-  for (const a of svg.getAnimations({ subtree: true })) {
-    const timing = a.effect?.getComputedTiming()
-    if (!timing) continue
-    if (timing.iterations !== Infinity) a.finish()
-    else if (Number(a.currentTime ?? 0) < (timing.delay ?? 0)) a.currentTime = timing.delay ?? 0
-  }
 }
 
 /**
  * The footer room: an animated night scene (walk-in, lights, desk, the city
  * outside). Costs nothing on page load: the scene loads only when the visitor
- * is within ~600px of the footer, plays its intro once per tab when it is on
- * screen, and pauses whenever it is off screen. Visitors can pause it (WCAG
+ * is within ~600px of the footer, plays its intro on every page load when it
+ * is on screen (it used to play once per tab; a refresh opened on the finished
+ * scene), and pauses whenever it is off screen. Visitors can pause it (WCAG
  * 2.2.2); reduced motion gets the finished frame from the scene's own CSS.
  */
 export function FooterScene() {
@@ -73,11 +53,6 @@ export function FooterScene() {
     const onScreen = new IntersectionObserver(
       ([entry]) => {
         visible.current = !!entry?.isIntersecting
-        if (visible.current) {
-          try {
-            sessionStorage.setItem(SEEN_KEY, '1')
-          } catch {}
-        }
         setPlaying(svgRef.current, !pausedRef.current && visible.current)
       },
       { threshold: 0.35 }
@@ -99,10 +74,9 @@ export function FooterScene() {
           // Reduced motion: the scene's CSS collapses every animation to its end frame.
           if (window.matchMedia('(prefers-reduced-motion: reduce)').matches)
             return setPlaying(svg, true)
-          if (readSeen()) skipIntro(svg)
           // Phones crop to the desk, so the walk across the room is off frame: start
           // the intro as he walks in under the third light instead of on an empty desk.
-          else if (!queries[1]?.matches) {
+          if (!queries[1]?.matches) {
             for (const a of svg.getAnimations({ subtree: true }))
               if (
                 a.effect?.getComputedTiming().iterations !== Infinity &&

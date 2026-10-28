@@ -238,12 +238,12 @@ export function WhatIDoBento() {
                 <ProofLinks items={PROOF.automation} />
               </div>
 
-              {/* Plays once as the strip scrolls into view: Trigger fires, the
+              {/* Plays each time the strip scrolls into view: Trigger fires, the
                   payload travels, the pipeline node works, the draft travels,
                   Output checks — then it rests on that finished state. Its own
                   Reveal, not the bento's: that one fires when the section top
                   arrives, long before this card at the bottom is on screen. */}
-              <Reveal className="flow lg:shrink-0">
+              <Reveal className="flow lg:shrink-0" repeat>
                 <div
                   className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center lg:justify-start"
                   aria-hidden="true"
