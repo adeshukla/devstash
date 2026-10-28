@@ -1,3 +1,4 @@
+import { H1_DISPLAY } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
@@ -125,9 +126,7 @@ export default function AboutPage() {
           <div className="max-w-site mx-auto grid grid-cols-1 items-center gap-12 px-6 lg:grid-cols-[1.3fr_1fr] lg:gap-20">
             <div>
               <p className="text-ds-accent font-mono text-sm">{'// about'}</p>
-              <h1 className="text-ds-text mt-3 text-[clamp(44px,6vw,80px)] leading-[1.02] font-bold tracking-[-0.035em]">
-                Hey, I&apos;m Adesh.
-              </h1>
+              <h1 className={`${H1_DISPLAY} mt-3`}>Hey, I&apos;m Adesh.</h1>
               <p className="text-ds-text mt-5 max-w-[30ch] text-[clamp(20px,2vw,28px)] leading-snug font-semibold tracking-tight">
                 Someone who checks the numbers, then builds the page.
               </p>

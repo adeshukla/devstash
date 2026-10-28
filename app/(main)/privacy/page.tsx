@@ -1,3 +1,4 @@
+import { H1_DISPLAY } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
@@ -26,9 +27,7 @@ export default function PrivacyPage() {
         <section className="border-ds-border border-b py-16">
           <div className="mx-auto max-w-3xl px-6">
             <p className="text-ds-accent font-mono text-sm">Legal</p>
-            <h1 className="text-ds-text mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
-              Privacy Policy
-            </h1>
+            <h1 className={`${H1_DISPLAY} mt-2`}>Privacy Policy</h1>
             <p className="text-ds-muted mt-3 font-mono text-sm">
               Last updated:{' '}
               <time dateTime={LAST_UPDATED}>

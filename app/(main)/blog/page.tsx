@@ -1,4 +1,5 @@
 // app/(main)/blog/page.tsx
+import { H1_DISPLAY } from '@/lib/utils/typography'
 import { Suspense } from 'react'
 import { type Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
@@ -101,9 +102,7 @@ export default async function BlogPage({ searchParams }: Props) {
           <Breadcrumb items={[{ name: 'Blog', url: 'https://devstash.me/blog' }]} />
 
           <div className="mt-6">
-            <h1 className="text-ds-text mb-3 font-sans text-[clamp(44px,6vw,72px)] leading-[1.02] font-bold tracking-[-0.035em]">
-              Blog
-            </h1>
+            <h1 className={`${H1_DISPLAY} mb-3`}>Blog</h1>
             <p className="text-ds-muted max-w-xl">
               Writing about frontend systems, automation, AI workflows, and things I figure out
               while building.

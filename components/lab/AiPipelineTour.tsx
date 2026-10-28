@@ -94,7 +94,7 @@ export function AiPipelineTour({ open, step, onStepChange, onClose }: AiPipeline
           >
             Skip
           </button>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {step > 0 && (
               <Button variant="ghost" size="sm" onClick={() => onStepChange(step - 1)}>
                 Back

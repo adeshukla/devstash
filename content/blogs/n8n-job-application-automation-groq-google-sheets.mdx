@@ -11,6 +11,13 @@ readingTime: 8
 canonical: 'https://devstash.me/blog/n8n-job-application-automation-groq-google-sheets'
 draft: false
 featured: true
+faqs:
+  - question: 'What does the job-application workflow do?'
+    answer: 'It reads HR contacts from a Google Sheet, generates a tailored cold email per row with an LLM, attaches a résumé PDF and sends it through Gmail, all from a self-hosted n8n instance.'
+  - question: 'Why Groq instead of Ollama?'
+    answer: 'A local qwen2.5:7b model took 45 to 90 seconds per email on the author''s laptop. Groq with llama-3.1-8b-instant brought it under 2 seconds per email and is free within the rate limits.'
+  - question: 'What is the n8n LLM Chain gotcha?'
+    answer: 'The node outputs only a text field and strips every other upstream JSON field, so contact details vanish. The fix is to reference the Google Sheets node directly instead of using $json.'
 ---
 
 Job hunting in the Indian tech market is a numbers game. The more companies you reach out to with relevant, personalised messages, the better your odds. But writing 30 cold emails a day by hand — tweaking subject lines, matching the tone to each company — is unsustainable.

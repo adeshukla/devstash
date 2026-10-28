@@ -11,6 +11,15 @@ readingTime: 4
 canonical: 'https://devstash.me/blog/what-i-actually-automate-and-what-i-dont'
 draft: false
 featured: false
+faqs:
+  - question: 'How do you decide what to automate?'
+    answer: 'By one question: does the task fail loudly or quietly? Tasks that fail loudly, like a broken build, are good candidates. Tasks that fail quietly, like a slightly-off summary, need much more care because a broken automation can run for weeks unnoticed.'
+  - question: 'What do you automate with n8n and Groq?'
+    answer: 'Structured data extraction that a Code node can validate mechanically, repetitive lookups that can be checked against a ground truth, and first drafts that are always edited by hand before anything goes public.'
+  - question: 'What do you deliberately keep manual?'
+    answer: 'Output that looks plausible and flatters the reader, such as performance reviews or testimonial-style copy, final publish or send actions, and one-off tasks that will not repeat often enough to repay the setup cost.'
+  - question: 'Does the AI pipeline publish anything automatically?'
+    answer: 'No. It hands over a draft with [TODO] markers wherever only the author''s own experience belongs, and every automation described in the post stops one step short of the irreversible action.'
 ---
 
 I have automated a decent chunk of my own workflow with n8n and Groq — the [job-application pipeline](/blog/n8n-job-application-automation-groq-google-sheets) is the most-documented one, plus a few smaller ones I have not written up. I have also started, then abandoned, more automations than I have shipped. The abandoned ones taught me more about where automation actually pays off than the successful ones did.

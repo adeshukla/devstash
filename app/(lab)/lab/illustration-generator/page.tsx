@@ -1,3 +1,4 @@
+import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
@@ -19,9 +20,7 @@ export default function IllustrationGeneratorPage() {
         <section className="border-ds-border border-b px-6 py-20 text-center sm:py-24">
           <div className="mx-auto max-w-2xl">
             <p className="text-ds-accent mb-4 font-mono text-sm">ILLUSTRATION GENERATOR</p>
-            <h1 className="text-ds-text text-4xl leading-tight font-bold tracking-tight sm:text-5xl">
-              Describe it, get a one-off illustration.
-            </h1>
+            <h1 className={`${H1_HEADLINE}`}>Describe it, get a one-off illustration.</h1>
             <p className="text-ds-muted mt-6 text-lg leading-relaxed">
               Two styles. <strong className="text-ds-text">Abstract</strong> composes shapes,
               charts, and networks from six motif primitives.{' '}

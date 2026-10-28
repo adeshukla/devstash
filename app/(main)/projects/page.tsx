@@ -1,13 +1,15 @@
+import { FaqSection } from '@/components/sections/FaqSection'
+import { H1_DISPLAY } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
 import { getAllProjects } from '@/lib/markdown/projects'
-import { ProjectsGrid } from '@/components/sections'
-import { Badge } from '@/components/ui'
+import { ProjectsExplorer, type ExplorerProject } from '@/components/sections/ProjectsExplorer'
+import { hasRealImage } from '@/components/sections/ProjectsGrid'
+import { Button } from '@/components/ui'
 import { PageFacts } from '@/components/ui/PageFacts'
-import { cn } from '@/lib/utils/cn'
 import type { ProjectCategory } from '@/types/project'
 
 const CATEGORY_LABELS: Record<ProjectCategory, string> = {
@@ -47,6 +49,29 @@ interface ProjectsPageProps {
   searchParams: Promise<{ category?: string }>
 }
 
+const FAQ = [
+  {
+    question: 'Are these client projects?',
+    answer:
+      'No. Everything on this page is something I built myself, and each case study says what it is and is not. Praxis, for example, has no users and I do not report numbers I do not have.',
+  },
+  {
+    question: 'Were these built with AI assistance?',
+    answer:
+      'Where it applies, the case study says so. Praxis states that the implementation was built with AI assistance that I directed and reviewed, while the product thinking, learning model and UX are mine.',
+  },
+  {
+    question: 'Which projects can I try right now?',
+    answer:
+      'The browser tools run in the Lab with no signup. Praxis, Build Components, the Motion Lab and Pare run on their own domains, linked from each card.',
+  },
+  {
+    question: 'Where is the source code?',
+    answer:
+      'Projects with a public repository show a GitHub link on their card and in the detail panel.',
+  },
+]
+
 export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
   const { category } = await searchParams
   const activeCategory = category ?? 'all'
@@ -55,11 +80,25 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   // Derived from the actual project data rather than a hand-typed list, so
   // the filter can never drift out of sync with real ProjectCategory values
   // again — every button shown is guaranteed to match at least one project.
-  const categories = ['all', ...new Set(allProjects.map((p) => p.category))] as const
-  const filtered =
-    activeCategory === 'all'
-      ? allProjects
-      : allProjects.filter((p) => p.category === activeCategory)
+  const explorerProjects: ExplorerProject[] = allProjects.map((p) => ({
+    slug: p.slug,
+    title: p.title,
+    description: p.description,
+    category: p.category,
+    categoryLabel: CATEGORY_LABELS[p.category],
+    status: p.status,
+    year: p.year,
+    tech: p.tech,
+    highlights: p.highlights,
+    problem: p.caseStudy?.problem,
+    outcome: p.caseStudy?.outcome,
+    liveUrl: p.liveUrl,
+    githubUrl: p.githubUrl,
+    image: hasRealImage(p.image) ? p.image : undefined,
+  }))
+  const techCount = new Map<string, number>()
+  for (const p of allProjects) for (const t of p.tech) techCount.set(t, (techCount.get(t) ?? 0) + 1)
+  const stack = [...techCount.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8)
 
   // Header facts, all counted from the project files: total (+ how many are
   // live), the two biggest categories, and how many run standalone.
@@ -83,9 +122,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
               { name: 'Projects', url: 'https://devstash.me/projects' },
             ]}
           />
-          <h1 className="text-ds-text mt-6 text-[clamp(44px,6vw,72px)] leading-[1.02] font-bold tracking-[-0.035em]">
-            Projects
-          </h1>
+          <h1 className={`${H1_DISPLAY} mt-6`}>Projects</h1>
           <p className="text-ds-muted mt-3 max-w-xl">
             The build behind each one — the problem it solved, the tradeoffs, and what I&apos;d
             change. Every card links through to something running: the browser tools live in the{' '}
@@ -108,38 +145,60 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
               ...(standalone > 0 ? [{ value: standalone, label: 'standalone apps' }] : []),
             ]}
           />
-
-          {/* Category filter */}
-          <div className="mt-8 flex flex-wrap gap-2" role="list" aria-label="Filter by category">
-            {categories.map((cat) => {
-              const isActive = cat === activeCategory
-              const href = cat === 'all' ? '/projects' : `/projects?category=${cat}`
-              const label = cat === 'all' ? 'All' : CATEGORY_LABELS[cat]
-              return (
-                <Link
-                  key={cat}
-                  href={href}
-                  role="listitem"
-                  aria-current={isActive ? 'true' : undefined}
-                >
-                  <Badge
-                    variant={isActive ? 'blue' : 'default'}
-                    className={cn(
-                      'ring-hover hover:border-ds-accent hover:text-ds-accent cursor-pointer transition-colors',
-                      isActive && 'ring-active'
-                    )}
-                  >
-                    {label}
-                  </Badge>
-                </Link>
-              )
-            })}
-          </div>
         </div>
       </section>
 
       {/* ── Grid ── */}
-      <ProjectsGrid projects={filtered} showAll />
+      <ProjectsExplorer projects={explorerProjects} initialCategory={activeCategory} />
+
+      {/* ── Stack across projects: counted from the project files ── */}
+      <section className="border-ds-border border-t py-16">
+        <div className="max-w-site mx-auto grid gap-10 px-6 lg:grid-cols-[5fr_7fr]">
+          <div>
+            <h2 className="text-ds-text text-2xl font-bold tracking-tight">
+              What it&apos;s built with
+            </h2>
+            <p className="text-ds-muted mt-3 max-w-md leading-relaxed">
+              Counted from the project files above, not picked for effect. The same few tools keep
+              showing up because I would rather know them well than collect new ones.
+            </p>
+          </div>
+          <ul className="flex flex-col gap-3">
+            {stack.map(([tech, n]) => (
+              <li key={tech} className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                <span className="text-ds-text w-32 shrink-0 font-mono text-sm">{tech}</span>
+                <span className="bg-ds-border/50 h-2 min-w-24 flex-1 basis-24 overflow-hidden rounded-full">
+                  <span
+                    className="from-ds-accent to-ds-purple block h-full rounded-full bg-gradient-to-r"
+                    style={{ width: `${(n / stack[0][1]) * 100}%` }}
+                  />
+                </span>
+                <span className="text-ds-muted w-16 shrink-0 text-right font-mono text-xs">
+                  {n} of {allProjects.length}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="border-ds-border border-t py-16">
+        <div className="max-w-site mx-auto flex flex-col gap-6 px-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-ds-text text-2xl font-bold tracking-tight">
+              Want to use something?
+            </h2>
+            <p className="text-ds-muted mt-2">The browser tools run in the Lab, no signup.</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Button href="/lab">Open the Lab →</Button>
+            <Button href="/contact" variant="ghost">
+              Get in touch
+            </Button>
+          </div>
+        </div>
+      </section>
+      <FaqSection items={FAQ} intro="What the case studies are, and are not." />
     </div>
   )
 }

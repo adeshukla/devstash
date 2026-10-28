@@ -11,6 +11,15 @@ readingTime: 4
 canonical: 'https://devstash.me/blog/agentic-browsing-lighthouse'
 draft: false
 featured: false
+faqs:
+  - question: 'What does the Lighthouse Agentic Browsing category check?'
+    answer: 'Three things: that the accessibility tree is well-formed, with every interactive element named and nothing interactive hidden from the tree; that layout shift stays low; and that the site has a valid llms.txt file.'
+  - question: 'Why does layout shift matter to an AI agent?'
+    answer: 'An agent that clicks based on a snapshot taken a moment earlier can miss entirely if the page shifts. A human adjusts to moved content without thinking, an agent does not.'
+  - question: 'What is llms.txt?'
+    answer: 'A plain-text file at the site root that describes the site''s purpose and structure for AI systems: a short description, who runs it and real Markdown links to the primary sections.'
+  - question: 'If my Accessibility score is already high, do I pass?'
+    answer: 'Likely most of it. The post says a site that scores well on Accessibility probably passes most Agentic Browsing checks, and llms.txt is the genuinely new piece of work.'
 ---
 
 Lighthouse 13.3 (May 2026) added an "Agentic Browsing" category alongside the familiar Performance, Accessibility, SEO, and Best Practices scores — see the [official scoring reference](https://developer.chrome.com/docs/lighthouse/agentic-browsing/scoring) from the Chrome DevTools team. That is a genuinely new kind of audience for a website to optimize for: not a human with a mouse, and not strictly a search-engine crawler, but an AI agent that navigates a page, reads its structure, and acts on what it finds — clicking, filling forms, extracting data — on behalf of a user who may never look at the raw page itself.

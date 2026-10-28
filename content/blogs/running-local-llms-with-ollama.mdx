@@ -11,6 +11,15 @@ readingTime: 4
 canonical: 'https://devstash.me/blog/running-local-llms-with-ollama'
 draft: false
 featured: false
+faqs:
+  - question: 'What is Ollama?'
+    answer: 'It packages open-weight models such as Llama, Mistral, Gemma and Qwen into a single local binary with a CLI and a local HTTP API shaped like a hosted API.'
+  - question: 'When would you choose a local model over a hosted API?'
+    answer: 'For privacy of the input, because no request leaves the machine; for no per-request cost at any volume; and for offline or restricted environments where a cloud dependency is not an option.'
+  - question: 'When do you still use Groq instead?'
+    answer: 'For open-ended work such as draft, improve and extract chains, where a hosted model does meaningfully better work per attempt and Groq''s speed removes the latency penalty.'
+  - question: 'How fast will a local model run on my machine?'
+    answer: 'The post deliberately gives no tokens-per-second figure because it swings with the machine, mainly whether the model fits in VRAM. Run ollama run with the verbose flag and read your own numbers.'
 ---
 
 Every automation I have written about on this site — the n8n workflows, the AI content pipeline — calls an external API (Groq, mostly). That is the right default for most tasks: cloud models are more capable, and Groq specifically is fast enough that latency is rarely the bottleneck. But "call an API" is not the only option, and there is a specific, narrow set of cases where running a model locally with something like Ollama is the better call. This is about where that line actually sits, not a general "local models are the future" pitch.

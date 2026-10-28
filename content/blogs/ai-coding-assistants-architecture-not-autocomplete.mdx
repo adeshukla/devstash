@@ -11,6 +11,15 @@ readingTime: 6
 canonical: 'https://devstash.me/blog/ai-coding-assistants-architecture-not-autocomplete'
 draft: false
 featured: false
+faqs:
+  - question: 'How is an agentic coding tool different from autocomplete?'
+    answer: 'Autocomplete predicts what you were about to type and cannot verify or act on anything beyond the cursor. An agentic tool reads files across the project, plans, edits, runs commands such as tsc and re-runs until its goal is met.'
+  - question: 'What tasks benefit most from an agent?'
+    answer: 'Cross-file refactors, goals like making the build pass where the tool reads real errors and iterates, and planning a multi-step change you can approve before any file is touched.'
+  - question: 'What belongs in CLAUDE.md or AGENTS.md?'
+    answer: 'Things a model cannot infer from the code: version constraints and why they exist, decisions that look wrong without history, known gotchas with their fixes, and hard rules with consequences. It is onboarding documentation, not a personality prompt.'
+  - question: 'Can a context file do harm?'
+    answer: 'Yes. The post says a stale context file is worse than none because it actively misleads, so it should be updated whenever an architectural decision changes.'
 ---
 
 The framing "AI coding assistant" still gets described, in a lot of writing, as a fancier version of autocomplete — a tool that finishes your current line or suggests the next few. That framing was accurate for GitHub Copilot's original 2021 release. It stopped being accurate once these tools could read an entire codebase, hold a multi-file plan in context, run commands, and check their own work against the actual result. That is a difference in kind, not degree, and it changes what the tool is actually useful for.

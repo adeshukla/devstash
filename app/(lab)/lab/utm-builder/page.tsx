@@ -1,3 +1,4 @@
+import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
@@ -19,9 +20,7 @@ export default function UtmBuilderPage() {
         <section className="border-ds-border border-b px-6 py-20 sm:py-28">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-ds-accent mb-4 font-mono text-sm">UTM LINK BUILDER</p>
-            <h1 className="text-ds-text text-4xl leading-tight font-bold tracking-tight sm:text-5xl">
-              Stop guessing which ad drove the click.
-            </h1>
+            <h1 className={`${H1_HEADLINE}`}>Stop guessing which ad drove the click.</h1>
             <p className="text-ds-muted mt-6 text-lg leading-relaxed">
               A working UTM builder — no backend, nothing saved, just a clean tagged URL you can
               paste straight into your ad platform.

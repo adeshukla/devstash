@@ -11,6 +11,15 @@ readingTime: 4
 canonical: 'https://devstash.me/blog/ai-meeting-notes-calendar-automation'
 draft: false
 featured: false
+faqs:
+  - question: 'Where do AI meeting-note tools go wrong?'
+    answer: 'Quietly, in attribution and false certainty: crediting the wrong person, flattening a soft "we should probably" into a firm decision, and producing a decisive bullet for a discussion that ended undecided.'
+  - question: 'What does the post say the tools get right?'
+    answer: 'Transcription of clear audio, removing the ambiguity of who was supposed to take notes, and extracting action items against a known format.'
+  - question: 'How would you structure the automation in n8n and Groq?'
+    answer: 'Transcript in, a summarisation pass that preserves hedge language, action items extracted in a separate pass with attribution as a required field checked by a Code node, then a human confirm step before anything writes to a calendar or tracker.'
+  - question: 'Is this a shipped workflow?'
+    answer: 'No. The post says it is a design, not a shipped workflow. The automations actually run are the job-application one and a few smaller jobs.'
 ---
 
 AI meeting-notes tools — transcribe the call, summarize it, extract action items, push them somewhere — are one of the most widely adopted AI automations in ordinary office work right now, precisely because meetings are a task everyone already dislikes doing manually. That popularity is a useful signal, but it is worth being precise about what the automation actually does well versus what it quietly gets wrong, since "summarize a meeting" sounds like a simple, low-risk task and is not quite as simple as it sounds.

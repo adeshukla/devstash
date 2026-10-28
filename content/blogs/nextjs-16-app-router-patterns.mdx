@@ -11,6 +11,13 @@ readingTime: 6
 canonical: 'https://devstash.me/blog/nextjs-16-app-router-patterns'
 draft: false
 featured: false
+faqs:
+  - question: 'Are params and searchParams async in Next.js 16?'
+    answer: 'Yes. Both are Promises and must be awaited before reading any property, in page components and in generateMetadata. Migrating from Next.js 14, this is the first thing to audit.'
+  - question: 'Should generateStaticParams and generateMetadata be used together?'
+    answer: 'On dynamic routes, almost always. generateStaticParams pre-renders the routes at build time and generateMetadata gives each one a unique title and description in search results.'
+  - question: 'How do you render MDX in the App Router?'
+    answer: 'The post uses next-mdx-remote/rsc, built for Server Components, which needs no serialize step and ships no client JavaScript for the content. It switched to it after hitting a Turbopack serialization error with @next/mdx.'
 ---
 
 I've been building DevStash — this site — on Next.js 16 App Router with TypeScript strict mode. Some patterns I expected from the docs. Others I only found by reading the breaking-change notes carefully, or by hitting confusing runtime errors at 11pm.

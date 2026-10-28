@@ -17,6 +17,15 @@ readingTime: 6
 canonical: 'https://devstash.me/blog/understanding-css-cubic-bezier-easing'
 draft: false
 featured: false
+faqs:
+  - question: 'What do the four numbers in cubic-bezier() mean?'
+    answer: 'They are two control points, P1 and P2, on a graph where the x-axis is time from 0 to 1 and the y-axis is progress. The curve always starts at (0, 0) and ends at (1, 1).'
+  - question: 'Can cubic-bezier values go outside 0 to 1?'
+    answer: 'Only the y values can. x1 and x2 must stay between 0 and 1 or the function is invalid. A y1 above 1, such as 1.56, makes the animation overshoot its target and settle back.'
+  - question: 'What do the built-in easing keywords equal?'
+    answer: 'ease is cubic-bezier(0.25, 0.1, 0.25, 1), ease-in is (0.42, 0, 1, 1), ease-out is (0, 0, 0.58, 1), ease-in-out is (0.42, 0, 0.58, 1) and linear is (0, 0, 1, 1).'
+  - question: 'When is cubic-bezier not enough?'
+    answer: 'For true spring behaviour and interruption-aware motion. The post says those are different problems, better served by keyframes, the Web Animations API, linear() or a physics-based animation library.'
 ---
 
 Every `transition` and `animation` you've written has a timing function attached to it, even if you never typed one — `ease` is the default. Most of the time that's fine and you move on. But the moment you need something that feels less generic — a button that overshoots slightly before settling, or a card that snaps in fast and eases out slowly — `ease-in-out` stops being can start to feel limiting. For many UI transitions, `cubic-bezier(x1, y1, x2, y2)` gives you direct control over how the motion accelerates and decelerates without reaching for an animation library.

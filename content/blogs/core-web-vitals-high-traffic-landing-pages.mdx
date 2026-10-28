@@ -11,6 +11,15 @@ readingTime: 7
 canonical: 'https://devstash.me/blog/core-web-vitals-high-traffic-landing-pages'
 draft: false
 featured: false
+faqs:
+  - question: 'What usually breaks LCP on a landing page?'
+    answer: 'The hero image, nearly every time. The fixes in the post: set explicit width and height, preload the hero image instead of lazy-loading it, serve a modern format at the real rendered size, and avoid blocking font loading when the headline is the LCP element.'
+  - question: 'Should the hero image be lazy-loaded?'
+    answer: 'No. Lazy-loading is the right default below the fold and the wrong default for anything visible on first paint. The post describes a case where lazy-loading an above-the-fold hero moved LCP from acceptable to clearly failing.'
+  - question: 'What causes layout shift on landing pages?'
+    answer: 'Mostly images and embeds without reserved dimensions, and third-party scripts such as chat widgets, tracking pixels and A/B tools that inject content after first render. Reserve space for async content and load marketing scripts late.'
+  - question: 'How should tracking scripts be loaded in Next.js?'
+    answer: 'With next/script. The post says most marketing pixels are fine with the lazyOnload strategy, and afterInteractive suits scripts that are more time-sensitive.'
 ---
 
 Core Web Vitals advice online tends to read the same way: "optimize images, minify CSS, use a CDN." True, but generic enough to be useless on an actual page that's bleeding ad spend because it loads slow. On PPC landing pages specifically — pages built fast, under deadline, often with a hero image and a form above the fold — the failure modes are pretty consistent. Here's what I actually check, in the order I check it.

@@ -1,3 +1,4 @@
+import { H1_DISPLAY } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
@@ -71,9 +72,7 @@ export default function UsesPage() {
             ]}
           />
           <p className="text-ds-accent mt-6 font-mono text-sm">/uses</p>
-          <h1 className="text-ds-text mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
-            The stack I build with
-          </h1>
+          <h1 className={`${H1_DISPLAY} mt-3`}>The stack I build with</h1>
           <p className="text-ds-muted mt-3 max-w-lg">
             The real toolchain behind this site and its projects — every tool here is one I actually
             ship with. Inspired by{' '}

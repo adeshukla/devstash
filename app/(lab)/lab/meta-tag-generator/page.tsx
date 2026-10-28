@@ -1,3 +1,4 @@
+import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
@@ -19,9 +20,7 @@ export default function MetaTagGeneratorPage() {
         <section className="border-ds-border border-b px-6 py-20 text-center sm:py-24">
           <div className="mx-auto max-w-2xl">
             <p className="text-ds-accent mb-4 font-mono text-sm">META TAGS &amp; SOCIAL PREVIEW</p>
-            <h1 className="text-ds-text text-4xl leading-tight font-bold tracking-tight sm:text-5xl">
-              See your link before you ship it.
-            </h1>
+            <h1 className={`${H1_HEADLINE}`}>See your link before you ship it.</h1>
             <p className="text-ds-muted mt-6 text-lg leading-relaxed">
               Paste real content and it drafts a starting title and description locally — no AI
               call, just sentence scoring and cleanup. Then see a live Google search preview, an

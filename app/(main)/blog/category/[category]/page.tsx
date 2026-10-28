@@ -1,4 +1,5 @@
 // app/(main)/blog/category/[category]/page.tsx
+import { H1_DISPLAY } from '@/lib/utils/typography'
 import { notFound } from 'next/navigation'
 import { type Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
@@ -69,9 +70,7 @@ export default async function CategoryPage({ params }: Props) {
 
           <div className="mt-6">
             <p className="text-ds-muted mb-2 font-mono text-sm">Category</p>
-            <h1 className="text-ds-text mb-3 font-sans text-[clamp(44px,6vw,72px)] leading-[1.02] font-bold tracking-[-0.035em]">
-              {validCategory.label}
-            </h1>
+            <h1 className={`${H1_DISPLAY} mb-3`}>{validCategory.label}</h1>
             <p className="text-ds-muted">
               {posts.length} post{posts.length !== 1 ? 's' : ''}
             </p>

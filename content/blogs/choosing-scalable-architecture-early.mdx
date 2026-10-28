@@ -11,6 +11,15 @@ readingTime: 7
 canonical: 'https://devstash.me/blog/choosing-scalable-architecture-early'
 draft: false
 featured: false
+faqs:
+  - question: 'How do you decide what to design carefully early?'
+    answer: 'By asking how expensive it is to be wrong. Cheap-to-reverse choices, like a component''s internals, are kept simple. Expensive ones, like the content layer shape, data-fetching boundary and stable URLs, get real design time.'
+  - question: 'What are the signs of over-building?'
+    answer: 'An abstraction with one implementation, configuration for cases that do not exist yet, and splitting a component before it has had two real use cases.'
+  - question: 'What are the signs of under-building?'
+    answer: 'A data shape that is hard to change once real content exists, the same hardcoded value copied into several components, and no seam between how data is stored and how it is used.'
+  - question: 'How many design tokens are enough?'
+    answer: 'The count should track the number of distinct visual roles that actually recur, not the number you can imagine. Forty variables for a five-page site is its own premature complexity.'
 ---
 
 "Build it to scale" is advice that sounds responsible and usually produces the opposite of what it promises — a project with three abstraction layers for a feature that has one real use case, built by someone guessing at a future that may never show up. The advice that's actually worked for me is narrower: don't design against scale you don't have yet, but don't make choices that would be expensive to undo if that scale actually arrives. Those are different things, and mixing them up is where most premature complexity comes from.

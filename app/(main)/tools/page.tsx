@@ -1,3 +1,4 @@
+import { H1_DISPLAY } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
@@ -86,9 +87,7 @@ export default function ToolsPage() {
               { name: 'Tools', url: 'https://devstash.me/tools' },
             ]}
           />
-          <h1 className="text-ds-text mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
-            What&apos;s actually on my machine
-          </h1>
+          <h1 className={`${H1_DISPLAY} mt-6`}>What&apos;s actually on my machine</h1>
           <p className="text-ds-muted mt-4 max-w-[68ch] text-lg leading-relaxed">
             The stack I reach for every day, and what each thing is genuinely for. No affiliate
             links, no sponsored picks, nothing I don&apos;t open in a normal week.

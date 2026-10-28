@@ -11,6 +11,13 @@ readingTime: 7
 canonical: 'https://devstash.me/blog/n8n-groq-workflow-patterns'
 draft: false
 featured: false
+faqs:
+  - question: 'Why chain several LLM calls instead of writing one big prompt?'
+    answer: 'Splitting a job into two or three smaller single-purpose LLM Chain nodes consistently produced better output than one node doing everything, and it is much easier to debug. The rule in the post is one node per distinct task, not one per checklist step.'
+  - question: 'Why do n8n LLM Chain nodes lose upstream data?'
+    answer: 'The LLM Chain node strips every upstream JSON field except its own text output. To reach a field from earlier in the flow, use $(''NodeName'').all()[0].json.fieldName explicitly.'
+  - question: 'Can I trust JSON returned by an LLM node?'
+    answer: 'Not blindly. The post treats LLM output as untrusted input and routes it through a Code node that strips code fences, parses defensively and throws a loud error, so failures surface at the cause instead of three nodes downstream.'
 ---
 
 I've built a handful of n8n + Groq workflows at this point — a job-application automation I've [written about before](/blog/n8n-job-application-automation-groq-google-sheets), and a couple of smaller ones I haven't documented. The tools change per workflow, but the actual architecture problems repeat almost every time. This is the list of patterns I now reach for by default instead of re-solving them from scratch.

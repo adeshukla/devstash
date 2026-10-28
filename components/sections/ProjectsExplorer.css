@@ -1,0 +1,17 @@
+/* Project detail swap: a short fade/rise when the selected project changes.
+   Motion only when the visitor has not asked for less. */
+@media (prefers-reduced-motion: no-preference) {
+  .pe-swap {
+    animation: pe-swap 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes pe-swap {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}

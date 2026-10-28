@@ -11,6 +11,15 @@ readingTime: 5
 canonical: 'https://devstash.me/blog/claude-code-vs-cursor-what-actually-differs'
 draft: false
 featured: false
+faqs:
+  - question: 'What is the real difference between Claude Code and Cursor?'
+    answer: 'Cursor is an editor, a VS Code fork with an agent built into the editing surface. Claude Code is a terminal-native agent that runs in your shell and can read files, run commands and handle tasks that leave the file.'
+  - question: 'Which one suits which kind of work?'
+    answer: 'Mostly "edit this function and see it update" fits an editor-native agent. Work that regularly needs to run things and check real output fits a standalone agent with a shell.'
+  - question: 'Has the author used both?'
+    answer: 'The post is upfront that DevStash is built with Claude Code as the daily driver, and frames the comparison around that experience rather than claiming equal time in both.'
+  - question: 'Why does CLAUDE.md matter?'
+    answer: 'It is the durable project context a terminal agent reads before touching code. It becomes load-bearing on a real project, and a stale or wrong one is actively misleading.'
 ---
 
 I want to be upfront about the shape of this post: I've built and maintained DevStash with Claude Code as the daily driver — it's in the commit history, and this site's `CLAUDE.md` is the actual instruction file it reads before touching code. I haven't run Cursor on a project of comparable size and duration, so this isn't a bake-off with a scorecard at the end. What I can do honestly is lay out the real architectural difference between the two categories, because it matters more than most comparisons make it sound.

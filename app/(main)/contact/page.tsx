@@ -1,3 +1,5 @@
+import { FaqSection } from '@/components/sections/FaqSection'
+import { H1_DISPLAY } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
@@ -52,6 +54,23 @@ const SOCIAL_LINKS: { label: string; href: string; handle: string; icon: IconNam
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
+const FAQ = [
+  {
+    question: 'How quickly will I get a reply?',
+    answer: 'I aim to reply within 24 hours.',
+  },
+  {
+    question: 'What should I include in my message?',
+    answer:
+      'What you are building, who it is for, any deadline, and links to anything existing. That is enough for me to say whether it is a fit and what the next step is.',
+  },
+  {
+    question: 'Do you work with teams outside India?',
+    answer:
+      'My availability is stated for work anywhere in India, remote or hybrid. If you are elsewhere, send a message and we can see whether it fits.',
+  },
+]
+
 export default function ContactPage() {
   return (
     <div>
@@ -73,9 +92,7 @@ export default function ContactPage() {
               { name: 'Contact', url: 'https://devstash.me/contact' },
             ]}
           />
-          <h1 className="text-ds-text mt-6 text-[clamp(44px,6vw,72px)] leading-[1.02] font-bold tracking-[-0.035em]">
-            Get in touch
-          </h1>
+          <h1 className={`${H1_DISPLAY} mt-6`}>Get in touch</h1>
           <p className="text-ds-muted mt-3 max-w-lg">
             Open to frontend roles anywhere in India — on-site, hybrid or remote — freelance
             projects, or just a chat about code, automation, or bikes.
@@ -182,6 +199,7 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+      <FaqSection items={FAQ} intro="A few things people ask before they write." />
     </div>
   )
 }

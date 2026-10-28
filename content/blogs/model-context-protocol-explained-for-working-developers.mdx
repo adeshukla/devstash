@@ -11,6 +11,15 @@ readingTime: 7
 canonical: 'https://devstash.me/blog/model-context-protocol-explained-for-working-developers'
 draft: false
 featured: false
+faqs:
+  - question: 'What problem does MCP solve?'
+    answer: 'Before MCP every agent and every tool needed its own custom integration. MCP is a standard protocol, so a provider builds one server and any MCP-compatible agent can use it.'
+  - question: 'What are the three MCP primitives?'
+    answer: 'Tools, which are functions the agent can call with a defined input schema; resources, which are read-only data addressable by URI; and prompts, which are reusable parameterised prompt templates the server exposes.'
+  - question: 'How is an MCP agent different from an n8n workflow?'
+    answer: 'An n8n chain has a fixed shape where node A always feeds node B. An MCP-connected agent is given a menu of tools and decides at inference time which to call. The post calls that a tradeoff, not a strict upgrade, and says the two can be combined.'
+  - question: 'What makes a good MCP tool?'
+    answer: 'A description written for deciding whether this is the right tool, narrow tools over one general one, error messages the model can act on, input validation at the server, and credentials scoped to the minimum the tools need.'
 ---
 
 Model Context Protocol (MCP) went from "thing Anthropic published" to standard infrastructure fast — [by mid-2026 there were roughly 9,400 published servers across the major registries](https://blog.jetbrains.com/research/2026/08/ai-coding-agent-adoption-2026/), and nearly every serious agent tool speaks it. If you've been heads-down shipping and only half-absorbed what it actually is, here's the version that skips the hype and gets to the mechanics.

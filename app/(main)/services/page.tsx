@@ -1,3 +1,5 @@
+import { FaqSection } from '@/components/sections/FaqSection'
+import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
@@ -37,6 +39,39 @@ const OFFERINGS: { icon: IconName; title: string; body: string }[] = [
   },
 ]
 
+const FAQ = [
+  {
+    question: 'What kind of work do you take on?',
+    answer:
+      'Frontend engineering with React and Next.js, SEO-ready builds with structured data, metadata and sitemaps wired in from day one, and workflow automation with n8n and LLM pipelines.',
+  },
+  {
+    question: 'Are you available for freelance or contract work?',
+    answer:
+      'Yes. I am open to freelance and contract frontend work anywhere in India, remote or hybrid, with immediate to roughly 20 days notice.',
+  },
+  {
+    question: 'How much does a project cost?',
+    answer:
+      'I do not publish fixed rates because scope varies a lot between a landing page and an internal tool. Tell me what you are building through the contact page and I will reply within 24 hours.',
+  },
+  {
+    question: 'What performance standard do you build to?',
+    answer:
+      'A real performance budget: a Lighthouse score above 90 on mobile and desktop as the target, tight Core Web Vitals, and accessibility handled by default rather than at the end.',
+  },
+  {
+    question: 'Do you handle SEO as part of a build?',
+    answer:
+      'Yes. Metadata, canonical URLs, Open Graph tags, JSON-LD structured data and a sitemap are part of the build itself instead of something added after launch.',
+  },
+  {
+    question: 'Can I see examples of your work first?',
+    answer:
+      'The Projects page has case studies covering the problem, the decisions and what I would change, and the Lab has working tools you can use in your browser with no signup.',
+  },
+]
+
 export default function ServicesPage() {
   return (
     <div>
@@ -50,9 +85,7 @@ export default function ServicesPage() {
             ]}
           />
           <p className="text-ds-accent mt-6 font-mono text-sm">Work with me</p>
-          <h1 className="text-ds-text mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
-            Need a frontend built, or a workflow automated?
-          </h1>
+          <h1 className={`${H1_HEADLINE} mt-3`}>Need a frontend built, or a workflow automated?</h1>
           <p className="text-ds-muted mt-3 max-w-lg">
             Open to freelance and contract frontend work — anywhere in India, remote or hybrid.
             Immediate to ~20 days notice.
@@ -89,6 +122,7 @@ export default function ServicesPage() {
           </Button>
         </div>
       </section>
+      <FaqSection items={FAQ} intro="Straight answers on scope, availability and how I work." />
     </div>
   )
 }

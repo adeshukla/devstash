@@ -18,6 +18,15 @@ readingTime: 6
 canonical: 'https://devstash.me/blog/building-devstash-with-nextjs'
 draft: false
 featured: true
+faqs:
+  - question: 'Why does DevStash use files instead of a database?'
+    answer: 'Content is MDX and JSON in the repo, so every page can be statically generated, changes go through git, nothing at runtime can be down, and moving to a CMS later means rewriting only lib/markdown. The cost is that publishing needs a commit and a deploy.'
+  - question: 'What is interactive on the site and what is not?'
+    answer: 'Only the mobile nav, theme toggle, blog filter, table of contents and the Lab tools. Everything else is a Server Component that ships no JavaScript.'
+  - question: 'Where do the design tokens live in Tailwind v4?'
+    answer: 'In an @theme block in CSS rather than tailwind.config.ts. Each token becomes a utility and stays a real CSS custom property, and the rule on the site is no raw hex values in JSX.'
+  - question: 'What breaks when migrating to Next.js 16?'
+    answer: 'params and searchParams are Promises that must be awaited, and useSearchParams needs a Suspense boundary at build time. The post links to separate write-ups of both.'
 ---
 
 Every developer reaches a point where a LinkedIn profile and a PDF resume aren't enough. I came to front-end from accounts, by way of an interest in UX, and I wanted something that actually *showed* engineering thinking rather than listing it as a bullet point.

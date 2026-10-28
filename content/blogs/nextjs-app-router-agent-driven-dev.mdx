@@ -11,6 +11,13 @@ readingTime: 4
 canonical: 'https://devstash.me/blog/nextjs-app-router-agent-driven-dev'
 draft: false
 featured: false
+faqs:
+  - question: 'Why do AI agents work well on App Router codebases?'
+    answer: 'File-based conventions let an agent re-derive structure each session: the route is the folder path, route files are colocated, and Server Components are the default, which removes ambiguity about where logic may run.'
+  - question: 'Where does this break down?'
+    answer: 'At real exceptions to the pattern that are not obvious from file structure alone. Those are the spots where an assistant reliably gets a change wrong.'
+  - question: 'Where are the concrete conventions covered?'
+    answer: 'In the post on Next.js 16 App Router patterns: async searchParams, generateStaticParams and the Server Component defaults.'
 ---
 
 I have used an AI coding assistant on nearly every change to this site's App Router codebase for months now, and it is consistently better at navigating this codebase correctly than at navigating less-conventional ones I have worked in. That is not because the assistant "understands Next.js" in some special way — it is because the App Router's file-based routing conventions are exactly the kind of structure that makes a codebase legible to a tool with no persistent memory of your project, which is a real, underappreciated advantage independent of the AI angle.

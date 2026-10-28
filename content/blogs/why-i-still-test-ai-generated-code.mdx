@@ -11,6 +11,13 @@ readingTime: 4
 canonical: 'https://devstash.me/blog/why-i-still-test-ai-generated-code'
 draft: false
 featured: false
+faqs:
+  - question: 'Do AI-written functions need tests?'
+    answer: 'Yes. AI code is syntactically clean and plausible, so its bugs do not look like mistakes the way a typo or a TODO does, and a diff that reads well is not the same as a diff that is correct.'
+  - question: 'What do you test in AI-generated code?'
+    answer: 'Boundary conditions the prompt never mentioned, the bug classes from the project''s own history, and end-to-end checks for anything user-facing through the Playwright suite in pnpm qa.'
+  - question: 'Is this distrust of AI specifically?'
+    answer: 'No. The same discipline applies to any contributor you did not watch write the code. What changed is the volume of code moving through review per hour.'
 ---
 
 There is a version of the "AI writes code now" argument that concludes tests matter less — if the assistant is good enough to write correct code, why spend time verifying it. I have found the opposite to be true in practice, for a reason that is more about how AI-generated code fails than about AI capability: it fails in a way that is specifically harder for a human reviewer to catch by reading alone, which makes automated verification more valuable, not less.

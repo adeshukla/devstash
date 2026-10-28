@@ -1,3 +1,4 @@
+import { H1_DISPLAY } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
@@ -91,9 +92,7 @@ export default function ResourcesPage() {
               { name: 'Resources', url: 'https://devstash.me/resources' },
             ]}
           />
-          <h1 className="text-ds-text mt-6 text-[clamp(44px,6vw,72px)] leading-[1.02] font-bold tracking-[-0.035em]">
-            Resources
-          </h1>
+          <h1 className={`${H1_DISPLAY} mt-6`}>Resources</h1>
           <p className="text-ds-muted mt-4 max-w-[68ch] text-lg leading-relaxed">
             The docs, articles and references I actually go back to — not a link dump. Every entry
             here earned its place by being useful more than once.

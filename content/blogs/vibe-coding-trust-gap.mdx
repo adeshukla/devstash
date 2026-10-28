@@ -11,6 +11,13 @@ readingTime: 5
 canonical: 'https://devstash.me/blog/vibe-coding-trust-gap'
 draft: false
 featured: false
+faqs:
+  - question: 'What is the vibe coding trust gap?'
+    answer: 'The space between code that runs and code that does what you meant. Compiling and executing are verified by the tool, but nobody checks the logic against your intent, and plausible-looking output gets less scrutiny than obviously broken output.'
+  - question: 'Where does the gap bite most?'
+    answer: 'Boundary conditions the prompt never mentioned, silent type coercion, and copy-pasted logic that almost matches an existing pattern.'
+  - question: 'What does the author do about it?'
+    answer: 'Gates every change the same way with a pre-commit hook and CI: tsc and ESLint, content checks, and a pnpm qa run with a security audit plus responsive and accessibility suites.'
 ---
 
 "Vibe coding" — describing what you want in plain English and letting an AI assistant write and run the code, mostly without reading it line by line — went from a niche term to something recruiters ask about in interviews inside about a year. And it's genuinely useful. I use it every day on this site. But there's a specific failure mode that doesn't show up until you've shipped a few dozen AI-generated changes, and it's worth naming precisely instead of waving at "AI can be wrong sometimes."

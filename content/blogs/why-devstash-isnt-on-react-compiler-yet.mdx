@@ -11,6 +11,15 @@ readingTime: 6
 canonical: 'https://devstash.me/blog/why-devstash-isnt-on-react-compiler-yet'
 draft: false
 featured: false
+faqs:
+  - question: 'What does React Compiler do?'
+    answer: 'It analyses components at build time and inserts memoization automatically, so you stop hand-writing useMemo, useCallback and dependency arrays.'
+  - question: 'Why is DevStash not using it yet?'
+    answer: 'The project pins exact React versions on purpose, and the compiler''s optimisation heuristics change with each release, so results depend on the exact compiler version as well as the React version.'
+  - question: 'Can the compiler skip my components?'
+    answer: 'Yes. It only optimises code it can prove safe and bails out on components that break the Rules of React, so a passing build does not mean your components are being optimised.'
+  - question: 'How can I check readiness without adopting it?'
+    answer: 'Install the latest eslint-plugin-react-hooks, which ships the compiler''s diagnostics as lint rules and shows which components it would refuse to optimise.'
 ---
 
 React Compiler is one of the most-discussed frontend shifts of 2026, and it's a genuinely good idea: automatic memoization, handled at build time, so you stop hand-writing `useMemo` and `useCallback` to prevent re-renders. DevStash doesn't use it. Not because it's bad — because of one specific, boring constraint already written into this project's own rules, and it's worth explaining rather than quietly skipping the topic.

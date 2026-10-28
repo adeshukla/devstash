@@ -1,3 +1,4 @@
+import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -57,9 +58,24 @@ export async function generateMetadata({
     })
   }
 
+  // Short names get a keyword suffix; long ones already fill the title budget.
+  const withSuffix = project.title.length <= 40 ? `${project.title} — Case Study` : project.title
+  // buildMetadata appends " | DevStash" (11 chars); keep the whole title near 60.
+  const seoTitle =
+    withSuffix.length + 11 > 65 ? `${project.title.split(' — ')[0]} — Case Study` : withSuffix
+
+  // Google cuts snippets near 160 characters; end on a word, not mid-sentence.
+  const seoDescription =
+    project.description.length <= 160
+      ? project.description
+      : project.description
+          .slice(0, 157)
+          .replace(/s+S*$/, '')
+          .replace(/[,;:—-]s*$/, '') + '…'
+
   return buildMetadata({
-    title: project.title,
-    description: project.description,
+    title: seoTitle,
+    description: seoDescription,
     canonical: `/projects/${project.slug}`,
     type: 'website',
     ogImage: buildOgImageUrl({
@@ -135,9 +151,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       <span className="text-ds-muted font-mono text-xs">{project.year}</span>
                     )}
                   </div>
-                  <h1 className="text-ds-text text-4xl font-bold tracking-tight sm:text-5xl">
-                    {project.title}
-                  </h1>
+                  <h1 className={`${H1_HEADLINE}`}>{project.title}</h1>
                   <p className="text-ds-muted mt-4 max-w-2xl text-lg">{project.description}</p>
                 </div>
               </MountReveal>

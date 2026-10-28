@@ -1,4 +1,5 @@
 // app/(main)/blog/[slug]/page.tsx
+import { H1_HEADLINE } from '@/lib/utils/typography'
 import { notFound } from 'next/navigation'
 import { type Metadata } from 'next'
 import Image from 'next/image'
@@ -140,9 +141,7 @@ export default async function BlogPostPage({ params }: Props) {
               </MountReveal>
 
               <MountReveal delay={160}>
-                <h1 className="text-ds-text mb-4 font-sans text-4xl leading-tight font-bold tracking-tight sm:text-5xl">
-                  {post.title}
-                </h1>
+                <h1 className={`${H1_HEADLINE} mb-4`}>{post.title}</h1>
               </MountReveal>
 
               <MountReveal delay={240}>

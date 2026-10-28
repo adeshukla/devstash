@@ -1,3 +1,4 @@
+import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
@@ -166,9 +167,7 @@ export default function CssShapesPlaygroundPage() {
             <p className="text-ds-accent mb-4 font-mono text-sm">
               CSS SHAPES &amp; ANIMATION PLAYGROUND
             </p>
-            <h1 className="text-ds-text text-4xl leading-tight font-bold tracking-tight sm:text-5xl">
-              Modern CSS, actually working.
-            </h1>
+            <h1 className={`${H1_HEADLINE}`}>Modern CSS, actually working.</h1>
             <p className="text-ds-muted mt-6 text-lg leading-relaxed">
               Every demo below is real, running CSS — pick a color and build a shape three different
               ways in the customizer, and copy the exact code for anything on this page.

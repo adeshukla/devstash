@@ -466,7 +466,7 @@ function GenerateTab() {
               <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
                 Figure style
               </p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {(Object.keys(PERSON_STYLE_LABELS) as PersonStyle[]).map((s) => (
                   <button
                     key={s}
@@ -537,7 +537,7 @@ function GenerateTab() {
               <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
                 {activeCharScene === 'team' ? 'Team size' : 'Density'}
               </p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {([1, 2, 3] as Density[]).map((d) => (
                   <button
                     key={d}
@@ -558,7 +558,7 @@ function GenerateTab() {
 
             <div>
               <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">Motion</p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {[true, false].map((v) => (
                   <button
                     key={String(v)}
@@ -618,7 +618,7 @@ function GenerateTab() {
               <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
                 Density
               </p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {([1, 2, 3] as Density[]).map((d) => (
                   <button
                     key={d}

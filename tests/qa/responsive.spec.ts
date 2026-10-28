@@ -17,12 +17,23 @@ const ROUTES = [
   '/contact',
   '/resources',
   '/tools',
+  '/uses',
+  '/services',
+  '/privacy',
+  '/terms',
+  '/projects/praxis',
+  '/lab/utm-builder',
+  '/lab/css-shapes-playground',
+  '/lab/illustration-generator',
+  '/lab/meta-tag-generator',
+  '/lab/ai-content-pipeline',
 ]
 
 // width × representative height (portrait-ish for small, landscape for large)
 const VIEWPORTS: [number, number][] = [
   [200, 250], // smartwatch
   [280, 400], // tiny/foldable cover screen
+  [300, 560], // narrow Android
   [320, 568], // iPhone SE gen1
   [375, 812], // common phone
   [768, 1024], // tablet portrait

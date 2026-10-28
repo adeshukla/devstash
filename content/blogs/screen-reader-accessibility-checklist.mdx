@@ -11,6 +11,15 @@ readingTime: 8
 canonical: 'https://devstash.me/blog/screen-reader-accessibility-checklist'
 draft: false
 featured: false
+faqs:
+  - question: 'Is an automated accessibility audit enough?'
+    answer: 'No. The post says tools like Lighthouse and axe catch roughly a third of what breaks a screen reader experience. They flag missing alt text but mostly miss focus traps that never release and dynamic updates nobody is told about.'
+  - question: 'When should I use ARIA instead of HTML elements?'
+    answer: 'Semantic HTML comes first. A button is focusable, announces its role and responds to keyboard activation for free, while a div with an onClick gets none of that. role="button" on a div is a valid fallback for when semantic HTML genuinely cannot express what you need.'
+  - question: 'Where should focus go when a modal closes?'
+    answer: 'Back to the element that opened it. Native dialog elements handle focus trapping and Escape-to-close, but the post notes the return-focus step is easy to forget and only shows up when you tab through the whole open, interact, close flow.'
+  - question: 'How do screen reader users learn about content that changes without a reload?'
+    answer: 'Through an aria-live region. Without one, updates like a validation error, a "message sent" confirmation or a search result count go unannounced and the user must re-explore the page to find them.'
 ---
 
 Accessibility usually gets treated as a checkbox — run an automated audit, fix the flagged issues, move on. The problem is that automated tools (Lighthouse, axe) catch maybe a third of what actually breaks a screen reader experience. Missing alt text, they'll flag. A focus trap that never releases, or a dynamic update nobody gets told about, they mostly won't. This is the list of things I actually check by hand, not just what a linter reports.

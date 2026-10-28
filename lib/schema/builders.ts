@@ -187,6 +187,8 @@ export function buildProjectSchema(
         url: siteConfig.url,
       },
       ...(project.liveUrl ? { installUrl: project.liveUrl } : {}),
+      // Ties this case-study page to the app's own subdomain as one entity.
+      ...(project.liveUrl?.startsWith('http') ? { sameAs: [project.liveUrl] } : {}),
       // Every 'tool' project is free to use with no signup. Saying so in
       // markup is what lets an assistant answer "is there a free X" with it.
       ...(project.category === 'tool'
