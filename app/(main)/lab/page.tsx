@@ -118,7 +118,7 @@ export default function LabPage() {
       />
       {/* Breadcrumb emits its own BreadcrumbList JSON-LD */}
       <section className="border-ds-border border-b py-16">
-        <div className="mx-auto max-w-5xl px-6">
+        <div className="max-w-site mx-auto px-6">
           <Breadcrumb
             items={[
               { name: 'Home', url: 'https://devstash.me' },
@@ -139,7 +139,7 @@ export default function LabPage() {
       {/* The flagship is a build, not a card in a grid — it gets the space to
           show its own three-stage shape. */}
       <section className="py-16">
-        <div className="mx-auto max-w-5xl px-6">
+        <div className="max-w-site mx-auto px-6">
           <CardTilt>
             <Link
               href={`/lab/${FLAGSHIP.slug}`}
@@ -177,9 +177,9 @@ export default function LabPage() {
       </section>
 
       <section className="py-4 pb-16">
-        <div className="mx-auto max-w-5xl px-6">
+        <div className="max-w-site mx-auto px-6">
           <h2 className="text-ds-text mb-8 text-2xl font-bold tracking-tight">Tools</h2>
-          <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 xl:grid-cols-4">
             {TOOLS.map((demo) => (
               <LabEntry key={demo.slug} demo={demo} />
             ))}

@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
 import { PageFacts } from '@/components/ui/PageFacts'
-import { Icon, type IconName } from '@/components/icons/Icon'
+import { type IconName } from '@/components/icons/Icon'
+import { CategoryIndex } from '@/components/sections/CategoryIndex'
 import toolsData from '@/content/tools/tools.json'
 
 const title = 'Tools — The Developer Stack Adesh Uses Daily'
@@ -77,7 +77,7 @@ export default function ToolsPage() {
     <div>
       {/* Breadcrumb handles its own buildBreadcrumbSchema JsonLd internally */}
       <section className="border-ds-border border-b py-16">
-        <div className="mx-auto max-w-3xl px-6">
+        <div className="max-w-site mx-auto px-6">
           <Breadcrumb
             items={[
               { name: 'Home', url: 'https://devstash.me' },
@@ -101,49 +101,21 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      {/* An inventory, not a card grid. Each row is name + what it's for, which
-          is the only question this page has to answer. */}
-      <section className="py-16">
-        <div className="mx-auto flex max-w-3xl flex-col gap-14 px-6">
-          {orderedCats.map((cat) => (
-            <section key={cat} aria-labelledby={`cat-${cat}`}>
-              <h2
-                id={`cat-${cat}`}
-                className="text-ds-text mb-1 flex items-center gap-2.5 text-sm font-semibold tracking-wide uppercase"
-              >
-                <Icon name={CATEGORY_ICONS[cat]} className="text-ds-accent h-4 w-4 shrink-0" />
-                {CATEGORY_LABELS[cat]}
-              </h2>
-
-              <ul className="divide-y divide-[var(--color-ds-border)]">
-                {grouped[cat]?.map((tool) => (
-                  <li key={tool.id}>
-                    <Link
-                      href={tool.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg -mx-3 grid gap-1 rounded-lg px-3 py-4 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:grid-cols-[13rem_1fr] sm:items-baseline sm:gap-6"
-                    >
-                      <div className="flex items-baseline gap-2">
-                        <h3 className="text-ds-text group-hover:text-ds-accent font-medium transition-colors">
-                          {tool.name}
-                        </h3>
-                        {!tool.free && <span className="text-ds-muted text-xs">Paid</span>}
-                        <Icon
-                          name="external-link"
-                          className="text-ds-muted h-3 w-3 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
-                        />
-                      </div>
-                      <p className="text-ds-muted max-w-[68ch] text-sm leading-relaxed">
-                        {tool.description}
-                      </p>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
+      <section className="py-6">
+        <CategoryIndex
+          groups={orderedCats.map((cat) => ({
+            key: cat,
+            label: CATEGORY_LABELS[cat],
+            icon: CATEGORY_ICONS[cat],
+            entries: (grouped[cat] ?? []).map((t) => ({
+              id: t.id,
+              title: t.name,
+              href: t.url,
+              paid: !t.free,
+              description: t.description,
+            })),
+          }))}
+        />
       </section>
     </div>
   )

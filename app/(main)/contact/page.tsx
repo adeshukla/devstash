@@ -66,7 +66,7 @@ export default function ContactPage() {
       {/* Breadcrumb handles its own buildBreadcrumbSchema JsonLd internally.
           Plain header, no background effects — same as every inner page. */}
       <section className="border-ds-border border-b py-16">
-        <div className="mx-auto max-w-5xl px-6">
+        <div className="max-w-site mx-auto px-6">
           <Breadcrumb
             items={[
               { name: 'Home', url: 'https://devstash.me' },
@@ -85,7 +85,7 @@ export default function ContactPage() {
 
       {/* ── Two-column layout ── */}
       <section className="py-16">
-        <div className="mx-auto max-w-5xl px-6">
+        <div className="max-w-site mx-auto px-6">
           {/* The form comes first in the source, so phones/tablets (and
               keyboard / screen-reader users) reach it straight away — with
               the panel first it started ~1.7 screens down on a 375px phone.

@@ -7,6 +7,9 @@ import { buildIntroVideoSchema, buildPersonSchema } from '@/lib/schema/builders'
 import { siteConfig } from '@/content/metadata/site.config'
 import { stack } from '@/lib/site/stack'
 import { Badge, Button, Reveal, AboutProfileCard } from '@/components/ui'
+import { PageFacts } from '@/components/ui/PageFacts'
+import { getAllProjects } from '@/lib/markdown/projects'
+import { getAllPosts } from '@/lib/markdown/blog'
 import { Icon, type IconName } from '@/components/icons/Icon'
 import { IntroVideo } from '@/components/ui/IntroVideo'
 
@@ -92,39 +95,57 @@ const CURRENTLY: { icon: IconName; text: string }[] = [
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
+// Section heading used by every block below: mono index + title, and an
+// optional one-line lede. Full site width (max-w-site), like the home page.
+function SectionHead({ n, title, lede }: { n: string; title: string; lede?: string }) {
+  return (
+    <Reveal>
+      <p className="text-ds-accent font-mono text-sm">{n} —</p>
+      <h2 className="text-ds-text mt-2 text-[clamp(28px,3vw,40px)] leading-tight font-bold tracking-tight">
+        {title}
+      </h2>
+      {lede && <p className="text-ds-muted mt-3 max-w-[60ch] leading-relaxed">{lede}</p>}
+    </Reveal>
+  )
+}
+
 export default function AboutPage() {
+  // Counted from the content at build time, so these can never drift out of date.
+  const projectCount = getAllProjects().length
+  const postCount = getAllPosts().length
+
   return (
     <>
       <JsonLd data={buildPersonSchema()} />
       <JsonLd data={buildIntroVideoSchema()} />
 
       <div>
-        {/* ── Hero ── */}
-        <section className="border-ds-border border-b py-10 sm:py-20">
-          <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-10 px-6 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
+        {/* ── Hero: the story on the left, the path as four steps on the right ── */}
+        <section className="border-ds-border border-b pt-12 pb-14 sm:pt-20 sm:pb-16">
+          <div className="max-w-site mx-auto grid grid-cols-1 items-center gap-12 px-6 lg:grid-cols-[1.3fr_1fr] lg:gap-20">
             <div>
-              <h1 className="text-ds-text text-4xl font-bold tracking-tight sm:text-5xl">
+              <p className="text-ds-accent font-mono text-sm">{'// about'}</p>
+              <h1 className="text-ds-text mt-3 text-[clamp(44px,6vw,80px)] leading-[1.02] font-bold tracking-[-0.035em]">
                 Hey, I&apos;m Adesh.
               </h1>
-              <div className="text-ds-muted mt-4 flex max-w-2xl flex-col gap-3 text-base leading-relaxed sm:mt-6 sm:gap-4 sm:text-lg">
+              <p className="text-ds-text mt-5 max-w-[30ch] text-[clamp(20px,2vw,28px)] leading-snug font-semibold tracking-tight">
+                Someone who checks the numbers, then builds the page.
+              </p>
+              <div className="text-ds-muted mt-6 flex max-w-[62ch] flex-col gap-4 text-base leading-relaxed sm:text-lg">
                 <p>
                   I started in accounts — a CA student, then tax compliance. UX is what pulled me
                   toward the web: I tried designing in tools like Figma, and what came out was an
-                  analyst and a front-end developer. Someone who checks the numbers, then builds the
-                  page.
+                  analyst and a front-end developer.
                 </p>
                 <p>
                   6+ years on the web since. Most of it has been landing pages at volume — CSS,
                   responsive layout, keeping an older codebase alive, and fixing the accessibility
-                  and speed problems that show up once a page is actually live.
-                </p>
-                <p>
-                  Currently at Chetu India building landing pages for US clients. Also building{' '}
-                  <span className="text-ds-accent">DevStash</span> — a personal platform that&apos;s
-                  more developer ecosystem than portfolio.
+                  and speed problems that show up once a page is actually live. Currently at Chetu
+                  India building landing pages for US clients, and building{' '}
+                  <span className="text-ds-accent-strong">DevStash</span> on the side.
                 </p>
               </div>
-              <div className="mt-5 flex flex-wrap gap-3 sm:mt-8">
+              <div className="mt-8 flex flex-wrap gap-3">
                 <Button href="/projects">See my work</Button>
                 <Button href="/contact" variant="outline">
                   Let&apos;s connect
@@ -141,44 +162,63 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="mx-auto w-full max-w-sm lg:mx-0">
+            <div className="mx-auto w-full max-w-md lg:mx-0 lg:justify-self-end">
               <AboutProfileCard />
             </div>
+          </div>
+
+          {/* The proof in four numbers — two he has stated, two counted from the site. */}
+          <div className="max-w-site mx-auto px-6">
+            <PageFacts
+              items={[
+                { value: 6, suffix: '+', label: 'years on the web' },
+                { value: 200, suffix: '+', label: 'landing pages, US clients' },
+                { value: projectCount, label: 'projects shipped' },
+                { value: postCount, label: 'blog posts' },
+              ]}
+            />
           </div>
         </section>
 
         {/* ── Intro video — click-to-load, so only the poster costs the page anything ── */}
-        <section className="pt-16" aria-labelledby="intro-video-heading">
-          <div className="mx-auto max-w-4xl px-6">
+        <section className="py-16 sm:py-20" aria-labelledby="intro-video-heading">
+          <div className="max-w-site mx-auto grid grid-cols-1 items-center gap-10 px-6 lg:grid-cols-[1fr_1.7fr] lg:gap-16">
             <Reveal>
-              <h2 id="intro-video-heading" className="text-ds-text mb-2 text-2xl font-bold">
+              <p className="text-ds-accent font-mono text-sm">01 —</p>
+              <h2
+                id="intro-video-heading"
+                className="text-ds-text mt-2 text-[clamp(28px,3vw,40px)] leading-tight font-bold tracking-tight"
+              >
                 The 80-second version
               </h2>
-              <p className="text-ds-muted mb-6">
+              <p className="text-ds-muted mt-3 max-w-[44ch] leading-relaxed">
                 What I build, narrated — Pare, Build Components, Praxis, Motion Lab and the AI
-                pipeline.
+                pipeline. Captions on, no autoplay.
               </p>
+            </Reveal>
+            <Reveal delay={80}>
               <IntroVideo />
             </Reveal>
           </div>
         </section>
 
-        {/* ── Skills ── */}
-        <section className="py-16">
-          <div className="mx-auto max-w-4xl px-6">
-            <Reveal>
-              <h2 className="text-ds-text mb-8 flex items-baseline gap-3 text-2xl font-bold">
-                <span className="text-ds-accent font-mono text-base font-normal">01 —</span>
-                Tech I use
-              </h2>
-            </Reveal>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {/* ── Skills: all five groups in one row on wide screens ── */}
+        <section className="border-ds-border border-t py-16 sm:py-20">
+          <div className="max-w-site mx-auto px-6">
+            <SectionHead
+              n="02"
+              title="Tech I use"
+              lede="Ordered by what I can defend in an interview, not by what looks impressive in a list."
+            />
+            <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {Object.entries(SKILLS).map(([category, items], i) => (
                 <Reveal key={category} delay={i * 60}>
                   {/* A labelled group, not a link — so no hover state */}
-                  <div className="border-ds-border bg-ds-surface/60 rounded-card border p-5">
-                    <h3 className="text-ds-accent mb-3 flex items-center gap-2 font-mono text-sm font-medium">
-                      <Icon name={CATEGORY_ICONS[category]} className="h-4 w-4 flex-shrink-0" />
+                  <div className="border-ds-border bg-ds-surface/60 rounded-card h-full border p-5">
+                    <h3 className="text-ds-text mb-4 flex items-center gap-2.5 font-semibold">
+                      <span className="bg-ds-accent/10 text-ds-accent-strong grid h-8 w-8 shrink-0 place-items-center rounded-lg">
+                        <Icon name={CATEGORY_ICONS[category]} className="h-4 w-4" />
+                      </span>
                       {category}
                     </h3>
                     <div className="flex flex-wrap gap-2">
@@ -195,95 +235,78 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ── Experience timeline ── */}
-        <section className="border-ds-border border-t py-16">
-          <div className="mx-auto max-w-4xl px-6">
-            <Reveal>
-              <h2 className="text-ds-text mb-10 flex items-baseline gap-3 text-2xl font-bold">
-                <span className="text-ds-accent font-mono text-base font-normal">02 —</span>
-                Experience
-              </h2>
-            </Reveal>
-            <ol className="flex flex-col gap-0">
-              {TIMELINE.map((item, i) => (
-                <Reveal key={item.company} delay={i * 80} as="li" className="group flex gap-6">
-                  <div className="flex flex-col items-center">
-                    <div className="relative mt-1 flex h-3 w-3 shrink-0 items-center justify-center">
-                      {/* The current role (first entry — TIMELINE is newest-first)
-                          gets the same live-status ping the hero's "Available
-                          for..." indicator uses, so "still here, ongoing" reads
-                          the same way it does everywhere else on the site. */}
-                      {i === 0 && (
-                        <span
-                          aria-hidden="true"
-                          className="bg-ds-accent absolute inline-flex h-full w-full animate-ping rounded-full opacity-60"
-                        />
+        {/* ── Experience + Currently, side by side ── */}
+        <section className="border-ds-border border-t py-16 sm:py-20">
+          <div className="max-w-site mx-auto grid grid-cols-1 gap-14 px-6 lg:grid-cols-[1.2fr_1fr] lg:gap-20">
+            <div>
+              <SectionHead n="03" title="Experience" />
+              <ol className="mt-10 flex flex-col">
+                {TIMELINE.map((item, i) => (
+                  <Reveal key={item.company} delay={i * 80} as="li" className="flex gap-6">
+                    <div className="flex flex-col items-center">
+                      <div className="relative mt-1.5 flex h-3 w-3 shrink-0 items-center justify-center">
+                        {/* Current role (newest first) gets the site's live-status ping */}
+                        {i === 0 && (
+                          <span
+                            aria-hidden="true"
+                            className="bg-ds-accent absolute inline-flex h-full w-full animate-ping rounded-full opacity-60"
+                          />
+                        )}
+                        <div className="bg-ds-accent ring-ds-bg relative h-3 w-3 rounded-full ring-4" />
+                      </div>
+                      {i < TIMELINE.length - 1 && (
+                        <div className="from-ds-accent to-ds-purple mt-1 w-px flex-1 bg-gradient-to-b" />
                       )}
-                      <div className="bg-ds-accent ring-ds-bg relative h-3 w-3 rounded-full ring-4 transition-transform group-hover:scale-125" />
                     </div>
-                    {i < TIMELINE.length - 1 && (
-                      <div className="from-ds-accent to-ds-purple mt-1 w-px flex-1 bg-gradient-to-b" />
-                    )}
-                  </div>
-                  <div className="border-ds-border hover:border-ds-accent hover:bg-ds-surface mb-6 flex-1 rounded-lg border p-4 transition-colors">
-                    <p className="text-ds-muted font-mono text-xs">{item.year}</p>
-                    <h3 className="text-ds-text mt-1 font-semibold">{item.role}</h3>
-                    <p className="text-ds-accent text-sm">{item.company}</p>
-                    <p className="text-ds-muted mt-2 text-sm">{item.desc}</p>
-                  </div>
-                </Reveal>
-              ))}
-            </ol>
-          </div>
-        </section>
+                    <div className="border-ds-border bg-ds-surface/60 rounded-card mb-6 flex-1 border p-5">
+                      <p className="text-ds-muted font-mono text-xs">{item.year}</p>
+                      <h3 className="text-ds-text mt-1 text-lg font-semibold">{item.role}</h3>
+                      <p className="text-ds-accent-strong text-sm">{item.company}</p>
+                      <p className="text-ds-muted mt-2 leading-relaxed">{item.desc}</p>
+                    </div>
+                  </Reveal>
+                ))}
+              </ol>
+            </div>
 
-        {/* ── Currently ── */}
-        <section className="border-ds-border border-t py-16">
-          <div className="mx-auto max-w-4xl px-6">
-            <Reveal>
-              <h2 className="text-ds-text mb-6 flex items-baseline gap-3 text-2xl font-bold">
-                <span className="text-ds-accent font-mono text-base font-normal">03 —</span>
-                Currently
-              </h2>
-            </Reveal>
-            <ul className="flex flex-col gap-3">
-              {CURRENTLY.map(({ icon, text }, i) => (
-                <Reveal
-                  key={text}
-                  delay={i * 60}
-                  as="li"
-                  className="group text-ds-muted flex items-center gap-3"
-                >
-                  <span
-                    className="border-ds-border bg-ds-surface2 text-ds-accent group-hover:border-ds-accent group-hover:bg-ds-accent/10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border transition-colors"
-                    aria-hidden="true"
+            <div>
+              <SectionHead n="04" title="Currently" />
+              <ul className="mt-10 grid gap-3">
+                {CURRENTLY.map(({ icon, text }, i) => (
+                  <Reveal
+                    key={text}
+                    delay={i * 60}
+                    as="li"
+                    className="border-ds-border bg-ds-surface/60 rounded-card text-ds-muted flex items-start gap-3 border p-4"
                   >
-                    <Icon name={icon} className="h-4 w-4" />
-                  </span>
-                  {text}
-                </Reveal>
-              ))}
-            </ul>
+                    <span
+                      className="bg-ds-accent/10 text-ds-accent-strong flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
+                      aria-hidden="true"
+                    >
+                      <Icon name={icon} className="h-4 w-4" />
+                    </span>
+                    <span className="pt-1 leading-relaxed">{text}</span>
+                  </Reveal>
+                ))}
+              </ul>
+            </div>
           </div>
         </section>
 
         {/* ── What is DevStash ── plain, literal sentences on purpose: this is
             what an assistant quotes when asked "what is DevStash", and the
             name is shared with several unrelated products. */}
-        <section className="border-ds-border border-t py-16">
-          <div className="mx-auto max-w-4xl px-6">
-            <h2 className="text-ds-text mb-6 flex items-baseline gap-3 text-2xl font-bold">
-              <span className="text-ds-accent font-mono text-base font-normal">04 —</span>
-              What is DevStash?
-            </h2>
-            <div className="text-ds-muted flex max-w-2xl flex-col gap-4 leading-relaxed">
+        <section className="border-ds-border border-t py-16 sm:py-20">
+          <div className="max-w-site mx-auto grid grid-cols-1 gap-8 px-6 lg:grid-cols-[1fr_2fr] lg:gap-20">
+            <SectionHead n="05" title="What is DevStash?" />
+            <div className="text-ds-muted flex max-w-[70ch] flex-col gap-4 text-lg leading-relaxed">
               <p>
                 DevStash (devstash.me) is the personal site of Adesh Shukla, a UI developer in
                 Ghaziabad, India. It holds his project case studies, a blog about frontend
                 development, Next.js and workflow automation, and a set of free browser tools in the{' '}
                 <Link
                   href="/lab"
-                  className="text-ds-accent decoration-ds-accent/40 hover:decoration-ds-accent underline underline-offset-2"
+                  className="text-ds-accent-strong decoration-ds-accent/40 hover:decoration-ds-accent underline underline-offset-2"
                 >
                   Lab
                 </Link>
@@ -304,17 +327,18 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ── CTA strip ── */}
-        <section className="border-ds-border bg-ds-surface border-t py-16">
-          <Reveal className="mx-auto max-w-4xl px-6 text-center">
-            <h2 className="text-ds-text flex items-baseline justify-center gap-3 text-2xl font-bold">
-              <span className="text-ds-accent font-mono text-base font-normal">05 —</span>
-              Want to work together?
-            </h2>
-            <p className="text-ds-muted mt-3">
-              I&apos;m open to frontend roles and freelance collabs. Drop me a line.
-            </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-4">
+        {/* ── CTA ── */}
+        <section className="border-ds-border bg-ds-surface border-t py-16 sm:py-20">
+          <Reveal className="max-w-site mx-auto flex flex-col items-start justify-between gap-8 px-6 lg:flex-row lg:items-center">
+            <div>
+              <h2 className="text-ds-text text-[clamp(28px,3vw,40px)] leading-tight font-bold tracking-tight">
+                Want to work together?
+              </h2>
+              <p className="text-ds-muted mt-3 text-lg">
+                I&apos;m open to frontend roles and freelance collabs. Drop me a line.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-4">
               <Button href="/contact" size="lg">
                 Contact me
               </Button>

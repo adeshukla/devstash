@@ -39,7 +39,7 @@ export function ProjectsGrid({ projects, showAll = false }: ProjectsGridProps) {
 
   return (
     <section className="py-16">
-      <div className="mx-auto max-w-6xl px-6">
+      <div className="max-w-site mx-auto px-6">
         {!showAll && (
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>

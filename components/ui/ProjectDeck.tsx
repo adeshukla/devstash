@@ -126,6 +126,43 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
   // never hover it, so this is how they learn it's a stack. It re-arms once
   // the deck has fully left the screen.
   const [greeting, setGreeting] = useState(false)
+
+  // The whole projects section is the hover zone, not just the cards: a mouse
+  // anywhere in the section fans the deck out, leaving the section folds it.
+  // A tap anywhere in the section (touch) plays the arrival moment again.
+  useEffect(() => {
+    const section = deckRef.current?.closest('section')
+    if (!section) return
+    let touchFold: number | undefined
+    const enter = (e: globalThis.PointerEvent) => {
+      if (e.pointerType !== 'mouse') return
+      setFanned(true)
+      setNudging(false) // they've found it — the hint's job is done
+    }
+    const leave = (e: globalThis.PointerEvent) => {
+      if (e.pointerType === 'mouse' && !drag.current) setFanned(false)
+    }
+    const tap = (e: globalThis.PointerEvent) => {
+      if (e.pointerType === 'mouse' || reducedMotion()) return
+      if (deckRef.current?.contains(e.target as Node)) return // the deck handles its own taps
+      setFanned(true)
+      setGreeting(true)
+      window.clearTimeout(touchFold)
+      touchFold = window.setTimeout(() => {
+        setGreeting(false)
+        setFanned(false)
+      }, FAN_ON_ARRIVAL_MS)
+    }
+    section.addEventListener('pointerenter', enter)
+    section.addEventListener('pointerleave', leave)
+    section.addEventListener('pointerdown', tap)
+    return () => {
+      section.removeEventListener('pointerenter', enter)
+      section.removeEventListener('pointerleave', leave)
+      section.removeEventListener('pointerdown', tap)
+      window.clearTimeout(touchFold)
+    }
+  }, [])
   useEffect(() => {
     const deck = deckRef.current
     if (!deck || reducedMotion()) return
@@ -293,12 +330,6 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
         aria-label={label}
         data-nudging={nudging || undefined}
         data-greeting={greeting || undefined}
-        onPointerEnter={(e) => {
-          if (e.pointerType !== 'mouse') return
-          setFanned(true)
-          setNudging(false) // they've found it — the hint's job is done
-        }}
-        onPointerLeave={() => !drag.current && setFanned(false)}
       >
         {cards.map((card, i) => {
           const pos = order.indexOf(i)

@@ -61,7 +61,7 @@ export default function ServicesPage() {
       </section>
 
       <section className="py-16">
-        <div className="mx-auto max-w-5xl px-6">
+        <div className="max-w-site mx-auto px-6">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
             {OFFERINGS.map((item) => (
               <div key={item.title}>

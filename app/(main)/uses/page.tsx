@@ -91,7 +91,7 @@ export default function UsesPage() {
       </section>
 
       <section className="py-16">
-        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 px-6 md:grid-cols-2">
+        <div className="max-w-site mx-auto grid grid-cols-1 gap-6 px-6 md:grid-cols-2">
           {STACK.map((section) => (
             <Card key={section.heading} padding="lg">
               <h2 className="text-ds-text mb-4 text-lg font-semibold">{section.heading}</h2>

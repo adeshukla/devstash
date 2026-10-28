@@ -59,7 +59,7 @@ export default async function CategoryPage({ params }: Props) {
       <JsonLd data={buildBreadcrumbSchema(breadcrumbs)} />
 
       <section className="border-ds-border border-b py-16">
-        <div className="mx-auto max-w-6xl px-6">
+        <div className="max-w-site mx-auto px-6">
           <Breadcrumb
             items={[
               { name: 'Blog', url: 'https://devstash.me/blog' },
@@ -80,7 +80,7 @@ export default async function CategoryPage({ params }: Props) {
       </section>
 
       <section className="py-16">
-        <div className="mx-auto max-w-6xl px-6">
+        <div className="max-w-site mx-auto px-6">
           <BlogList posts={posts} emptyMessage={`No posts in ${validCategory.label} yet.`} />
         </div>
       </section>

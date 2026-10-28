@@ -97,7 +97,7 @@ export default async function BlogPage({ searchParams }: Props) {
           row describes the whole blog, so it stays the same on filtered and
           paginated views. ── */}
       <section className="border-ds-border border-b py-16">
-        <div className="mx-auto max-w-6xl px-6">
+        <div className="max-w-site mx-auto px-6">
           <Breadcrumb items={[{ name: 'Blog', url: 'https://devstash.me/blog' }]} />
 
           <div className="mt-6">
@@ -133,7 +133,7 @@ export default async function BlogPage({ searchParams }: Props) {
 
       {/* ── Content ── */}
       <section className="py-16">
-        <div className="mx-auto max-w-6xl px-6">
+        <div className="max-w-site mx-auto px-6">
           {/* Layout: filter bar + post grid. BlogFilter is compact on mobile
               (horizontal-scroll category strip, tags collapsed) so it can sit
               at the top — like every major filter UI — without pushing cards

@@ -76,7 +76,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       {/* ── Page header ── */}
       {/* Breadcrumb handles its own buildBreadcrumbSchema JsonLd internally */}
       <section className="border-ds-border border-b py-16">
-        <div className="mx-auto max-w-5xl px-6">
+        <div className="max-w-site mx-auto px-6">
           <Breadcrumb
             items={[
               { name: 'Home', url: 'https://devstash.me' },
