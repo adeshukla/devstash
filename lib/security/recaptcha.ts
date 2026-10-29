@@ -9,6 +9,8 @@ const SCORE_THRESHOLD = 0.5
 interface RecaptchaResult {
   ok: boolean
   reason?: string
+  /** 0.0 (bot) – 1.0 (human); absent when verification is off. */
+  score?: number
 }
 
 interface SiteverifyResponse {
@@ -51,5 +53,5 @@ export async function verifyRecaptcha(
     return { ok: false, reason: 'reCAPTCHA score too low.' }
   }
 
-  return { ok: true }
+  return { ok: true, score: data.score }
 }

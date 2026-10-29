@@ -56,7 +56,10 @@ export default function PrivacyPage() {
                 <ul>
                   <li>
                     <strong className="text-ds-text">Contact form submissions</strong> — name, email
-                    address, and message content when you use our contact form.
+                    address, the topic you pick, your phone number if you choose to give one, and
+                    message content when you use our contact form. The form also sends the first
+                    page you opened in that visit and where you came from (referring site or
+                    campaign tags), so the site owner can see what brought you here.
                   </li>
                   <li>
                     <strong className="text-ds-text">Analytics data</strong> — page views, referral

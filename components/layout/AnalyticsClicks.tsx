@@ -9,6 +9,9 @@ import {
   type AnalyticsParams,
 } from '@/lib/analytics/events'
 
+/** sessionStorage key read by components/contact/ContactForm.tsx. */
+export const FIRST_TOUCH_KEY = 'ds_first_touch'
+
 // Type guard: verify a raw attribute string is a known analytics event before
 // handing it to the strictly-typed trackEvent (no `as any`/`@ts-ignore`).
 function isAnalyticsEvent(value: string): value is AnalyticsEvent {
@@ -25,6 +28,24 @@ function isAnalyticsEvent(value: string): value is AnalyticsEvent {
  */
 export function AnalyticsClicks() {
   useEffect(() => {
+    // First page of the visit + where it came from, kept for this tab only, so
+    // the contact form can tell the owner what brought the sender here.
+    try {
+      if (!sessionStorage.getItem(FIRST_TOUCH_KEY)) {
+        const q = new URLSearchParams(location.search)
+        const utm = ['utm_source', 'utm_medium', 'utm_campaign']
+          .map((k) => q.get(k))
+          .filter(Boolean)
+          .join(' / ')
+        sessionStorage.setItem(
+          FIRST_TOUCH_KEY,
+          JSON.stringify({ page: location.pathname, referrer: document.referrer, utm })
+        )
+      }
+    } catch {
+      // Storage blocked (private mode) — the form just omits the source.
+    }
+
     function fire(name: AnalyticsEvent, params: AnalyticsParams) {
       // Client analytics (GA4 + GTM) and a server-side visit log.
       trackEvent(name, params)

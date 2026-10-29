@@ -3,7 +3,7 @@
 
 import { cn } from '@/lib/utils/cn'
 import { useId } from 'react'
-import type { InputHTMLAttributes, TextareaHTMLAttributes } from 'react'
+import type { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react'
 
 // ── Shared ────────────────────────────────────────────────────
 interface FieldWrapperProps {
@@ -107,6 +107,52 @@ export function Input({
         className={cn(baseInput, 'h-11', error && errorInput, className)}
         {...props}
       />
+    </FieldWrapper>
+  )
+}
+
+// ── Select ────────────────────────────────────────────────────
+interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'id'> {
+  label?: string
+  hint?: string
+  error?: string
+  wrapClass?: string
+}
+
+export function Select({
+  label,
+  hint,
+  error,
+  wrapClass,
+  className,
+  required,
+  children,
+  ...props
+}: SelectProps) {
+  const id = useId()
+
+  return (
+    <FieldWrapper
+      id={id}
+      label={label}
+      hint={hint}
+      error={error}
+      required={required}
+      className={wrapClass}
+    >
+      <select
+        id={id}
+        required={required}
+        aria-describedby={
+          [error ? `${id}-error` : '', hint ? `${id}-hint` : ''].filter(Boolean).join(' ') ||
+          undefined
+        }
+        aria-invalid={!!error}
+        className={cn(baseInput, 'h-11', error && errorInput, className)}
+        {...props}
+      >
+        {children}
+      </select>
     </FieldWrapper>
   )
 }

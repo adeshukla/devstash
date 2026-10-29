@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, Input, Textarea } from '@/components/ui'
+import { Button, Input, Select, Textarea } from '@/components/ui'
+import { FIRST_TOUCH_KEY } from '@/components/layout/AnalyticsClicks'
 import { trackAndLog, ANALYTICS_EVENTS } from '@/lib/analytics/events'
 
 // reCAPTCHA v3 (invisible). The ~350 KB script is loaded on first interaction with
@@ -48,17 +49,41 @@ interface FormState {
 interface FieldErrors {
   name?: string
   email?: string
+  phone?: string
+  topic?: string
   subject?: string
   message?: string
+}
+
+// Keys must match TOPICS in app/api/contact/route.ts.
+const TOPIC_OPTIONS = [
+  { value: 'general', label: 'General question' },
+  { value: 'hiring', label: 'Hiring / job opportunity' },
+  { value: 'freelance', label: 'Freelance project' },
+  { value: 'collaboration', label: 'Collaboration' },
+  { value: 'feedback', label: 'Feedback' },
+] as const
+
+function readFirstTouch(): unknown {
+  try {
+    return JSON.parse(sessionStorage.getItem(FIRST_TOUCH_KEY) ?? 'null') ?? undefined
+  } catch {
+    return undefined
+  }
 }
 
 function validateForm(data: {
   name: string
   email: string
+  phone: string
   subject: string
   message: string
 }): FieldErrors {
   const errors: FieldErrors = {}
+
+  if (data.phone.trim() && !/^\+?[\d\s\-()]{7,20}$/.test(data.phone.trim())) {
+    errors.phone = 'Enter a valid phone number, or leave it empty.'
+  }
 
   if (!data.name.trim() || data.name.trim().length < 2) {
     errors.name = 'Name must be at least 2 characters.'
@@ -89,6 +114,8 @@ export function ContactForm() {
   const [values, setValues] = useState({
     name: '',
     email: '',
+    phone: '',
+    topic: 'general',
     subject: '',
     message: '',
   })
@@ -106,6 +133,10 @@ export function ContactForm() {
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     updateField(e.target.name as keyof typeof values, e.target.value)
+  }
+
+  function handleSelectChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    updateField('topic', e.target.value)
   }
 
   function handleTextareaChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -129,7 +160,13 @@ export function ContactForm() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...values, recaptchaToken }),
+        body: JSON.stringify({
+          ...values,
+          phone: values.phone.trim() || undefined,
+          source: readFirstTouch(),
+          tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          recaptchaToken,
+        }),
       })
 
       const data = (await res.json()) as { message?: string; error?: string }
@@ -142,7 +179,7 @@ export function ContactForm() {
         status: 'success',
         message: data.message ?? "Message sent! I'll get back to you soon.",
       })
-      setValues({ name: '', email: '', subject: '', message: '' })
+      setValues({ name: '', email: '', phone: '', topic: 'general', subject: '', message: '' })
       // Conversion event — fire only on confirmed success. No PII (no email/
       // message content); only a non-identifying source label. Also writes a
       // server-side visit log via /api/track.
@@ -254,6 +291,35 @@ export function ContactForm() {
           disabled={isLoading}
           required
           placeholder="you@example.com"
+        />
+      </div>
+
+      {/* Topic + optional phone */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <Select
+          label="What is this about?"
+          name="topic"
+          value={values.topic}
+          onChange={handleSelectChange}
+          disabled={isLoading}
+        >
+          {TOPIC_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </Select>
+        <Input
+          label="Phone (optional)"
+          name="phone"
+          type="tel"
+          autoComplete="tel"
+          value={values.phone}
+          onChange={handleInputChange}
+          error={fieldErrors.phone}
+          disabled={isLoading}
+          placeholder="+91 …"
+          hint="Only if you'd rather talk than email."
         />
       </div>
 
