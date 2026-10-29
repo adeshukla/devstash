@@ -11,7 +11,7 @@ const EVENTS = ['pointerdown', 'keydown', 'scroll', 'touchstart'] as const
  */
 export function AfterInteraction({
   children,
-  fallbackMs = 5000,
+  fallbackMs = 2000,
 }: {
   children: ReactNode
   fallbackMs?: number

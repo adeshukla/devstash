@@ -304,11 +304,11 @@ export function ProjectsExplorer({
                   className={cn(
                     'rounded-full border px-3.5 py-1.5 text-sm transition-colors',
                     category === key
-                      ? 'border-ds-accent text-ds-accent bg-ds-accent/10'
+                      ? 'border-ds-accent text-ds-accent-strong bg-ds-accent/10'
                       : 'border-ds-border text-ds-muted hover:border-ds-border2 hover:text-ds-text'
                   )}
                 >
-                  {label} <span className="font-mono text-xs opacity-60">{n}</span>
+                  {label} <span className="font-mono text-xs opacity-80">{n}</span>
                 </button>
               )
             )}

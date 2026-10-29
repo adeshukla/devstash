@@ -12,7 +12,7 @@
 // PageSpeed as the largest "reduce unused JavaScript" entry. Analytics has no
 // reason to compete with LCP — nothing on this site renders based on it.
 //
-// All of it mounts via <AfterInteraction> (first input or 5 s), so none of it
+// All of it mounts via <AfterInteraction> (first input or 2 s), so none of it
 // counts toward Total Blocking Time in the load window.
 //
 // IMPORTANT — pick ONE owner per tool, never both:

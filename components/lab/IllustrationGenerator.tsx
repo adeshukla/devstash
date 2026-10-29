@@ -156,7 +156,7 @@ export function IllustrationGenerator() {
           aria-pressed={tab === 'generate'}
           className={
             tab === 'generate'
-              ? 'bg-ds-accent rounded-lg px-4 py-2 text-sm font-medium text-white'
+              ? 'bg-ds-cta rounded-lg px-4 py-2 text-sm font-medium text-white'
               : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-4 py-2 text-sm transition-colors'
           }
         >
@@ -168,7 +168,7 @@ export function IllustrationGenerator() {
           aria-pressed={tab === 'match'}
           className={
             tab === 'match'
-              ? 'bg-ds-accent rounded-lg px-4 py-2 text-sm font-medium text-white'
+              ? 'bg-ds-cta rounded-lg px-4 py-2 text-sm font-medium text-white'
               : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-4 py-2 text-sm transition-colors'
           }
         >
@@ -314,7 +314,7 @@ function GenerateTab() {
             aria-pressed={style === 'abstract'}
             className={
               style === 'abstract'
-                ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                 : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
             }
           >
@@ -451,7 +451,7 @@ function GenerateTab() {
                   aria-pressed={activeCharScene === s}
                   className={
                     activeCharScene === s
-                      ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                      ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                       : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                   }
                 >
@@ -475,7 +475,7 @@ function GenerateTab() {
                     aria-pressed={personStyle === s}
                     className={
                       personStyle === s
-                        ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                        ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                         : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                     }
                   >
@@ -523,7 +523,7 @@ function GenerateTab() {
                     aria-pressed={palette === p}
                     className={
                       palette === p
-                        ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                        ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                         : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                     }
                   >
@@ -546,7 +546,7 @@ function GenerateTab() {
                     aria-pressed={density === d}
                     className={
                       density === d
-                        ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                        ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                         : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                     }
                   >
@@ -567,7 +567,7 @@ function GenerateTab() {
                     aria-pressed={motionOn === v}
                     className={
                       motionOn === v
-                        ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                        ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                         : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                     }
                   >
@@ -601,7 +601,7 @@ function GenerateTab() {
                   aria-pressed={motifOverride.includes(m)}
                   className={
                     motifOverride.includes(m)
-                      ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                      ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                       : composition.matchedMotifs.includes(m) && usingAuto
                         ? 'border-ds-accent text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                         : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
@@ -627,7 +627,7 @@ function GenerateTab() {
                     aria-pressed={density === d}
                     className={
                       density === d
-                        ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                        ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                         : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                     }
                   >
@@ -650,7 +650,7 @@ function GenerateTab() {
                     aria-pressed={palette === p}
                     className={
                       palette === p
-                        ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                        ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                         : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                     }
                   >
@@ -673,7 +673,7 @@ function GenerateTab() {
                     aria-pressed={layout === l}
                     className={
                       layout === l
-                        ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                        ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                         : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                     }
                   >
@@ -696,7 +696,7 @@ function GenerateTab() {
                     aria-pressed={backdrop === b}
                     className={
                       backdrop === b
-                        ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                        ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                         : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                     }
                   >
@@ -717,7 +717,7 @@ function GenerateTab() {
                     aria-pressed={finish === f}
                     className={
                       finish === f
-                        ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                        ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                         : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                     }
                   >
@@ -741,7 +741,7 @@ function GenerateTab() {
                       aria-pressed={animation === a}
                       className={
                         animation === a
-                          ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white capitalize'
+                          ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white capitalize'
                           : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm capitalize transition-colors'
                       }
                     >
@@ -765,7 +765,7 @@ function GenerateTab() {
                   title={preset.hint}
                   className={
                     size.key === preset.key
-                      ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                      ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                       : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                   }
                 >
@@ -919,7 +919,7 @@ function MatchTab() {
               aria-pressed={activeScene === scene}
               className={
                 activeScene === scene
-                  ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                  ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                   : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
               }
             >

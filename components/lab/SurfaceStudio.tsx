@@ -24,7 +24,7 @@ const TABS: { key: Tab; label: string; hint: string }[] = [
 
 const tabBtn = (active: boolean) =>
   active
-    ? 'bg-ds-accent rounded-lg px-4 py-2 text-sm font-medium text-white'
+    ? 'bg-ds-cta rounded-lg px-4 py-2 text-sm font-medium text-white'
     : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-4 py-2 text-sm transition-colors'
 
 function hexToRgb(hex: string): [number, number, number] {

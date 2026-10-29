@@ -256,7 +256,7 @@ export function ShapeCustomizer() {
                 aria-pressed={mode === m.key}
                 className={
                   mode === m.key
-                    ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                    ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                     : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                 }
               >
@@ -281,7 +281,7 @@ export function ShapeCustomizer() {
                     aria-pressed={shape === key}
                     className={
                       shape === key
-                        ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                        ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                         : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                     }
                   >
@@ -379,7 +379,7 @@ export function ShapeCustomizer() {
                   aria-pressed={animation === a}
                   className={
                     animation === a
-                      ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white capitalize'
+                      ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white capitalize'
                       : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm capitalize transition-colors'
                   }
                 >
@@ -416,7 +416,7 @@ export function ShapeCustomizer() {
                   aria-pressed={easing === e}
                   className={
                     easing === e
-                      ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                      ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                       : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                   }
                 >

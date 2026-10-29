@@ -80,7 +80,7 @@ export default function UsesPage() {
               href="https://uses.tech"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-ds-accent underline-offset-4 hover:underline"
+              className="text-ds-accent underline underline-offset-4"
             >
               uses.tech
             </a>

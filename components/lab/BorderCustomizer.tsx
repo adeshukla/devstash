@@ -18,12 +18,7 @@ const COLORS = [
 ]
 
 type Technique =
-  | 'gradientSweep'
-  | 'conicSpin'
-  | 'marchingAnts'
-  | 'dashedRotate'
-  | 'doubleRing'
-  | 'glowPulse'
+  'gradientSweep' | 'conicSpin' | 'marchingAnts' | 'dashedRotate' | 'doubleRing' | 'glowPulse'
 
 const TECHNIQUES: { key: Technique; label: string }[] = [
   { key: 'gradientSweep', label: 'Gradient sweep' },
@@ -207,7 +202,7 @@ export function BorderCustomizer() {
                 aria-pressed={technique === t.key}
                 className={
                   technique === t.key
-                    ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                    ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                     : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                 }
               >
@@ -277,7 +272,7 @@ export function BorderCustomizer() {
                 aria-pressed={easing === e}
                 className={
                   easing === e
-                    ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                    ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                     : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                 }
               >

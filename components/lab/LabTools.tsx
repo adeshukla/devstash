@@ -37,7 +37,7 @@ export function LabTools({ tools }: { tools: LabTool[] }) {
             className={cn(
               'rounded-full border px-3.5 py-1.5 text-sm transition-colors',
               tag === t
-                ? 'border-ds-accent text-ds-accent bg-ds-accent/10'
+                ? 'border-ds-accent text-ds-accent-strong bg-ds-accent/10'
                 : 'border-ds-border text-ds-muted hover:border-ds-border2 hover:text-ds-text'
             )}
           >

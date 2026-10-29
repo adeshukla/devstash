@@ -115,7 +115,7 @@ export function ShadowCustomizer() {
                 aria-pressed={technique === t.key}
                 className={
                   technique === t.key
-                    ? 'bg-ds-accent rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                    ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                     : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                 }
               >

@@ -135,7 +135,7 @@ export default function PrivacyPage() {
                   these rights, contact us at{' '}
                   <a
                     href="mailto:hello@devstash.me"
-                    className="text-ds-accent underline-offset-4 hover:underline"
+                    className="text-ds-accent underline underline-offset-4"
                   >
                     hello@devstash.me
                   </a>
@@ -156,7 +156,7 @@ export default function PrivacyPage() {
                   Questions about this policy? Email{' '}
                   <a
                     href="mailto:hello@devstash.me"
-                    className="text-ds-accent underline-offset-4 hover:underline"
+                    className="text-ds-accent underline underline-offset-4"
                   >
                     hello@devstash.me
                   </a>
