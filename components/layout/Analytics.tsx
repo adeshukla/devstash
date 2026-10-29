@@ -12,8 +12,9 @@
 // PageSpeed as the largest "reduce unused JavaScript" entry. Analytics has no
 // reason to compete with LCP — nothing on this site renders based on it.
 //
-// All of it mounts via <AfterInteraction> (first input or 2 s), so none of it
-// counts toward Total Blocking Time in the load window.
+// GTM/GA4 mount via <AfterInteraction> (first input or 2 s); Clarity via
+// <ClarityLoader> (first input or 6 s) so the heaviest script stays out of the
+// load window's Total Blocking Time.
 //
 // IMPORTANT — pick ONE owner per tool, never both:
 //   (a) GTM owns everything: set only NEXT_PUBLIC_GTM_ID and configure the GA4
@@ -59,15 +60,22 @@ export function Analytics() {
           `}</Script>
         </>
       ) : null}
+    </AfterInteraction>
+  )
+}
 
-      {CLARITY_ID ? (
-        <Script id="clarity-init" strategy="lazyOnload">{`
-          (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-          y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})
-          (window,document,"clarity","script","${CLARITY_ID}");
-        `}</Script>
-      ) : null}
+// Clarity is session replay/heatmaps, not a count, so it can wait longer than
+// GA4: first input or 6 s. It is the heaviest third-party script on the page.
+export function ClarityLoader() {
+  if (!CLARITY_ID) return null
+  return (
+    <AfterInteraction fallbackMs={6000}>
+      <Script id="clarity-init" strategy="lazyOnload">{`
+        (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})
+        (window,document,"clarity","script","${CLARITY_ID}");
+      `}</Script>
     </AfterInteraction>
   )
 }

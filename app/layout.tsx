@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { DM_Sans, JetBrains_Mono } from 'next/font/google'
 import { siteConfig } from '@/content/metadata/site.config'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
-import { Analytics, GtmNoScript } from '@/components/layout/Analytics'
+import { Analytics, ClarityLoader, GtmNoScript } from '@/components/layout/Analytics'
 import { AnalyticsClicks } from '@/components/layout/AnalyticsClicks'
 import './globals.css'
 
@@ -129,6 +129,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <GtmNoScript />
         {children}
         <Analytics />
+        <ClarityLoader />
         <AnalyticsClicks />
       </body>
     </html>
