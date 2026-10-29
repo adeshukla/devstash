@@ -169,6 +169,8 @@ export function ContactForm() {
   // ── Submit ──────────────────────────────────────────────────────
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    // Read before any await: React clears e.currentTarget afterwards.
+    const honeypot = new FormData(e.currentTarget).get('website')
 
     const errors = validateForm(values)
     if (Object.keys(errors).length > 0) {
@@ -186,7 +188,7 @@ export function ContactForm() {
         body: JSON.stringify({
           ...values,
           phone: cleanPhone(values.phone) || undefined,
-          website: new FormData(e.currentTarget).get('website') || undefined,
+          website: honeypot || undefined,
           source: readFirstTouch(),
           tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
           recaptchaToken,
