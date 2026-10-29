@@ -106,7 +106,7 @@ judgement.
 
 | Layer           | Choice                                                   | Notes                                                                                                                                    |
 | --------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Framework       | Next.js 16.2.6 App Router                                | Turbopack DISABLED (Windows crashes)                                                                                                     |
+| Framework       | Next.js 16.4.3 App Router                                | Turbopack DISABLED (Windows crashes)                                                                                                     |
 | UI Library      | React 19.2.4 (exact pin)                                 | react-dom 19.2.4 — pinned, not caret-ranged                                                                                              |
 | Language        | TypeScript strict mode                                   | noUnusedLocals, noUnusedParameters                                                                                                       |
 | Styling         | Tailwind CSS v4                                          | Tokens in globals.css @theme (NOT tailwind.config.ts)                                                                                    |
@@ -620,7 +620,7 @@ iron-session ^8.0.4
 @vercel/speed-insights ^2.0.0   # Real user monitoring on Vercel dashboard. Already wired — do not add a duplicate.
 
 # Core framework (exact pins — do not assume looser ranges)
-next 16.2.6                     # EXACT pin, not ^16
+next 16.4.3                     # EXACT pin (security: 16.2.x has critical RCE advisories)
 react 19.2.4                    # EXACT pin, not ^19
 react-dom 19.2.4                # EXACT pin, not ^19
 

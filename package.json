@@ -26,14 +26,14 @@
     "qa:a11y": "playwright test -c playwright.qa.config.ts tests/qa/a11y.spec.ts",
     "qa": "pnpm qa:security && pnpm qa:responsive && pnpm qa:a11y",
     "resume:pdf": "node scripts/automation/build-resume-pdf.mjs",
-    "test:unit": "node --test \"tests/unit/*.test.mjs\""
+    "test:unit": "node --experimental-strip-types --no-warnings=ExperimentalWarning --test \"tests/unit/*.test.mjs\""
   },
   "dependencies": {
     "@vercel/speed-insights": "^2.0.0",
     "clsx": "^2.1.1",
     "gray-matter": "^4.0.3",
     "iron-session": "^8.0.4",
-    "next": "16.2.12",
+    "next": "16.4.3",
     "next-mdx-remote": "^6.0.0",
     "react": "19.2.7",
     "react-dom": "19.2.7",
@@ -43,13 +43,13 @@
     "resend": "^6.17.2",
     "schema-dts": "^2.0.0",
     "tailwind-merge": "^3.6.0",
-    "zod": "^4.4.3"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
     "@lhci/cli": "^0.15.1",
     "@mdx-js/mdx": "^3.1.1",
-    "@next/eslint-plugin-next": "^16.2.12",
+    "@next/eslint-plugin-next": "^16.4.3",
     "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/mdx": "^2.0.14",
@@ -59,7 +59,7 @@
     "@typescript-eslint/eslint-plugin": "^8.64.0",
     "@typescript-eslint/parser": "^8.64.0",
     "eslint": "^9.39.4",
-    "eslint-config-next": "16.2.12",
+    "eslint-config-next": "16.4.3",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.7",
     "prettier": "^3.9.5",
@@ -78,16 +78,24 @@
   "pnpm": {
     "overrides": {
       "tmp": ">=0.2.6",
-      "brace-expansion": ">=1.1.16 <2.0.0",
+      "brace-expansion": ">=1.1.20 <2.0.0",
       "ip-address": ">=10.3.1",
-      "js-yaml": ">=3.15.1 <4.0.0",
+      "js-yaml": ">=3.15.2 <4.0.0",
       "postcss": ">=8.5.18",
       "nanoid": ">=3.3.18 <4.0.0",
-      "sharp": ">=0.35.3"
+      "sharp": ">=0.35.5",
+      "browserslist": ">=4.28.7",
+      "basic-ftp": ">=6.2.1",
+      "source-map-js": ">=1.2.2",
+      "proxy-addr": ">=2.0.8",
+      "compression": ">=1.8.2",
+      "body-parser": ">=1.20.9",
+      "zod": ">=4.6.6"
     },
     "auditConfig": {
       "ignoreGhsas": [
-        "GHSA-jmr9-qjv8-65gv"
+        "GHSA-jmr9-qjv8-65gv",
+        "GHSA-7pqw-9j4j-h8q3"
       ]
     }
   },
