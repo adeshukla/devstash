@@ -27,9 +27,10 @@ test('home page loads with a heading', async ({ page }) => {
 
 test('lab hub loads and lists live demos', async ({ page }) => {
   await visit(page, '/lab')
-  await expect(page.getByRole('heading', { name: 'Lab', exact: true })).toBeVisible()
-  // At least one demo card links out to a live demo.
-  await expect(page.getByText('Try it live', { exact: false }).first()).toBeVisible()
+  await expect(page.locator('h1')).toBeVisible()
+  // The hub lists the flagship and the tools; each links to its own demo page.
+  await expect(page.locator('a[href="/lab/ai-content-pipeline"]').first()).toBeVisible()
+  await expect(page.locator('a[href="/lab/utm-builder"]').first()).toBeVisible()
 })
 
 test('a lab demo renders', async ({ page }) => {
