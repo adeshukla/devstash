@@ -68,12 +68,14 @@ jobs:
     name: Security Checks
     runs-on: ubuntu-latest
     steps:
-      # Shallow checkout (default depth) on purpose: gitleaks scans the git
-      # history it can see. Known-old, already-rotated secrets from before
-      # this job existed live deeper in history (see CLAUDE.md Known Issues);
-      # re-flagging those forever without a history rewrite isn't useful, so
-      # this job is scoped to catching *new* leaks in the current commit.
+      # Full history so gitleaks can resolve the pushed commit range. A shallow
+      # checkout made gitleaks exit 1 ("unexpected exit code", not a leak) on any
+      # push of several commits, e.g. a release merge into main. gitleaks-action
+      # scans only the commits in the push (before..after), so old, already-rotated
+      # secrets deeper in history (see CLAUDE.md Known Issues) are not re-scanned.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v3
         with:
