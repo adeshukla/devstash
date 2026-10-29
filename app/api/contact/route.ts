@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { Resend } from 'resend'
 import { verifyRecaptcha } from '@/lib/security/recaptcha'
+import { clientKey, isSameOrigin, rateLimited } from '@/lib/security/requestGuard'
 import { renderNotificationEmail, escapeHtml } from '@/lib/email/renderNotificationEmail'
 import {
   summarizeUserAgent,
@@ -59,6 +60,8 @@ const ContactSchema = z.object({
     })
     .optional(),
   tz: z.string().max(64).optional(),
+  // Honeypot: hidden from people, so only bots fill it.
+  website: z.string().max(200).optional(),
 })
 
 // ─── Resend client (lazy init — only on server) ───────────────────────────────
@@ -76,10 +79,28 @@ const TO_EMAIL = 'hello@devstash.me'
 // ─── POST handler ─────────────────────────────────────────────────────────────
 
 export async function POST(request: Request) {
+  // Cheapest checks first: nothing below runs for a cross-site, flooding or
+  // oversized request.
+  if (!isSameOrigin(request)) {
+    return NextResponse.json({ error: 'Forbidden.' }, { status: 403 })
+  }
+  // 5 messages per 10 minutes per IP is far above a real visitor.
+  if (rateLimited(`contact:${clientKey(request)}`, 5, 10 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: 'Too many messages. Please try again in a few minutes.' },
+      { status: 429 }
+    )
+  }
+
   let body: unknown
 
   try {
-    body = await request.json()
+    // Max payload is ~6 KB of text; 20 KB leaves room for the JSON wrapper.
+    const raw = await request.text()
+    if (raw.length > 20_000) {
+      return NextResponse.json({ error: 'Request too large.' }, { status: 413 })
+    }
+    body = JSON.parse(raw)
   } catch {
     return NextResponse.json({ error: 'Invalid JSON in request body.' }, { status: 400 })
   }
@@ -97,7 +118,7 @@ export async function POST(request: Request) {
   }
 
   const {
-    name,
+    name: rawName,
     email,
     subject: rawSubject,
     message,
@@ -106,9 +127,20 @@ export async function POST(request: Request) {
     phone,
     source,
     tz,
+    website,
   } = parsed.data
-  // Strip line breaks so nothing can smuggle extra lines into the subject.
-  const subject = rawSubject.replace(/[\r\n]+/g, ' ').trim()
+
+  // A bot filled the hidden field. Answer exactly like a success so it learns
+  // nothing, and send nothing.
+  if (website) {
+    return NextResponse.json({ message: "Message received! I'll reply within 24 hours." })
+  }
+
+  // Strip control characters (line breaks included) so nothing can smuggle
+  // extra lines into the subject or the plain-text email.
+  const stripControl = (v: string) => v.replace(/[\u0000-\u001f\u007f]+/g, ' ').trim()
+  const subject = stripControl(rawSubject)
+  const name = stripControl(rawName)
 
   const recaptcha = await verifyRecaptcha(recaptchaToken, RECAPTCHA_ACTION)
   if (!recaptcha.ok) {

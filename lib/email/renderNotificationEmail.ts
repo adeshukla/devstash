@@ -2,11 +2,10 @@
 //
 // One shared, branded template for every owner-facing notification email
 // (contact form, résumé downloads, CTA clicks) so they all look like the same
-// system instead of ad-hoc HTML per route. Light background on purpose, not
-// DevStash's dark site theme — email client dark-mode support is
-// inconsistent enough (Gmail/Outlook/Apple Mail all differ) that a dark card
-// risks unreadable text in some clients; a light card with the brand's blue
-// accent reads correctly everywhere and still looks unmistakably DevStash.
+// system instead of ad-hoc HTML per route. Light by default; clients that
+// honour prefers-color-scheme (Apple Mail, iOS/Android Gmail, Outlook.com) get
+// a dark variant from the <style> block. Clients that ignore it keep the light
+// card, which reads correctly everywhere.
 //
 // "Interaction" in email means links: mailto:/tel:/https buttons are the only
 // thing every client renders, so actions are plain anchors styled as buttons.
@@ -63,10 +62,11 @@ export function escapeHtml(input: string): string {
 }
 
 function renderButton({ label, href, primary }: NotificationAction): string {
+  const cls = primary ? '' : ' class="em-btn2"'
   const style = primary
     ? 'background:#2563eb;color:#ffffff;border:1px solid #2563eb'
     : 'background:#ffffff;color:#2563eb;border:1px solid #cbd5e1'
-  return `<a href="${escapeHtml(href)}" style="display:inline-block;margin:0 8px 8px 0;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;${style}">${escapeHtml(label)}</a>`
+  return `<a${cls} href="${escapeHtml(href)}" style="display:inline-block;margin:0 8px 8px 0;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;${style}">${escapeHtml(label)}</a>`
 }
 
 export function renderNotificationEmail({
@@ -85,7 +85,7 @@ export function renderNotificationEmail({
     .map(({ label, value, href, mono, section }) => {
       const safeValue = escapeHtml(value)
       const valueHtml = href
-        ? `<a href="${escapeHtml(href)}" style="color:#2563eb;text-decoration:none">${safeValue}</a>`
+        ? `<a class="em-link" href="${escapeHtml(href)}" style="color:#2563eb;text-decoration:none">${safeValue}</a>`
         : safeValue
       const valueStyle = mono
         ? "font-family:'SF Mono',Consolas,monospace;font-size:12.5px;word-break:break-all;"
@@ -93,13 +93,13 @@ export function renderNotificationEmail({
       const sectionRow = section
         ? `
         <tr>
-          <td colspan="2" style="padding:18px 0 6px;color:#0f172a;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase">${escapeHtml(section)}</td>
+          <td colspan="2" class="em-text" style="padding:18px 0 6px;color:#0f172a;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase">${escapeHtml(section)}</td>
         </tr>`
         : ''
       return `${sectionRow}
         <tr>
-          <td style="padding:9px 12px 9px 0;color:#64748b;font-size:13px;width:110px;vertical-align:top;border-top:1px solid #f1f5f9">${escapeHtml(label)}</td>
-          <td style="padding:9px 0;color:#0f172a;${valueStyle};vertical-align:top;border-top:1px solid #f1f5f9">${valueHtml}</td>
+          <td class="em-muted em-line" style="padding:9px 12px 9px 0;color:#64748b;font-size:13px;width:110px;vertical-align:top;border-top:1px solid #f1f5f9">${escapeHtml(label)}</td>
+          <td class="em-text em-line" style="padding:9px 0;color:#0f172a;${valueStyle};vertical-align:top;border-top:1px solid #f1f5f9">${valueHtml}</td>
         </tr>`
     })
     .join('')
@@ -109,29 +109,43 @@ export function renderNotificationEmail({
     : ''
 
   const html = `
-<div style="background:#f1f5f9;padding:32px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+<style>
+  :root{color-scheme:light dark}
+  @media (prefers-color-scheme:dark){
+    .em-bg{background:#0b0f19!important}
+    .em-card{background:#111827!important;border-color:#1f2937!important}
+    .em-text{color:#f3f4f6!important}
+    .em-sub{color:#cbd5e1!important}
+    .em-muted{color:#94a3b8!important}
+    .em-quote{background:#161f2e!important;color:#e2e8f0!important}
+    .em-line{border-color:#1f2937!important}
+    .em-link{color:#60a5fa!important}
+    .em-btn2{background:#111827!important;color:#60a5fa!important;border-color:#2a3649!important}
+  }
+</style>
+<div class="em-bg" style="background:#f1f5f9;padding:32px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
   ${preheader ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">${escapeHtml(preheader)}</div>` : ''}
-  <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0">
+  <div class="em-card" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0">
     <div style="background:linear-gradient(100deg,#3b82f6,#8b5cf6);padding:20px 28px">
       <span style="color:#ffffff;font-weight:700;font-size:15px;letter-spacing:-0.02em">
         <span style="opacity:0.85">&gt;_</span>&nbsp; DevStash
       </span>
     </div>
     <div style="padding:28px">
-      <h1 style="margin:0 0 4px;font-size:19px;color:#0f172a;font-weight:700">
+      <h1 class="em-text" style="margin:0 0 4px;font-size:19px;color:#0f172a;font-weight:700">
         ${icon}&nbsp; ${escapeHtml(heading)}${badgeHtml}
       </h1>
-      ${lead ? `<p style="margin:6px 0 0;color:#475569;font-size:14px">${escapeHtml(lead)}</p>` : ''}
+      ${lead ? `<p class="em-sub" style="margin:6px 0 0;color:#475569;font-size:14px">${escapeHtml(lead)}</p>` : ''}
       ${
         bodyHtml
-          ? `<div style="margin:16px 0 4px;padding:14px 16px;background:#f8fafc;border-left:3px solid #3b82f6;border-radius:6px;color:#334155;font-size:14px;line-height:1.6;white-space:pre-wrap">${bodyHtml}</div>`
+          ? `<div class="em-quote" style="margin:16px 0 4px;padding:14px 16px;background:#f8fafc;border-left:3px solid #3b82f6;border-radius:6px;color:#334155;font-size:14px;line-height:1.6;white-space:pre-wrap">${bodyHtml}</div>`
           : ''
       }
       ${actions?.length ? `<div style="margin-top:16px">${actions.map(renderButton).join('')}</div>` : ''}
       <table style="width:100%;border-collapse:collapse;margin-top:${bodyHtml || actions?.length ? '8' : '16'}px">
         ${rows}
       </table>
-      <p style="margin:20px 0 0;color:#94a3b8;font-size:12px">${escapeHtml(footerNote)}</p>
+      <p class="em-muted" style="margin:20px 0 0;color:#94a3b8;font-size:12px">${escapeHtml(footerNote)}</p>
     </div>
   </div>
 </div>`.trim()

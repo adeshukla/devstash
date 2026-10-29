@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Button, Input, Select, Textarea } from '@/components/ui'
+import { DIAL_CODES } from '@/lib/utils/dialCodes'
 import { FIRST_TOUCH_KEY } from '@/components/layout/AnalyticsClicks'
 import { trackAndLog, ANALYTICS_EVENTS } from '@/lib/analytics/events'
 
@@ -72,6 +73,13 @@ function readFirstTouch(): unknown {
   }
 }
 
+// The prefilled dial code on its own ("+91") means the visitor left the optional
+// phone field empty.
+function cleanPhone(v: string): string {
+  const t = v.trim()
+  return /^\+\d{1,3}$/.test(t) ? '' : t
+}
+
 function validateForm(data: {
   name: string
   email: string
@@ -81,7 +89,7 @@ function validateForm(data: {
 }): FieldErrors {
   const errors: FieldErrors = {}
 
-  if (data.phone.trim() && !/^\+?[\d\s\-()]{7,20}$/.test(data.phone.trim())) {
+  if (cleanPhone(data.phone) && !/^\+?[\d\s\-()]{7,20}$/.test(cleanPhone(data.phone))) {
     errors.phone = 'Enter a valid phone number, or leave it empty.'
   }
 
@@ -119,6 +127,21 @@ export function ContactForm() {
     subject: '',
     message: '',
   })
+
+  // One tiny same-origin request, on first focus, to pre-fill the phone prefix
+  // from the visitor's country. Skipped if they already typed a number.
+  const geoAsked = useRef(false)
+  async function prefillDialCode() {
+    if (geoAsked.current) return
+    geoAsked.current = true
+    try {
+      const { country } = (await (await fetch('/api/geo')).json()) as { country: string | null }
+      const code = country ? DIAL_CODES[country] : undefined
+      if (code) setValues((v) => (v.phone ? v : { ...v, phone: `${code} ` }))
+    } catch {
+      // No prefill — the field still works.
+    }
+  }
 
   const isLoading = formState.status === 'loading'
   const isSuccess = formState.status === 'success'
@@ -162,7 +185,8 @@ export function ContactForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...values,
-          phone: values.phone.trim() || undefined,
+          phone: cleanPhone(values.phone) || undefined,
+          website: new FormData(e.currentTarget).get('website') || undefined,
           source: readFirstTouch(),
           tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
           recaptchaToken,
@@ -248,7 +272,10 @@ export function ContactForm() {
   // ── Form ────────────────────────────────────────────────────────
   return (
     <form
-      onFocus={() => void loadRecaptcha()}
+      onFocus={() => {
+        void loadRecaptcha()
+        void prefillDialCode()
+      }}
       onSubmit={handleSubmit}
       noValidate
       aria-label="Contact form"
@@ -321,6 +348,14 @@ export function ContactForm() {
           placeholder="+91 …"
           hint="Only if you'd rather talk than email."
         />
+      </div>
+
+      {/* Honeypot: off-screen, skipped by keyboard and screen readers. Bots fill it. */}
+      <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+        <label>
+          Website
+          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+        </label>
       </div>
 
       {/* Subject */}
