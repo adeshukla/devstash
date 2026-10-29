@@ -69,7 +69,10 @@ export default function HomePage() {
 
       {/* The work above, narrated in 80 seconds. Click-to-load: only the poster ships with the page. */}
       <Reveal>
-        <section className="border-ds-border border-t py-16" aria-labelledby="home-video-heading">
+        <section
+          className="border-ds-border cv-auto border-t py-16"
+          aria-labelledby="home-video-heading"
+        >
           <div className="mx-auto max-w-4xl px-6">
             <h2
               id="home-video-heading"
@@ -90,7 +93,7 @@ export default function HomePage() {
 
       {/* Lab teaser — surfaces the interactive demos (the strongest differentiator) */}
       <Reveal>
-        <section className="border-ds-border border-t py-20">
+        <section className="border-ds-border cv-auto border-t py-20">
           <div className="max-w-site mx-auto px-6">
             <CardTilt>
               <Link
@@ -126,7 +129,7 @@ export default function HomePage() {
 
       {/* Closing CTA */}
       <Reveal>
-        <section className="border-ds-border bg-ds-surface border-t py-20">
+        <section className="border-ds-border bg-ds-surface cv-auto border-t py-20">
           <div className="mx-auto max-w-3xl px-6 text-center">
             <h2 className="text-ds-text text-3xl font-bold tracking-tight sm:text-4xl">
               Let&apos;s build something

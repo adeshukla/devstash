@@ -70,7 +70,10 @@ export function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="bg-ds-surface relative w-full overflow-hidden" aria-label="Site footer">
+    <footer
+      className="bg-ds-surface cv-auto relative w-full overflow-hidden"
+      aria-label="Site footer"
+    >
       {/* Gradient hairline instead of a flat border-t — same accent→purple
           duo as the navbar's own top-of-page border, so the chrome reads as
           one system top and bottom instead of a plain rule closing it out. */}

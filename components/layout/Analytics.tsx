@@ -12,6 +12,9 @@
 // PageSpeed as the largest "reduce unused JavaScript" entry. Analytics has no
 // reason to compete with LCP — nothing on this site renders based on it.
 //
+// All of it mounts via <AfterInteraction> (first input or 5 s), so none of it
+// counts toward Total Blocking Time in the load window.
+//
 // IMPORTANT — pick ONE owner per tool, never both:
 //   (a) GTM owns everything: set only NEXT_PUBLIC_GTM_ID and configure the GA4
 //       + Clarity tags inside the container. This is what production does as of
@@ -24,6 +27,7 @@
 // also pushes to dataLayer, but forwarding those custom events to GA4 requires
 // a matching trigger in the GTM container.
 import Script from 'next/script'
+import { AfterInteraction } from './AfterInteraction'
 
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID
@@ -31,7 +35,7 @@ const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID
 
 export function Analytics() {
   return (
-    <>
+    <AfterInteraction>
       {GTM_ID ? (
         <Script id="gtm-init" strategy="lazyOnload">{`
           (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
@@ -64,7 +68,7 @@ export function Analytics() {
           (window,document,"clarity","script","${CLARITY_ID}");
         `}</Script>
       ) : null}
-    </>
+    </AfterInteraction>
   )
 }
 

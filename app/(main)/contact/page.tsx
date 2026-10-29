@@ -1,7 +1,6 @@
 import { FaqSection } from '@/components/sections/FaqSection'
 import { H1_DISPLAY } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
-import Script from 'next/script'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { siteConfig } from '@/content/metadata/site.config'
@@ -10,13 +9,6 @@ import { ContactForm } from '@/components/contact/ContactForm'
 import { Reveal, Separator } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
 import type { IconName } from '@/components/icons/Icon'
-
-// reCAPTCHA v3 site key is public by design (it's meant to be embedded in
-// client JS) — only renders once a real key is set, so the form works
-// exactly as before until then. afterInteractive (not lazyOnload) because
-// the token needs to be ready by the time someone submits, not just
-// eventually — unlike GA/Clarity this isn't fire-and-forget instrumentation.
-const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
 
 const title = 'Contact Adesh Shukla — Frontend Developer'
 const description =
@@ -74,13 +66,6 @@ const FAQ = [
 export default function ContactPage() {
   return (
     <div>
-      {RECAPTCHA_SITE_KEY ? (
-        <Script
-          src={`https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`}
-          strategy="afterInteractive"
-        />
-      ) : null}
-
       {/* ── Header ── */}
       {/* Breadcrumb handles its own buildBreadcrumbSchema JsonLd internally.
           Plain header, no background effects — same as every inner page. */}

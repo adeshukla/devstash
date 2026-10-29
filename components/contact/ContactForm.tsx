@@ -4,16 +4,30 @@ import { useState } from 'react'
 import { Button, Input, Textarea } from '@/components/ui'
 import { trackAndLog, ANALYTICS_EVENTS } from '@/lib/analytics/events'
 
-// reCAPTCHA v3 (invisible) — the <Script> tag that loads the widget lives on
-// the contact page itself (mounts regardless of this form's internal state);
-// this just reads the already-loaded window.grecaptcha at submit time.
-// Resolves to undefined when no site key is configured yet, or the script
-// hasn't loaded — verifyRecaptcha() server-side no-ops in that case too.
+// reCAPTCHA v3 (invisible). The ~350 KB script is loaded on first interaction with
+// the form (or at submit time), not on page load, so it never costs LCP/TBT.
+// Resolves to undefined when no site key is configured or the script fails to
+// load — verifyRecaptcha() server-side no-ops in that case too.
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
 const RECAPTCHA_ACTION = 'contact_form'
 
+let recaptchaLoad: Promise<void> | undefined
+function loadRecaptcha(): Promise<void> {
+  if (!RECAPTCHA_SITE_KEY || typeof window === 'undefined') return Promise.resolve()
+  recaptchaLoad ??= new Promise((resolve) => {
+    const el = document.createElement('script')
+    el.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`
+    el.async = true
+    el.onload = () => resolve()
+    el.onerror = () => resolve()
+    document.head.appendChild(el)
+  })
+  return recaptchaLoad
+}
+
 async function getRecaptchaToken(): Promise<string | undefined> {
-  if (!RECAPTCHA_SITE_KEY || typeof window === 'undefined' || !window.grecaptcha) {
+  await loadRecaptcha()
+  if (!RECAPTCHA_SITE_KEY || !window.grecaptcha) {
     return undefined
   }
   return new Promise((resolve) => {
@@ -197,6 +211,7 @@ export function ContactForm() {
   // ── Form ────────────────────────────────────────────────────────
   return (
     <form
+      onFocus={() => void loadRecaptcha()}
       onSubmit={handleSubmit}
       noValidate
       aria-label="Contact form"

@@ -1509,3 +1509,10 @@ svg .animate-pulse2 {
   transform-box: fill-box;
   transform-origin: center;
 }
+
+/* Skip layout/paint of below-the-fold sections until they near the viewport.
+   `auto` in contain-intrinsic-size remembers the real height once rendered. */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 640px;
+}
