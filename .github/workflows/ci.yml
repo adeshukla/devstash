@@ -27,8 +27,11 @@ jobs:
       - name: TypeScript type check
         run: pnpm tsc --noEmit
 
-      - name: ESLint
+      - name: ESLint (zero warnings allowed)
         run: pnpm lint
+
+      - name: Unit and content tests
+        run: pnpm test:unit
 
   content-checks:
     name: Content Checks
@@ -114,3 +117,43 @@ jobs:
         run: pnpm build
         env:
           NEXT_PUBLIC_SITE_URL: https://devstash.me
+
+  # Release gate only: layout must not overflow from 200px to 1440px on any key
+  # route. Runs on pull requests into main so ordinary dev pushes stay fast.
+  responsive:
+    name: Responsive QA
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm exec playwright install --with-deps chromium
+
+      # Test the production build, not a cold dev server: dev compiles each of
+      # the 17 routes on first hit and times out under parallel workers.
+      - name: Build
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_SITE_URL: https://devstash.me
+
+      - name: Start the built site
+        run: |
+          pnpm start &
+          timeout 90 bash -c 'until curl -sf http://localhost:3000 >/dev/null; do sleep 2; done'
+
+      - name: No horizontal overflow, 200px to 1440px
+        run: pnpm qa:responsive
+        env:
+          QA_BASE_URL: http://localhost:3000

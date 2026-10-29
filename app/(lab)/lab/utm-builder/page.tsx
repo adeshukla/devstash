@@ -7,7 +7,7 @@ import { UtmBuilder } from '@/components/lab/UtmBuilder'
 export const metadata: Metadata = buildMetadata({
   title: 'UTM Builder — Free Campaign URL Generator',
   description:
-    'A real, working UTM link builder for PPC landing pages — built from actually tagging 200+ campaign URLs, not a mockup.',
+    'A free UTM link builder for campaign URLs: keeps existing query parameters, flags a missing utm_ prefix, and runs entirely in your browser. Built from tagging 200+ URLs.',
   canonical: '/lab/utm-builder',
 })
 

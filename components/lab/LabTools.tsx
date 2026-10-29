@@ -11,6 +11,8 @@ export interface LabTool {
   blurb: string
   tag: string
   highlights: string[]
+  /** Short facts from the project file, shown as chips. */
+  stats: string[]
   tech: string[]
   /** Rendered on the server (LabPreview) and passed through. */
   preview: ReactNode
@@ -67,6 +69,18 @@ export function LabTools({ tools }: { tools: LabTool[] }) {
                     </Badge>
                   </div>
                   <p className="text-ds-muted text-sm leading-relaxed">{tool.blurb}</p>
+                  {tool.stats.length > 0 && (
+                    <ul className="flex flex-wrap gap-1.5" aria-label="Facts">
+                      {tool.stats.map((x) => (
+                        <li
+                          key={x}
+                          className="border-ds-border text-ds-muted rounded-full border px-2.5 py-1 font-mono text-[11px]"
+                        >
+                          {x}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
 
                   {isOpen && (
                     <div id={`lab-${tool.slug}-more`} className="flex flex-col gap-4 pt-1">

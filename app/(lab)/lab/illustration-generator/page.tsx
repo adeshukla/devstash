@@ -5,7 +5,7 @@ import { LabToolSchema } from '@/components/lab/LabToolSchema'
 import { IllustrationGenerator } from '@/components/lab/IllustrationGenerator'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'AI Illustration Generator — Free SVG Tool',
+  title: 'Free SVG Illustration Generator, Animated',
   description:
     'A real tool that composes a unique, theme-aware animated SVG illustration from a description — procedural generation, not a fixed list of presets to pick from.',
   canonical: '/lab/illustration-generator',

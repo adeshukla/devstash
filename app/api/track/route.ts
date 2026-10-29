@@ -126,6 +126,7 @@ export async function POST(request: Request) {
   }
 
   // Structured single-line log for easy filtering in Vercel logs.
+  // eslint-disable-next-line no-console -- intentional structured log line for Vercel log filtering
   console.log(`[visit] ${JSON.stringify(entry)}`)
 
   const notify = NOTIFY_EVENTS[event]

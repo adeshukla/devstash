@@ -99,6 +99,20 @@ function validate(data, { errors, warnings, seenSlugs }) {
     // occurrence is the one flagged.
   }
 
+  // Search-result title: Google shows about 60 characters and buildMetadata
+  // appends " | DevStash" (11). A long H1 needs a shorter seoTitle.
+  if (typeof data.title === 'string') {
+    if (data.seoTitle !== undefined) {
+      if (typeof data.seoTitle !== 'string' || data.seoTitle.length > 49) {
+        errors.push(`seoTitle must be a string of at most 49 characters`)
+      }
+    } else if (data.title.length + 11 > 62) {
+      warnings.push(
+        `title is ${data.title.length + 11} chars in search results (aim for 60); add a seoTitle of 49 or fewer`
+      )
+    }
+  }
+
   // Category in allowed set.
   if (data.category !== undefined && !CATEGORIES.includes(data.category)) {
     errors.push(`category "${data.category}" not in allowed set: ${CATEGORIES.join(', ')}`)

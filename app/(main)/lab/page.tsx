@@ -127,6 +127,7 @@ export default async function LabPage() {
       blurb: demo.blurb,
       tag: demo.tag,
       highlights: project?.highlights ?? [],
+      stats: project?.coverStats ?? [],
       tech: project?.tech ?? [],
       preview: <LabPreview kind={demo.preview} />,
     }

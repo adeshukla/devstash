@@ -46,6 +46,7 @@ function parsePost(fileName: string): BlogPost | null {
       title: String(data.title),
       slug: String(data.slug),
       description: String(data.description),
+      ...(typeof data.seoTitle === 'string' && data.seoTitle ? { seoTitle: data.seoTitle } : {}),
       author: String(data.author ?? 'Adesh Shukla'),
       createdAt: String(data.createdAt ?? new Date().toISOString().split('T')[0]),
       updatedAt: String(data.updatedAt ?? data.createdAt ?? new Date().toISOString().split('T')[0]),

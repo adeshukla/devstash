@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings=0",
     "lint:content": "node scripts/seo/check-metadata.mjs",
     "check:project-mdx": "node scripts/seo/check-project-mdx.mjs",
     "check:links": "node scripts/automation/check-links.mjs",
@@ -25,7 +25,8 @@
     "qa:responsive": "playwright test -c playwright.qa.config.ts tests/qa/responsive.spec.ts",
     "qa:a11y": "playwright test -c playwright.qa.config.ts tests/qa/a11y.spec.ts",
     "qa": "pnpm qa:security && pnpm qa:responsive && pnpm qa:a11y",
-    "resume:pdf": "node scripts/automation/build-resume-pdf.mjs"
+    "resume:pdf": "node scripts/automation/build-resume-pdf.mjs",
+    "test:unit": "node --test \"tests/unit/*.test.mjs\""
   },
   "dependencies": {
     "@vercel/speed-insights": "^2.0.0",

@@ -2,7 +2,6 @@
 import type { Thing, WithContext } from 'schema-dts'
 
 interface JsonLdProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: WithContext<Thing> | Record<string, any>
 }
 

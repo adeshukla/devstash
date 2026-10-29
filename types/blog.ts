@@ -19,6 +19,8 @@ export interface BlogPost {
   title: string
   slug: string
   description: string
+  /** Optional search-result title, up to 49 chars (buildMetadata adds " | DevStash"). The H1 stays `title`. */
+  seoTitle?: string
   author: string
   createdAt: string
   updatedAt: string

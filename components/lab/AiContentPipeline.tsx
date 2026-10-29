@@ -57,6 +57,7 @@ export function AiContentPipeline() {
 
   useEffect(() => {
     if (!window.localStorage.getItem(TOUR_SEEN_KEY)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot mount read of localStorage
       setTourOpen(true)
     }
   }, [])

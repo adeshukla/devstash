@@ -2,7 +2,7 @@
 
 # Paste this at the start of every new Claude conversation
 
-# Last updated: 2026-07-12 — Phase 10 partially shipped (honest AI pipeline live), recruiter-facing home/case-studies/lab/nav on prod, QA+security automation (pnpm qa), mobile-perf pass. See Section 13 for current status.
+# Last updated: 2026-10-29 — Projects/Lab redesigned (explorer, animated covers), FAQs on all posts + key pages, seoTitle for posts, robots no longer blocks /_next/, lint at zero warnings, unit tests, responsive QA in CI. See Section 13.
 
 ---
 
@@ -104,21 +104,21 @@ judgement.
 
 ## SECTION 3 — TECH STACK (HARD CONSTRAINTS)
 
-| Layer           | Choice                                | Notes                                                                                                                                    |
-| --------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Framework       | Next.js 16.2.6 App Router             | Turbopack DISABLED (Windows crashes)                                                                                                     |
-| UI Library      | React 19.2.4 (exact pin)              | react-dom 19.2.4 — pinned, not caret-ranged                                                                                              |
-| Language        | TypeScript strict mode                | noUnusedLocals, noUnusedParameters                                                                                                       |
-| Styling         | Tailwind CSS v4                       | Tokens in globals.css @theme (NOT tailwind.config.ts)                                                                                    |
-| Package manager | pnpm ONLY                             | Never suggest npm or yarn                                                                                                                |
-| Fonts           | next/font/google                      | DM Sans (sans) + JetBrains Mono (mono)                                                                                                   |
-| Images          | next/image                            | @next/next/no-img-element ESLint rule (config pending)                                                                                   |
-| Deployment      | Vercel                                | pnpm build, pnpm install commands                                                                                                        |
-| DNS             | Cloudflare                            | DNS Only mode (grey cloud) — no proxy with Vercel                                                                                        |
-| Content         | MDX + JSON                            | File-based, CMS-ready (next-mdx-remote ^6.0.0)                                                                                           |
-| CI/CD           | GitHub Actions                        | .github/workflows/ci.yml                                                                                                                 |
-| Testing/QA      | Playwright ^1.61                      | `pnpm qa` = static security audit + 200–1440px responsive suite (scripts/qa/, tests/qa/). `pnpm test:smoke` = post-deploy checks vs prod |
-| Analytics       | GA4 + Search Console + Speed Insights | lazyOnload strategy; @vercel/speed-insights ^2.0.0 wired                                                                                 |
+| Layer           | Choice                                                   | Notes                                                                                                                                    |
+| --------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework       | Next.js 16.2.6 App Router                                | Turbopack DISABLED (Windows crashes)                                                                                                     |
+| UI Library      | React 19.2.4 (exact pin)                                 | react-dom 19.2.4 — pinned, not caret-ranged                                                                                              |
+| Language        | TypeScript strict mode                                   | noUnusedLocals, noUnusedParameters                                                                                                       |
+| Styling         | Tailwind CSS v4                                          | Tokens in globals.css @theme (NOT tailwind.config.ts)                                                                                    |
+| Package manager | pnpm ONLY                                                | Never suggest npm or yarn                                                                                                                |
+| Fonts           | next/font/google                                         | DM Sans (sans) + JetBrains Mono (mono)                                                                                                   |
+| Images          | next/image                                               | @next/next/no-img-element ESLint rule (config pending)                                                                                   |
+| Deployment      | Vercel                                                   | pnpm build, pnpm install commands                                                                                                        |
+| DNS             | Cloudflare                                               | DNS Only mode (grey cloud) — no proxy with Vercel                                                                                        |
+| Content         | MDX + JSON                                               | File-based, CMS-ready (next-mdx-remote ^6.0.0)                                                                                           |
+| CI/CD           | GitHub Actions                                           | .github/workflows/ci.yml                                                                                                                 |
+| Testing/QA      | `pnpm test:unit` (node:test, no deps) + Playwright ^1.61 | `pnpm qa` = static security audit + 200–1440px responsive suite (scripts/qa/, tests/qa/). `pnpm test:smoke` = post-deploy checks vs prod |
+| Analytics       | GA4 + Search Console + Speed Insights                    | lazyOnload strategy; @vercel/speed-insights ^2.0.0 wired                                                                                 |
 
 ---
 
@@ -684,6 +684,18 @@ Current task: [what you want to do]
 **Update this file after each phase completes.**
 
 **Current Status (2026-07):** Phase 9 complete. Phase 10 partially shipped — honest-scaffold AI pipeline (`/lab/ai-content-pipeline`) live in prod; n8n workflow still proposal-only. `/lab` hub + recruiter-facing home/case-studies/nav shipped to `main`. `pnpm qa` security/responsive automation added. Sitemap/IndexNow auto-submission wired (IndexNow live; GSC step skips until `GSC_SERVICE_ACCOUNT_JSON` + `GSC_PROPERTY` repo secrets are set). Pending on user: GSC secrets, Groq key rotation, real quotes for social-proof section.
+
+**Update (2026-10-29):**
+
+- Projects page is a client explorer (`components/sections/ProjectsExplorer.tsx`); covers are `AnimatedCover` (brand field + per-project loop + `coverStats` chips from each project JSON). Loops on hover/focus, always on touch (`@media (hover:none)`); transform/opacity only; still under reduced-motion.
+- Lab page: `LabTools` (tag filter, expandable cards, stats). Shared `FaqSection` (visible Q&A + FAQPage JSON-LD) on Services, Contact, Projects, Lab. Every blog post has `faqs`.
+- Blog posts take optional `seoTitle` (<= 49 chars; buildMetadata adds " | DevStash"). `pnpm lint:content` warns when a post title is too long without one.
+- H1 sizes come from `lib/utils/typography.ts` (H1_DISPLAY / H1_HEADLINE). Do not hand-size page H1s.
+- `robots.ts` must NOT disallow `/_next/` (Googlebot needs JS/CSS to render). A unit test guards this.
+- Lint is `--max-warnings=0`. `react-hooks/set-state-in-effect` is an error; existing uses carry an inline disable with a reason.
+- CI: unit tests in the typecheck job; a Responsive QA job (200px-1440px) runs against the production build on PRs into main.
+- Plans and drafts: `docs/seo-keywords.md` (keyword targets, discoverability), `docs/launch-posts.md` (backlink kit).
+- Still pending on user: real photo, one real quote, backlinks, Search Console properties for each subdomain.
 
 **Version note (Jun 2026):** This file's tech stack was corrected against the live `package.json` —
 Next.js is **16.2.6** (not 15), React is pinned at **19.2.4**, Zod is **^4.4.3** (v4 API, breaking

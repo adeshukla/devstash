@@ -170,7 +170,6 @@ async function callProviderWithRetry(
   let lastErr: unknown
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      // eslint-disable-next-line no-await-in-loop -- sequential backoff is the point
       return await callProvider(config, apiKey, messages, options)
     } catch (err) {
       lastErr = err
@@ -180,7 +179,6 @@ async function callProviderWithRetry(
       console.warn(
         `[lib/ai/groq] ${config.name} rate limited, retrying in ${waitMs}ms (attempt ${attempt + 1}/${maxRetries})`
       )
-      // eslint-disable-next-line no-await-in-loop -- sequential backoff is the point
       await sleep(waitMs)
     }
   }
@@ -223,7 +221,6 @@ export async function callWithFallback(
   for (let i = 0; i < configured.length; i++) {
     const config = configured[i]
     try {
-      // eslint-disable-next-line no-await-in-loop -- sequential fallback is the point
       return await callProviderWithRetry(
         config,
         process.env[config.apiKeyEnv] as string,

@@ -49,6 +49,7 @@ export function ThemeToggle({ className }: { className?: string }) {
 
   useEffect(() => {
     const applied = document.documentElement.getAttribute('data-theme')
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot read of the theme applied before hydration
     setTheme(applied === 'light' ? 'light' : 'dark')
   }, [])
 

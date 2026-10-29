@@ -64,6 +64,7 @@ export function MobileNav({ items }: MobileNavProps) {
   // Close on route change — page already navigated, so snap shut immediately
   useEffect(() => {
     window.clearTimeout(closeTimeoutRef.current)
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- snap shut after a route change
     setEntered(false)
     setOpen(false)
   }, [pathname])

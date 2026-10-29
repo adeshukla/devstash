@@ -27,8 +27,20 @@ const config = [
       // Existing mount-time sync patterns (theme resolution, reduced-motion checks,
       // route-change close, one-shot flags) are safe single setState calls, not
       // cascading loops — downgraded rather than restructured across 6 components.
-      'react-hooks/set-state-in-effect': 'warn',
+      // Each existing use carries an inline disable naming why it is safe, so any
+      // NEW synchronous setState-in-effect fails the build.
+      'react-hooks/set-state-in-effect': 'error',
     },
+  },
+  {
+    // Server code and build scripts log on purpose; warn/error are the only
+    // levels a server route should use, and scripts print their results.
+    files: ['app/api/**', 'lib/**'],
+    rules: { 'no-console': ['warn', { allow: ['warn', 'error'] }] },
+  },
+  {
+    files: ['scripts/**', 'tests/**'],
+    rules: { 'no-console': 'off' },
   },
 ]
 

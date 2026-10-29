@@ -10,9 +10,9 @@ import { Button } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
 import type { IconName } from '@/components/icons/Icon'
 
-const title = 'Work With Me — Frontend Development & Automation'
+const title = 'Hire a Freelance Frontend Developer in India'
 const description =
-  'Freelance and contract frontend development, SEO-ready builds, and workflow automation from Adesh Shukla — for teams needing a Next.js site or internal tool.'
+  'Freelance and contract frontend developer in India: Next.js and React builds, SEO-ready landing pages, accessibility and workflow automation. Reply within 24 hours.'
 
 export const metadata: Metadata = buildMetadata({
   title,

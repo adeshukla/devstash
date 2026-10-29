@@ -5,9 +5,9 @@ import { LabToolSchema } from '@/components/lab/LabToolSchema'
 import { AiContentPipeline } from '@/components/lab/AiContentPipeline'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'AI Content Pipeline Demo — Scaffold, Copy-edit, SEO Frontmatter',
+  title: 'AI Content Pipeline Demo — Live 3-Step LLM Chain',
   description:
-    'A live 3-step LLM pipeline: scaffold an honest draft that marks where you add real code and numbers, run a copy-edit pass to strip AI-tell phrases, and produce SEO frontmatter — with real token usage and latency for every step.',
+    'A live 3-step LLM pipeline: scaffold an honest draft, strip AI-tell phrases in a copy-edit pass, then generate SEO frontmatter, with real token usage and latency shown.',
   canonical: '/lab/ai-content-pipeline',
 })
 

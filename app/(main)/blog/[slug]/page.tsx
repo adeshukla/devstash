@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return {}
 
   return buildMetadata({
-    title: post.title,
+    title: post.seoTitle ?? post.title,
     description: post.description,
     canonical: `/blog/${post.slug}`,
     type: 'article',
