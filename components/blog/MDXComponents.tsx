@@ -117,7 +117,7 @@ export const mdxComponents: MDXComponents = {
   code: ({ children, className }) => {
     if (className) return <code className={className}>{children}</code>
     return (
-      <code className="bg-ds-surface2 text-ds-accent rounded px-1.5 py-0.5 font-mono text-[0.85em] [overflow-wrap:anywhere]">
+      <code className="bg-ds-surface2 text-ds-accent-strong rounded px-1.5 py-0.5 font-mono text-[0.85em] [overflow-wrap:anywhere]">
         {children}
       </code>
     )

@@ -20,7 +20,10 @@ const variantStyles: Record<BadgeVariant, string> = {
   // needs at this font size (caught by the a11y Playwright suite); the
   // -strong token is a theme-aware darker blue for exactly this case.
   blue: 'bg-ds-accent/10 border-ds-accent/25 text-ds-accent-strong',
-  purple: 'bg-ds-purple/10 border-ds-purple/25 text-ds-purple',
+  // Text mixes the purple toward the page text colour: #8b5cf6 on the tinted dark
+  // surface was 4.1:1, under the 4.5:1 AA floor. Lightens in dark, deepens in light.
+  purple:
+    'bg-ds-purple/10 border-ds-purple/25 text-[color-mix(in_srgb,var(--color-ds-purple)_70%,var(--color-ds-text))]',
   green: 'bg-ds-success/10 border-ds-success/25 text-ds-success',
   // Same reasoning as the blue variant above — measured ~4.18:1 in light
   // theme against the ~4.5:1 needed.

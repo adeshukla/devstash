@@ -54,7 +54,8 @@ export function LabTools({ tools }: { tools: LabTool[] }) {
               <article className="group flex h-full flex-col gap-5">
                 <Link
                   href={`/lab/${tool.slug}`}
-                  aria-label={`Open ${tool.name}`}
+                  aria-hidden="true"
+                  tabIndex={-1}
                   className="focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg card-spotlight card-glow block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                 >
                   {tool.preview}
