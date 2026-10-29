@@ -30,5 +30,6 @@
       "React + Tailwind and plain HTML/CSS/JS first. Other frameworks come only after they pass the same tests, rather than being listed as supported before that."
     ],
     "outcome": "Live at build-components.devstash.me with 125 parts, every one tested on both outputs. No usage or adoption numbers exist yet, so none are reported here. What it demonstrates is the frontend fundamentals component work actually depends on — accessibility, keyboard behaviour and clean, dependency-free output — applied across a whole catalogue rather than a single component."
-  }
+  },
+  "coverStats": ["125 parts", "2 outputs", "0 runtime deps"]
 }

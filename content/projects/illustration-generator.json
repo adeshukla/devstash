@@ -29,5 +29,6 @@
       "Made the boardroom scene reuse the same growing-bar-chart primitive as the solo presenting scene rather than drawing a second, separate chart implementation."
     ],
     "outcome": "// TODO: No usage data yet — this is a self-initiated sample tool, not a deployed internal tool."
-  }
+  },
+  "coverStats": ["7 character scenes", "2 styles", "copyable SVG"]
 }

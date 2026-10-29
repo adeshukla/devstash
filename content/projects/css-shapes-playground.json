@@ -29,5 +29,6 @@
       "Split into four named categories (shapes, borders, buttons, shadows) instead of one long undifferentiated grid, so a visitor looking for 'how do I animate a border' can find that section directly."
     ],
     "outcome": "// TODO: No analytics on this page yet — it's a self-initiated sample, not a deployed campaign."
-  }
+  },
+  "coverStats": ["11 shape presets", "4 radius sliders", "6 CTA hovers"]
 }

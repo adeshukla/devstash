@@ -29,5 +29,6 @@
       "Kept it fully client-side with no backend call — there's nothing to submit, so there's nothing to log or store, which matters for a tool that might get pasted with an unpublished page's real title/description."
     ],
     "outcome": "// TODO: No usage data yet — this is a self-initiated sample tool, not a deployed internal tool."
-  }
+  },
+  "coverStats": ["3 live previews", "title 50–60", "description 130–160"]
 }

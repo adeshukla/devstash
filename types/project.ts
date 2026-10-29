@@ -35,4 +35,6 @@ export interface Project {
   year?: number
   interface?: GalleryImage[]
   caseStudy?: ProjectCaseStudy
+  /** Up to 3 short facts shown as chips on the animated cover. Each must be in the project's own data. */
+  coverStats?: string[]
 }

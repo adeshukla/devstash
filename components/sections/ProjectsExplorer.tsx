@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Badge, Button } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
-import { ProjectCover } from '@/components/sections/ProjectCover'
+import { AnimatedCover } from '@/components/sections/AnimatedCover'
 import { projectBrand } from '@/components/icons/ProjectMark'
 import { TECH_ICONS } from '@/lib/utils/techIcons'
 import { cn } from '@/lib/utils/cn'
@@ -24,7 +24,10 @@ export interface ExplorerProject {
   tech: string[]
   highlights: string[]
   problem?: string
+  approach?: string
+  decisions?: string[]
   outcome?: string
+  coverStats?: string[]
   liveUrl?: string
   githubUrl?: string
   /** Set only when the screenshot exists on disk (checked on the server). */
@@ -73,7 +76,7 @@ function Detail({ project }: { project: ExplorerProject }) {
   return (
     <div className="pe-swap flex flex-col gap-6" style={ringVars(project.slug)}>
       <div className="card-spotlight card-glow rounded-xl">
-        <div className="relative h-52 w-full overflow-hidden rounded-xl sm:h-64">
+        <div className="relative h-52 w-full overflow-hidden rounded-xl sm:h-64 lg:h-72">
           {project.image ? (
             <Image
               src={project.image}
@@ -83,7 +86,7 @@ function Detail({ project }: { project: ExplorerProject }) {
               sizes="(min-width: 1024px) 600px, 100vw"
             />
           ) : (
-            <ProjectCover slug={project.slug} />
+            <AnimatedCover slug={project.slug} stats={project.coverStats} />
           )}
         </div>
       </div>
@@ -138,9 +141,15 @@ function Detail({ project }: { project: ExplorerProject }) {
           className="pt-5"
         >
           {tab === 'Overview' && (
-            <ul className="flex flex-col gap-3">
-              {project.highlights.slice(0, 4).map((h) => (
-                <li key={h} className="text-ds-muted flex gap-3 text-sm leading-relaxed">
+            <ul className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:gap-x-8 lg:gap-y-4">
+              {project.highlights.slice(0, 6).map((h, i) => (
+                <li
+                  key={h}
+                  className={cn(
+                    'text-ds-muted flex gap-3 text-sm leading-relaxed',
+                    i >= 4 && 'hidden lg:flex'
+                  )}
+                >
                   <span className="bg-ds-accent mt-2 h-1.5 w-1.5 shrink-0 rounded-full" />
                   {h}
                 </li>
@@ -148,21 +157,50 @@ function Detail({ project }: { project: ExplorerProject }) {
             </ul>
           )}
           {tab === 'Case study' && (
-            <dl className="flex flex-col gap-5 text-sm leading-relaxed">
+            <dl className="flex flex-col gap-5 text-sm leading-relaxed lg:grid lg:grid-cols-2 lg:gap-x-8">
               {project.problem && (
                 <div>
                   <dt className="text-ds-text mb-1 font-mono text-[11px] tracking-[0.12em] uppercase">
                     Problem
                   </dt>
-                  <dd className="text-ds-muted line-clamp-5">{project.problem}</dd>
+                  <dd className="text-ds-muted line-clamp-5 lg:line-clamp-none">
+                    {project.problem}
+                  </dd>
+                </div>
+              )}
+              {project.approach && (
+                <div className="hidden lg:block">
+                  <dt className="text-ds-text mb-1 font-mono text-[11px] tracking-[0.12em] uppercase">
+                    Approach
+                  </dt>
+                  <dd className="text-ds-muted">{project.approach}</dd>
+                </div>
+              )}
+              {project.decisions && project.decisions.length > 0 && (
+                <div className="hidden lg:col-span-2 lg:block">
+                  <dt className="text-ds-text mb-1 font-mono text-[11px] tracking-[0.12em] uppercase">
+                    Key decisions
+                  </dt>
+                  <dd>
+                    <ul className="flex flex-col gap-2">
+                      {project.decisions.map((d) => (
+                        <li key={d} className="text-ds-muted flex gap-3">
+                          <span className="bg-ds-accent mt-2 h-1.5 w-1.5 shrink-0 rounded-full" />
+                          {d}
+                        </li>
+                      ))}
+                    </ul>
+                  </dd>
                 </div>
               )}
               {project.outcome && (
-                <div>
+                <div className="lg:col-span-2">
                   <dt className="text-ds-text mb-1 font-mono text-[11px] tracking-[0.12em] uppercase">
                     Outcome
                   </dt>
-                  <dd className="text-ds-muted line-clamp-5">{project.outcome}</dd>
+                  <dd className="text-ds-muted line-clamp-5 lg:line-clamp-none">
+                    {project.outcome}
+                  </dd>
                 </div>
               )}
             </dl>

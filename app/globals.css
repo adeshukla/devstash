@@ -575,6 +575,25 @@ body {
   }
 }
 
+/* Light theme: spotlight cards (the big boxed panels) sat on a #cbd5e1 border
+   over a #f1f5f9 surface on white — about 1.5:1, so they read as a faint smudge.
+   A firmer border plus the same soft raise the rounded-card panels get. Dark is
+   untouched. */
+[data-theme='light'] .card-spotlight {
+  border-color: color-mix(in srgb, var(--color-ds-border) 50%, var(--color-ds-border2));
+  box-shadow:
+    0 1px 2px -1px rgb(15 23 42 / 0.08),
+    0 10px 24px -14px rgb(15 23 42 / 0.16);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) .card-spotlight {
+    border-color: color-mix(in srgb, var(--color-ds-border) 50%, var(--color-ds-border2));
+    box-shadow:
+      0 1px 2px -1px rgb(15 23 42 / 0.08),
+      0 10px 24px -14px rgb(15 23 42 / 0.16);
+  }
+}
+
 /* A tinted shadow this soft all but disappears against a white/near-white
    surface — dark backgrounds give a colored glow contrast for free, light
    ones don't, so it needs a stronger mix to read as the same felt effect

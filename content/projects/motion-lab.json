@@ -31,5 +31,6 @@
       "Experiences are deliberately unlike each other; templates are deliberately alike. Collapsing those two products into one set of pages would have made both worse."
     ],
     "outcome": "Live at showcase.devstash.me with 17 pages, a hub, and documented budgets and accessibility contracts in the repo. It is still being refined — designs are actively changing and more pages are planned — so this is a snapshot of work in progress rather than a finished product. There are no usage or engagement numbers to report and none are invented here. What it demonstrates is motion work that answers the question clients and hiring managers actually ask about it: what does it cost on a phone."
-  }
+  },
+  "coverStats": ["17 pages", "LCP < 2.5s", "INP < 200ms"]
 }

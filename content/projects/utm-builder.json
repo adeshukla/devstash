@@ -27,5 +27,6 @@
       "No backend at all. A tool like this has no reason to touch a server, and it's one less thing that can be down when someone actually needs to tag a link fast."
     ],
     "outcome": "// TODO: No usage data yet — this is a self-initiated sample tool, not a deployed internal tool."
-  }
+  },
+  "coverStats": ["no data sent", "3 required fields", "URL API"]
 }

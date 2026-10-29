@@ -6,7 +6,11 @@ import { HeroSection } from '@/components/sections/HeroSection'
 import { ProjectDeckSection } from '@/components/sections/ProjectDeckSection'
 import { FeaturedPosts } from '@/components/sections/FeaturedPosts'
 import { WhatIDoBento } from '@/components/sections/WhatIDoBento'
-import { Reveal, Button } from '@/components/ui'
+import Link from 'next/link'
+import { Reveal, Button, CardTilt } from '@/components/ui'
+import { CopyEmail } from '@/components/ui/CopyEmail'
+import { LabPreview } from '@/components/lab/LabPreview'
+import { siteConfig } from '@/content/metadata/site.config'
 import { Icon } from '@/components/icons/Icon'
 import { IntroVideo } from '@/components/ui/IntroVideo'
 import { getAllProjects, getFeaturedProjects } from '@/lib/markdown/projects'
@@ -88,21 +92,29 @@ export default function HomePage() {
       <Reveal>
         <section className="border-ds-border border-t py-20">
           <div className="max-w-site mx-auto px-6">
-            <div className="border-ds-border bg-ds-surface flex flex-col items-start gap-6 rounded-2xl border p-8 sm:flex-row sm:items-center sm:justify-between sm:p-10">
-              <div className="max-w-xl">
-                <p className="text-ds-accent font-mono text-sm">{'// lab'}</p>
-                <h2 className="text-ds-text mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-                  Play with what I&apos;ve built
-                </h2>
-                <p className="text-ds-muted mt-3 leading-relaxed">
-                  A live AI content pipeline, CSS &amp; SVG generators, SEO tooling, and
-                  conversion-focused landing-page samples — all running in your browser, no signup.
-                </p>
-              </div>
-              <Button href="/lab" size="lg" className="shrink-0 font-semibold">
-                Explore the Lab →
-              </Button>
-            </div>
+            <CardTilt>
+              <Link
+                href="/lab"
+                className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg block rounded-2xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+              >
+                <div className="border-ds-border bg-ds-surface card-spotlight card-glow grid items-center gap-8 rounded-2xl border p-6 sm:p-10 lg:grid-cols-[1.1fr_1fr] lg:gap-12">
+                  <div>
+                    <p className="text-ds-accent font-mono text-sm">{'// lab'}</p>
+                    <h2 className="text-ds-text mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+                      Play with what I&apos;ve built
+                    </h2>
+                    <p className="text-ds-muted mt-3 max-w-xl leading-relaxed">
+                      A live AI content pipeline, CSS and SVG generators, a meta tag previewer and a
+                      UTM builder — all running in your browser, no signup.
+                    </p>
+                    <span className="keycap bg-ds-cta mt-6 inline-flex min-h-12 items-center rounded-xl px-6 text-[15px] font-semibold text-white [--edge:var(--color-ds-cta-edge)]">
+                      Explore the Lab →
+                    </span>
+                  </div>
+                  <LabPreview kind="pipeline" />
+                </div>
+              </Link>
+            </CardTilt>
           </div>
         </section>
       </Reveal>
@@ -123,6 +135,10 @@ export default function HomePage() {
               Open to frontend roles and freelance collaborations. Have a project, a role, or just a
               question? I&apos;d love to hear about it.
             </p>
+            <p className="text-ds-muted mt-5 inline-flex items-center gap-2 font-mono text-xs">
+              <span className="bg-ds-success h-2 w-2 rounded-full" aria-hidden="true" />
+              Open to roles and freelance · I aim to reply within 24 hours
+            </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <Button href="/contact" size="lg" className="font-semibold">
                 Get in touch
@@ -137,6 +153,7 @@ export default function HomePage() {
               >
                 Download résumé
               </Button>
+              <CopyEmail email={siteConfig.author.email} />
             </div>
           </div>
         </section>
