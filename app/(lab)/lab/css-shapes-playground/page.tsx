@@ -269,7 +269,7 @@ export default function CssShapesPlaygroundPage() {
               >
                 <button
                   type="button"
-                  className="shine-btn bg-ds-accent rounded-xl px-6 py-3 font-medium text-white"
+                  className="shine-btn bg-ds-cta rounded-xl px-6 py-3 font-medium text-white"
                 >
                   Hover me
                 </button>
@@ -281,7 +281,7 @@ export default function CssShapesPlaygroundPage() {
               >
                 <button
                   type="button"
-                  className="ripple-btn bg-ds-accent rounded-xl px-6 py-3 font-medium text-white"
+                  className="ripple-btn bg-ds-cta rounded-xl px-6 py-3 font-medium text-white"
                 >
                   Always pulsing
                 </button>
@@ -293,7 +293,7 @@ export default function CssShapesPlaygroundPage() {
               >
                 <button
                   type="button"
-                  className="lift-btn bg-ds-accent rounded-xl px-6 py-3 font-medium text-white"
+                  className="lift-btn bg-ds-cta rounded-xl px-6 py-3 font-medium text-white"
                 >
                   Hover me
                 </button>
@@ -305,7 +305,7 @@ export default function CssShapesPlaygroundPage() {
               >
                 <button
                   type="button"
-                  className="outline-btn bg-ds-accent rounded-xl px-6 py-3 font-medium text-white"
+                  className="outline-btn bg-ds-cta rounded-xl px-6 py-3 font-medium text-white"
                 >
                   Hover me
                 </button>
@@ -317,7 +317,7 @@ export default function CssShapesPlaygroundPage() {
               >
                 <button
                   type="button"
-                  className="icon-slide-btn bg-ds-accent rounded-xl px-6 py-3 font-medium text-white"
+                  className="icon-slide-btn bg-ds-cta rounded-xl px-6 py-3 font-medium text-white"
                 >
                   Get started <span className="arrow">→</span>
                 </button>
@@ -329,7 +329,7 @@ export default function CssShapesPlaygroundPage() {
               >
                 <button
                   type="button"
-                  className="press-btn bg-ds-accent rounded-xl px-6 py-3 font-medium text-white"
+                  className="press-btn bg-ds-cta rounded-xl px-6 py-3 font-medium text-white"
                 >
                   Press me
                 </button>
