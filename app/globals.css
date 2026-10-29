@@ -1516,3 +1516,24 @@ svg .animate-pulse2 {
   content-visibility: auto;
   contain-intrinsic-size: auto 640px;
 }
+
+/* Chrome paints autofilled fields pale blue with dark text, which ignores the
+   theme and, with a light --color-ds-text, made selected text unreadable. The
+   inset shadow covers the browser fill with the field's own surface colour;
+   the long transition stops the fill from flashing back in. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--color-ds-text);
+  caret-color: var(--color-ds-text);
+  box-shadow: 0 0 0 1000px var(--color-ds-surface2) inset;
+  transition: background-color 9999s ease-out 0s;
+}
+input:autofill,
+textarea:autofill,
+select:autofill {
+  color: var(--color-ds-text);
+  background-color: var(--color-ds-surface2);
+}
