@@ -38,6 +38,10 @@
   bottom: 12px;
   display: flex;
   gap: 6px;
+  /* One row only: a chip that does not fit wraps below and is clipped whole,
+     never shown cut in half. */
+  flex-wrap: wrap;
+  max-height: 24px;
   overflow: hidden;
 }
 .ac-stat {
@@ -300,6 +304,8 @@
   left: 8%;
   bottom: 56px;
   display: flex;
+  flex-wrap: wrap;
+  max-width: 84%;
   gap: 5px;
 }
 .ac .utm span {
@@ -309,6 +315,7 @@
   color: var(--color-ds-text);
   background: color-mix(in srgb, var(--brand) 30%, var(--color-ds-surface));
   border: 1px solid color-mix(in srgb, var(--brand) 50%, var(--color-ds-border2));
+  white-space: nowrap;
   opacity: 0;
 }
 

@@ -208,14 +208,14 @@ function SpeedScene() {
 function AppScene() {
   const stack: IconName[] = ['react', 'nextjs', 'typescript', 'tailwind']
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-5 px-6">
-      <div className="flex flex-wrap items-center justify-center gap-3">
+    <div className="flex h-full flex-col items-center justify-center gap-3 px-4 sm:gap-5 sm:px-6">
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
         {stack.map((name) => (
           <span
             key={name}
-            className="border-ds-border bg-ds-surface text-ds-accent flex h-14 w-14 items-center justify-center rounded-xl border"
+            className="border-ds-border bg-ds-surface text-ds-accent flex h-9 w-9 items-center justify-center rounded-xl border min-[360px]:h-11 min-[360px]:w-11 sm:h-14 sm:w-14"
           >
-            <Icon name={name} className="h-7 w-7" />
+            <Icon name={name} className="h-6 w-6 sm:h-7 sm:w-7" />
           </span>
         ))}
       </div>
@@ -236,15 +236,17 @@ function AutomationScene() {
     { label: 'Output', icon: 'check' as IconName },
   ]
   return (
-    <div className="flex h-full items-center justify-center gap-2 px-4">
+    <div className="flex h-full items-center justify-center gap-1 px-3 sm:gap-2 sm:px-4">
       {nodes.map(({ label, icon }, i) => (
-        <div key={label} className="flex items-center gap-2">
-          <div className="border-ds-border2 bg-ds-surface flex w-[84px] flex-col items-center gap-2 rounded-xl border-[1.5px] px-2 py-3.5">
+        <div key={label} className="flex min-w-0 flex-1 items-center gap-1 sm:flex-none sm:gap-2">
+          <div className="border-ds-border2 bg-ds-surface flex min-w-0 flex-1 flex-col items-center gap-2 rounded-xl border-[1.5px] px-1.5 py-3.5 sm:w-[84px] sm:flex-none sm:px-2">
             <Icon name={icon} className="text-ds-accent h-5 w-5" />
-            <span className="text-ds-muted font-mono text-[10px] whitespace-nowrap">{label}</span>
+            <span className="text-ds-muted text-center font-mono text-[10px] [overflow-wrap:anywhere]">
+              {label}
+            </span>
           </div>
           {i < nodes.length - 1 && (
-            <span className="from-ds-accent to-ds-purple h-0.5 w-6 rounded-full bg-gradient-to-r" />
+            <span className="from-ds-accent to-ds-purple h-0.5 w-2 shrink-0 rounded-full bg-gradient-to-r sm:w-6" />
           )}
         </div>
       ))}
