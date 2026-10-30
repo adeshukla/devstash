@@ -27,7 +27,7 @@ import { getAllPosts, getFeaturedPosts } from '@/lib/markdown/blog'
 export const metadata: Metadata = buildMetadata({
   title: 'Adesh Shukla — UI Developer, Landing Pages & Speed',
   description:
-    'UI developer, 6+ years. 200+ PPC landing pages for US clients — CSS, responsive layout, accessibility and page-speed fixes. Open to roles in India or remote.',
+    'Freelance UI developer in India, 6+ years. Custom websites and 200+ PPC landing pages for US clients — fast, accessible and SEO-ready. Open to work.',
 })
 
 export default function HomePage() {

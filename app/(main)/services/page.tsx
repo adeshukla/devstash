@@ -28,6 +28,16 @@ const OFFERINGS: { icon: IconName; title: string; body: string }[] = [
     body: 'React and Next.js apps built to a real performance budget — Lighthouse 90+, tight Core Web Vitals, accessible by default.',
   },
   {
+    icon: 'frontend',
+    title: 'Landing Pages & Custom Websites',
+    body: 'Hand-coded, responsive pages for ad campaigns and small businesses: built from scratch, not a template, and shaped around one conversion goal. 200+ PPC landing pages delivered for US clients.',
+  },
+  {
+    icon: 'performance',
+    title: 'Website Speed & Core Web Vitals',
+    body: 'Slow site losing ad spend or rankings? I audit on mobile first and fix the real causes: images, fonts, render-blocking scripts and layout shift.',
+  },
+  {
     icon: 'performance',
     title: 'SEO-Ready Builds',
     body: 'Structured data, metadata, and sitemaps wired in from day one, not bolted on after launch.',
@@ -44,6 +54,21 @@ const FAQ = [
     question: 'What kind of work do you take on?',
     answer:
       'Frontend engineering with React and Next.js, SEO-ready builds with structured data, metadata and sitemaps wired in from day one, and workflow automation with n8n and LLM pipelines.',
+  },
+  {
+    question: 'Do you build custom websites or use templates?',
+    answer:
+      'Custom. Pages are hand-coded in React and Next.js (or plain HTML and CSS for a simple landing page), so you are not carrying a page-builder plugin stack that slows the site down.',
+  },
+  {
+    question: 'Can you build landing pages for Google Ads campaigns?',
+    answer:
+      'Yes. I have built 200+ PPC landing pages for US clients: one clear goal per page, fast on mobile, accessible, with form and tracking hooks ready for your ad platform.',
+  },
+  {
+    question: 'Can you speed up my slow website?',
+    answer:
+      'Usually, yes. I start with a mobile Lighthouse and Core Web Vitals audit, then fix what is actually slow, such as oversized images, font loading, blocking scripts and layout shift. I will tell you up front if the platform itself is the limit.',
   },
   {
     question: 'Are you available for freelance or contract work?',
