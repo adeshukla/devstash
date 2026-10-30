@@ -66,11 +66,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.4,
     },
     {
-      url: `${BASE_URL}/feed.xml`,
-      changeFrequency: 'daily',
-      priority: 0.3,
-    },
-    {
       url: `${BASE_URL}/privacy`,
       changeFrequency: 'yearly',
       priority: 0.3,

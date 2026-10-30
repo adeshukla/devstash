@@ -5,9 +5,9 @@ import { LabToolSchema } from '@/components/lab/LabToolSchema'
 import { MetaTagGenerator } from '@/components/lab/MetaTagGenerator'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Meta Tags & Social Preview Generator — Free SEO Tool',
+  title: 'Meta Tag Generator with Google Preview — Free',
   description:
-    'A free tool that drafts a title/description from your content and previews it as a Google result, an X/Twitter card, and a Facebook/OG card — with live character counts and copyable meta tags.',
+    'Free meta tag generator: drafts a title and description, previews them as a Google result, X card and Facebook/OG card, with live character counts.',
   canonical: '/lab/meta-tag-generator',
 })
 

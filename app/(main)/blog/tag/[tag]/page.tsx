@@ -10,6 +10,12 @@ import { Breadcrumb } from '@/components/layout'
 import { BlogList } from '@/components/blog/BlogList'
 import { getAllPosts, getPostsByTag, getAllTags, isTagIndexable } from '@/lib/markdown/blog'
 
+// Real post titles make each archive's description unique instead of boilerplate.
+function archiveDescription(label: string, titles: string[]) {
+  const base = `${titles.length} posts on ${label}: `
+  return (base + titles.slice(0, 2).join('; ')).slice(0, 157).trimEnd()
+}
+
 // ─── Static Params ────────────────────────────────────────────────────────────
 
 export async function generateStaticParams() {
@@ -22,10 +28,14 @@ type Props = { params: Promise<{ tag: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { tag } = await params
+  const desc = archiveDescription(
+    `#${tag}`,
+    getPostsByTag(tag).map((p) => p.title)
+  )
 
   return buildMetadata({
     title: `#${tag} — Blog`,
-    description: `All DevStash blog posts tagged with #${tag}.`,
+    description: desc,
     canonical: `/blog/tag/${tag}`,
     type: 'website',
     // A one-post tag archive duplicates the post it links to, so it's kept
@@ -34,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     noIndex: !isTagIndexable(tag),
     ogImage: buildOgImageUrl({
       title: `#${tag} — Blog`,
-      description: `All DevStash blog posts tagged with #${tag}.`,
+      description: desc,
       type: 'website',
     }),
   })

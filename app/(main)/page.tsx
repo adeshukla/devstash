@@ -25,7 +25,7 @@ import { getAllPosts, getFeaturedPosts } from '@/lib/markdown/blog'
 // The old title ("DevStash — Modern Developer Ecosystem") targeted a phrase
 // with no real search demand and rendered the brand name twice.
 export const metadata: Metadata = buildMetadata({
-  title: 'Adesh Shukla — UI Developer, Landing Pages & Speed',
+  title: 'Adesh Shukla — Freelance UI Developer, India',
   description:
     'Freelance UI developer in India, 6+ years. Custom websites and 200+ PPC landing pages for US clients — fast, accessible and SEO-ready. Open to work.',
 })

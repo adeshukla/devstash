@@ -9,6 +9,12 @@ import { buildBreadcrumbSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
 import { BlogList } from '@/components/blog/BlogList'
 import { getAllPosts, getPostsByCategory } from '@/lib/markdown/blog'
+
+// Real post titles make each archive's description unique instead of boilerplate.
+function archiveDescription(label: string, titles: string[]) {
+  const base = `${titles.length} posts on ${label}: `
+  return (base + titles.slice(0, 2).join('; ')).slice(0, 157).trimEnd()
+}
 import { type BlogCategory, BLOG_CATEGORIES } from '@/types/blog'
 
 // ─── Static Params ────────────────────────────────────────────────────────────
@@ -25,15 +31,19 @@ type Props = { params: Promise<{ category: string }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category } = await params
   const label = BLOG_CATEGORIES.find((c) => c.value === category)?.label ?? category
+  const desc = archiveDescription(
+    label,
+    getPostsByCategory(category as BlogCategory).map((p) => p.title)
+  )
 
   return buildMetadata({
     title: `${label} — Blog`,
-    description: `All DevStash blog posts in the ${label} category.`,
+    description: desc,
     canonical: `/blog/category/${category}`,
     type: 'website',
     ogImage: buildOgImageUrl({
       title: `${label} — Blog`,
-      description: `All DevStash blog posts in the ${label} category.`,
+      description: desc,
       type: 'website',
     }),
   })
