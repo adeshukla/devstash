@@ -1,0 +1,74 @@
+---
+title: 'Why Is My Website Slow on Mobile? 7 Causes and Fixes'
+seoTitle: 'Why Your Website Is Slow on Mobile: 7 Fixes'
+slug: 'why-is-my-website-slow-on-mobile'
+description: 'Slow on phones but fine on your laptop? Seven common causes of a slow mobile website, how to spot each one in PageSpeed Insights, and how to fix them.'
+author: 'Adesh Shukla'
+createdAt: '2026-10-30'
+updatedAt: '2026-10-30'
+category: 'performance'
+tags: ['page-speed', 'core-web-vitals', 'lighthouse']
+readingTime: 7
+canonical: 'https://devstash.me/blog/why-is-my-website-slow-on-mobile'
+draft: false
+featured: false
+faqs:
+  - question: 'Why is my website fast on desktop but slow on mobile?'
+    answer: 'Phones have slower processors and often slower networks, so the same JavaScript, images and fonts take much longer to download and run. PageSpeed Insights simulates this, which is why the mobile score is usually lower than the desktop one.'
+  - question: 'What are good Core Web Vitals scores?'
+    answer: 'Google treats Largest Contentful Paint under 2.5 seconds, Interaction to Next Paint under 200 milliseconds and Cumulative Layout Shift under 0.1 as good, measured at the 75th percentile of real visits.'
+  - question: 'What is the quickest fix for a slow website?'
+    answer: 'Usually the images. Serve modern formats such as AVIF or WebP at the size they are actually displayed, give them explicit width and height, and do not lazy-load the main image at the top of the page.'
+  - question: 'Does page speed affect Google rankings?'
+    answer: 'Page experience is one of many signals, and relevance and links matter more. Speed mainly affects whether visitors stay and convert, which matters most when you are paying for ad clicks.'
+---
+
+If your site feels fine on your laptop and sluggish on a phone, you are not imagining it. Phones have slower processors and often slower connections, so anything heavy hurts them first. Here are seven causes I check, in the order they usually turn up, and what to do about each.
+
+## First, measure the right thing
+
+Run the page through [PageSpeed Insights](https://pagespeed.web.dev/) and look at the **mobile** tab. Two things matter:
+
+- **Field data** (real visitors, if your site has enough traffic) tells you what people actually experience.
+- **Lab data** (the Lighthouse run) tells you what to fix.
+
+Google's thresholds for "good" are Largest Contentful Paint (LCP) under 2.5 seconds, Interaction to Next Paint (INP) under 200 milliseconds and Cumulative Layout Shift (CLS) under 0.1. A lab score is a diagnostic, not a guarantee, so treat it as a to-do list rather than a grade.
+
+## 1. Oversized or old-format images
+
+The most common cause. A 3000-pixel photo displayed in a 400-pixel box still downloads in full. Serve **AVIF or WebP** at the size the image is shown, and set explicit `width` and `height` so the layout does not jump. If you want to convert images without uploading them anywhere, [Pare](/projects/pare) does it in your browser.
+
+## 2. Lazy-loading the main image
+
+Lazy-loading is good for images below the fold. It is bad for the large image at the top, because the browser deliberately waits before fetching the very thing that decides your LCP. Load the hero image eagerly and preload it. The full pattern is in my post on [Core Web Vitals for high-traffic landing pages](/blog/core-web-vitals-high-traffic-landing-pages).
+
+## 3. Too much JavaScript
+
+Every script has to be downloaded, parsed and run by a phone's processor. Page builders, sliders, chat widgets and tracking tags add up fast. In PageSpeed Insights, look at "Reduce unused JavaScript" and "Minimize main-thread work". Remove what you do not use, and load the rest after the page is interactive. Third-party scripts, such as analytics and chat, should wait until the visitor interacts or the page has settled.
+
+## 4. Render-blocking CSS and fonts
+
+CSS in the head blocks painting until it arrives. Web fonts can hide your text while they load. Inline the small amount of critical CSS, load the rest normally, self-host fonts, and use `font-display: swap` so text shows immediately. Fewer font weights means fewer files.
+
+## 5. Layout shift from late-loading content
+
+If a banner, an ad or an image pushes the page down after it loads, that is CLS. Reserve space for anything that arrives late: give images dimensions, give ad and embed slots a fixed height, and do not insert content above what the visitor is already reading.
+
+## 6. A slow server or no caching
+
+If the very first byte takes a long time (shown as "Reduce initial server response time"), no front-end tweak will save you. Cheap shared hosting, uncached pages and heavy database queries are the usual causes. Serving pages from a CDN or as pre-built static pages removes most of the wait.
+
+## 7. A heavy theme or plugin stack
+
+On template sites, the theme and plugins load on every page. Deactivating plugins you do not use, replacing a heavy page builder or moving a key landing page to a lean custom build often does more than any setting. I cover when that trade is worth it in [custom website vs template](/blog/custom-website-vs-template-small-business).
+
+## A sensible order of work
+
+1. Fix the hero image (format, size, no lazy-load).
+2. Remove or delay third-party scripts.
+3. Fix fonts and render-blocking CSS.
+4. Reserve space to stop layout shift.
+5. Look at hosting and caching if the server is slow.
+6. Re-test on mobile, then check real-user data in Search Console after a few weeks, since field data updates slowly.
+
+If you would rather hand this to someone, my [website speed and Core Web Vitals work](/services) starts with a mobile audit so you know what is actually slow before anything is changed.

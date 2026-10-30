@@ -31,5 +31,6 @@
     ],
     "outcome": "Live at build-components.devstash.me with 125 parts, every one tested on both outputs. No usage or adoption numbers exist yet, so none are reported here. What it demonstrates is the frontend fundamentals component work actually depends on — accessibility, keyboard behaviour and clean, dependency-free output — applied across a whole catalogue rather than a single component."
   },
-  "coverStats": ["125 parts", "2 outputs", "0 runtime deps"]
+  "coverStats": ["125 parts", "2 outputs", "0 runtime deps"],
+  "relatedPosts": ["screen-reader-accessibility-checklist", "figma-to-production-handoff-workflow"]
 }

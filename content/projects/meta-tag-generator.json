@@ -30,5 +30,6 @@
     ],
     "outcome": "// TODO: No usage data yet — this is a self-initiated sample tool, not a deployed internal tool."
   },
-  "coverStats": ["3 live previews", "title 50–60", "description 130–160"]
+  "coverStats": ["3 live previews", "title 50–60", "description 130–160"],
+  "relatedPosts": ["nextjs-16-app-router-patterns"]
 }

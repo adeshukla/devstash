@@ -37,4 +37,6 @@ export interface Project {
   caseStudy?: ProjectCaseStudy
   /** Up to 3 short facts shown as chips on the animated cover. Each must be in the project's own data. */
   coverStats?: string[]
+  /** Blog post slugs shown as "Related writing" on the case study (internal links both ways). */
+  relatedPosts?: string[]
 }

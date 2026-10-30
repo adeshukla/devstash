@@ -32,5 +32,6 @@
     ],
     "outcome": "Live at praxis.devstash.me, scoring 100 on Accessibility, Best Practices and SEO on Lighthouse mobile with zero failed audits. It has no users — it was built for my own interview preparation and has not been promoted, so there are no signup, retention or engagement numbers to report and I won't invent any. What it demonstrates is product direction and follow-through on a system considerably larger than a single-page tool."
   },
-  "coverStats": ["755 lessons", "19 tracks", "SM-2 spaced repetition"]
+  "coverStats": ["755 lessons", "19 tracks", "SM-2 spaced repetition"],
+  "relatedPosts": ["nextjs-16-app-router-patterns"]
 }

@@ -30,5 +30,6 @@
     ],
     "outcome": "// TODO: No usage data yet — this is a self-initiated sample tool, not a deployed internal tool."
   },
-  "coverStats": ["7 character scenes", "2 styles", "copyable SVG"]
+  "coverStats": ["7 character scenes", "2 styles", "copyable SVG"],
+  "relatedPosts": ["building-devstash-with-nextjs"]
 }

@@ -43,5 +43,6 @@
     ],
     "outcome": "Live at pare.devstash.me, with the code public on GitHub. Every planned phase is built — images, fonts, text assets, folder mode and verification — and the three items deliberately not shipped each have a written decision explaining why. Running the suite in Firefox and WebKit, not just Chromium, surfaced bugs a single engine hid: in WebKit a dropped folder silently did nothing. It has not yet been run against a real WordPress export or measured on a large set of real photographs, so no real-world savings figures are claimed here, and there are no usage numbers to report."
   },
-  "coverStats": ["97.8 KB gzipped JS", "150 KB budget", "no upload"]
+  "coverStats": ["97.8 KB gzipped JS", "150 KB budget", "no upload"],
+  "relatedPosts": ["core-web-vitals-high-traffic-landing-pages"]
 }

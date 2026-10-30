@@ -13,6 +13,7 @@ import { JsonLd } from '@/components/seo/JsonLd'
 import { buildProjectSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
 import { getAllProjects, getProjectBySlug, parseCaseStudyOutcome } from '@/lib/markdown/projects'
+import { getPostBySlug } from '@/lib/markdown/blog'
 import { Badge, Button, ImageGallery, Reveal, MountReveal, Separator } from '@/components/ui'
 import { AnimatedCover } from '@/components/sections/AnimatedCover'
 import { Icon } from '@/components/icons/Icon'
@@ -97,6 +98,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const project = await getProjectBySlug(slug)
 
   if (!project) notFound()
+
+  const relatedPosts = (project.relatedPosts ?? []).flatMap((s) => getPostBySlug(s) ?? [])
 
   const statusConfig = {
     live: { variant: 'green' as const, label: 'Live' },
@@ -300,6 +303,24 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       <li key={item} className="flex items-start gap-3">
                         <span className="bg-ds-accent mt-2 h-1.5 w-1.5 shrink-0 rounded-full" />
                         <span className="text-ds-muted">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {relatedPosts.length > 0 && (
+                <div>
+                  <h2 className="text-ds-text mb-6 text-2xl font-bold">Related writing</h2>
+                  <ul className="flex flex-col gap-3">
+                    {relatedPosts.map((post) => (
+                      <li key={post.slug}>
+                        <Link
+                          href={`/blog/${post.slug}`}
+                          className="text-ds-accent underline-offset-4 hover:underline"
+                        >
+                          {post.title}
+                        </Link>
                       </li>
                     ))}
                   </ul>

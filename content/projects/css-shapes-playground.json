@@ -30,5 +30,6 @@
     ],
     "outcome": "// TODO: No analytics on this page yet — it's a self-initiated sample, not a deployed campaign."
   },
-  "coverStats": ["11 shape presets", "4 radius sliders", "6 CTA hovers"]
+  "coverStats": ["11 shape presets", "4 radius sliders", "6 CTA hovers"],
+  "relatedPosts": ["understanding-css-cubic-bezier-easing"]
 }
