@@ -1,4 +1,5 @@
 import { FaqSection } from '@/components/sections/FaqSection'
+import { CtaBand } from '@/components/sections/CtaBand'
 import { H1_DISPLAY } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -202,6 +203,11 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
         </div>
       </section>
       <FaqSection items={FAQ} intro="What the case studies are, and are not." />
+      <CtaBand
+        title="Like what you see? Let’s build yours."
+        body="I take on freelance and contract frontend work, remote, for clients worldwide."
+        secondary={{ label: 'See services', href: '/services' }}
+      />
     </div>
   )
 }

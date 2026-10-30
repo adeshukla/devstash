@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { FaqSection } from '@/components/sections/FaqSection'
+import { CtaBand } from '@/components/sections/CtaBand'
 import { ServicesExplorer, type ServiceItem } from '@/components/sections/ServicesExplorer'
 import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
@@ -263,7 +264,7 @@ export default function ServicesPage() {
                 </span>
                 custom websites, landing pages &amp; speed fixes.
               </h1>
-              <p className="text-ds-muted mt-6 max-w-xl text-lg leading-relaxed">
+              <p className="text-ds-muted mt-6 max-w-xl text-base leading-relaxed sm:text-lg">
                 I build fast, accessible, SEO-ready sites and landing pages for clients in the US
                 and worldwide. 6+ years in, with 200+ PPC landing pages delivered for US clients.
               </p>
@@ -294,13 +295,16 @@ export default function ServicesPage() {
               </div>
             </div>
 
-            <div className="border-ds-border bg-ds-surface rounded-card border p-6 sm:p-8">
+            <div className="border-ds-border bg-ds-surface rounded-card border p-5 sm:p-8">
               <p className="text-ds-muted font-mono text-xs tracking-wide uppercase">At a glance</p>
               <dl className="divide-ds-border mt-4 divide-y">
                 {FACTS.map(([k, v]) => (
-                  <div key={k} className="flex items-baseline justify-between gap-6 py-3.5">
+                  <div
+                    key={k}
+                    className="flex flex-col gap-0.5 py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6 sm:py-3.5"
+                  >
                     <dt className="text-ds-muted text-sm">{k}</dt>
-                    <dd className="text-ds-text text-right font-mono text-sm">{v}</dd>
+                    <dd className="text-ds-text font-mono text-sm sm:text-right">{v}</dd>
                   </div>
                 ))}
               </dl>
@@ -317,7 +321,7 @@ export default function ServicesPage() {
         <div className="max-w-site mx-auto px-6">
           <Reveal>
             <p className="text-ds-accent font-mono text-sm">What I build</p>
-            <h2 className="text-ds-text mt-3 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="text-ds-text mt-3 max-w-2xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
               Pick a service to see what you get
             </h2>
           </Reveal>
@@ -332,12 +336,12 @@ export default function ServicesPage() {
         <div className="max-w-site mx-auto px-6">
           <Reveal>
             <p className="text-ds-accent font-mono text-sm">Every build</p>
-            <h2 className="text-ds-text mt-3 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="text-ds-text mt-3 max-w-2xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
               The same standard on a landing page or a full app
             </h2>
           </Reveal>
           <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-12">
-            <Reveal className="border-ds-border bg-ds-surface rounded-card border p-8 lg:col-span-7">
+            <Reveal className="border-ds-border bg-ds-surface rounded-card border p-5 sm:p-8 lg:col-span-7">
               <p className="text-ds-muted font-mono text-xs tracking-wide uppercase">
                 Performance budget · every page
               </p>
@@ -350,7 +354,9 @@ export default function ServicesPage() {
                   ] as const
                 ).map(([value, label]) => (
                   <div key={label}>
-                    <p className="text-ds-text font-mono text-3xl font-semibold">{value}</p>
+                    <p className="text-ds-text font-mono text-2xl font-semibold sm:text-3xl">
+                      {value}
+                    </p>
                     <p className="text-ds-muted mt-1 font-mono text-xs tracking-wide uppercase">
                       {label}
                     </p>
@@ -365,14 +371,18 @@ export default function ServicesPage() {
 
             <Reveal
               delay={80}
-              className="border-ds-border bg-ds-surface rounded-card border p-8 lg:col-span-5"
+              className="border-ds-border bg-ds-surface rounded-card border p-5 sm:p-8 lg:col-span-5"
             >
               <p className="text-ds-muted font-mono text-xs tracking-wide uppercase">
                 Search preview
               </p>
               <div className="border-ds-border bg-ds-surface2 mt-4 rounded-lg border p-4">
-                <p className="text-ds-success truncate font-mono text-xs">devstash.me › services</p>
-                <p className="text-ds-accent-strong mt-1.5 truncate text-base">{title}</p>
+                <p className="text-ds-success line-clamp-1 font-mono text-xs">
+                  devstash.me › services
+                </p>
+                <p className="text-ds-accent-strong mt-1.5 line-clamp-2 text-base sm:line-clamp-1">
+                  {title}
+                </p>
                 <p className="text-ds-muted mt-1 line-clamp-2 text-sm leading-relaxed">
                   {description}
                 </p>
@@ -385,7 +395,7 @@ export default function ServicesPage() {
 
             <Reveal
               delay={120}
-              className="border-ds-border bg-ds-surface rounded-card border p-8 lg:col-span-5"
+              className="border-ds-border bg-ds-surface rounded-card border p-5 sm:p-8 lg:col-span-5"
             >
               <p className="text-ds-muted font-mono text-xs tracking-wide uppercase">
                 Accessible by default
@@ -412,12 +422,15 @@ export default function ServicesPage() {
 
             <Reveal
               delay={160}
-              className="border-ds-border bg-ds-surface rounded-card border p-8 lg:col-span-7"
+              className="border-ds-border bg-ds-surface rounded-card border p-5 sm:p-8 lg:col-span-7"
             >
               <p className="text-ds-muted font-mono text-xs tracking-wide uppercase">
                 Responsive, tested wide to narrow
               </p>
-              <div className="mt-5 flex items-end gap-2.5 sm:gap-4" aria-hidden="true">
+              <div
+                className="mt-5 flex flex-wrap items-end gap-x-2.5 gap-y-3 sm:gap-x-4"
+                aria-hidden="true"
+              >
                 {[
                   ['w-7 sm:w-10', '375'],
                   ['w-10 sm:w-20', '768'],
@@ -446,14 +459,14 @@ export default function ServicesPage() {
         <div className="max-w-site mx-auto px-6">
           <Reveal>
             <p className="text-ds-accent font-mono text-sm">How a project runs</p>
-            <h2 className="text-ds-text mt-3 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="text-ds-text mt-3 max-w-2xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
               Four steps, no surprises on the invoice
             </h2>
           </Reveal>
           <ol className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((s, i) => (
               <Reveal as="li" key={s.n} delay={i * 80} className="list-none">
-                <div className="ring-hover border-ds-border bg-ds-surface h-full rounded-xl border p-6">
+                <div className="ring-hover border-ds-border bg-ds-surface h-full rounded-xl border p-5 sm:p-6">
                   <span className="text-ds-accent font-mono text-sm">{s.n}</span>
                   <h3 className="text-ds-text mt-3 text-lg font-semibold">{s.title}</h3>
                   <p className="text-ds-muted mt-2 text-sm leading-relaxed">{s.body}</p>
@@ -469,14 +482,14 @@ export default function ServicesPage() {
         <div className="max-w-site mx-auto px-6">
           <Reveal>
             <p className="text-ds-accent font-mono text-sm">Ways to work together</p>
-            <h2 className="text-ds-text mt-3 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="text-ds-text mt-3 max-w-2xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
               A project, a contract or a team seat
             </h2>
           </Reveal>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {ENGAGEMENTS.map((e, i) => (
               <Reveal key={e.title} delay={i * 80}>
-                <div className="ring-hover border-ds-border bg-ds-surface h-full rounded-xl border p-6">
+                <div className="ring-hover border-ds-border bg-ds-surface h-full rounded-xl border p-5 sm:p-6">
                   <h3 className="text-ds-text text-lg font-semibold">{e.title}</h3>
                   <p className="text-ds-muted mt-2 text-sm leading-relaxed">{e.body}</p>
                 </div>
@@ -502,23 +515,8 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* ── Closing CTA ── */}
-      <section className="border-ds-border border-t py-16 text-center lg:py-20">
-        <div className="mx-auto max-w-xl px-6">
-          <h2 className="text-ds-text mb-3 text-3xl font-bold tracking-tight">
-            Let&apos;s talk about your project
-          </h2>
-          <p className="text-ds-muted mb-8">
-            Tell me what you&apos;re building and where the traffic comes from. I&apos;ll reply
-            within 24 hours.
-          </p>
-          <Button href="/contact" variant="primary" size="lg">
-            Get in Touch
-          </Button>
-        </div>
-      </section>
-
       <FaqSection items={FAQ} intro="Straight answers on scope, availability and how I work." />
+      <CtaBand />
     </div>
   )
 }

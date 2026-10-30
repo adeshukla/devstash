@@ -1,0 +1,17 @@
+/* Answer eases in when a <details> opens. Motion only when the visitor has not
+   asked for less; the content itself is always in the DOM and readable. */
+@media (prefers-reduced-motion: no-preference) {
+  details[open] > .faq-answer {
+    animation: faq-open 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes faq-open {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}

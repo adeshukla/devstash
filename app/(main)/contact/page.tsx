@@ -184,7 +184,7 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
-      <FaqSection items={FAQ} intro="A few things people ask before they write." />
+      <FaqSection items={FAQ} intro="A few things people ask before they write." ask={false} />
     </div>
   )
 }
