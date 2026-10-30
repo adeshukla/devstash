@@ -142,6 +142,13 @@ export default function HomePage() {
               <span className="bg-ds-success h-2 w-2 rounded-full" aria-hidden="true" />
               Open to roles and freelance · I aim to reply within 24 hours
             </p>
+            <p className="text-ds-muted mt-4 text-sm">
+              Need a custom website, a landing page or a faster site?{' '}
+              <Link href="/services" className="text-ds-accent underline-offset-4 hover:underline">
+                Hire a freelance frontend developer in India
+              </Link>
+              .
+            </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <Button href="/contact" size="lg" className="font-semibold">
                 Get in touch

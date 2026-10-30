@@ -37,6 +37,8 @@ export function buildPersonSchema(): WithContext<Person> {
     url: siteConfig.url,
     email: siteConfig.author.email,
     jobTitle: 'UI Developer',
+    description:
+      'Freelance UI developer in Ghaziabad, India. Builds custom websites, PPC landing pages and fast, accessible React and Next.js frontends.',
     // Every profile that corroborates the same identity. The X handle was
     // already in site.config but had never been emitted here.
     sameAs: [siteConfig.author.github, siteConfig.author.linkedin, siteConfig.author.x],
@@ -243,7 +245,13 @@ export function buildServicesSchema(
     url: siteConfig.url,
     makesOffer: services.map(({ title, body }) => ({
       '@type': 'Offer',
-      itemOffered: { '@type': 'Service', name: title, description: body },
+      itemOffered: {
+        '@type': 'Service',
+        name: title,
+        description: body,
+        areaServed: 'IN',
+        provider: { '@id': PERSON_ID },
+      },
     })),
   }
 }

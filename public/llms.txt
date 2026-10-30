@@ -41,7 +41,7 @@ All run in the browser, free, no signup.
 
 ## Other sections
 
-- [Services](https://devstash.me/services): freelance and contract frontend work
+- [Services](https://devstash.me/services): freelance and contract work — custom websites, PPC landing pages (200+ delivered for US clients), website speed and Core Web Vitals fixes, React/Next.js frontends. Based in Ghaziabad (Delhi NCR), India; works remotely. Pricing is quoted per project via the contact page; reply within 24 hours.
 - [Resources](https://devstash.me/resources): curated docs/articles/references
 - [Tools](https://devstash.me/tools): the author's real daily toolchain
 - [Contact](https://devstash.me/contact)
