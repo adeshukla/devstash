@@ -47,6 +47,9 @@ export type Scene =
   | 'asset-shrink'
   | 'promise-params'
   | 'class-debug'
+  | 'template-vs-custom'
+  | 'slow-phone'
+  | 'ads-checklist'
 
 const BLOG_SCENE: Record<BlogCategory, Scene> = {
   frontend: 'frontend',
@@ -132,6 +135,12 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   // each other on /blog. Each gets the bug it is actually about.
   'nextjs-16-params-promise-undefined': 'promise-params',
   'tailwind-v4-classes-not-working': 'class-debug',
+  // The client-intent posts: 'frontend' x2 and 'performance' (shared with the
+  // Core Web Vitals post) would otherwise repeat an existing thumbnail.
+  'custom-website-vs-template-small-business': 'template-vs-custom',
+  'why-is-my-website-slow-on-mobile': 'slow-phone',
+  'google-ads-landing-page-checklist': 'ads-checklist',
+  'how-much-does-a-landing-page-cost-in-india': 'template-vs-custom',
 }
 
 interface CategoryIllustrationProps {
@@ -280,6 +289,12 @@ export function SceneContent({ scene }: { scene: Scene }) {
       return <PromiseParamsScene />
     case 'class-debug':
       return <ClassDebugScene />
+    case 'template-vs-custom':
+      return <TemplateVsCustomScene />
+    case 'slow-phone':
+      return <SlowPhoneScene />
+    case 'ads-checklist':
+      return <AdsChecklistScene />
   }
 }
 
@@ -324,6 +339,9 @@ export const ALL_SCENES: Scene[] = [
   'asset-shrink',
   'promise-params',
   'class-debug',
+  'template-vs-custom',
+  'slow-phone',
+  'ads-checklist',
 ]
 
 // Keyword index — maps a scene to the words a topic string is checked
@@ -420,6 +438,23 @@ export const SCENE_KEYWORDS: Record<Scene, string[]> = {
     'debugging',
     'missing styles',
     'checklist',
+  ],
+  'template-vs-custom': [
+    'custom website',
+    'template',
+    'wordpress',
+    'wix',
+    'small business',
+    'pricing',
+  ],
+  'slow-phone': ['slow website', 'mobile speed', 'pagespeed', 'core web vitals', 'lcp', 'phone'],
+  'ads-checklist': [
+    'google ads',
+    'ppc',
+    'landing page',
+    'checklist',
+    'message match',
+    'conversion',
   ],
   'component-parts': [
     'component library',
@@ -2258,6 +2293,212 @@ function ClassDebugScene() {
           </g>
         )
       })}
+    </g>
+  )
+}
+
+// ── Template vs custom — a stock theme beside a purpose-built page ─────────
+function TemplateVsCustomScene() {
+  return (
+    <g>
+      <rect
+        x="62"
+        y="44"
+        width="124"
+        height="140"
+        rx="10"
+        className="fill-ds-surface2 stroke-ds-border2"
+        strokeWidth="2"
+        strokeDasharray="6 5"
+      />
+      {[0, 1, 2, 3].map((i) => (
+        <rect
+          key={i}
+          x="74"
+          y={56 + i * 22}
+          width="100"
+          height="16"
+          rx="4"
+          className="fill-ds-muted/25"
+        />
+      ))}
+      {[0, 1, 2, 3, 4].map((i) => (
+        <rect
+          key={i}
+          x={74 + i * 21}
+          y="150"
+          width="16"
+          height="16"
+          rx="4"
+          className="fill-ds-muted/35"
+        />
+      ))}
+      <rect
+        x="214"
+        y="44"
+        width="124"
+        height="140"
+        rx="10"
+        className="fill-ds-surface stroke-ds-accent"
+        strokeWidth="2"
+      />
+      <rect x="228" y="60" width="72" height="9" rx="4" className="fill-ds-text/80" />
+      <rect x="228" y="76" width="96" height="5" rx="2.5" className="fill-ds-muted/40" />
+      <rect x="228" y="87" width="80" height="5" rx="2.5" className="fill-ds-muted/40" />
+      <rect
+        x="228"
+        y="106"
+        width="64"
+        height="22"
+        rx="6"
+        className="fill-ds-accent animate-pulse2"
+      />
+      <rect x="228" y="142" width="96" height="28" rx="6" className="fill-ds-purple/15" />
+      <circle cx="200" cy="114" r="12" className="fill-ds-bg stroke-ds-border2" strokeWidth="2" />
+      <text
+        x="200"
+        y="118"
+        textAnchor="middle"
+        className="fill-ds-muted"
+        fontSize="10"
+        style={{ fontFamily: 'var(--font-mono)' }}
+      >
+        vs
+      </text>
+    </g>
+  )
+}
+
+// ── Slow on mobile — phone mid-load next to a stopwatch and page weight ────
+function SlowPhoneScene() {
+  const mono = { fontFamily: 'var(--font-mono)' }
+  return (
+    <g>
+      <rect
+        x="66"
+        y="36"
+        width="86"
+        height="156"
+        rx="14"
+        className="fill-ds-surface stroke-ds-border2"
+        strokeWidth="2.5"
+      />
+      <rect x="78" y="56" width="62" height="34" rx="6" className="fill-ds-muted/20" />
+      <rect x="78" y="98" width="46" height="6" rx="3" className="fill-ds-muted/30" />
+      <rect x="78" y="110" width="58" height="6" rx="3" className="fill-ds-muted/30" />
+      <rect x="78" y="168" width="62" height="6" rx="3" className="fill-ds-border" />
+      <rect x="78" y="168" width="22" height="6" rx="3" className="fill-ds-accent animate-pulse2" />
+      <circle
+        cx="248"
+        cy="88"
+        r="40"
+        className="fill-ds-surface2 stroke-ds-border2"
+        strokeWidth="3"
+      />
+      <path
+        d="M248 88 L272 66"
+        className="stroke-ds-warning"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+      <circle cx="248" cy="88" r="4" className="fill-ds-warning" />
+      <rect x="238" y="42" width="20" height="5" rx="2" className="fill-ds-border2" />
+      <text
+        x="248"
+        y="144"
+        textAnchor="middle"
+        className="fill-ds-muted"
+        fontSize="10"
+        style={mono}
+      >
+        LCP &lt; 2.5s
+      </text>
+      <rect x="196" y="156" width="124" height="6" rx="3" className="fill-ds-error/60" />
+      <rect x="196" y="168" width="84" height="6" rx="3" className="fill-ds-warning/60" />
+      <rect x="196" y="180" width="44" height="6" rx="3" className="fill-ds-success/60" />
+    </g>
+  )
+}
+
+// ── Ads checklist — ticked list, and the ad that leads to a matching page ──
+function AdsChecklistScene() {
+  return (
+    <g>
+      <rect
+        x="62"
+        y="36"
+        width="130"
+        height="156"
+        rx="10"
+        className="fill-ds-surface stroke-ds-border"
+        strokeWidth="2"
+      />
+      <rect x="102" y="30" width="50" height="12" rx="5" className="fill-ds-border2" />
+      {[0, 1, 2, 3, 4, 5].map((i) => {
+        const y = 56 + i * 22
+        const hit = i === 2
+        return (
+          <g key={i}>
+            <rect
+              x="76"
+              y={y}
+              width="12"
+              height="12"
+              rx="3"
+              className={hit ? 'fill-ds-accent animate-pulse2' : 'fill-ds-success/20'}
+            />
+            <path
+              d={`M79 ${y + 6}l3 3 5-6`}
+              className={hit ? 'stroke-ds-bg' : 'stroke-ds-success'}
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+            <rect
+              x="96"
+              y={y + 4}
+              width={[78, 64, 84, 58, 72, 66][i]}
+              height="4"
+              rx="2"
+              className="fill-ds-muted/30"
+            />
+          </g>
+        )
+      })}
+      <rect
+        x="226"
+        y="44"
+        width="110"
+        height="30"
+        rx="6"
+        className="fill-ds-surface2 stroke-ds-border2"
+        strokeWidth="1.5"
+      />
+      <rect x="236" y="52" width="22" height="8" rx="2" className="fill-ds-warning/70" />
+      <rect x="236" y="64" width="80" height="4" rx="2" className="fill-ds-muted/40" />
+      <g className="animate-float">
+        <path
+          d="M281 82v22m-6-6l6 7 6-7"
+          className="stroke-ds-accent"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      </g>
+      <rect
+        x="226"
+        y="116"
+        width="110"
+        height="76"
+        rx="8"
+        className="fill-ds-surface stroke-ds-accent"
+        strokeWidth="2"
+      />
+      <rect x="238" y="128" width="64" height="8" rx="4" className="fill-ds-text/80" />
+      <rect x="238" y="144" width="86" height="4" rx="2" className="fill-ds-muted/40" />
+      <rect x="238" y="160" width="58" height="20" rx="6" className="fill-ds-accent" />
     </g>
   )
 }

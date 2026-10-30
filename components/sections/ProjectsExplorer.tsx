@@ -3,7 +3,7 @@
 import { useId, useMemo, useState, type CSSProperties, type KeyboardEvent } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Badge, Button } from '@/components/ui'
+import { Badge, Button, CardTilt } from '@/components/ui'
 import { Icon } from '@/components/icons/Icon'
 import { AnimatedCover } from '@/components/sections/AnimatedCover'
 import { projectBrand } from '@/components/icons/ProjectMark'
@@ -75,21 +75,23 @@ function Detail({ project }: { project: ExplorerProject }) {
 
   return (
     <div className="pe-swap flex flex-col gap-6" style={ringVars(project.slug)}>
-      <div className="card-spotlight card-glow rounded-xl">
-        <div className="relative h-52 w-full overflow-hidden rounded-xl sm:h-64 lg:h-72">
-          {project.image ? (
-            <Image
-              src={project.image}
-              alt={project.title}
-              fill
-              className="object-cover"
-              sizes="(min-width: 1024px) 600px, 100vw"
-            />
-          ) : (
-            <AnimatedCover slug={project.slug} stats={project.coverStats} />
-          )}
+      <CardTilt>
+        <div className="card-spotlight card-glow rounded-xl">
+          <div className="relative h-52 w-full overflow-hidden rounded-xl sm:h-64 lg:h-72">
+            {project.image ? (
+              <Image
+                src={project.image}
+                alt={project.title}
+                fill
+                className="object-cover"
+                sizes="(min-width: 1024px) 600px, 100vw"
+              />
+            ) : (
+              <AnimatedCover slug={project.slug} stats={project.coverStats} />
+            )}
+          </div>
         </div>
-      </div>
+      </CardTilt>
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-3">
