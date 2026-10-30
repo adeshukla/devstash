@@ -16,7 +16,7 @@ import { IntroVideo } from '@/components/ui/IntroVideo'
 
 const title = 'About Adesh Shukla — UI Developer'
 const description =
-  'UI developer, 6+ years — 200+ PPC landing pages for US clients, plus CSS, responsive layout, accessibility and page-speed work. Ghaziabad, NCR. Open to UI roles.'
+  'UI developer, 6+ years — 200+ PPC landing pages for US clients, plus CSS, responsive layout, accessibility and page-speed work. Based in India, working remotely. Open to UI roles.'
 
 export const metadata: Metadata = buildMetadata({
   title,
@@ -89,7 +89,7 @@ const CURRENTLY: { icon: IconName; text: string }[] = [
   { icon: 'automation', text: 'Automating workflows with n8n and local LLMs (Ollama)' },
   {
     icon: 'career',
-    text: 'Open to frontend roles · anywhere in India or remote/hybrid · immediate–20 days notice',
+    text: 'Open to frontend roles · remote worldwide, or hybrid in India · immediate–20 days notice',
   },
   // TODO: Keep this section updated
 ]
@@ -301,8 +301,8 @@ export default function AboutPage() {
             <div className="text-ds-muted flex max-w-[70ch] flex-col gap-4 text-lg leading-relaxed">
               <p>
                 DevStash (devstash.me) is the personal site of Adesh Shukla, a UI developer in
-                Ghaziabad, India. It holds his project case studies, a blog about frontend
-                development, Next.js and workflow automation, and a set of free browser tools in the{' '}
+                India. It holds his project case studies, a blog about frontend development, Next.js
+                and workflow automation, and a set of free browser tools in the{' '}
                 <Link
                   href="/lab"
                   className="text-ds-accent-strong decoration-ds-accent/40 hover:decoration-ds-accent underline underline-offset-2"

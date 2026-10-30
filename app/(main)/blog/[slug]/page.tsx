@@ -3,6 +3,7 @@ import { H1_HEADLINE } from '@/lib/utils/typography'
 import { notFound } from 'next/navigation'
 import { type Metadata } from 'next'
 import Image from 'next/image'
+import Link from 'next/link'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import remarkGfm from 'remark-gfm'
 import rehypeSlug from 'rehype-slug'
@@ -135,7 +136,9 @@ export default async function BlogPostPage({ params }: Props) {
             <div className="max-w-3xl">
               <MountReveal delay={80}>
                 <div className="mb-4 flex items-center gap-3">
-                  <Badge variant="blue">{post.category.replace('-', ' ')}</Badge>
+                  <Link href={`/blog/category/${post.category}`}>
+                    <Badge variant="blue">{post.category.replace('-', ' ')}</Badge>
+                  </Link>
                   <span className="text-ds-muted text-xs">{post.readingTime} min read</span>
                 </div>
               </MountReveal>

@@ -187,7 +187,7 @@ export function Footer() {
         {/* Bottom row */}
         <div className="border-ds-border mt-6 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-ds-muted font-mono text-[12px]">
-            © {year} {siteConfig.name} · crafted with <CoffeeCup /> in Ghaziabad
+            © {year} {siteConfig.name} · crafted with <CoffeeCup /> in India
           </p>
           <nav aria-label="Legal links">
             <ul className="m-0 flex list-none gap-4 p-0">

@@ -38,7 +38,7 @@ export function buildPersonSchema(): WithContext<Person> {
     email: siteConfig.author.email,
     jobTitle: 'UI Developer',
     description:
-      'Freelance UI developer in Ghaziabad, India. Builds custom websites, PPC landing pages and fast, accessible React and Next.js frontends.',
+      'Freelance UI developer in India. Builds custom websites, PPC landing pages and fast, accessible React and Next.js frontends.',
     // Every profile that corroborates the same identity. The X handle was
     // already in site.config but had never been emitted here.
     sameAs: [siteConfig.author.github, siteConfig.author.linkedin, siteConfig.author.x],

@@ -126,3 +126,5 @@ Add a fallback when the component occupies real layout space. Without one, that 
 Any hook that reads request-time information cannot run during static prerendering, and Next.js will require you to declare a boundary around it. `useSearchParams()` is just the one people hit first, because query strings are so ordinary that it doesn't feel like a request-time dependency until the build fails.
 
 If you're working through other Next.js 16 App Router migration issues — `params` and `searchParams` becoming Promises is the other big one, and it [fails silently rather than at build time](/blog/nextjs-16-params-promise-undefined) — I've collected the patterns I actually use in [Next.js 16 App Router: Patterns I Actually Use](/blog/nextjs-16-app-router-patterns).
+
+Another build-time debugging write-up from the same stack: [Tailwind v4 classes not working](/blog/tailwind-v4-classes-not-working).

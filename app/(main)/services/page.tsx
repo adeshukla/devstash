@@ -73,7 +73,7 @@ const FAQ = [
   {
     question: 'Are you available for freelance or contract work?',
     answer:
-      'Yes. I am open to freelance and contract frontend work anywhere in India, remote or hybrid, with immediate to roughly 20 days notice.',
+      'Yes. I am open to freelance and contract frontend work remotely for clients worldwide, including the US, with immediate to roughly 20 days notice.',
   },
   {
     question: 'How much does a project cost?',
@@ -112,7 +112,7 @@ export default function ServicesPage() {
           <p className="text-ds-accent mt-6 font-mono text-sm">Work with me</p>
           <h1 className={`${H1_HEADLINE} mt-3`}>Need a frontend built, or a workflow automated?</h1>
           <p className="text-ds-muted mt-3 max-w-lg">
-            Open to freelance and contract frontend work — anywhere in India, remote or hybrid.
+            Open to freelance and contract frontend work — remote, for clients and teams worldwide.
             Immediate to ~20 days notice.
           </p>
         </div>

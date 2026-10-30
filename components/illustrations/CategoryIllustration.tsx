@@ -140,7 +140,7 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   'custom-website-vs-template-small-business': 'template-vs-custom',
   'why-is-my-website-slow-on-mobile': 'slow-phone',
   'google-ads-landing-page-checklist': 'ads-checklist',
-  'how-much-does-a-landing-page-cost-in-india': 'template-vs-custom',
+  'how-much-does-a-landing-page-cost': 'template-vs-custom',
 }
 
 interface CategoryIllustrationProps {

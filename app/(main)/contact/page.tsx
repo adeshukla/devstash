@@ -12,7 +12,7 @@ import type { IconName } from '@/components/icons/Icon'
 
 const title = 'Contact Adesh Shukla — Frontend Developer'
 const description =
-  'Get in touch with Adesh Shukla about frontend roles, freelance projects, or collaboration. Based in Ghaziabad, open to roles anywhere in India or remote.'
+  'Get in touch with Adesh Shukla about frontend roles, freelance projects, or collaboration. Based in India, working remotely with teams and clients in the US and worldwide.'
 
 export const metadata: Metadata = buildMetadata({
   title,
@@ -59,7 +59,7 @@ const FAQ = [
   {
     question: 'Do you work with teams outside India?',
     answer:
-      'My availability is stated for work anywhere in India, remote or hybrid. If you are elsewhere, send a message and we can see whether it fits.',
+      'Yes. I am based in India and work remotely with US and international clients. Send a message with your time zone and we can agree on overlap hours.',
   },
 ]
 
@@ -79,8 +79,8 @@ export default function ContactPage() {
           />
           <h1 className={`${H1_DISPLAY} mt-6`}>Get in touch</h1>
           <p className="text-ds-muted mt-3 max-w-lg">
-            Open to frontend roles anywhere in India — on-site, hybrid or remote — freelance
-            projects, or just a chat about code, automation, or bikes.
+            Open to remote frontend roles worldwide (or hybrid in India), freelance projects, or
+            just a chat about code, automation, or bikes.
           </p>
         </div>
       </section>
@@ -125,7 +125,7 @@ export default function ContactPage() {
                     Location
                   </h2>
                   <p className="text-ds-muted text-sm">
-                    Ghaziabad, UP — open to roles anywhere in India: on-site, hybrid or remote.
+                    India — working remotely with teams and clients in the US and worldwide.
                   </p>
                 </div>
 

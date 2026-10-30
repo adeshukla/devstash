@@ -1,6 +1,6 @@
 # DevStash
 
-> DevStash (devstash.me) is the personal site of Adesh Shukla, a UI developer in Ghaziabad, India, working with React and Next.js. It holds his project case studies, a technical blog on frontend, Next.js and workflow automation, and free browser tools.
+> DevStash (devstash.me) is the personal site of Adesh Shukla, a UI developer in India, working with React and Next.js. It holds his project case studies, a technical blog on frontend, Next.js and workflow automation, and free browser tools.
 
 DevStash is not a generic portfolio template — it's the working site of one developer, covering shipped projects, technical writing, and free tools, all built by the same person whose name is on the site. It is not connected to the other products named DevStash (devstash.io, devstash.app, devstash.dev).
 
@@ -41,7 +41,7 @@ All run in the browser, free, no signup.
 
 ## Other sections
 
-- [Services](https://devstash.me/services): freelance and contract work — custom websites, PPC landing pages (200+ delivered for US clients), website speed and Core Web Vitals fixes, React/Next.js frontends. Based in Ghaziabad (Delhi NCR), India; works remotely. Pricing is quoted per project via the contact page; reply within 24 hours.
+- [Services](https://devstash.me/services): freelance and contract work — custom websites, PPC landing pages (200+ delivered for US clients), website speed and Core Web Vitals fixes, React/Next.js frontends. Based in India; works remotely with US and international clients. Pricing is quoted per project via the contact page; reply within 24 hours.
 - [Resources](https://devstash.me/resources): curated docs/articles/references
 - [Tools](https://devstash.me/tools): the author's real daily toolchain
 - [Contact](https://devstash.me/contact)
