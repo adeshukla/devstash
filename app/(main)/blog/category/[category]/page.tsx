@@ -10,12 +10,28 @@ import { Breadcrumb } from '@/components/layout'
 import { BlogList } from '@/components/blog/BlogList'
 import { getAllPosts, getPostsByCategory } from '@/lib/markdown/blog'
 
-// Real post titles make each archive's description unique instead of boilerplate.
-function archiveDescription(label: string, titles: string[]) {
-  const base = `${titles.length} posts on ${label}: `
-  return (base + titles.slice(0, 2).join('; ')).slice(0, 157).trimEnd()
-}
+import Link from 'next/link'
 import { type BlogCategory, BLOG_CATEGORIES } from '@/types/blog'
+
+// One sentence per category, describing what its posts actually cover. It is the
+// meta description and the visible intro, so each archive page has real copy
+// instead of just a post count.
+const CATEGORY_INTRO: Record<BlogCategory, string> = {
+  automation:
+    'Notes on n8n workflows, Groq prompts and calendar automation: what I automate, what I deliberately leave manual, and the patterns that held up.',
+  frontend:
+    'Next.js 16 App Router, Tailwind v4, accessibility, landing pages and custom websites: build notes, debugging write-ups and plain guides for site owners.',
+  performance:
+    'Core Web Vitals and mobile page speed: why pages are slow on phones, how to fix LCP, INP and layout shift, and what to check before paid traffic.',
+  'ai-workflows':
+    'AI in day-to-day development: coding assistants, MCP, local models and agentic browsing. Where they help, where they fail, and how I check the output.',
+  devtools:
+    'Comparisons of developer tooling, written from using it on real projects: what each tool is good at and where the differences actually show up.',
+  tutorials:
+    'Step-by-step explainers that show the working, such as how CSS cubic-bezier easing curves behave and how to choose one for a real element.',
+  career:
+    'Working notes on being a solo developer with AI assistants: what got removed from the workload, what did not, and what it asks of you.',
+}
 
 // ─── Static Params ────────────────────────────────────────────────────────────
 
@@ -31,10 +47,7 @@ type Props = { params: Promise<{ category: string }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category } = await params
   const label = BLOG_CATEGORIES.find((c) => c.value === category)?.label ?? category
-  const desc = archiveDescription(
-    label,
-    getPostsByCategory(category as BlogCategory).map((p) => p.title)
-  )
+  const desc = CATEGORY_INTRO[category as BlogCategory] ?? `Posts on ${label}.`
 
   return buildMetadata({
     title: `${label} — Blog`,
@@ -81,7 +94,8 @@ export default async function CategoryPage({ params }: Props) {
           <div className="mt-6">
             <p className="text-ds-muted mb-2 font-mono text-sm">Category</p>
             <h1 className={`${H1_DISPLAY} mb-3`}>{validCategory.label}</h1>
-            <p className="text-ds-muted">
+            <p className="text-ds-muted max-w-2xl">{CATEGORY_INTRO[category as BlogCategory]}</p>
+            <p className="text-ds-muted mt-3 font-mono text-sm">
               {posts.length} post{posts.length !== 1 ? 's' : ''}
             </p>
           </div>
@@ -91,6 +105,21 @@ export default async function CategoryPage({ params }: Props) {
       <section className="py-16">
         <div className="max-w-site mx-auto px-6">
           <BlogList posts={posts} emptyMessage={`No posts in ${validCategory.label} yet.`} />
+          <nav aria-label="Other topics" className="border-ds-border mt-12 border-t pt-8">
+            <p className="text-ds-muted mb-3 font-mono text-sm">Other topics</p>
+            <ul className="flex flex-wrap gap-2">
+              {BLOG_CATEGORIES.filter((c) => c.value !== category).map((c) => (
+                <li key={c.value}>
+                  <Link
+                    href={`/blog/category/${c.value}`}
+                    className="border-ds-border text-ds-muted hover:border-ds-border2 hover:text-ds-text rounded-full border px-3.5 py-1.5 text-sm transition-colors"
+                  >
+                    {c.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
       </section>
     </>

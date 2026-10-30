@@ -4,7 +4,7 @@ slug: 'screen-reader-accessibility-checklist'
 description: 'Practical screen-reader accessibility checks for React apps — semantic HTML, focus management, ARIA landmarks, and how I actually test them.'
 author: 'Adesh Shukla'
 createdAt: '2026-07-02'
-updatedAt: '2026-07-02'
+updatedAt: '2026-10-31'
 category: 'frontend'
 tags: ['accessibility', 'frontend', 'react', 'aria']
 readingTime: 8
@@ -26,7 +26,7 @@ Accessibility usually gets treated as a checkbox — run an automated audit, fix
 
 ## Semantic HTML first — ARIA is a patch, not a starting point
 
-The single highest-leverage thing you can do for screen reader users is use the HTML element that already means what you're building. A `<button>` is focusable, announces its role, and responds to both click and keyboard activation for free. A `<div onClick>` styled to look like a button gets none of that — you'd have to hand-roll `role="button"`, `tabIndex="0"`, and a keydown handler for Enter/Space just to get back to where `<button>` started.
+The single most valuable thing you can do for screen reader users is use the HTML element that already means what you're building. A `<button>` is focusable, announces its role, and responds to both click and keyboard activation for free. A `<div onClick>` styled to look like a button gets none of that — you'd have to hand-roll `role="button"`, `tabIndex="0"`, and a keydown handler for Enter/Space just to get back to where `<button>` started.
 
 I keep a short mental checklist before reaching for a `<div>`:
 
@@ -114,7 +114,3 @@ That same accessibility tree now has a second audience: Lighthouse's Agentic Bro
 [Build Components](/projects/build-components) is the component set I built with these accessibility rules applied by default.
 
 On the design side, the [Figma to production handoff workflow](/blog/figma-to-production-handoff-workflow) is where these requirements are easiest to write down.
-
-<Callout type="info" title="Images to add">
-  /images/blog/screen-reader-accessibility-checklist.webp (featured/hero image)
-</Callout>

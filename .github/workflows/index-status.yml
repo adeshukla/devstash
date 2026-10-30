@@ -1,0 +1,29 @@
+name: Google Index Status
+
+# Weekly read-only report of which sitemap URLs Google has indexed, via the
+# Search Console URL Inspection API. The table appears on the run's summary
+# page. It cannot request indexing (no API exists for that on normal pages);
+# use it to see which URLs still need a manual "Request indexing".
+# Skips cleanly when the GSC secrets are not set.
+
+on:
+  schedule:
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Inspect sitemap URLs
+        run: node scripts/indexing/check-index-status.mjs
+        env:
+          NEXT_PUBLIC_SITE_URL: https://devstash.me
+          GSC_PROPERTY: ${{ secrets.GSC_PROPERTY }}
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
