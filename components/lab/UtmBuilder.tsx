@@ -23,6 +23,8 @@ import { useUrlSync } from './useUrlSync'
 import { ShareLinkButton } from './ShareLinkButton'
 import { UtmSheet } from './UtmSheet'
 import { UtmQr } from './UtmQr'
+import { UtmImport } from './UtmImport'
+import { ChannelNote } from './ChannelNote'
 
 const INITIAL: UtmFields = { url: '', source: '', medium: '', campaign: '', term: '', content: '' }
 const SHEET_KEY = 'devstash-utm-sheet'
@@ -272,6 +274,10 @@ export function UtmBuilder() {
     ])
   }
 
+  function importRows(next: Omit<SheetRow, 'id'>[]) {
+    updateRows([...rows, ...next.map((r) => ({ ...r, id: crypto.randomUUID() }))])
+  }
+
   function editRow(row: SheetRow) {
     setBulk(false)
     setFields(row.fields)
@@ -502,6 +508,7 @@ export function UtmBuilder() {
                     </span>
                   )}
                   <span className="font-mono text-sm break-all">{l.result.url}</span>
+                  <ChannelNote source={l.fields.source} medium={l.fields.medium} />
                   <button
                     type="button"
                     onClick={() => setQrUrl(l.result.url)}
@@ -551,6 +558,8 @@ export function UtmBuilder() {
           <ShareLinkButton getUrl={getShareUrl} />
         </div>
       </div>
+
+      <UtmImport onAdd={importRows} />
 
       {rows.length > 0 && (
         <UtmSheet

@@ -1,6 +1,13 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { buildUtmUrl, normalizeValue, lintRows, toCsv } from '../../lib/lab/utm.ts'
+import {
+  buildUtmUrl,
+  normalizeValue,
+  lintRows,
+  toCsv,
+  ga4Channel,
+  parseSheet,
+} from '../../lib/lab/utm.ts'
 import { buildSearch, pick } from '../../lib/lab/urlState.ts'
 import { escapeAttr, buildHtml, buildJsonLd, fitToWidth } from '../../lib/lab/metaTags.ts'
 
@@ -44,7 +51,7 @@ test('lint flags unknown medium, alias source, duplicates and mixed separators',
     mk({ source: 'google', medium: 'cpc', campaign: 'a-b' }),
   ]
   const text = lintRows(rows).join('\n')
-  assert.match(text, /not a standard GA4 medium/)
+  assert.match(text, /under Unassigned/)
   assert.match(text, /use "facebook"/)
   assert.match(text, /same link as row 1/)
   assert.match(text, /mix/)
@@ -163,4 +170,34 @@ test('linkWarnings: long link and term on a non-paid medium', async () => {
   assert.equal(linkWarnings(fields({ term: 'x', medium: 'email' }), 'https://e.com').length, 1)
   assert.equal(linkWarnings(fields({ term: 'x', medium: 'cpc' }), 'https://e.com').length, 0)
   assert.equal(linkWarnings(fields(), 'https://e.com/' + 'a'.repeat(2100)).length, 1)
+})
+
+test('GA4 channel follows the default grouping rules', () => {
+  assert.equal(ga4Channel('google', 'cpc'), 'Paid Search')
+  assert.equal(ga4Channel('Facebook', 'paid-social'), 'Paid Social')
+  assert.equal(ga4Channel('facebook', 'cpc'), 'Paid Social')
+  assert.equal(ga4Channel('linkedin', 'social'), 'Organic Social')
+  assert.equal(ga4Channel('newsletter', 'email'), 'Email')
+  assert.equal(ga4Channel('acme', 'ppc-ads'), 'Unassigned')
+  assert.equal(ga4Channel('', ''), '')
+})
+
+test('sheet import reads headers in any order, cleans values and reports bad lines', () => {
+  const r = parseSheet(
+    'campaign,url,utm_source,medium\n"Spring Sale",https://a.com/1,Google,cpc\n,nope,x,y\n,https://b.com/?utm_source=bing&utm_medium=cpc&utm_campaign=q,,'
+  )
+  assert.equal(r.rows.length, 2)
+  assert.match(r.rows[0].url, /utm_campaign=spring-sale/)
+  assert.match(r.rows[0].url, /utm_source=google/)
+  assert.deepEqual(
+    r.errors.map((e) => e.line),
+    [3]
+  )
+  assert.match(r.rows[1].url, /utm_source=bing&utm_medium=cpc&utm_campaign=q/)
+  assert.equal(r.fixed, 1)
+})
+
+test('sheet import without a header uses url, source, medium, campaign order', () => {
+  const r = parseSheet('https://a.com\tgoogle\tcpc\tsale')
+  assert.match(r.rows[0].url, /utm_campaign=sale/)
 })

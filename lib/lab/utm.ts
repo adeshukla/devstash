@@ -82,27 +82,69 @@ export interface SheetRow {
   url: string
 }
 
-// Mediums GA4's default channel grouping commonly recognises. Anything else
-// tends to land in "Unassigned", which is the usual cause of "my campaign
-// traffic is missing from the channel report".
-const KNOWN_MEDIUMS = new Set([
-  'cpc',
-  'ppc',
-  'paidsearch',
-  'paid-search',
-  'email',
-  'social',
-  'paid-social',
-  'organic',
-  'referral',
-  'display',
-  'cpm',
-  'banner',
-  'affiliate',
-  'video',
-  'sms',
-  'push',
+const SEARCH = new Set([
+  'google',
+  'bing',
+  'yahoo',
+  'baidu',
+  'duckduckgo',
+  'yandex',
+  'ecosia',
+  'naver',
+  'ask',
+  'aol',
+  'brave',
+  'startpage',
 ])
+const SOCIAL = new Set([
+  'facebook',
+  'fb',
+  'instagram',
+  'ig',
+  'linkedin',
+  'twitter',
+  'x',
+  'pinterest',
+  'reddit',
+  'tiktok',
+  'snapchat',
+  'whatsapp',
+  'threads',
+  'quora',
+  'tumblr',
+  'mastodon',
+])
+const VIDEO = new Set(['youtube', 'vimeo', 'twitch'])
+const PAID_MEDIUM = /^(.*cp.*|ppc|retargeting|paid.*)$/
+
+/**
+ * Which GA4 default channel a source/medium pair lands in. Follows Google's
+ * documented rules in their evaluation order, simplified: it ignores the
+ * Direct, Shopping and Cross-network cases and any custom channel groups the
+ * property defines. "Unassigned" is the usual cause of campaign traffic
+ * missing from the channel report.
+ */
+export function ga4Channel(source: string, medium: string): string {
+  const s = normalizeValue(source)
+  const m = normalizeValue(medium)
+  if (!s && !m) return ''
+  const paid = PAID_MEDIUM.test(m)
+  if (paid && SEARCH.has(s)) return 'Paid Search'
+  if (paid && SOCIAL.has(s)) return 'Paid Social'
+  if (paid && VIDEO.has(s)) return 'Paid Video'
+  if (/^(display|banner|expandable|interstitial|cpm)$/.test(m)) return 'Display'
+  if (paid) return 'Paid Other'
+  if (SOCIAL.has(s) && /^(social|social-network|social-media|sm)$/.test(m)) return 'Organic Social'
+  if (VIDEO.has(s) && m.includes('video')) return 'Organic Video'
+  if (SEARCH.has(s) && m === 'organic') return 'Organic Search'
+  if (/^(referral|app|link)$/.test(m)) return 'Referral'
+  if (/^e-?mail$/.test(m)) return 'Email'
+  if (m === 'affiliate') return 'Affiliates'
+  if (m === 'audio') return 'Audio'
+  if (s === 'sms' || m === 'sms') return 'SMS'
+  if (m.endsWith('push') || /mobile|notification/.test(m)) return 'Mobile Push Notifications'
+  return 'Unassigned'
+}
 
 const SOURCE_ALIASES: Record<string, string> = {
   fb: 'facebook',
@@ -121,9 +163,9 @@ export function lintRows(rows: SheetRow[]): string[] {
     const { source, medium } = row.fields
     const s = normalizeValue(source)
     const m = normalizeValue(medium)
-    if (m && !KNOWN_MEDIUMS.has(m))
+    if (ga4Channel(s, m) === 'Unassigned')
       out.push(
-        `Row ${n}: medium "${m}" is not a standard GA4 medium, so it may land in Unassigned.`
+        `Row ${n}: GA4 will file source "${s}" / medium "${m}" under Unassigned. Use a standard medium such as cpc, email or social.`
       )
     if (s && SOURCE_ALIASES[s])
       out.push(`Row ${n}: source "${s}" — use "${SOURCE_ALIASES[s]}" so it groups with other rows.`)
@@ -265,4 +307,93 @@ export function linkWarnings(fields: UtmFields, url: string): string[] {
       'utm_term is meant for paid-search keywords; it is probably not needed for this medium.'
     )
   return out
+}
+
+/** Splits CSV or tab-separated text into cells; handles quotes and escaped quotes. */
+function parseDelimited(text: string): string[][] {
+  const first = text.split(/\r?\n/, 1)[0]
+  const sep = first.includes('\t')
+    ? '\t'
+    : first.split(';').length > first.split(',').length
+      ? ';'
+      : ','
+  const rows: string[][] = []
+  let row: string[] = []
+  let cur = ''
+  let quoted = false
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]
+    if (quoted) {
+      if (ch === '"' && text[i + 1] === '"') {
+        cur += '"'
+        i++
+      } else if (ch === '"') quoted = false
+      else cur += ch
+    } else if (ch === '"' && !cur) quoted = true
+    else if (ch === sep) {
+      row.push(cur)
+      cur = ''
+    } else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && text[i + 1] === '\n') i++
+      row.push(cur)
+      rows.push(row)
+      row = []
+      cur = ''
+    } else cur += ch
+  }
+  if (cur || row.length) {
+    row.push(cur)
+    rows.push(row)
+  }
+  return rows.filter((r) => r.some((c) => c.trim()))
+}
+
+export const MAX_IMPORT_ROWS = 500
+
+/**
+ * A pasted or uploaded sheet of links. A header row is optional and may name
+ * columns "url, source, medium, campaign, term, content" with or without the
+ * utm_ prefix, in any order; without one the order is exactly that. Links that
+ * already carry utm_ params fill any blank cell. Values are cleaned the same
+ * way as in the form; rows that cannot be built are reported by line number.
+ */
+export function parseSheet(text: string): {
+  rows: Omit<SheetRow, 'id'>[]
+  errors: { line: number; message: string }[]
+  fixed: number
+  truncated: boolean
+} {
+  const table = parseDelimited(text.replace(/^﻿/, ''))
+  const cols: Record<string, number> = {}
+  const names = ['url', ...UTM_KEYS]
+  const head = table[0]?.map((c) => c.trim().toLowerCase().replace(/^utm_/, '')) ?? []
+  const hasHeader = head.includes('url') || head.includes('link')
+  if (hasHeader) head.forEach((h, i) => (cols[h === 'link' ? 'url' : h] ??= i))
+  else names.forEach((n, i) => (cols[n] = i))
+
+  const rows: Omit<SheetRow, 'id'>[] = []
+  const errors: { line: number; message: string }[] = []
+  let fixed = 0
+  const body = hasHeader ? table.slice(1) : table
+  body.slice(0, MAX_IMPORT_ROWS).forEach((cells, i) => {
+    const line = i + 1 + (hasHeader ? 1 : 0)
+    const get = (k: string) => (cols[k] === undefined ? '' : (cells[cols[k]] ?? '').trim())
+    const split = splitUtm(get('url'))
+    const fields: UtmFields = {
+      url: split ? split.base : get('url'),
+      source: get('source') || split?.fields.source || '',
+      medium: get('medium') || split?.fields.medium || '',
+      campaign: get('campaign') || split?.fields.campaign || '',
+      term: get('term') || split?.fields.term || '',
+      content: get('content') || split?.fields.content || '',
+    }
+    const built = buildUtmUrl(fields)
+    if (built.error || !built.url) {
+      errors.push({ line, message: built.error || 'No link on this line.' })
+      return
+    }
+    if (built.changes.length) fixed++
+    rows.push({ fields, url: built.url })
+  })
+  return { rows, errors, fixed, truncated: body.length > MAX_IMPORT_ROWS }
 }

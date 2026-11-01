@@ -15,7 +15,48 @@ function svgMarkup(qr: Qr, px?: number) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${qr.size} ${qr.size}"${dims} shape-rendering="crispEdges"><rect width="${qr.size}" height="${qr.size}" fill="#fff"/><path d="${qr.path}" fill="#000"/></svg>`
 }
 
-function save(blob: Blob, name: string) {
+interface SaveHandle {
+  createWritable: () => Promise<{ write: (b: Blob) => Promise<void>; close: () => Promise<void> }>
+}
+type SavePicker = (opts: {
+  suggestedName: string
+  types: { description: string; accept: Record<string, string[]> }[]
+}) => Promise<SaveHandle>
+
+/** Readable file name from the link, e.g. qr-google-spring-sale.png. */
+function fileName(url: string, ext: string) {
+  try {
+    const p = new URL(url).searchParams
+    const parts = [p.get('utm_source'), p.get('utm_campaign')].filter(Boolean)
+    if (parts.length) return `qr-${parts.join('-')}.${ext}`.slice(0, 80)
+  } catch {}
+  return `utm-qr.${ext}`
+}
+
+/**
+ * Opens the system "Save as" dialog where the browser has one (Chrome, Edge,
+ * Opera) so the user picks the folder. Firefox and Safari have no such API and
+ * fall back to a normal download.
+ */
+async function save(blob: Blob, name: string) {
+  const picker = (window as unknown as { showSaveFilePicker?: SavePicker }).showSaveFilePicker
+  if (picker) {
+    try {
+      const ext = name.slice(name.lastIndexOf('.'))
+      const handle = await picker({
+        suggestedName: name,
+        types: [
+          { description: ext.slice(1).toUpperCase() + ' image', accept: { [blob.type]: [ext] } },
+        ],
+      })
+      const file = await handle.createWritable()
+      await file.write(blob)
+      await file.close()
+      return
+    } catch (e) {
+      if ((e as DOMException).name === 'AbortError') return // user cancelled
+    }
+  }
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
   a.download = name
@@ -75,7 +116,7 @@ export function UtmQr({ url, onClose }: { url: string; onClose: () => void }) {
     const canvas = document.createElement('canvas')
     canvas.width = canvas.height = 1024
     canvas.getContext('2d')?.drawImage(img, 0, 0, 1024, 1024)
-    canvas.toBlob((b) => b && save(b, 'utm-qr.png'), 'image/png')
+    canvas.toBlob((b) => b && save(b, fileName(url, 'png')), 'image/png')
   }
 
   return (
@@ -118,7 +159,7 @@ export function UtmQr({ url, onClose }: { url: string; onClose: () => void }) {
           variant="outline"
           disabled={!qr}
           onClick={() =>
-            qr && save(new Blob([svgMarkup(qr)], { type: 'image/svg+xml' }), 'utm-qr.svg')
+            qr && save(new Blob([svgMarkup(qr)], { type: 'image/svg+xml' }), fileName(url, 'svg'))
           }
         >
           Download SVG

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui'
 import { copyText } from '@/lib/utils/clipboard'
+import { ChannelNote } from './ChannelNote'
 import { lintRows, toCsv, toTsv, type SheetRow } from '@/lib/lab/utm'
 
 function downloadCsv(rows: SheetRow[]) {
@@ -101,6 +102,7 @@ export function UtmSheet({
               <span className="text-ds-muted mr-2">{i + 1}</span>
               {row.url}
             </p>
+            <ChannelNote source={row.fields.source} medium={row.fields.medium} />
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
               <button
                 type="button"
