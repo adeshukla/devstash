@@ -29,5 +29,9 @@
     "outcome": "// TODO: No usage data yet — this is a self-initiated sample tool, not a deployed internal tool."
   },
   "coverStats": ["no data sent", "3 required fields", "URL API"],
-  "relatedPosts": ["ppc-landing-page-conversion-lessons"]
+  "relatedPosts": [
+    "ppc-landing-page-conversion-lessons",
+    "utm-naming-convention-for-teams",
+    "ga4-campaign-names-split-by-capital-letters"
+  ]
 }

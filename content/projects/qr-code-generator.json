@@ -1,7 +1,7 @@
 {
   "slug": "qr-code-generator",
   "title": "QR Code Generator",
-  "description": "Static QR codes for a website, WhatsApp chat, Wi-Fi, contact card, email, phone or text. Saves as PNG or SVG, prints, and never expires because nothing is redirected.",
+  "description": "Static QR codes for a website, WhatsApp chat, UPI payment, Wi-Fi, contact card, email, phone or text. Saves as PNG or SVG, prints, and never expires because nothing is redirected.",
   "longDescription": "A free QR generator that treats the code as what it is: text stored in a pattern. There is no redirect service, so a printed code keeps working and nothing you type, including a Wi-Fi password, is sent to a server. Colours, a caption, size and damage tolerance are optional, with a warning when the colours risk an unreadable code.",
   "status": "live",
   "featured": false,
@@ -15,7 +15,7 @@
   "highlights": [
     "Fully client-side: no API route, nothing is uploaded or stored",
     "Static codes, so there is no redirect that can lapse and no subscription",
-    "Seven content types, each validated with a plain-language message (country code for WhatsApp, WPA password length for Wi-Fi)",
+    "Eight content types, each validated with a plain-language message (country code for WhatsApp, WPA password length for Wi-Fi)",
     "Contrast check that warns about light-on-dark or low-contrast colours before printing",
     "Save as PNG or SVG through the system Save dialog where the browser has one, or print"
   ],
@@ -29,6 +29,6 @@
     ],
     "outcome": "// TODO: No usage data yet. This is a self-initiated tool, not a deployed one."
   },
-  "coverStats": ["static codes", "7 content types", "no data sent"],
+  "coverStats": ["static codes", "8 content types", "no data sent"],
   "relatedPosts": []
 }

@@ -1,5 +1,6 @@
 import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
 import { UtmToolkitNav } from '@/components/lab/UtmToolkitNav'
@@ -70,6 +71,17 @@ export default function UtmReportCleanerPage() {
             <ReportCleaner />
           </div>
         </section>
+
+        <p className="text-ds-muted mx-auto max-w-3xl px-6 pb-8 text-center text-sm">
+          Why rows split and how to stop it:{' '}
+          <Link
+            href="/blog/ga4-campaign-names-split-by-capital-letters"
+            className="text-ds-accent-strong underline"
+          >
+            read the guide
+          </Link>
+          .
+        </p>
 
         <FaqSection
           items={FAQ}

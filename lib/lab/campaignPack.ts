@@ -26,6 +26,16 @@ export interface PackInput {
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
 
+/** What to check before a tagged campaign goes live. Shown in the pack and in the builder. */
+export const LAUNCH_CHECKLIST: string[] = [
+  'Open each link in a private window and confirm the right page loads.',
+  'On that page, look at the address bar. The utm_ parameters should still be there; if they are gone, a redirect is dropping them.',
+  'Click the link while GA4 is open at Reports, then Realtime, and check the source and medium appear.',
+  'For paid ads, check the tracking part in the ad platform, then use its preview or a test click. Do not guess.',
+  'Scan each QR code with a phone and confirm it opens the right page.',
+  'A day or two after launch, open the traffic report and check each link landed in the channel shown in this pack.',
+]
+
 const STYLE = `
   body{font:15px/1.5 Arial,Helvetica,sans-serif;color:#111;margin:0;padding:32px;max-width:960px}
   h1{font-size:24px;margin:0 0 4px} h2{font-size:16px;margin:28px 0 8px}
@@ -38,6 +48,7 @@ const STYLE = `
   td.qr svg{width:110px;height:auto;display:block}
   .note{color:#666;font-size:12px}
   tr{break-inside:avoid}
+  .todo{list-style:none;padding:0}.todo li{padding:6px 0;font-size:14px}.todo input{margin-right:10px}
   @media print{body{padding:12px}}`
 
 /** Builds the full HTML document. Every text value is escaped. */
@@ -81,6 +92,10 @@ ${problems}
 ${rows}
 </tbody>
 </table>
+<h2>Before you launch</h2>
+<ul class="todo">
+${LAUNCH_CHECKLIST.map((t) => `<li><label><input type="checkbox"> ${esc(t)}</label></li>`).join('\n')}
+</ul>
 <p class="note">QR codes are static: the link is stored in the pattern, so they never expire.</p>
 </main>
 </body></html>`

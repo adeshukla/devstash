@@ -9,7 +9,7 @@ import { FaqSection } from '@/components/sections/FaqSection'
 export const metadata: Metadata = buildMetadata({
   title: 'Free QR Code Generator: WhatsApp, Wi-Fi, Contact',
   description:
-    'Free QR codes that never expire: website, WhatsApp chat, Wi-Fi, contact card, email, phone or text. Save as PNG or SVG, or print. No signup; runs in your browser.',
+    'Free QR codes that never expire: website, WhatsApp, UPI, Wi-Fi, contact, email, phone or text. Save as PNG or SVG, or print. No signup; runs in your browser.',
   canonical: '/lab/qr-code-generator',
 })
 
@@ -28,6 +28,11 @@ const FAQ = [
     question: 'How do I get a WhatsApp number right?',
     answer:
       'Enter the full number with the country code first and no leading 0, for example 91 98765 43210 for India. The code opens a chat with that number, with your message ready to send.',
+  },
+  {
+    question: 'Is a UPI QR code safe to print?',
+    answer:
+      'It holds the UPI ID and payee name you type, so anyone who scans can pay that ID. Check the name, then pay a small amount from another UPI app to test it before you print. The link follows NPCI’s UPI linking specification; the newest public version I could find is from 2017, so the test payment matters. Nothing you type is stored or sent.',
   },
   {
     question: 'Is a Wi-Fi QR code safe to print?',
@@ -58,9 +63,9 @@ export default function QrCodeGeneratorPage() {
             <p className="text-ds-accent mb-4 font-mono text-sm">QR CODE GENERATOR</p>
             <h1 className={`${H1_HEADLINE}`}>QR codes that never expire.</h1>
             <p className="text-ds-muted mt-4 text-lg leading-relaxed">
-              Make a code for a website, a WhatsApp chat, Wi-Fi, a contact card, an email, a phone
-              number or text. Save it as PNG or SVG, or print it. Free, no signup, and nothing
-              leaves your browser.
+              Make a code for a website, a WhatsApp chat, a UPI payment, Wi-Fi, a contact card, an
+              email, a phone number or text. Save it as PNG or SVG, or print it. Free, no signup,
+              and nothing leaves your browser.
             </p>
           </div>
         </section>

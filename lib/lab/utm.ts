@@ -358,17 +358,47 @@ export function buildMatrix(
   urls: string[],
   base: UtmFields,
   channels: ChannelPreset[],
-  sep?: Separator
+  sep?: Separator,
+  /** Ad versions to test; each becomes its own utm_content and its own link. */
+  variants: string[] = []
 ): TaggedLink[] {
   const targets = channels.length
     ? channels.map((c) => ({ label: c.label, source: c.source, medium: c.medium }))
     : [{ label: '', source: base.source, medium: base.medium }]
-  return urls.flatMap((url) =>
-    targets.map((t) => {
-      const fields = { ...base, url, source: t.source, medium: t.medium }
-      return { label: t.label, fields, result: buildUtmUrl(fields, sep) }
-    })
-  )
+  const versions: (string | null)[] = variants.length ? variants : [null]
+  const out: TaggedLink[] = []
+  for (const url of urls)
+    for (const t of targets)
+      for (const v of versions) {
+        const fields = {
+          ...base,
+          url,
+          source: t.source,
+          medium: t.medium,
+          ...(v !== null && { content: v }),
+        }
+        out.push({
+          label: [t.label, v].filter(Boolean).join(' · '),
+          fields,
+          result: buildUtmUrl(fields, sep),
+        })
+        if (out.length >= MAX_LINKS) return out
+      }
+  return out
+}
+
+/** Pages x channels x versions can multiply fast; past this the list is cut. */
+export const MAX_LINKS = 300
+export const MAX_VARIANTS = 10
+
+/** "blue-button, green-button" or one per line, cleaned, without repeats. */
+export function parseVariants(text: string): string[] {
+  const seen = new Set<string>()
+  for (const part of text.split(/[,\n]/)) {
+    const v = normalizeValue(part)
+    if (v) seen.add(v)
+  }
+  return [...seen].slice(0, MAX_VARIANTS)
 }
 
 /** Adds "-YYYY-MM" to a campaign name unless it already ends with that month. */

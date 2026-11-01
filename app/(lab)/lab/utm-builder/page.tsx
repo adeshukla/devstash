@@ -128,6 +128,24 @@ export default function UtmBuilderPage() {
           </div>
         </section>
 
+        <p className="text-ds-muted mx-auto max-w-3xl px-6 pb-8 text-center text-sm">
+          More:{' '}
+          <Link
+            href="/blog/utm-naming-convention-for-teams"
+            className="text-ds-accent-strong underline"
+          >
+            a naming convention for teams
+          </Link>{' '}
+          and{' '}
+          <Link
+            href="/blog/ga4-campaign-names-split-by-capital-letters"
+            className="text-ds-accent-strong underline"
+          >
+            fixing campaign names split by capital letters
+          </Link>
+          .
+        </p>
+
         <FaqSection
           items={FAQ}
           title="UTM builder questions"

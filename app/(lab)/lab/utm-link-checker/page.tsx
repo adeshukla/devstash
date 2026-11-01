@@ -1,5 +1,6 @@
 import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
 import { UtmToolkitNav } from '@/components/lab/UtmToolkitNav'
@@ -139,6 +140,17 @@ export default function UtmLinkCheckerPage() {
             </div>
           </div>
         </section>
+
+        <p className="text-ds-muted mx-auto max-w-3xl px-6 pb-8 text-center text-sm">
+          Want your whole team to tag the same way?{' '}
+          <Link
+            href="/blog/utm-naming-convention-for-teams"
+            className="text-ds-accent-strong underline"
+          >
+            Read the naming convention guide
+          </Link>
+          .
+        </p>
 
         <FaqSection
           items={FAQ}

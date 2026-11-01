@@ -8,6 +8,7 @@ import { analyzeLink, MAX_CHECK_LINKS } from '@/lib/lab/utmCheck'
 import { splitUtm, type SheetRow } from '@/lib/lab/utm'
 import { mergeRows } from '@/lib/lab/workspace'
 import { KEYS, readStored, writeStored } from './storage'
+import { trackLab } from './track'
 
 const EXAMPLE =
   'https://example.com/spring?utm_source=Google&utm_medium=cpc&UTM_Campaign=Spring Sale\nhttps://example.com/news?utm_source=newsletter&utm_medium=email&utm_campaign=spring-sale-2026-03'
@@ -38,6 +39,7 @@ export function UtmChecker() {
   )
 
   function addToSaved() {
+    trackLab('link-checker', 'add_to_saved')
     const rows: SheetRow[] = []
     for (const r of addable) {
       const url = r.cleaned || r.input
@@ -62,6 +64,7 @@ export function UtmChecker() {
 
   async function copy(value: string, id: string) {
     if (!(await copyText(value))) return
+    trackLab('link-checker', id === 'all' ? 'copy_all_cleaned' : 'copy_cleaned')
     setCopied(id)
     setTimeout(() => setCopied(''), 2000)
   }

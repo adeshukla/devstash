@@ -19,6 +19,7 @@ import {
   wifiPayload,
   contactPayload,
   textPayload,
+  upiPayload,
 } from '../../lib/lab/qrPayload.ts'
 import { analyzeLink, adsSuffix } from '../../lib/lab/utmCheck.ts'
 import { makeQr, qrSvg, contrastRatio, scanWarning } from '../../lib/lab/qr.ts'
@@ -28,6 +29,9 @@ import {
   decodeRules,
   rulesVersion,
   ruleIssues,
+  patternError,
+  matchesPattern,
+  patternExample,
 } from '../../lib/lab/utmRules.ts'
 import { withMonth, placeholdersFor } from '../../lib/lab/utm.ts'
 import {
@@ -37,6 +41,8 @@ import {
   toCsv,
   ga4Channel,
   parseSheet,
+  parseVariants,
+  buildMatrix,
 } from '../../lib/lab/utm.ts'
 import { buildSearch, pick } from '../../lib/lab/urlState.ts'
 import { escapeAttr, buildHtml, buildJsonLd, fitToWidth } from '../../lib/lab/metaTags.ts'
@@ -601,4 +607,110 @@ test('landing graphics: icons match the text, never repeat in a row, and every a
     assert.doesNotMatch(svg, /<text/, type + ' must carry no figures or labels')
   }
   assert.match(ringsSvg(), /aria-hidden="true"/)
+})
+
+test('team campaign pattern: validates, matches, round-trips and flags rows', () => {
+  assert.equal(patternError('{name}-{yyyy}-{mm}'), '')
+  assert.match(patternError('{nam}-{yyyy}'), /Unknown part \{nam\}/)
+  assert.match(patternError('spring'), /at least one part/)
+  assert.match(patternError('{name} {yyyy}'), /only lowercase/)
+  const rules = {
+    channels: [{ label: 'G', source: 'google', medium: 'cpc' }],
+    separator: '-',
+    pattern: '{name}-{yyyy}-{mm}',
+  }
+  assert.equal(matchesPattern('spring-sale-2026-11', rules), true)
+  assert.equal(matchesPattern('spring-sale', rules), false)
+  assert.equal(matchesPattern('spring-sale-26-11', rules), false)
+  assert.equal(matchesPattern('anything', { ...rules, pattern: '' }), true)
+  assert.equal(
+    patternExample('{name}-{yyyy}-{mm}', '_', new Date(2026, 10, 2)),
+    'spring_sale_2026_11'
+  )
+  assert.deepEqual(decodeRules(encodeRules(rules)), rules)
+  assert.notEqual(rulesVersion(rules), rulesVersion({ ...rules, pattern: '' }))
+  assert.equal(decodeRules(encodeRules({ ...rules, pattern: '' })).pattern, undefined)
+  const row = (campaign) => ({
+    id: '1',
+    url: 'u',
+    fields: {
+      url: 'https://e.com',
+      source: 'google',
+      medium: 'cpc',
+      campaign,
+      term: '',
+      content: '',
+    },
+  })
+  assert.match(
+    ruleIssues([row('spring-sale')], rules).join('\n'),
+    /does not follow the team pattern \{name\}-\{yyyy\}-\{mm\}/
+  )
+  assert.equal(ruleIssues([row('spring-sale-2026-11')], rules).length, 0)
+})
+
+test('ad versions multiply pages x channels x versions, with a cap', () => {
+  assert.deepEqual(parseVariants('Blue Button, green-button,, blue-button\nred'), [
+    'blue-button',
+    'green-button',
+    'red',
+  ])
+  const base = { url: '', source: '', medium: '', campaign: 'c', term: '', content: 'ignored' }
+  const channels = [
+    { label: 'Google Ads', source: 'google', medium: 'cpc' },
+    { label: 'Newsletter', source: 'newsletter', medium: 'email' },
+  ]
+  const links = buildMatrix(['https://a.com/1', 'https://a.com/2'], base, channels, undefined, [
+    'a',
+    'b',
+  ])
+  assert.equal(links.length, 8)
+  assert.equal(links[0].label, 'Google Ads · a')
+  assert.match(links[1].result.url, /utm_content=b/)
+  assert.doesNotMatch(links[0].result.url, /ignored/)
+  const plain = buildMatrix(['https://a.com/1'], base, channels)
+  assert.equal(plain.length, 2)
+  assert.match(plain[0].result.url, /utm_content=ignored/)
+  const many = buildMatrix(
+    Array.from({ length: 50 }, (_, i) => 'https://a.com/' + i),
+    base,
+    [...channels, { label: 'X', source: 'x', medium: 'social' }],
+    undefined,
+    ['a', 'b', 'c']
+  )
+  assert.equal(many.length, 300)
+})
+
+test('UPI payment link follows the NPCI parameters and rejects bad input', () => {
+  assert.equal(
+    upiPayload('shop@okhdfcbank', 'Acme Studio', '250', 'Invoice 1042').payload,
+    'upi://pay?pa=shop@okhdfcbank&pn=Acme%20Studio&am=250.00&cu=INR&tn=Invoice%201042'
+  )
+  assert.equal(
+    upiPayload('a.b-c_d@ybl', 'Ana', '', '').payload,
+    'upi://pay?pa=a.b-c_d@ybl&pn=Ana&cu=INR'
+  )
+  assert.equal(
+    upiPayload('ana@ybl', 'Ana', '₹1,250.5', '').payload,
+    'upi://pay?pa=ana@ybl&pn=Ana&am=1250.50&cu=INR'
+  )
+  assert.deepEqual(upiPayload('', '', '', ''), { payload: '', error: '' })
+  assert.match(upiPayload('nobank', 'Ana', '', '').error, /name@bank/)
+  assert.match(upiPayload('ana@ybl', '', '', '').error, /payee name/)
+  assert.match(upiPayload('ana@ybl', 'Ana', '12.345', '').error, /amount/)
+  assert.match(upiPayload('ana@ybl', 'Ana', '0', '').error, /amount/)
+  assert.match(upiPayload('ana@ybl', 'Ana', '', 'x'.repeat(51)).error, /under 50/)
+})
+
+test('campaign pack carries the launch checklist', () => {
+  const html = buildPackHtml({
+    title: 't',
+    owner: '',
+    date: '2026-11-02',
+    rules: '',
+    issues: [],
+    items: [],
+  })
+  assert.match(html, /Before you launch/)
+  assert.match(html, /type="checkbox"/)
 })

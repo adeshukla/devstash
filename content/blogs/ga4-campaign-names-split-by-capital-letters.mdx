@@ -1,0 +1,91 @@
+---
+title: 'GA4 Campaign Names Split by Capital Letters: How to Fix and Prevent It'
+seoTitle: 'Fix GA4 Campaign Names Split by Capital Letters'
+slug: 'ga4-campaign-names-split-by-capital-letters'
+description: 'GA4 can show Spring_Sale, spring-sale and SPRING-SALE as three campaigns. Why it happens, how to merge the rows in your reports, and how to stop it.'
+author: 'Adesh Shukla'
+createdAt: '2026-11-02'
+updatedAt: '2026-11-02'
+category: 'tutorials'
+tags: ['ga4', 'utm', 'analytics', 'reporting']
+readingTime: 6
+canonical: 'https://devstash.me/blog/ga4-campaign-names-split-by-capital-letters'
+draft: false
+featured: false
+faqs:
+  - question: 'Why does GA4 show the same campaign on several rows?'
+    answer: 'Each distinct string is a separate value. Spring_Sale, spring-sale and SPRING-SALE are three strings, so a report groups them as three campaigns even though you meant one.'
+  - question: 'Can I merge old campaign names inside GA4?'
+    answer: 'I could not find a setting that renames or merges values that GA4 has already collected. The practical fix is to clean the values in the report you read, such as a Looker Studio calculated field or a spreadsheet, and to tag consistently from now on.'
+  - question: 'Does lowercasing fix everything?'
+    answer: 'It fixes capital letters. Spaces, underscores versus hyphens, and short names such as fb and facebook are separate problems, so a mapping from each spelling to one clean name is more reliable than a single formula.'
+  - question: 'Is the cleaned report the same as GA4 data?'
+    answer: 'No. GA4 keeps what it received. Cleaning changes how you read an export or a connected report, not what is stored in the property.'
+---
+
+You open a campaign report and one campaign has turned into three rows: `Spring_Sale`, `spring-sale` and `SPRING-SALE`. Each row looks small, none of them tells you what the campaign really did, and the totals you copy into a slide are wrong.
+
+This is one of the most common tagging problems, and it is easy to prevent and awkward to repair. Here is why it happens, how to read around it in reports you already have, and how to stop it happening again.
+
+## What is actually going wrong
+
+GA4 stores the campaign name as the text it was sent. Practitioner guides consistently report that it treats `Email` and `email` as different values, and the same goes for a hyphen versus an underscore or a space. A report then groups by exact text, so three spellings make three rows.
+
+Nothing is broken in GA4. The links were tagged by different people, at different times, in different ways. The data is simply faithful to the inconsistency.
+
+Check it yourself before you change anything: open a campaign report, sort by name, and look for rows that would be the same thing if you ignored capital letters, spaces and separators.
+
+## Why you cannot fix the history in GA4
+
+As far as I could find, there is no setting that renames or merges values GA4 has already collected. Every fix I found is either cleaning at the source going forward or cleaning the report you read.
+
+That second option is what this post is about, because it is the one that rescues numbers you already have.
+
+## Fix 1: merge the rows in a copy of the report
+
+1. Export the report as a CSV, or copy the table.
+2. Open the [report cleaner](/lab/utm-report-cleaner) and paste it in. It reads the campaign, source or medium column and finds rows that match once capitals, spaces, hyphens and underscores are ignored.
+3. It adds up only columns that can be added, such as sessions, users and key events, and tells you which rate or average columns it left out, because adding those would give a wrong number.
+4. Rename each merged group if you prefer a different clean name, then copy the merged table into your sheet.
+
+Nothing is uploaded; the merge runs in your browser. If you press "Remember these merges", the cleaner applies them automatically next month, so the monthly clean-up gets shorter each time.
+
+## Fix 2: clean the value inside Looker Studio or a spreadsheet
+
+If your report lives in Looker Studio, add a calculated field and use it in place of the original dimension:
+
+```
+LOWER(REGEXP_REPLACE(TRIM(Session campaign), "[ _]+", "-"))
+```
+
+In Google Sheets, with the label in A2:
+
+```
+=LOWER(REGEXP_REPLACE(TRIM(A2),"[ _]+","-"))
+```
+
+These handle capital letters, spaces and underscores. They do not handle two names that really differ, such as `fb-ads` and `facebook-ads`. For those you need an explicit mapping from each spelling to the clean one, which the report cleaner produces as an "original to clean" list and as a Looker Studio `CASE` field. I have not been able to test the generated `CASE` field against every Looker Studio data source, so check the first chart after you add it.
+
+## Fix 3: stop it at the source
+
+Repairing reports every month is a tax you only pay because links were tagged inconsistently. Three habits remove most of it:
+
+- **Lowercase everything.** The [UTM builder](/lab/utm-builder) cleans every value as you type and tells you what it changed.
+- **Pick one separator.** A hyphen or an underscore, never both. Team rules in the builder lock this for everyone who uses the same rules link.
+- **Use a pattern for campaign names**, for example `name-year-month`, so two people naming the same campaign arrive at the same text.
+
+For links that already exist, the [link checker](/lab/utm-link-checker) reads each one and flags capital letters, spaces, misspelled parameter names and mediums GA4 will file under Unassigned. More on that in the [naming convention guide](/blog/utm-naming-convention-for-teams).
+
+## A short checklist
+
+1. Find the split rows in the report.
+2. Merge them in a copy of the report, not in GA4.
+3. Save the mapping so next month starts clean.
+4. Retag live links the same way from now on.
+5. Check old links before reusing them in a new campaign.
+
+If you run paid campaigns, the same discipline belongs in your [pre-launch checklist](/blog/google-ads-landing-page-checklist).
+
+## Need help with tracking on a campaign page?
+
+I build fast landing pages and set up the tagging that goes with them. See [my services](/services) or [get in touch](/contact) with where your traffic comes from.

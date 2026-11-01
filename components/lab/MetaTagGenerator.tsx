@@ -480,7 +480,7 @@ export function MetaTagGenerator() {
             <Button type="button" size="sm" variant="ghost" onClick={loadExample}>
               Load example
             </Button>
-            <ShareLinkButton getUrl={getShareUrl} />
+            <ShareLinkButton getUrl={getShareUrl} tool="meta-tags" />
           </div>
         </div>
 

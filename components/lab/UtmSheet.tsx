@@ -7,6 +7,7 @@ import { ChannelNote } from './ChannelNote'
 import { makeQr, qrSvg } from '@/lib/lab/qr'
 import { buildPackHtml, type PackItem } from '@/lib/lab/campaignPack'
 import { saveBlob } from './saveFile'
+import { trackLab } from './track'
 import { printQrSheet, type PrintItem } from './qrPrint'
 import { ruleIssues, rulesActive, rulesVersion, type UtmRules } from '@/lib/lab/utmRules'
 import { ga4Channel, tokensIn, lintRows, toCsv, toTsv, type SheetRow } from '@/lib/lab/utm'
@@ -51,11 +52,13 @@ export function UtmSheet({
 
   async function copyForSheets() {
     if (!(await copyText(toTsv(rows)))) return
+    trackLab('utm-builder', 'copy_for_sheets')
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
   async function downloadPack() {
+    trackLab('utm-builder', 'download_pack')
     const items: PackItem[] = []
     for (const row of rows) {
       let svg = ''
@@ -90,6 +93,7 @@ export function UtmSheet({
   }
 
   async function printSheet() {
+    trackLab('utm-builder', 'print_qr_sheet')
     const items: PrintItem[] = []
     for (const row of rows) {
       if (tokensIn(row.url).length) continue
@@ -132,7 +136,15 @@ export function UtmSheet({
           <Button type="button" size="sm" variant="outline" onClick={copyForSheets}>
             <span aria-live="polite">{copied ? 'Copied ✓' : 'Copy for Google Sheets'}</span>
           </Button>
-          <Button type="button" size="sm" variant="outline" onClick={() => downloadCsv(rows)}>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              trackLab('utm-builder', 'download_csv')
+              downloadCsv(rows)
+            }}
+          >
             Download CSV
           </Button>
           <Button type="button" size="sm" variant="outline" onClick={downloadPack}>

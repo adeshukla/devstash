@@ -41,7 +41,7 @@ export function CssCodeBlock({ code, label = 'CSS' }: { code: string; label?: st
           scrollable-region-focusable). */}
       <pre
         tabIndex={0}
-        role="region"
+        role="group"
         aria-label={label ? `${label} code` : 'Code'}
         className="focus-visible:ring-ds-accent overflow-x-auto p-3 text-xs leading-relaxed focus-visible:ring-2 focus-visible:outline-none"
       >

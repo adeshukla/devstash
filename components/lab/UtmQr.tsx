@@ -40,7 +40,7 @@ export function UtmQr({ url, onClose }: { url: string; onClose: () => void }) {
         A static code: the link is stored inside the pattern, so it never expires and there is no
         subscription.
       </p>
-      <QrPanel text={url} fileBase={fileBase(url)} showText>
+      <QrPanel text={url} fileBase={fileBase(url)} showText tool="utm-builder">
         <Button type="button" size="sm" variant="ghost" onClick={() => dialog.current?.close()}>
           Close
         </Button>

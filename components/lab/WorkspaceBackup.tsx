@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui'
 import { parseWorkspace, type Workspace } from '@/lib/lab/workspace'
 import { saveBlob } from './saveFile'
+import { trackLab } from './track'
 
 export interface RestoreSummary {
   links: number
@@ -27,6 +28,7 @@ export function WorkspaceBackup({
   const [bad, setBad] = useState(false)
 
   async function download() {
+    trackLab('utm-builder', 'download_backup')
     const date = new Date().toLocaleDateString('sv-SE')
     await saveBlob(
       new Blob([JSON.stringify(build(), null, 2)], { type: 'application/json' }),

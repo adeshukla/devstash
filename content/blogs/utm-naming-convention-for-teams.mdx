@@ -1,0 +1,78 @@
+---
+title: 'A UTM Naming Convention for Teams (With a Free Template)'
+seoTitle: 'UTM Naming Convention for Teams + Template'
+slug: 'utm-naming-convention-for-teams'
+description: 'A simple UTM naming convention a team can follow: lowercase, one separator, approved channels and a campaign pattern, plus a free CSV template and rules link.'
+author: 'Adesh Shukla'
+createdAt: '2026-11-02'
+updatedAt: '2026-11-02'
+category: 'tutorials'
+tags: ['utm', 'ga4', 'analytics', 'marketing']
+readingTime: 7
+canonical: 'https://devstash.me/blog/utm-naming-convention-for-teams'
+draft: false
+featured: false
+faqs:
+  - question: 'What is a UTM naming convention?'
+    answer: 'A short written rule set for how UTM values are spelled: letter case, the separator between words, which sources and mediums are allowed, and the shape of campaign names. It exists so different people tagging the same campaign produce the same text.'
+  - question: 'Hyphens or underscores?'
+    answer: 'Either works. Guides disagree on which is better, and both agree on the thing that matters: pick one and never mix them. A mixed convention splits rows just as capital letters do.'
+  - question: 'Who should own the list of approved values?'
+    answer: 'One named person or role per team. If anyone can add a new source or medium, the list drifts. Requests for new values go to the owner, who adds them and updates the version.'
+  - question: 'How do I enforce a naming convention without paid software?'
+    answer: 'Use a builder that only offers the approved channels and a fixed separator, share the rules as a link so everyone starts from the same setup, and check saved links against the rules before launch.'
+---
+
+A UTM link is only as useful as the spelling on it. If three people tag the same campaign three ways, your reports show three campaigns. A naming convention is the cheap fix: a page of rules everyone follows, and a way to notice when someone does not.
+
+Here is a convention small enough to remember, the free template to start from, and how to enforce it without buying anything.
+
+## The six rules
+
+1. **Lowercase everything.** GA4 treats `Email` and `email` as different values.
+2. **One separator between words.** A hyphen or an underscore. Never both, and never spaces.
+3. **Source is the platform.** `google`, `linkedin`, `newsletter`. Use the full name, not `fb` or `li`.
+4. **Medium is the type of traffic**, from a short approved list: `cpc`, `paid-social`, `email`, `social`, `referral`. These are values GA4's default channel grouping recognises, which keeps links out of "Unassigned". Check the list against [Google's default channel group](https://support.google.com/analytics/answer/9756891) before you freeze it.
+5. **Campaign names follow one pattern.** For example `name-year-month`: `spring-sale-2026-11`. Two people naming the same campaign then arrive at the same text.
+6. **Never tag links inside your own site.** A tagged internal link can overwrite where the visit really came from.
+
+## Approved channels: the list that does the work
+
+The rules above are easy to agree to and easy to break. The part that actually keeps data clean is a short list of approved source and medium pairs, one per channel your team uses:
+
+```
+Google Ads, google, cpc
+LinkedIn Ads, linkedin, paid-social
+Newsletter, newsletter, email
+Organic social, linkedin, social
+Partner posts, acme, referral
+```
+
+Anything not on the list is a conversation, not a new value typed in a hurry. Give the list one owner. When a new channel appears, the owner adds it and the version changes, so you always know which rules a link followed.
+
+## A log nobody has to maintain by hand
+
+A convention without a record turns into folklore. For each link, keep four things: the link, who made it, when, and which version of the rules it followed. That is enough to answer "where did this tag come from?" six months later.
+
+The [UTM builder](/lab/utm-builder) writes these into its exports: the CSV and the Google Sheets copy end with the GA4 channel, the date created, the owner and the rules version. You can also download a [free template](/lab/utm-builder) with the same columns and three example rows; it is the button under "A naming convention you can copy" on that page.
+
+## Enforce it without paid software
+
+Paid UTM tools sell enforcement: dropdowns instead of free text, approved lists, roles. You can get most of that for free if you accept two limits: it runs in the browser, and it lives on each person's device.
+
+- **Rules as a link.** In the builder, open "Working in a team? Set naming rules", paste your approved channels, pick the separator and optionally a campaign pattern such as `{name}-{yyyy}-{mm}`. Copy the rules link and send it to your team. Anyone who opens it gets a form that offers only those channels and writes names the agreed way. Nothing is stored on a server.
+- **Flags, not blocks.** Names that do not fit the pattern are flagged in the saved list, so a one-off exception stays possible and visible.
+- **Check old links.** Paste existing links into the [link checker](/lab/utm-link-checker). It flags capital letters, spaces, misspelled parameter names and combinations GA4 files under Unassigned, and builds a cleaned link.
+- **Test before launch.** The campaign pack download includes a checklist: open each link, confirm the parameters survive redirects, watch GA4's Realtime report, scan each QR code.
+
+## When the damage is already done
+
+If reports are already split, merge them in a copy of the report. The [report cleaner](/lab/utm-report-cleaner) finds rows that are the same campaign written differently and gives you the mapping; the [guide to fixing split campaign names](/blog/ga4-campaign-names-split-by-capital-letters) walks through it.
+
+## What this does not solve
+
+A convention cannot fix links that lose their parameters in a redirect, consent settings that drop attribution, or an ad platform that overrides your tags. It makes your own tagging consistent, which is the part you control.
+
+## Need tracking set up on a campaign page?
+
+I build landing pages and the tagging that goes with them. See [my services](/services) or [get in touch](/contact).

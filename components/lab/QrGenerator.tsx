@@ -8,6 +8,7 @@ import {
   emailPayload,
   phonePayload,
   textPayload,
+  upiPayload,
   websitePayload,
   whatsappPayload,
   wifiPayload,
@@ -24,6 +25,11 @@ const KINDS: { id: QrKind; label: string; note: string }[] = [
     id: 'whatsapp',
     label: 'WhatsApp',
     note: 'Opens a chat with this number, with your message ready to send. Include the country code.',
+  },
+  {
+    id: 'upi',
+    label: 'UPI payment',
+    note: 'Opens a UPI app with the payee filled in. Check the name, and pay a small amount from another UPI app to test before you print. Nothing is stored.',
   },
   {
     id: 'wifi',
@@ -78,6 +84,10 @@ export function QrGenerator() {
   const [subject, setSubject] = useState('')
   const [body, setBody] = useState('')
   const [text, setText] = useState('')
+  const [upiId, setUpiId] = useState('')
+  const [upiName, setUpiName] = useState('')
+  const [upiAmount, setUpiAmount] = useState('')
+  const [upiNote, setUpiNote] = useState('')
 
   const result: PayloadResult = (() => {
     switch (kind) {
@@ -93,6 +103,8 @@ export function QrGenerator() {
         return emailPayload(to, subject, body)
       case 'phone':
         return phonePayload(phone)
+      case 'upi':
+        return upiPayload(upiId, upiName, upiAmount, upiNote)
       case 'text':
         return textPayload(text)
     }
@@ -255,6 +267,40 @@ export function QrGenerator() {
             </>
           )}
 
+          {kind === 'upi' && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Input
+                label="UPI ID"
+                placeholder="name@bank"
+                value={upiId}
+                onChange={(e) => setUpiId(e.target.value)}
+                autoComplete="off"
+              />
+              <Input
+                label="Payee name"
+                placeholder="As it should appear to the payer"
+                value={upiName}
+                maxLength={60}
+                onChange={(e) => setUpiName(e.target.value)}
+              />
+              <Input
+                label="Amount in rupees (optional)"
+                inputMode="decimal"
+                placeholder="250"
+                value={upiAmount}
+                hint="Leave blank to let the payer type the amount."
+                onChange={(e) => setUpiAmount(e.target.value)}
+              />
+              <Input
+                label="Note (optional)"
+                placeholder="Invoice 1042"
+                value={upiNote}
+                maxLength={50}
+                onChange={(e) => setUpiNote(e.target.value)}
+              />
+            </div>
+          )}
+
           {kind === 'text' && (
             <Textarea
               label="Text"
@@ -281,6 +327,8 @@ export function QrGenerator() {
             fileBase={`qr-${kind}`}
             printCaption={current.label}
             showText={kind !== 'wifi' && kind !== 'contact'}
+            tool="qr-generator"
+            kind={kind}
           />
         ) : (
           <p className="text-ds-muted text-sm">Fill in the form and your code appears here.</p>

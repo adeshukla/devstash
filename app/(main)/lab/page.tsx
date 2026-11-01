@@ -89,7 +89,7 @@ const TOOLS: Demo[] = [
     slug: 'qr-code-generator',
     name: 'QR Code Generator',
     blurb:
-      'Static codes for a website, WhatsApp chat, Wi-Fi, contact card, email, phone or text. They never expire, save as PNG or SVG, and print. Nothing is uploaded.',
+      'Static codes for a website, WhatsApp chat, UPI payment, Wi-Fi, contact card, email, phone or text. They never expire, save as PNG or SVG, and print. Nothing is uploaded.',
     tag: 'Utility',
     preview: 'qr',
   },

@@ -498,7 +498,7 @@ export function ShapeCustomizer() {
 
         <CssCodeBlock code={css} />
         <div>
-          <ShareLinkButton getUrl={getShareUrl} />
+          <ShareLinkButton getUrl={getShareUrl} tool="css-shapes" />
         </div>
       </div>
 

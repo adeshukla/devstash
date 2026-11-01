@@ -17,6 +17,9 @@ export const ANALYTICS_EVENTS = {
   exitOfferShown: 'exit_offer_shown',
   exitOfferClicked: 'exit_offer_clicked',
   videoWatched: 'video_watched',
+  // One event for every Lab tool action. Carries the tool and the action only,
+  // never anything the visitor typed or pasted.
+  labToolAction: 'lab_tool_action',
 } as const
 
 export type AnalyticsEvent = (typeof ANALYTICS_EVENTS)[keyof typeof ANALYTICS_EVENTS]

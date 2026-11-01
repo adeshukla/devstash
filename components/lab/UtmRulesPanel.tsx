@@ -3,8 +3,11 @@
 import { useState } from 'react'
 import { Button, Input } from '@/components/ui'
 import { copyText } from '@/lib/utils/clipboard'
+import { trackLab } from './track'
 import {
   channelLines,
+  patternError,
+  patternExample,
   parseChannelLines,
   rulesActive,
   rulesVersion,
@@ -35,6 +38,8 @@ export function UtmRulesPanel({
 }) {
   const [text, setText] = useState(() => channelLines(rules.channels))
   const [separator, setSeparator] = useState<Separator>(rules.separator)
+  const [pattern, setPattern] = useState(rules.pattern ?? '')
+  const [patternProblem, setPatternProblem] = useState('')
   const [errors, setErrors] = useState<number[]>([])
   const [copied, setCopied] = useState(false)
   const active = rulesActive(rules)
@@ -43,13 +48,20 @@ export function UtmRulesPanel({
     const parsed = parseChannelLines(text)
     setErrors(parsed.errors.map((e) => e.line))
     // Apply only a clean list: applying changes the key and would wipe the error message.
-    if (parsed.errors.length || !parsed.channels.length) return
-    onApply({ channels: parsed.channels, separator })
+    const problem = patternError(pattern)
+    setPatternProblem(problem)
+    if (parsed.errors.length || !parsed.channels.length || problem) return
+    onApply({
+      channels: parsed.channels,
+      separator,
+      ...(pattern.trim() && { pattern: pattern.trim() }),
+    })
     setText(channelLines(parsed.channels))
   }
 
   async function copyLink() {
     if (!(await copyText(getLink()))) return
+    trackLab('utm-builder', 'copy_rules_link')
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -114,6 +126,23 @@ export function UtmRulesPanel({
             ))}
           </div>
         </fieldset>
+
+        <Input
+          label="Campaign name pattern (optional)"
+          placeholder="{name}-{yyyy}-{mm}"
+          value={pattern}
+          maxLength={60}
+          onChange={(e) => {
+            setPattern(e.target.value)
+            setPatternProblem('')
+          }}
+          error={patternProblem}
+          hint={
+            pattern.trim() && !patternError(pattern)
+              ? `Names must look like ${patternExample(pattern, separator, new Date())}. Parts: {name}, {yyyy}, {mm}, {dd}, {n}.`
+              : 'Parts: {name}, {yyyy}, {mm}, {dd}, {n}. Names that do not fit are flagged, not blocked.'
+          }
+        />
 
         <Input
           label="Your name or team (added to exports)"

@@ -2,7 +2,8 @@
 // "@/" imports so node:test can run it. Each builder returns the payload or a
 // plain-language error; an empty payload with no error means "nothing typed yet".
 
-export type QrKind = 'website' | 'whatsapp' | 'wifi' | 'contact' | 'email' | 'phone' | 'text'
+export type QrKind =
+  'website' | 'whatsapp' | 'upi' | 'wifi' | 'contact' | 'email' | 'phone' | 'text'
 
 export interface PayloadResult {
   payload: string
@@ -129,6 +130,40 @@ export function contactPayload(c: Contact): PayloadResult {
     'END:VCARD',
   ].filter(Boolean)
   return ok(lines.join('\r\n'))
+}
+
+// A UPI address is a handle, an @, then the bank or app: name@bank.
+const UPI_ID = /^[a-zA-Z0-9._-]{2,256}@[a-zA-Z][a-zA-Z0-9]{1,63}$/
+const UPI_AMOUNT = /^\d{1,7}(\.\d{1,2})?$/
+
+/**
+ * A UPI payment link as in NPCI's linking specification (v1.6): pa is the payee
+ * address and pn the payee name, both required; am the amount in rupees with
+ * two decimals, optional for a static code; cu is INR, the only value; tn a
+ * short note. Nothing is stored or sent.
+ */
+export function upiPayload(id: string, name: string, amount: string, note: string): PayloadResult {
+  const vpa = id.trim()
+  const payee = name.trim()
+  const amt = amount.trim().replace(/^₹/, '').replace(/,/g, '')
+  const tn = note.trim()
+  if (!vpa && !payee && !amt && !tn) return empty
+  if (!vpa) return fail('Enter the UPI ID, for example name@bank.')
+  if (!UPI_ID.test(vpa)) return fail('That UPI ID looks wrong. It should look like name@bank.')
+  if (!payee)
+    return fail("Enter the payee name exactly as it should appear in the payer's UPI app.")
+  if (payee.length > 60) return fail('Keep the payee name under 60 characters.')
+  if (amt && (!UPI_AMOUNT.test(amt) || Number(amt) <= 0))
+    return fail('Enter the amount in rupees, for example 250 or 250.50.')
+  if (tn.length > 50) return fail('Keep the note under 50 characters.')
+  const parts = [
+    `pa=${encodeURIComponent(vpa).replace(/%40/g, '@')}`,
+    `pn=${encodeURIComponent(payee)}`,
+    amt && `am=${Number(amt).toFixed(2)}`,
+    'cu=INR',
+    tn && `tn=${encodeURIComponent(tn)}`,
+  ].filter(Boolean)
+  return ok(`upi://pay?${parts.join('&')}`)
 }
 
 export function textPayload(input: string): PayloadResult {

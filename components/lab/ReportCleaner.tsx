@@ -13,6 +13,7 @@ import {
   rememberable,
 } from '@/lib/lab/reportClean'
 import { KEYS, readStored, writeStored } from './storage'
+import { trackLab } from './track'
 import type { Separator } from '@/lib/lab/utm'
 
 // A made-up sample so the tool can be tried without an export. Not real data.
@@ -61,6 +62,7 @@ export function ReportCleaner() {
   }
   async function copy(value: string, id: string) {
     if (!(await copyText(value))) return
+    trackLab('report-cleaner', `copy_${id}`)
     setCopied(id)
     setTimeout(() => setCopied(''), 2000)
   }
@@ -74,6 +76,7 @@ export function ReportCleaner() {
     result?.groups.reduce((n, g) => n + g.variants.filter((v) => v.remembered).length, 0) ?? 0
 
   function remember() {
+    trackLab('report-cleaner', 'remember_merges')
     if (!result) return
     const found = rememberable(result)
     const next = { ...saved, ...found }

@@ -6,11 +6,14 @@ import { copyText } from '@/lib/utils/clipboard'
 import {
   buildMatrix,
   buildUtmUrl,
+  applySeparator,
   channelKey,
   linkWarnings,
   matchPreset,
   normalizeValue,
   parseUrlList,
+  parseVariants,
+  MAX_LINKS,
   placeholdersFor,
   tokensIn,
   GOOGLE_PLACEHOLDERS,
@@ -27,12 +30,16 @@ import {
   NO_RULES,
   decodeRules,
   encodeRules,
+  matchesPattern,
+  patternExample,
   rulesActive,
   rulesVersion,
   type UtmRules,
 } from '@/lib/lab/utmRules'
 import { useUrlSync } from './useUrlSync'
 import { KEYS, readStored, writeStored } from './storage'
+import { trackLab } from './track'
+import { LaunchChecklist } from './LaunchChecklist'
 import { WorkspaceBackup, type RestoreSummary } from './WorkspaceBackup'
 import { buildWorkspace, mergeRows, type Workspace } from '@/lib/lab/workspace'
 import { UtmRulesPanel } from './UtmRulesPanel'
@@ -114,6 +121,8 @@ export function UtmBuilder() {
   const [touchedUrl, setTouchedUrl] = useState(false)
   const [imported, setImported] = useState(false)
   const [qrUrl, setQrUrl] = useState<string | null>(null)
+  const [variantsText, setVariantsText] = useState('')
+  const variants = useMemo(() => parseVariants(variantsText), [variantsText])
   const [rules, setRules] = useState<UtmRules>(NO_RULES)
   const [owner, setOwner] = useState('')
   const locked = rulesActive(rules)
@@ -129,6 +138,7 @@ export function UtmBuilder() {
       c: fields.campaign,
       t: fields.term,
       n: fields.content,
+      v: variantsText,
       ch: channels.map(channelKey).join(','),
       r: locked ? encodeRules(rules) : '',
     },
@@ -149,6 +159,7 @@ export function UtmBuilder() {
         term: get('t') ?? '',
         content: get('n') ?? '',
       })
+      setVariantsText(get('v') ?? '')
       const restored = (get('ch') ?? '')
         .split(',')
         .map((pair) => pair.split('/'))
@@ -221,8 +232,8 @@ export function UtmBuilder() {
     [bulk, list, single]
   )
   const links = useMemo(
-    () => buildMatrix(urls, fields, channels, sep),
-    [urls, fields, channels, sep]
+    () => buildMatrix(urls, fields, channels, sep, variants),
+    [urls, fields, channels, sep, variants]
   )
   const singleError = !bulk && touchedUrl ? buildUtmUrl(fields).error : ''
   const hasInput = channels.length > 0 || UTM_KEYS.some((k) => fields[k].trim())
@@ -233,6 +244,8 @@ export function UtmBuilder() {
     !(bulk && list && list.invalid.length > 0)
   const changes = [...new Set(links.flatMap((l) => l.result.changes))]
   const warnings = [...new Set(links.flatMap((l) => linkWarnings(l.fields, l.result.url)))]
+  const cleanCampaign = applySeparator(normalizeValue(fields.campaign), sep)
+  const campaignFits = !fields.campaign.trim() || matchesPattern(cleanCampaign, rules)
   const needChannel = !channels.length && !(fields.source.trim() && fields.medium.trim())
   const needCampaign = !fields.campaign.trim()
 
@@ -299,6 +312,7 @@ export function UtmBuilder() {
   async function handleCopy() {
     if (!ready || !(await copyText(links.map((l) => l.result.url).join('\n')))) return
     rememberUrls()
+    trackLab('utm-builder', links.length > 1 ? 'copy_many_links' : 'copy_link')
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -317,6 +331,7 @@ export function UtmBuilder() {
 
   function addToList() {
     if (!ready) return
+    trackLab('utm-builder', 'save_to_list')
     rememberUrls()
     updateRows([
       ...rows,
@@ -330,10 +345,12 @@ export function UtmBuilder() {
   }
 
   function importRows(next: Omit<SheetRow, 'id'>[]) {
+    trackLab('utm-builder', 'import_sheet')
     updateRows([...rows, ...next.map((r) => ({ ...r, id: crypto.randomUUID(), ...stamp() }))])
   }
 
   function applyRules(next: UtmRules) {
+    trackLab('utm-builder', 'rules_on')
     setRules(next)
     writeStored(RULES_KEY, encodeRules(next))
     setChannels([])
@@ -358,6 +375,7 @@ export function UtmBuilder() {
     )
 
   function restoreBackup(data: Workspace): RestoreSummary {
+    trackLab('utm-builder', 'restore_backup')
     const merged = mergeRows(rows, data.sheet)
     if (merged.added) updateRows(merged.rows)
     const known = new Set(mine.map((p) => `${p.label}|${channelKey(p)}`))
@@ -417,6 +435,8 @@ export function UtmBuilder() {
   }
 
   const count = links.length
+  const fullSize =
+    Math.max(urls.length, 1) * Math.max(channels.length, 1) * Math.max(variants.length, 1)
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-start">
@@ -600,7 +620,12 @@ export function UtmBuilder() {
               aria-label="Campaign name"
               list="utm-campaign-names"
               autoComplete="off"
-              placeholder="spring-sale"
+              placeholder={
+                locked && rules.pattern
+                  ? patternExample(rules.pattern, rules.separator, new Date())
+                  : 'spring-sale'
+              }
+              hint={locked && rules.pattern ? `Team pattern: ${rules.pattern}` : undefined}
               value={fields.campaign}
               onChange={(e) => update('campaign', e.target.value)}
             />
@@ -631,10 +656,19 @@ export function UtmBuilder() {
               />
               <Input
                 label="Ad version (content)"
-                hint="To compare two ads."
+                hint={variants.length ? 'Replaced by the versions below.' : 'To compare two ads.'}
                 placeholder="blue-button"
                 value={fields.content}
+                disabled={variants.length > 0}
                 onChange={(e) => update('content', e.target.value)}
+              />
+              <Input
+                label="Or test several ad versions at once"
+                wrapClass="sm:col-span-2"
+                hint="Comma-separated, up to 10, for example blue-button, green-button. Makes one link per version, for every page and channel."
+                placeholder="blue-button, green-button"
+                value={variantsText}
+                onChange={(e) => setVariantsText(e.target.value)}
               />
               <AdValues sets={placeholderSets} onInsert={insertToken} />
             </div>
@@ -689,10 +723,22 @@ export function UtmBuilder() {
           </p>
         )}
 
+        {ready && locked && rules.pattern && fields.campaign.trim() && !campaignFits && (
+          <p className="text-ds-warning-strong mt-3 text-xs">
+            The campaign name does not follow your team pattern {rules.pattern}, for example{' '}
+            {patternExample(rules.pattern, rules.separator, new Date())}.
+          </p>
+        )}
         {ready && (needChannel || needCampaign) && (
           <p className="text-ds-warning-strong mt-3 text-xs">
             {needChannel && 'Pick where you will share it (step 2). '}
             {needCampaign && 'Add a campaign name (step 3): reports group by it.'}
+          </p>
+        )}
+        {count >= MAX_LINKS && fullSize > MAX_LINKS && (
+          <p className="text-ds-warning-strong mt-2 text-xs">
+            Showing the first {MAX_LINKS} of {fullSize} links. Use fewer pages, channels or
+            versions.
           </p>
         )}
         {warnings.map((w) => (
@@ -719,7 +765,7 @@ export function UtmBuilder() {
           <Button type="button" variant="outline" onClick={addToList} disabled={!ready}>
             {count > 1 ? `Save ${count} to list` : 'Save to list'}
           </Button>
-          <ShareLinkButton getUrl={getShareUrl} />
+          <ShareLinkButton getUrl={getShareUrl} tool="utm-builder" />
         </div>
       </div>
 
@@ -734,6 +780,7 @@ export function UtmBuilder() {
           getLink={rulesLink}
         />
         <UtmImport onAdd={importRows} />
+        <LaunchChecklist />
         <WorkspaceBackup build={buildBackup} onRestore={restoreBackup} />
 
         {rows.length > 0 && (

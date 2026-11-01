@@ -820,7 +820,7 @@ function GenerateTab() {
               >
                 Download SVG
               </button>
-              <ShareLinkButton getUrl={getShareUrl} />
+              <ShareLinkButton getUrl={getShareUrl} tool="illustration" />
             </div>
             <p className="text-ds-muted mb-6 text-sm">
               The composition is generated at the selected size, not cropped to it — an Open Graph

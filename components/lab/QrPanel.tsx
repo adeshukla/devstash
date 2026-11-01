@@ -5,6 +5,7 @@ import { Button } from '@/components/ui'
 import { makeQr, qrSvg, scanWarning, MAX_LABEL, type QrCode, type QrLevel } from '@/lib/lab/qr'
 import { printQrSheet } from './qrPrint'
 import { saveBlob } from './saveFile'
+import { trackLab } from './track'
 
 const LEVELS: { value: QrLevel; label: string }[] = [
   { value: 'L', label: 'Smallest code' },
@@ -28,6 +29,8 @@ export function QrPanel({
   fileBase,
   printCaption = 'Scan to open',
   showText = false,
+  tool = 'qr',
+  kind,
   children,
 }: {
   text: string
@@ -36,6 +39,9 @@ export function QrPanel({
   printCaption?: string
   /** Show the encoded text under the code (useful for links, not for passwords). */
   showText?: boolean
+  /** Tool name for usage tracking, and the kind of code when there is one. */
+  tool?: string
+  kind?: string
   /** Extra buttons at the end of the action row, such as Close. */
   children?: React.ReactNode
 }) {
@@ -70,6 +76,7 @@ export function QrPanel({
 
   async function downloadPng() {
     if (!qr) return
+    trackLab(tool, 'download_png', kind)
     // data: URL, not blob: the site CSP only allows data: for images.
     const svg = qrSvg(qr, style, size)
     const img = new Image()
@@ -182,10 +189,11 @@ export function QrPanel({
           size="sm"
           variant="outline"
           disabled={!qr}
-          onClick={() =>
-            qr &&
+          onClick={() => {
+            if (!qr) return
+            trackLab(tool, 'download_svg', kind)
             saveBlob(new Blob([qrSvg(qr, style)], { type: 'image/svg+xml' }), `${fileBase}.svg`)
-          }
+          }}
         >
           Download SVG
         </Button>
@@ -194,10 +202,11 @@ export function QrPanel({
           size="sm"
           variant="outline"
           disabled={!qr}
-          onClick={() =>
-            qr &&
+          onClick={() => {
+            if (!qr) return
+            trackLab(tool, 'print', kind)
             printQrSheet([{ qr, style, caption: label || printCaption, url: showText ? text : '' }])
-          }
+          }}
         >
           Print
         </Button>

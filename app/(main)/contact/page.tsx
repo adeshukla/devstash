@@ -85,7 +85,10 @@ export default function ContactPage() {
           </p>
           <p className="text-ds-muted mt-3 text-sm">
             Not sure what to ask for?{' '}
-            <Link href="/services" className="text-ds-accent underline-offset-4 hover:underline">
+            <Link
+              href="/services"
+              className="text-ds-accent underline underline-offset-4 hover:no-underline"
+            >
               See what I offer →
             </Link>
           </p>
