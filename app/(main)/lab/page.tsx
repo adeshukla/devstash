@@ -9,8 +9,7 @@ import { buildItemListSchema } from '@/lib/schema/builders'
 import { Badge, Button, CardTilt } from '@/components/ui'
 import { PageFacts } from '@/components/ui/PageFacts'
 import { getAllProjects } from '@/lib/markdown/projects'
-import { buildFAQSchema } from '@/lib/schema/builders'
-import { LabFaq } from '@/components/lab/LabFaq'
+import { FaqSection } from '@/components/sections/FaqSection'
 import { LabTools, type LabTool } from '@/components/lab/LabTools'
 import { LabPreview, type PreviewKind } from '@/components/lab/LabPreview'
 
@@ -140,7 +139,6 @@ export default async function LabPage() {
           [FLAGSHIP, ...TOOLS].map((d) => ({ name: d.name, url: `/lab/${d.slug}` }))
         )}
       />
-      <JsonLd data={buildFAQSchema(FAQ.map((f) => ({ question: f.question, answer: f.answer })))} />
       {/* Breadcrumb emits its own BreadcrumbList JSON-LD */}
       <section className="border-ds-border border-b py-16">
         <div className="max-w-site mx-auto px-6">
@@ -235,17 +233,10 @@ export default async function LabPage() {
         </div>
       </section>
 
-      <section className="border-ds-border border-t py-16">
-        <div className="max-w-site mx-auto grid gap-10 px-6 lg:grid-cols-[5fr_7fr]">
-          <div>
-            <h2 className="text-ds-text text-2xl font-bold tracking-tight">Questions</h2>
-            <p className="text-ds-muted mt-3 max-w-md leading-relaxed">
-              The short answers on what the Lab is and what it does with what you type.
-            </p>
-          </div>
-          <LabFaq items={FAQ} />
-        </div>
-      </section>
+      <FaqSection
+        items={FAQ}
+        intro="The short answers on what the Lab is and what it does with what you type."
+      />
 
       <section className="border-ds-border border-t py-16">
         <div className="max-w-site mx-auto flex flex-col gap-6 px-6 sm:flex-row sm:items-center sm:justify-between">
@@ -255,7 +246,12 @@ export default async function LabPage() {
               Each build has a case study: the problem and the tradeoffs.
             </p>
           </div>
-          <Button href="/projects">Read the case studies &rarr;</Button>
+          <div className="flex flex-wrap gap-3">
+            <Button href="/projects">Read the case studies &rarr;</Button>
+            <Button href="/services" variant="ghost">
+              Work with me
+            </Button>
+          </div>
         </div>
       </section>
     </div>

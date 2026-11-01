@@ -40,6 +40,7 @@ function NavLogo() {
 // ── Nav items config ──────────────────────────────────────────
 export const navItems = [
   { label: 'Projects', href: '/projects' },
+  { label: 'Services', href: '/services' },
   { label: 'Lab', href: '/lab' },
   { label: 'Blog', href: '/blog' },
   { label: 'Resources', href: '/resources' },

@@ -14,7 +14,7 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildBlogPostingSchema, buildFAQSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
-import { Badge, Reveal, MountReveal } from '@/components/ui'
+import { Badge, Button, Reveal, MountReveal } from '@/components/ui'
 import { CategoryIllustration } from '@/components/illustrations/CategoryIllustration'
 import { TOC } from '@/components/blog/TOC'
 import { AuthorBio } from '@/components/blog/AuthorBio'
@@ -227,6 +227,21 @@ export default async function BlogPostPage({ params }: Props) {
                   ))}
                 </section>
               )}
+
+              {/* Pointer to the hiring page, for readers who came to get something built */}
+              <div className="border-ds-border bg-ds-surface mt-12 flex flex-col gap-4 rounded-xl border p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-ds-text font-semibold">
+                    Need something like this built or fixed?
+                  </p>
+                  <p className="text-ds-muted mt-1 text-sm">
+                    Custom websites, landing pages and speed fixes. I reply within 24 hours.
+                  </p>
+                </div>
+                <Button href="/services" variant="outline" size="sm" className="shrink-0">
+                  See services →
+                </Button>
+              </div>
 
               {/* Author */}
               <Reveal className="border-ds-border mt-12 border-t pt-10">

@@ -249,7 +249,7 @@ export default function ServicesPage() {
           <Breadcrumb
             items={[
               { name: 'Home', url: 'https://devstash.me' },
-              { name: 'Work With Me', url: 'https://devstash.me/services' },
+              { name: 'Services', url: 'https://devstash.me/services' },
             ]}
           />
           <div className="mt-8 grid items-center gap-12 lg:grid-cols-[1.15fr_1fr]">

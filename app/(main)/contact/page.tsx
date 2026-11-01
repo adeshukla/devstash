@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { FaqSection } from '@/components/sections/FaqSection'
 import { H1_DISPLAY } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
@@ -81,6 +82,12 @@ export default function ContactPage() {
           <p className="text-ds-muted mt-3 max-w-lg">
             Open to remote frontend roles worldwide (or hybrid in India), freelance projects, or
             just a chat about code, automation, or bikes.
+          </p>
+          <p className="text-ds-muted mt-3 text-sm">
+            Not sure what to ask for?{' '}
+            <Link href="/services" className="text-ds-accent underline-offset-4 hover:underline">
+              See what I offer →
+            </Link>
           </p>
         </div>
       </section>

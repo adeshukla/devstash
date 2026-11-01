@@ -16,6 +16,7 @@ import { getAllProjects, getProjectBySlug, parseCaseStudyOutcome } from '@/lib/m
 import { getPostBySlug } from '@/lib/markdown/blog'
 import { Badge, Button, ImageGallery, Reveal, MountReveal, Separator } from '@/components/ui'
 import { AnimatedCover } from '@/components/sections/AnimatedCover'
+import { CtaBand } from '@/components/sections/CtaBand'
 import { Icon } from '@/components/icons/Icon'
 import { TECH_ICONS } from '@/lib/utils/techIcons'
 import { mdxComponents } from '@/components/blog/MDXComponents'
@@ -329,6 +330,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             </div>
           </Reveal>
         </section>
+
+        <CtaBand
+          title="Need something like this built?"
+          body="I take on freelance and contract frontend work, remote, for clients worldwide."
+          secondary={{ label: 'See services', href: '/services' }}
+        />
 
         {/* ── Back link ── */}
         <div className="border-ds-border border-t py-8">
