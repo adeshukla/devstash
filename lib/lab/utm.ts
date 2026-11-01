@@ -1,0 +1,157 @@
+// UTM logic for the Lab builder. Pure, no React and no "@/" imports so
+// node:test can run it.
+
+export interface UtmFields {
+  url: string
+  source: string
+  medium: string
+  campaign: string
+  term: string
+  content: string
+}
+
+export const UTM_KEYS = ['source', 'medium', 'campaign', 'term', 'content'] as const
+export type UtmKey = (typeof UTM_KEYS)[number]
+
+/** Lowercase, whitespace to hyphens, drop anything not URL-safe. GA4 is case-sensitive. */
+export function normalizeValue(raw: string): string {
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9\-_.]/g, '')
+    .replace(/-{2,}/g, '-')
+    .replace(/^[-_.]+|[-_.]+$/g, '')
+}
+
+export interface BuildResult {
+  url: string
+  /** Fields whose value was changed by normalisation, e.g. "source: Google Ads → google-ads" */
+  changes: string[]
+  error: string
+}
+
+export function buildUtmUrl(fields: UtmFields): BuildResult {
+  const empty = { url: '', changes: [], error: '' }
+  const raw = fields.url.trim()
+  if (!raw) return empty
+
+  let base: URL
+  try {
+    base = new URL(raw)
+  } catch {
+    return { ...empty, error: 'That URL looks incomplete — include https://' }
+  }
+  if (base.protocol !== 'http:' && base.protocol !== 'https:') {
+    return { ...empty, error: 'Use an http or https URL.' }
+  }
+
+  const params = new URLSearchParams(base.search)
+  const changes: string[] = []
+  for (const key of UTM_KEYS) {
+    const original = fields[key].trim()
+    if (!original) continue
+    const value = normalizeValue(original)
+    if (!value) continue
+    if (value !== original) changes.push(`${key}: ${original} → ${value}`)
+    params.set(`utm_${key}`, value)
+  }
+  base.search = params.toString()
+  return { url: base.toString(), changes, error: '' }
+}
+
+export interface ChannelPreset {
+  label: string
+  source: string
+  medium: string
+}
+
+export const PRESETS: ChannelPreset[] = [
+  { label: 'Google Ads', source: 'google', medium: 'cpc' },
+  { label: 'Bing Ads', source: 'bing', medium: 'cpc' },
+  { label: 'Meta Ads', source: 'facebook', medium: 'paid-social' },
+  { label: 'Instagram Ads', source: 'instagram', medium: 'paid-social' },
+  { label: 'LinkedIn Ads', source: 'linkedin', medium: 'paid-social' },
+  { label: 'Newsletter', source: 'newsletter', medium: 'email' },
+  { label: 'Organic social', source: 'linkedin', medium: 'social' },
+]
+
+export interface SheetRow {
+  id: string
+  fields: UtmFields
+  url: string
+}
+
+// Mediums GA4's default channel grouping commonly recognises. Anything else
+// tends to land in "Unassigned", which is the usual cause of "my campaign
+// traffic is missing from the channel report".
+const KNOWN_MEDIUMS = new Set([
+  'cpc',
+  'ppc',
+  'paidsearch',
+  'paid-search',
+  'email',
+  'social',
+  'paid-social',
+  'organic',
+  'referral',
+  'display',
+  'cpm',
+  'banner',
+  'affiliate',
+  'video',
+  'sms',
+  'push',
+])
+
+const SOURCE_ALIASES: Record<string, string> = {
+  fb: 'facebook',
+  ig: 'instagram',
+  li: 'linkedin',
+  adwords: 'google',
+  gads: 'google',
+}
+
+/** Consistency problems normalisation cannot fix, across the whole sheet. */
+export function lintRows(rows: SheetRow[]): string[] {
+  const out: string[] = []
+  const seen = new Map<string, number>()
+  rows.forEach((row, i) => {
+    const n = i + 1
+    const { source, medium } = row.fields
+    const s = normalizeValue(source)
+    const m = normalizeValue(medium)
+    if (m && !KNOWN_MEDIUMS.has(m))
+      out.push(
+        `Row ${n}: medium "${m}" is not a standard GA4 medium, so it may land in Unassigned.`
+      )
+    if (s && SOURCE_ALIASES[s])
+      out.push(`Row ${n}: source "${s}" — use "${SOURCE_ALIASES[s]}" so it groups with other rows.`)
+    const prev = seen.get(row.url)
+    if (prev) out.push(`Row ${n}: same link as row ${prev}.`)
+    else seen.set(row.url, n)
+  })
+  const campaigns = rows.map((r) => normalizeValue(r.fields.campaign)).filter(Boolean)
+  if (campaigns.some((c) => c.includes('_')) && campaigns.some((c) => c.includes('-')))
+    out.push(
+      'Campaign names mix "_" and "-". Pick one separator so names sort and filter together.'
+    )
+  return out
+}
+
+const CSV_HEADER = ['url', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']
+
+function cell(value: string): string {
+  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value
+}
+
+function toTable(rows: SheetRow[], sep: string, escape: (v: string) => string): string {
+  const lines = rows.map((r) =>
+    [r.url, ...UTM_KEYS.map((k) => normalizeValue(r.fields[k]))].map(escape).join(sep)
+  )
+  return [CSV_HEADER.join(sep), ...lines].join('\n')
+}
+
+export const toCsv = (rows: SheetRow[]) => toTable(rows, ',', cell)
+/** Tab-separated, pastes straight into Google Sheets or Excel. */
+export const toTsv = (rows: SheetRow[]) => toTable(rows, '\t', (v) => v.replace(/[\t\n]/g, ' '))

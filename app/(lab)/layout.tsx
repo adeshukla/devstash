@@ -1,20 +1,21 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
-// No Navbar/Footer — these are standalone landing-page samples meant to look
-// like real, isolated PPC pages, not pages inside the DevStash site shell.
+// No Navbar/Footer — Lab tools are standalone pages. The way back is a normal
+// in-flow link at the top, not a fixed pill: a fixed pill sat on top of content
+// on narrow screens (it covered a heading at 300px).
 export default function LabLayout({ children }: { children: ReactNode }) {
   return (
     <>
-      {children}
-      <div className="fixed bottom-4 left-4 z-50">
+      <nav aria-label="Lab" className="bg-ds-bg px-6 pt-4">
         <Link
           href="/lab"
-          className="border-ds-border bg-ds-surface/90 text-ds-muted hover:border-ds-accent hover:text-ds-accent inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-xs backdrop-blur transition-colors"
+          className="border-ds-border bg-ds-surface text-ds-muted hover:border-ds-accent hover:text-ds-accent inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-xs transition-colors"
         >
           ← devstash.me/lab
         </Link>
-      </div>
+      </nav>
+      {children}
     </>
   )
 }

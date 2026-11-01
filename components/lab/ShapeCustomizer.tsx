@@ -2,6 +2,9 @@
 
 import { useMemo, useState } from 'react'
 import { CssCodeBlock } from './CssCodeBlock'
+import { useUrlSync } from './useUrlSync'
+import { ShareLinkButton } from './ShareLinkButton'
+import { pick } from '@/lib/lab/urlState'
 import {
   PolygonShapeEditor,
   DEFAULT_POLYGON,
@@ -127,6 +130,19 @@ const ANIMATION_KEYFRAMES: Record<Exclude<Animation, 'none'>, { name: string; bo
   },
 }
 
+const nums = (s: string | null, count: number) => {
+  const parts = (s ?? '').split(',').map(Number)
+  return parts.length === count && parts.every((n) => Number.isFinite(n)) ? parts : null
+}
+
+/** "x,y;x,y;..." with 3 to 12 points, each 0-100. */
+function parsePolygon(s: string | null): Point[] | null {
+  const points = (s ?? '').split(';').map((p) => nums(p, 2))
+  if (points.length < 3 || points.length > 12) return null
+  if (points.some((p) => !p || p.some((n) => n < 0 || n > 100))) return null
+  return points.map((p) => ({ x: p![0], y: p![1] }))
+}
+
 /**
  * The real interactive centerpiece — pick a color, then shape it three
  * different ways (preset, per-corner radius, or a drag-to-build polygon),
@@ -142,6 +158,48 @@ export function ShapeCustomizer() {
   const [duration, setDuration] = useState(4)
   const [easing, setEasing] = useState<Easing>('ease-in-out')
   const [bezier, setBezier] = useState<[BezierPoint, BezierPoint]>(DEFAULT_BEZIER)
+
+  // The whole customizer is mirrored into the URL so a shape can be shared.
+  // Values that equal the defaults are left out of the link.
+  const getShareUrl = useUrlSync(
+    {
+      c: color === COLORS[0].value ? '' : color,
+      m: mode === 'preset' ? '' : mode,
+      shape: shape === 'blob' ? '' : shape,
+      r: mode === 'corners' ? `${corners.tl},${corners.tr},${corners.br},${corners.bl}` : '',
+      p: mode === 'polygon' ? polygonPoints.map((p) => `${p.x},${p.y}`).join(';') : '',
+      a: animation === 'none' ? '' : animation,
+      d: duration === 4 ? '' : String(duration),
+      e: easing === 'ease-in-out' ? '' : easing,
+      b: easing === 'custom' ? `${bezier[0].x},${bezier[0].y},${bezier[1].x},${bezier[1].y}` : '',
+    },
+    (get) => {
+      const c = get('c')
+      setColor(c && /^#[0-9a-f]{6}$/i.test(c) ? c : COLORS[0].value)
+      setMode(pick(get('m'), ['preset', 'corners', 'polygon'] as const, 'preset'))
+      setShape(pick(get('shape'), Object.keys(SHAPES) as ShapeKey[], 'blob'))
+      const r = nums(get('r'), 4)
+      if (r) setCorners({ tl: r[0], tr: r[1], br: r[2], bl: r[3] })
+      const poly = parsePolygon(get('p'))
+      if (poly) setPolygonPoints(poly)
+      setAnimation(
+        pick(
+          get('a'),
+          ['none', 'spin', 'pulse', 'float', 'wobble', 'shake', 'bounce'] as const,
+          'none'
+        )
+      )
+      const d = Number(get('d'))
+      setDuration(Number.isFinite(d) && d > 0 && d <= 20 ? d : 4)
+      setEasing(pick(get('e'), EASINGS, 'ease-in-out'))
+      const b = nums(get('b'), 4)
+      if (b)
+        setBezier([
+          { x: b[0], y: b[1] },
+          { x: b[2], y: b[3] },
+        ])
+    }
+  )
 
   const shapeInfo = useMemo(() => {
     if (mode === 'preset') {
@@ -183,6 +241,12 @@ export function ShapeCustomizer() {
     if (animation !== 'none') {
       const kf = ANIMATION_KEYFRAMES[animation]
       lines.push('', `@keyframes ${kf.name} {`, kf.body, '}')
+      lines.push(
+        '',
+        '@media (prefers-reduced-motion: reduce) {',
+        '  .my-shape { animation: none; }',
+        '}'
+      )
     }
     return lines.join('\n')
   }, [color, shapeInfo, animation, animationValue])
@@ -433,6 +497,9 @@ export function ShapeCustomizer() {
         )}
 
         <CssCodeBlock code={css} />
+        <div>
+          <ShareLinkButton getUrl={getShareUrl} />
+        </div>
       </div>
 
       <style>{`

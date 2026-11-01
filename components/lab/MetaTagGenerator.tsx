@@ -4,10 +4,52 @@ import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui'
 import { CssCodeBlock } from './CssCodeBlock'
 import { draftFromContent } from './metaDraftEngine'
+import { useUrlSync } from './useUrlSync'
+import { ShareLinkButton } from './ShareLinkButton'
+import { pick } from '@/lib/lab/urlState'
+import {
+  buildHtml,
+  buildJsonLd,
+  buildNextMetadata,
+  fitToWidth,
+  type JsonLdType,
+  type MetaInput,
+} from '@/lib/lab/metaTags'
+
+type OutputTab = 'html' | 'next' | 'jsonld'
+
+const EXAMPLE = {
+  title: 'Free Invoice Generator for Freelancers',
+  description:
+    'Create a clean, professional invoice in under a minute. No sign-up, no watermark: add your details, download the PDF and get paid faster.',
+  url: 'https://example.com/invoice-generator',
+  siteName: 'Example',
+}
+
+// Pixel budgets search results are commonly cited as cutting at. Google changes
+// these without notice, so the UI calls them approximate.
+const TITLE_PX = 600
+const DESC_PX = { desktop: 920, mobile: 680 }
+
+/** Text width via canvas on the client; a rough per-character estimate on the server. */
+function makeMeasure(font: string, size: number) {
+  let ctx: CanvasRenderingContext2D | null | undefined
+  return (s: string) => {
+    if (typeof document === 'undefined') return s.length * size * 0.5
+    if (ctx === undefined) {
+      ctx = document.createElement('canvas').getContext('2d')
+      if (ctx) ctx.font = font
+    }
+    return ctx ? ctx.measureText(s).width : s.length * size * 0.5
+  }
+}
+const measureTitle = makeMeasure('20px Arial, sans-serif', 20)
+const measureDesc = makeMeasure('14px Arial, sans-serif', 14)
 
 function countClass(len: number, min: number, max: number): string {
   if (len === 0) return 'text-ds-muted'
-  if (len < min || len > max) return 'text-ds-error'
+  if (len > max) return 'text-ds-error'
+  if (len < min) return 'text-ds-warning-strong'
   if (len > max - 10 && len <= max) return 'text-ds-warning'
   return 'text-ds-success'
 }
@@ -74,15 +116,45 @@ function ImagePlaceholder({ label }: { label: string }) {
  */
 export function MetaTagGenerator() {
   const [content, setContent] = useState('')
-  const [title, setTitle] = useState('DevStash — Developer Portfolio & Automation Blog')
-  const [description, setDescription] = useState(
-    'A modern developer ecosystem showcasing engineering, automation, AI workflows, and frontend systems — projects, tools, and writing from Adesh Shukla.'
-  )
-  const [url, setUrl] = useState('https://example.com/page')
-  const [siteName, setSiteName] = useState('Example Site')
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [url, setUrl] = useState('')
+  const [siteName, setSiteName] = useState('')
   const [image, setImage] = useState('')
   const [imageError, setImageError] = useState(false)
-  const [twitterHandle, setTwitterHandle] = useState('@example')
+  const [twitterHandle, setTwitterHandle] = useState('')
+  const [pageType, setPageType] = useState<MetaInput['type']>('website')
+  const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop')
+  const [tab, setTab] = useState<OutputTab>('html')
+  const [jsonLdType, setJsonLdType] = useState<JsonLdType>('WebPage')
+
+  const getShareUrl = useUrlSync(
+    {
+      t: title,
+      d: description,
+      u: url,
+      site: siteName,
+      i: image,
+      x: twitterHandle,
+      y: pageType === 'website' ? '' : pageType,
+    },
+    (get) => {
+      setTitle(get('t') ?? '')
+      setDescription(get('d') ?? '')
+      setUrl(get('u') ?? '')
+      setSiteName(get('site') ?? '')
+      setImage(get('i') ?? '')
+      setTwitterHandle(get('x') ?? '')
+      setPageType(pick(get('y'), ['website', 'article'] as const, 'website'))
+    }
+  )
+
+  function loadExample() {
+    setTitle(EXAMPLE.title)
+    setDescription(EXAMPLE.description)
+    setUrl(EXAMPLE.url)
+    setSiteName(EXAMPLE.siteName)
+  }
 
   // Candidates + cursor for the "Shuffle" controls — draftFromContent()
   // returns several ranked options per field, and shuffle just cycles the
@@ -96,7 +168,7 @@ export function MetaTagGenerator() {
     try {
       return new URL(url).hostname
     } catch {
-      return url.replace(/^https?:\/\//, '').split('/')[0] || 'example.com'
+      return url.replace(/^https?:\/\//, '').split('/')[0] || 'yoursite.com'
     }
   }, [url])
 
@@ -126,23 +198,18 @@ export function MetaTagGenerator() {
 
   const showImage = image.trim() && !imageError
 
-  const metaCode = useMemo(() => {
-    const imageLines = image.trim() ? `<meta property="og:image" content="${image}" />\n\n` : ''
-    return `<title>${title}</title>
-<meta name="description" content="${description}" />
-<link rel="canonical" href="${url}" />
+  const meta: MetaInput = useMemo(
+    () => ({ title, description, url, siteName, image, twitter: twitterHandle, type: pageType }),
+    [title, description, url, siteName, image, twitterHandle, pageType]
+  )
+  const output = useMemo(() => {
+    if (tab === 'next') return buildNextMetadata(meta)
+    if (tab === 'jsonld') return buildJsonLd(meta, jsonLdType)
+    return buildHtml(meta)
+  }, [tab, meta, jsonLdType])
 
-<meta property="og:type" content="website" />
-<meta property="og:title" content="${title}" />
-<meta property="og:description" content="${description}" />
-<meta property="og:url" content="${url}" />
-<meta property="og:site_name" content="${siteName}" />
-${imageLines}<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="${title}" />
-<meta name="twitter:description" content="${description}" />${
-      image.trim() ? `\n<meta name="twitter:image" content="${image}" />` : ''
-    }${twitterHandle ? `\n<meta name="twitter:site" content="${twitterHandle}" />` : ''}`
-  }, [title, description, url, siteName, image, twitterHandle])
+  const titleFit = fitToWidth(title, TITLE_PX, measureTitle)
+  const descFit = fitToWidth(description, DESC_PX[device], measureDesc)
 
   return (
     <div className="flex flex-col gap-8">
@@ -192,12 +259,16 @@ ${imageLines}<meta name="twitter:card" content="summary_large_image" />
               <span className={`font-mono text-xs ${countClass(title.length, 50, 60)}`}>
                 {title.length}/60
               </span>
+              <span className="text-ds-muted font-mono text-xs">
+                ≈{Math.round(titleFit.width)}/{TITLE_PX}px
+              </span>
             </span>
           </label>
           <input
             id="mt-title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            placeholder="Your page title"
             className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent h-11 w-full rounded-lg border px-4 text-sm transition-colors outline-none"
           />
         </div>
@@ -209,6 +280,7 @@ ${imageLines}<meta name="twitter:card" content="summary_large_image" />
             id="mt-url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://yoursite.com/page"
             className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent h-11 w-full rounded-lg border px-4 text-sm transition-colors outline-none"
           />
         </div>
@@ -235,6 +307,7 @@ ${imageLines}<meta name="twitter:card" content="summary_large_image" />
           id="mt-desc"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          placeholder="What the page offers, in one or two sentences"
           rows={5}
           className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent w-full resize-y rounded-lg border px-4 py-3 text-sm leading-relaxed transition-colors outline-none"
         />
@@ -249,6 +322,7 @@ ${imageLines}<meta name="twitter:card" content="summary_large_image" />
             id="mt-site"
             value={siteName}
             onChange={(e) => setSiteName(e.target.value)}
+            placeholder="Your brand"
             className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent h-11 w-full rounded-lg border px-4 text-sm transition-colors outline-none"
           />
         </div>
@@ -275,6 +349,7 @@ ${imageLines}<meta name="twitter:card" content="summary_large_image" />
             id="mt-twitter"
             value={twitterHandle}
             onChange={(e) => setTwitterHandle(e.target.value)}
+            placeholder="@yourhandle"
             className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent h-11 w-full rounded-lg border px-4 text-sm transition-colors outline-none"
           />
         </div>
@@ -282,10 +357,29 @@ ${imageLines}<meta name="twitter:card" content="summary_large_image" />
 
       {/* Google SERP preview */}
       <div>
-        <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
-          Google search preview
-        </p>
-        <div className="rounded-xl bg-white p-5">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-ds-muted font-mono text-xs tracking-wide uppercase">
+            Google search preview (approximate)
+          </p>
+          <div className="flex gap-2">
+            {(['desktop', 'mobile'] as const).map((d) => (
+              <button
+                key={d}
+                type="button"
+                aria-pressed={device === d}
+                onClick={() => setDevice(d)}
+                className={
+                  device === d
+                    ? 'bg-ds-cta rounded-lg px-3 py-1 text-xs font-medium text-white capitalize'
+                    : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1 text-xs capitalize transition-colors'
+                }
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className={`rounded-xl bg-white p-5 ${device === 'mobile' ? 'max-w-[380px]' : ''}`}>
           <p className="truncate text-sm text-[#4d5156]">
             {domain} <span className="text-[#4d5156]">›</span>{' '}
             {url
@@ -294,11 +388,17 @@ ${imageLines}<meta name="twitter:card" content="summary_large_image" />
               .slice(1)
               .join(' › ')}
           </p>
-          <p className="mt-1 truncate text-xl text-[#1a0dab]">{title || 'Untitled page'}</p>
-          <p className="mt-1 line-clamp-2 text-sm text-[#4d5156]">
-            {description || 'No description provided.'}
+          <p className="mt-1 text-xl leading-snug break-words text-[#1a0dab]">
+            {title ? titleFit.text : 'Untitled page'}
+          </p>
+          <p className="mt-1 text-sm break-words text-[#4d5156]">
+            {description ? descFit.text : 'No description provided.'}
           </p>
         </div>
+        <p className="text-ds-muted mt-2 text-xs">
+          Cut at about {TITLE_PX}px for the title and {DESC_PX[device]}px for the description
+          (measured in Arial). Google changes these without notice, so treat the cut-off as a guide.
+        </p>
       </div>
 
       {/* Social card previews */}
@@ -352,8 +452,91 @@ ${imageLines}<meta name="twitter:card" content="summary_large_image" />
       </div>
 
       <div>
-        <p className="text-ds-muted mb-2 text-sm">Copy the finished &lt;meta&gt; block:</p>
-        <CssCodeBlock code={metaCode} />
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-2">
+            {(
+              [
+                ['html', 'HTML'],
+                ['next', 'Next.js metadata'],
+                ['jsonld', 'JSON-LD'],
+              ] as const
+            ).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                aria-pressed={tab === key}
+                onClick={() => setTab(key)}
+                className={
+                  tab === key
+                    ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                    : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
+                }
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" size="sm" variant="ghost" onClick={loadExample}>
+              Load example
+            </Button>
+            <ShareLinkButton getUrl={getShareUrl} />
+          </div>
+        </div>
+
+        {tab === 'next' && (
+          <p className="text-ds-muted mb-2 text-sm">
+            Paste into <code className="text-ds-accent">app/your-page/page.tsx</code> or a layout.
+          </p>
+        )}
+        {tab === 'jsonld' && (
+          <div className="mb-2 flex flex-wrap items-center gap-3 text-sm">
+            <label htmlFor="mt-jsonld" className="text-ds-muted">
+              Type
+            </label>
+            <select
+              id="mt-jsonld"
+              value={jsonLdType}
+              onChange={(e) => setJsonLdType(e.target.value as JsonLdType)}
+              className="border-ds-border bg-ds-surface2 text-ds-text rounded-lg border px-3 py-1.5 text-sm"
+            >
+              <option value="WebPage">WebPage</option>
+              <option value="Article">Article</option>
+            </select>
+            {jsonLdType === 'Article' && (
+              <span className="text-ds-muted text-xs">
+                Add author and datePublished yourself: they are your real details.
+              </span>
+            )}
+          </div>
+        )}
+        {tab === 'html' && (
+          <div className="mb-2 flex flex-wrap items-center gap-3 text-sm">
+            <label htmlFor="mt-type" className="text-ds-muted">
+              og:type
+            </label>
+            <select
+              id="mt-type"
+              value={pageType}
+              onChange={(e) => setPageType(e.target.value as MetaInput['type'])}
+              className="border-ds-border bg-ds-surface2 text-ds-text rounded-lg border px-3 py-1.5 text-sm"
+            >
+              <option value="website">website</option>
+              <option value="article">article</option>
+            </select>
+          </div>
+        )}
+
+        {title.trim() || description.trim() ? (
+          <CssCodeBlock
+            code={output}
+            label={tab === 'html' ? 'HTML' : tab === 'next' ? 'TypeScript' : 'JSON-LD'}
+          />
+        ) : (
+          <p className="border-ds-border text-ds-muted rounded-lg border border-dashed p-4 text-sm">
+            Add a title or description, or press Load example, to see the code.
+          </p>
+        )}
       </div>
     </div>
   )

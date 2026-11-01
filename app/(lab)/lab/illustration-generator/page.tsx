@@ -17,24 +17,20 @@ export default function IllustrationGeneratorPage() {
       <LabToolSchema slug="illustration-generator" path="/lab/illustration-generator" />
 
       <main className="bg-ds-bg min-h-screen">
-        <section className="border-ds-border border-b px-6 py-20 text-center sm:py-24">
+        <section className="border-ds-border border-b px-6 py-8 text-center sm:py-12">
           <div className="mx-auto max-w-2xl">
             <p className="text-ds-accent mb-4 font-mono text-sm">ILLUSTRATION GENERATOR</p>
             <h1 className={`${H1_HEADLINE}`}>Describe it, get a one-off illustration.</h1>
-            <p className="text-ds-muted mt-6 text-lg leading-relaxed">
-              Two styles. <strong className="text-ds-text">Abstract</strong> composes shapes,
-              charts, and networks from six motif primitives.{' '}
-              <strong className="text-ds-text">Character</strong> builds flat-icon corporate scenes
-              with real clothing — a figure waving hello, presenting to a growing chart, a full
-              boardroom presentation, a team, a handshake, a celebration, or an idea moment — with
-              your own skin tone, masculine/feminine figure style, and outfit palette. Click either
-              preview to make the copied SVG use that theme&apos;s real colors.
+            <p className="text-ds-muted mt-4 text-lg leading-relaxed">
+              Type what it is for and get an animated SVG composed from shapes, charts and networks.
+              Same text, same picture; shuffle for a new arrangement. Download SVG or PNG, or copy a
+              link that reopens it.
             </p>
           </div>
         </section>
 
-        <section className="px-6 py-16">
-          <div className="border-ds-border bg-ds-surface mx-auto max-w-4xl rounded-2xl border p-8">
+        <section className="px-6 py-8 sm:py-12">
+          <div className="border-ds-border bg-ds-surface mx-auto max-w-4xl rounded-2xl border p-5 sm:p-8">
             <IllustrationGenerator />
           </div>
         </section>

@@ -8,6 +8,15 @@ import { ShadowCustomizer } from '@/components/lab/ShadowCustomizer'
 import { SurfaceStudio } from '@/components/lab/SurfaceStudio'
 import { CssCodeBlock } from '@/components/lab/CssCodeBlock'
 
+const SECTIONS = [
+  { id: 'shapes', label: 'Shapes' },
+  { id: 'surfaces', label: 'Surfaces' },
+  { id: 'gallery', label: 'Gallery' },
+  { id: 'borders', label: 'Borders' },
+  { id: 'buttons', label: 'Buttons' },
+  { id: 'shadows', label: 'Shadows' },
+]
+
 export const metadata: Metadata = buildMetadata({
   title: 'CSS Shapes & Animation Generator — Free',
   description:
@@ -162,7 +171,7 @@ export default function CssShapesPlaygroundPage() {
 
       <main className="bg-ds-bg min-h-screen">
         {/* ── Hero ── */}
-        <section className="border-ds-border border-b px-6 py-20 text-center sm:py-24">
+        <section className="border-ds-border border-b px-6 py-8 text-center sm:py-12">
           <div className="mx-auto max-w-2xl">
             <p className="text-ds-accent mb-4 font-mono text-sm">
               CSS SHAPES &amp; ANIMATION PLAYGROUND
@@ -175,8 +184,26 @@ export default function CssShapesPlaygroundPage() {
           </div>
         </section>
 
+        <nav
+          aria-label="Playground sections"
+          className="border-ds-border bg-ds-bg/95 sticky top-0 z-40 border-b backdrop-blur"
+        >
+          <ul className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 py-2">
+            {SECTIONS.map((s) => (
+              <li key={s.id} className="shrink-0">
+                <a
+                  href={`#${s.id}`}
+                  className="text-ds-muted hover:text-ds-accent focus-visible:ring-ds-accent rounded-md px-3 py-1.5 font-mono text-xs transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                >
+                  {s.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
         {/* ── Interactive customizer ── */}
-        <section className="border-ds-border border-b px-6 py-16">
+        <section id="shapes" className="border-ds-border scroll-mt-14 border-b px-6 py-16">
           <div className="mx-auto max-w-4xl">
             <h2 className="text-ds-text mb-2 text-2xl font-bold">Customize it yourself</h2>
             <p className="text-ds-muted mb-8">
@@ -189,7 +216,7 @@ export default function CssShapesPlaygroundPage() {
         </section>
 
         {/* ── Surface studio ── */}
-        <section className="border-ds-border border-b px-6 py-16">
+        <section id="surfaces" className="border-ds-border scroll-mt-14 border-b px-6 py-16">
           <div className="mx-auto max-w-4xl">
             <h2 className="text-ds-text mb-2 text-2xl font-bold">Surfaces</h2>
             <p className="text-ds-muted mb-8">
@@ -203,7 +230,7 @@ export default function CssShapesPlaygroundPage() {
         </section>
 
         {/* ── Shape gallery ── */}
-        <section className="px-6 py-16">
+        <section id="gallery" className="scroll-mt-14 px-6 py-16">
           <div className="mx-auto max-w-5xl">
             <h2 className="text-ds-text mb-8 text-2xl font-bold">Shape &amp; motion gallery</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -245,7 +272,10 @@ export default function CssShapesPlaygroundPage() {
         </section>
 
         {/* ── Border customizer ── */}
-        <section className="border-ds-border bg-ds-surface2/30 border-t px-6 py-16">
+        <section
+          id="borders"
+          className="border-ds-border bg-ds-surface2/30 scroll-mt-14 border-t px-6 py-16"
+        >
           <div className="mx-auto max-w-4xl">
             <h2 className="text-ds-text mb-2 text-2xl font-bold">Border functions</h2>
             <p className="text-ds-muted mb-8">
@@ -258,7 +288,7 @@ export default function CssShapesPlaygroundPage() {
         </section>
 
         {/* ── CTA button animations ── */}
-        <section className="px-6 py-16">
+        <section id="buttons" className="scroll-mt-14 px-6 py-16">
           <div className="mx-auto max-w-5xl">
             <h2 className="text-ds-text mb-8 text-2xl font-bold">CTA button animations</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
@@ -339,7 +369,10 @@ export default function CssShapesPlaygroundPage() {
         </section>
 
         {/* ── Box-shadow animations ── */}
-        <section className="border-ds-border bg-ds-surface2/30 border-t px-6 py-16">
+        <section
+          id="shadows"
+          className="border-ds-border bg-ds-surface2/30 scroll-mt-14 border-t px-6 py-16"
+        >
           <div className="mx-auto max-w-4xl">
             <h2 className="text-ds-text mb-2 text-2xl font-bold">Box-shadow functions</h2>
             <p className="text-ds-muted mb-8">

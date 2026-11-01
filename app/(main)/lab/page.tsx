@@ -65,7 +65,7 @@ const TOOLS: Demo[] = [
     slug: 'meta-tag-generator',
     name: 'Meta Tag & Social Preview Generator',
     blurb:
-      'Drafts a title and description, then previews it as a Google result, an X card, and a Facebook/OG card — with live character counts.',
+      'Drafts a title and description, previews them as Google, X and Facebook cards with pixel-width truncation, and outputs HTML, Next.js metadata or JSON-LD.',
     tag: 'SEO',
     preview: 'meta',
   },
@@ -73,7 +73,7 @@ const TOOLS: Demo[] = [
     slug: 'utm-builder',
     name: 'UTM Builder',
     blurb:
-      'A working UTM link builder for campaign URLs — fully client-side, nothing you type is sent anywhere.',
+      'Cleans UTM values so GA4 reports do not split, checks a whole campaign sheet for naming problems, and exports CSV. Client-side; the sheet stays on your device.',
     tag: 'Marketing',
     preview: 'utm',
   },

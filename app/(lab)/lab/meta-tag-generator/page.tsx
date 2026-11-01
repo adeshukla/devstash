@@ -7,7 +7,7 @@ import { MetaTagGenerator } from '@/components/lab/MetaTagGenerator'
 export const metadata: Metadata = buildMetadata({
   title: 'Meta Tag Generator with Google Preview — Free',
   description:
-    'Free meta tag generator: drafts a title and description, previews them as a Google result, X card and Facebook/OG card, with live character counts.',
+    'Free meta tag generator: Google, X and Facebook previews with pixel-width truncation, plus HTML, Next.js metadata and JSON-LD output. Runs in your browser.',
   canonical: '/lab/meta-tag-generator',
 })
 
@@ -17,7 +17,7 @@ export default function MetaTagGeneratorPage() {
       <LabToolSchema slug="meta-tag-generator" path="/lab/meta-tag-generator" />
 
       <main className="bg-ds-bg min-h-screen">
-        <section className="border-ds-border border-b px-6 py-20 text-center sm:py-24">
+        <section className="border-ds-border border-b px-6 py-8 text-center sm:py-12">
           <div className="mx-auto max-w-2xl">
             <p className="text-ds-accent mb-4 font-mono text-sm">META TAGS &amp; SOCIAL PREVIEW</p>
             <h1 className={`${H1_HEADLINE}`}>See your link before you ship it.</h1>
@@ -31,8 +31,8 @@ export default function MetaTagGeneratorPage() {
           </div>
         </section>
 
-        <section className="px-6 py-16">
-          <div className="border-ds-border bg-ds-surface mx-auto max-w-4xl rounded-2xl border p-8">
+        <section className="px-6 py-8 sm:py-12">
+          <div className="border-ds-border bg-ds-surface mx-auto max-w-4xl rounded-2xl border p-5 sm:p-8">
             <MetaTagGenerator />
           </div>
         </section>

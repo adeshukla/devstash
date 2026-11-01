@@ -7,7 +7,7 @@ import { UtmBuilder } from '@/components/lab/UtmBuilder'
 export const metadata: Metadata = buildMetadata({
   title: 'UTM Builder — Free Campaign URL Generator',
   description:
-    'Free UTM link builder for campaign URLs. Keeps existing query parameters, flags a missing utm_ prefix and runs in your browser. Built from tagging 200+ URLs.',
+    'Free UTM link builder: cleans values to lowercase so GA4 reports do not split, checks a campaign sheet for naming problems, exports CSV. Runs in your browser.',
   canonical: '/lab/utm-builder',
 })
 
@@ -17,19 +17,20 @@ export default function UtmBuilderPage() {
       <LabToolSchema slug="utm-builder" path="/lab/utm-builder" />
 
       <main className="bg-ds-bg min-h-screen">
-        <section className="border-ds-border border-b px-6 py-20 sm:py-28">
+        <section className="border-ds-border border-b px-6 py-8 sm:py-12">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-ds-accent mb-4 font-mono text-sm">UTM LINK BUILDER</p>
             <h1 className={`${H1_HEADLINE}`}>Stop guessing which ad drove the click.</h1>
-            <p className="text-ds-muted mt-6 text-lg leading-relaxed">
-              A working UTM builder — no backend, nothing saved, just a clean tagged URL you can
-              paste straight into your ad platform.
+            <p className="text-ds-muted mt-4 text-lg leading-relaxed">
+              Cleans every value to lowercase so GA4 reports do not split, checks a whole campaign
+              sheet for naming problems, and exports it. Runs in your browser; the sheet is saved
+              only on this device.
             </p>
           </div>
         </section>
 
-        <section className="px-6 py-16">
-          <div className="border-ds-border bg-ds-surface mx-auto max-w-2xl rounded-2xl border p-8">
+        <section className="px-6 py-8 sm:py-12">
+          <div className="border-ds-border bg-ds-surface mx-auto max-w-2xl rounded-2xl border p-5 sm:p-8">
             <UtmBuilder />
           </div>
         </section>

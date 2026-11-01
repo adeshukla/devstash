@@ -45,6 +45,12 @@ import {
 import { FINISH_LABELS, ALL_FINISHES, type FinishKey } from './illustrationFinish'
 import type { Theme } from './designTokens'
 import { CssCodeBlock } from './CssCodeBlock'
+import { useUrlSync } from './useUrlSync'
+import { ShareLinkButton } from './ShareLinkButton'
+import { pick } from '@/lib/lab/urlState'
+
+const ANIMATIONS: AnimationKey[] = ['none', 'float', 'pulse', 'drift', 'draw', 'orbit']
+const keysOf = <T extends string>(labels: Record<T, string>) => Object.keys(labels) as T[]
 
 const CHARACTER_SCENE_KEYWORDS: Record<CharacterScene, string[]> = {
   wave: ['hello', 'welcome', 'contact', 'greet', 'intro', 'about us', 'meet'],
@@ -211,6 +217,38 @@ function GenerateTab() {
   const [personStyle, setPersonStyle] = useState<PersonStyle>('masculine')
   const [motionOn, setMotionOn] = useState(true)
 
+  // Seed + options live in the URL, so a result you like can be reopened or shared.
+  // Defaults are sent as '' and left out of the link.
+  const getShareUrl = useUrlSync(
+    {
+      t: topic,
+      n: nonce ? String(nonce) : '',
+      d: density === 2 ? '' : String(density),
+      p: palette === 'auto' ? '' : palette,
+      a: animation === 'float' ? '' : animation,
+      l: layout === 'auto' ? '' : layout,
+      b: backdrop === 'flat' ? '' : backdrop,
+      f: finish === 'gradient' ? '' : finish,
+      size: size.key === DEFAULT_SIZE.key ? '' : size.key,
+      m: motifOverride.join(','),
+    },
+    (get) => {
+      setTopic(get('t') ?? '')
+      const n = Number(get('n'))
+      setNonce(Number.isInteger(n) && n > 0 && n < 1e6 ? n : 0)
+      setDensity(get('d') === '1' ? 1 : get('d') === '3' ? 3 : 2)
+      setPalette(pick(get('p'), keysOf(PALETTE_LABELS), 'auto'))
+      setAnimation(pick(get('a'), ANIMATIONS, 'float'))
+      setLayout(pick(get('l'), keysOf(LAYOUT_LABELS), 'auto'))
+      setBackdrop(pick(get('b'), keysOf(BACKGROUND_LABELS), 'flat'))
+      setFinish(pick(get('f'), keysOf(FINISH_LABELS), 'gradient'))
+      setSize(SIZE_PRESETS.find((p) => p.key === get('size')) ?? DEFAULT_SIZE)
+      setMotifOverride(
+        (get('m') ?? '').split(',').filter((m): m is MotifKey => ALL_MOTIFS.includes(m as MotifKey))
+      )
+    }
+  )
+
   const composition = useMemo(
     () =>
       generateComposition({
@@ -295,6 +333,17 @@ function GenerateTab() {
     }
   }
 
+  function downloadSvg() {
+    const blob = new Blob([isCharacter ? charSvgCode : svgCode], { type: 'image/svg+xml' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `illustration-${size.key}-${composition.seed}.svg`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(a.href)
+  }
+
   function toggleMotif(m: MotifKey) {
     setMotifOverride((prev) => (prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]))
   }
@@ -308,27 +357,10 @@ function GenerateTab() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">Style</p>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setStyle('abstract')}
-            aria-pressed={style === 'abstract'}
-            className={
-              style === 'abstract'
-                ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
-                : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
-            }
-          >
-            Abstract (shapes, charts, network)
-          </button>
-          {/* "Character" style toggle intentionally hidden for now — the
-              character scenes need another quality pass. All the underlying
-              logic below (isCharacter branches, characterEngine imports)
-              is untouched; re-add this button to bring it back. */}
-        </div>
-      </div>
+      {/* The Style toggle (Abstract / Character) is hidden while Abstract is the only
+          style: a single button is not a choice. The character scenes need another
+          quality pass; all the isCharacter branches and characterEngine imports below
+          are untouched. Re-add the toggle that calls setStyle to bring Character back. */}
 
       <div>
         <label htmlFor="topic" className="text-ds-text mb-1.5 block text-sm font-medium">
@@ -735,23 +767,21 @@ function GenerateTab() {
                 Animation
               </p>
               <div className="flex flex-wrap gap-2">
-                {(['none', 'float', 'pulse', 'drift', 'draw', 'orbit'] as AnimationKey[]).map(
-                  (a) => (
-                    <button
-                      key={a}
-                      type="button"
-                      onClick={() => setAnimation(a)}
-                      aria-pressed={animation === a}
-                      className={
-                        animation === a
-                          ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white capitalize'
-                          : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm capitalize transition-colors'
-                      }
-                    >
-                      {a}
-                    </button>
-                  )
-                )}
+                {ANIMATIONS.map((a) => (
+                  <button
+                    key={a}
+                    type="button"
+                    onClick={() => setAnimation(a)}
+                    aria-pressed={animation === a}
+                    className={
+                      animation === a
+                        ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white capitalize'
+                        : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm capitalize transition-colors'
+                    }
+                  >
+                    {a}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -783,6 +813,14 @@ function GenerateTab() {
               >
                 {exporting ? 'Rendering…' : `Download PNG (${size.w}×${size.h})`}
               </button>
+              <button
+                type="button"
+                onClick={downloadSvg}
+                className="border-ds-accent text-ds-accent hover:bg-ds-accent rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors hover:text-white"
+              >
+                Download SVG
+              </button>
+              <ShareLinkButton getUrl={getShareUrl} />
             </div>
             <p className="text-ds-muted mb-6 text-sm">
               The composition is generated at the selected size, not cropped to it — an Open Graph
