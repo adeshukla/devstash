@@ -30,7 +30,7 @@ export default function UtmBuilderPage() {
         </section>
 
         <section className="px-6 py-8 sm:py-12">
-          <div className="border-ds-border bg-ds-surface mx-auto max-w-2xl rounded-2xl border p-5 sm:p-8">
+          <div className="border-ds-border bg-ds-surface mx-auto max-w-5xl rounded-2xl border p-5 sm:p-8">
             <UtmBuilder />
           </div>
         </section>

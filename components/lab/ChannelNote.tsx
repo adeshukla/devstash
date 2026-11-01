@@ -10,7 +10,7 @@ export function ChannelNote({ source, medium }: { source: string; medium: string
   if (!channel) return null
   const lost = channel === 'Unassigned'
   return (
-    <p className={`mt-1 text-xs ${lost ? 'text-ds-warning-strong' : 'text-ds-muted'}`}>
+    <p className={`mt-1.5 text-sm ${lost ? 'text-ds-warning-strong' : 'text-ds-muted'}`}>
       GA4 channel: <strong className="font-semibold">{channel}</strong>
       {lost && ' — not recognised. Use a standard type of traffic such as cpc, email or social.'}
     </p>
