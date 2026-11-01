@@ -33,6 +33,34 @@
     transform: scale(0.82);
     animation: labPop 3s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
   }
+  /* SVG parts: bars grow from their left edge, strokes draw along their length,
+     and text slides in sideways (never faded, so its contrast stays put). */
+  .lab-grow {
+    transform: scaleX(0);
+    animation: labGrow 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+  .lab-draw100 {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: labDraw100 3.4s ease-out infinite;
+  }
+  .lab-slide {
+    transform: translateX(-10px);
+    animation: labSlide 3.2s ease-out infinite;
+  }
+}
+
+/* Scale and rotate SVG parts about their own centre, not the canvas origin. */
+.lab-pop,
+.lab-grow,
+.lab-slide {
+  transform-box: fill-box;
+}
+.lab-pop {
+  transform-origin: center;
+}
+.lab-grow {
+  transform-origin: left center;
 }
 
 /* Static, legible fallbacks so a reduced-motion visitor sees a finished
@@ -117,5 +145,45 @@
   95%,
   100% {
     transform: scale(0.82);
+  }
+}
+
+@keyframes labGrow {
+  0%,
+  8% {
+    transform: scaleX(0);
+  }
+  42%,
+  80% {
+    transform: scaleX(1);
+  }
+  96%,
+  100% {
+    transform: scaleX(0);
+  }
+}
+@keyframes labDraw100 {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  55%,
+  85% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 100;
+  }
+}
+@keyframes labSlide {
+  0%,
+  6% {
+    transform: translateX(-10px);
+  }
+  28%,
+  85% {
+    transform: none;
+  }
+  100% {
+    transform: translateX(-10px);
   }
 }
