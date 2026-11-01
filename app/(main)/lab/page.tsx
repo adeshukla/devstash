@@ -12,6 +12,11 @@ import { getAllProjects } from '@/lib/markdown/projects'
 import { FaqSection } from '@/components/sections/FaqSection'
 import { LabTools, type LabTool } from '@/components/lab/LabTools'
 import { LabPreview, type PreviewKind } from '@/components/lab/LabPreview'
+import { buildUtmUrl } from '@/lib/lab/utm'
+import { analyzeLink } from '@/lib/lab/utmCheck'
+import { cleanReport } from '@/lib/lab/reportClean'
+import { whatsappPayload } from '@/lib/lab/qrPayload'
+import { buildHtml } from '@/lib/lab/metaTags'
 
 const title = 'Lab — Interactive Tools & Live Demos'
 const description =
@@ -140,7 +145,79 @@ const FAQ = [
   },
 ]
 
+/**
+ * A real result for a sample input on each card, produced by the tool's own
+ * code at build time, so the hub shows what the tool returns, not a mock-up.
+ */
+function examples(): Record<string, { input: string; output: string }> {
+  const checked = analyzeLink(
+    'https://example.com/?utm_source=Google&utm_medium=cpc&UTM_Campaign=Spring Sale'
+  )
+  const cleaned = cleanReport(
+    'Session campaign,Sessions\nspring-sale,1200\nSpring_Sale,300\nspring sale,90',
+    '-'
+  ).groups[0]
+  return {
+    'utm-builder': {
+      input: 'example.com/pricing + Google Ads + "Spring Sale"',
+      output: buildUtmUrl({
+        url: 'https://example.com/pricing',
+        source: 'google',
+        medium: 'cpc',
+        campaign: 'Spring Sale',
+        term: '',
+        content: '',
+      }).url,
+    },
+    'utm-link-checker': {
+      input: 'A link with "Google" and "UTM_Campaign" in it',
+      output: `${checked.issues.filter((i) => i.level === 'problem').length} problems found. Cleaned: ${checked.cleaned}`,
+    },
+    'utm-report-cleaner': {
+      input: 'Spring_Sale, spring sale and spring-sale in one report',
+      output: `${cleaned.variants.length} spellings merge into ${cleaned.canonical}`,
+    },
+    'qr-code-generator': {
+      input: 'WhatsApp +91 98765 43210, message "Hello"',
+      output: whatsappPayload('+91 98765 43210', 'Hello').payload,
+    },
+    'meta-tag-generator': {
+      input: 'A title and a description',
+      output: buildHtml({
+        title: 'Free UTM Link Builder',
+        description: 'Build clean tracking links.',
+        url: '',
+        siteName: '',
+        image: '',
+        twitter: '',
+        type: 'website',
+      })
+        .split('\n')
+        .filter(Boolean)
+        .slice(0, 2)
+        .join('  '),
+    },
+    'css-shapes-playground': {
+      input: 'A morphing blob',
+      output: 'border-radius: 42% 58% 63% 37% / 47% 42% 58% 53%;',
+    },
+  }
+}
+
+const JOBS = [
+  { job: 'Tag links for a campaign', tool: 'UTM Builder', href: '/lab/utm-builder' },
+  { job: 'Check links I already use', tool: 'Link Checker', href: '/lab/utm-link-checker' },
+  { job: 'Fix a report with split rows', tool: 'Report Cleaner', href: '/lab/utm-report-cleaner' },
+  { job: 'Make a QR code', tool: 'QR Code Generator', href: '/lab/qr-code-generator' },
+  {
+    job: 'See how my page looks on Google',
+    tool: 'Meta Tag Generator',
+    href: '/lab/meta-tag-generator',
+  },
+]
+
 export default async function LabPage() {
+  const samples = examples()
   const projects = await getAllProjects()
   const toolkitSlugs = [
     'utm-builder',
@@ -161,6 +238,7 @@ export default async function LabPage() {
       tag: demo.tag,
       highlights: project?.highlights ?? [],
       stats: project?.coverStats ?? [],
+      example: samples[demo.slug],
       tech: project?.tech ?? [],
       preview: <LabPreview kind={demo.preview} />,
     }
@@ -188,8 +266,9 @@ export default async function LabPage() {
           <h1 className={`${H1_DISPLAY} mt-6`}>Everything here is running.</h1>
           <p className="text-ds-muted mt-4 max-w-[68ch] text-lg leading-relaxed">
             Not screenshots or case studies — working things you can use right now, in your browser,
-            with no signup. Break them, copy from them, view the source. Each preview below is the
-            real output, animating live.
+            with no signup. Break them, copy from them, view the source. Each card shows a real
+            result for a sample input, and the animation above it shows the shape of what the tool
+            does.
           </p>
           <PageFacts
             items={[
@@ -198,6 +277,25 @@ export default async function LabPage() {
               { value: 0, label: 'signups needed' },
             ]}
           />
+        </div>
+      </section>
+
+      <section className="border-ds-border border-b py-10">
+        <div className="max-w-site mx-auto px-6">
+          <h2 className="text-ds-text text-xl font-bold tracking-tight">What do you need to do?</h2>
+          <ul className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {JOBS.map((j) => (
+              <li key={j.href}>
+                <Link
+                  href={j.href}
+                  className="border-ds-border bg-ds-surface hover:border-ds-accent focus-visible:ring-ds-accent flex h-full flex-col gap-1 rounded-xl border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                >
+                  <span className="text-ds-text text-sm font-medium">{j.job}</span>
+                  <span className="text-ds-accent-strong text-xs">{j.tool} &rarr;</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 

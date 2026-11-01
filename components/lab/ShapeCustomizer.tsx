@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { CssCodeBlock } from './CssCodeBlock'
 import { useUrlSync } from './useUrlSync'
 import { ShareLinkButton } from './ShareLinkButton'
+import { PresetBar } from './PresetBar'
 import { pick } from '@/lib/lab/urlState'
 import {
   PolygonShapeEditor,
@@ -500,6 +501,7 @@ export function ShapeCustomizer() {
         <div>
           <ShareLinkButton getUrl={getShareUrl} tool="css-shapes" />
         </div>
+        <PresetBar tool="css-shapes" getUrl={getShareUrl} />
       </div>
 
       <style>{`

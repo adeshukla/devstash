@@ -108,11 +108,11 @@ export function UtmRulesPanel({
           )}
         </div>
 
-        <fieldset>
+        <fieldset className="min-w-0">
           <legend className="text-ds-text mb-1.5 text-[13px] font-medium">
             Between words in campaign names
           </legend>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
             {(['-', '_'] as const).map((s) => (
               <label key={s} className="text-ds-text flex items-center gap-2 text-sm">
                 <input

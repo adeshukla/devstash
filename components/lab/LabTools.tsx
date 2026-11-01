@@ -4,6 +4,8 @@ import { useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { Badge, CardTilt } from '@/components/ui'
 import { cn } from '@/lib/utils/cn'
+import { copyText } from '@/lib/utils/clipboard'
+import { trackLab } from './track'
 
 export interface LabTool {
   slug: string
@@ -14,6 +16,8 @@ export interface LabTool {
   /** Short facts from the project file, shown as chips. */
   stats: string[]
   tech: string[]
+  /** A real result for a sample input, computed by the tool's own code. */
+  example?: { input: string; output: string }
   /** Rendered on the server (LabPreview) and passed through. */
   preview: ReactNode
 }
@@ -22,8 +26,18 @@ export interface LabTool {
 export function LabTools({ tools }: { tools: LabTool[] }) {
   const [tag, setTag] = useState('All')
   const [open, setOpen] = useState<string | null>(null)
+  const [copied, setCopied] = useState<string | null>(null)
   const tags = ['All', ...new Set(tools.map((t) => t.tag))]
   const shown = tag === 'All' ? tools : tools.filter((t) => t.tag === tag)
+  // An odd last card spans the row instead of sitting alone in half of it.
+  const wideLast = shown.length > 1 && shown.length % 2 === 1
+
+  async function copyToolLink(slug: string) {
+    if (!(await copyText(`${window.location.origin}/lab/${slug}`))) return
+    trackLab('hub', 'copy_tool_link', slug)
+    setCopied(slug)
+    setTimeout(() => setCopied(null), 2000)
+  }
 
   return (
     <>
@@ -47,11 +61,17 @@ export function LabTools({ tools }: { tools: LabTool[] }) {
       </div>
 
       <div className="grid grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-2">
-        {shown.map((tool) => {
+        {shown.map((tool, index) => {
           const isOpen = open === tool.slug
+          const wide = wideLast && index === shown.length - 1
           return (
-            <CardTilt key={tool.slug}>
-              <article className="group flex h-full flex-col gap-5">
+            <CardTilt key={tool.slug} className={wide ? 'sm:col-span-2' : undefined}>
+              <article
+                className={cn(
+                  'group flex h-full flex-col gap-5',
+                  wide && 'sm:grid sm:grid-cols-2 sm:items-center sm:gap-8'
+                )}
+              >
                 <Link
                   href={`/lab/${tool.slug}`}
                   aria-hidden="true"
@@ -70,6 +90,14 @@ export function LabTools({ tools }: { tools: LabTool[] }) {
                     </Badge>
                   </div>
                   <p className="text-ds-muted text-sm leading-relaxed">{tool.blurb}</p>
+                  {tool.example && (
+                    <div className="border-ds-border bg-ds-surface2 rounded-lg border p-3">
+                      <p className="text-ds-muted text-xs">Real output · {tool.example.input}</p>
+                      <p className="text-ds-text mt-1 font-mono text-xs break-all">
+                        {tool.example.output}
+                      </p>
+                    </div>
+                  )}
                   {tool.stats.length > 0 && (
                     <ul className="flex flex-wrap gap-1.5" aria-label="Facts">
                       {tool.stats.map((x) => (
@@ -118,6 +146,15 @@ export function LabTools({ tools }: { tools: LabTool[] }) {
                       className="text-ds-muted hover:text-ds-text transition-colors"
                     >
                       {isOpen ? 'Hide details' : "What's inside"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => copyToolLink(tool.slug)}
+                      className="text-ds-muted hover:text-ds-text transition-colors"
+                    >
+                      <span aria-live="polite">
+                        {copied === tool.slug ? 'Link copied ✓' : 'Copy link'}
+                      </span>
                     </button>
                     <Link
                       href={`/projects/${tool.slug}`}

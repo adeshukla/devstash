@@ -6,6 +6,7 @@ import { CssCodeBlock } from './CssCodeBlock'
 import { draftFromContent } from './metaDraftEngine'
 import { useUrlSync } from './useUrlSync'
 import { ShareLinkButton } from './ShareLinkButton'
+import { PresetBar } from './PresetBar'
 import { pick } from '@/lib/lab/urlState'
 import {
   buildHtml,
@@ -482,6 +483,7 @@ export function MetaTagGenerator() {
             </Button>
             <ShareLinkButton getUrl={getShareUrl} tool="meta-tags" />
           </div>
+          <PresetBar tool="meta-tags" getUrl={getShareUrl} />
         </div>
 
         {tab === 'next' && (

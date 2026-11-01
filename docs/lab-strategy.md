@@ -83,6 +83,8 @@ Also done (2026-11-02): usage events for every Lab tool (`lab_tool_action`, carr
 
 Also done (2026-11-02): the builder's secondary panels (team rules, import, checklist, backup) sit under one closed "More tools" section so the first screen stays the three steps; the toolkit's browser flows are now a repo test (`pnpm qa:toolkit`, 20 tests, also run on PRs into main). Lighthouse CI now also lists the four toolkit pages. Local Lighthouse on this machine is noisy (the existing /about page scored 75 performance), so judge the toolkit pages by CI or a Vercel preview, not by local numbers.
 
+Also done (2026-11-02, hub and small tools): larger SVG previews; each hub card shows a real result computed by the tool's own code; a "What do you need to do?" row of jobs; an odd last card spans the row; a copy-link button per card; the meta tag generator can check pasted head tags; saved looks (name + share link, kept on the device) for the CSS, illustration and meta tools; a one-time backup reminder after five saved UTM links. Browser checks for these are in `tests/qa/lab.spec.ts` (run by `pnpm qa:toolkit`). The 200px responsive suite caught two real overflows during this work (a fieldset and the saved-looks block), both fixed.
+
 Next (needs Adesh or real data):
 
 1. **Run it on a real GA4 export** and a real Looker Studio report; report which headers fail.

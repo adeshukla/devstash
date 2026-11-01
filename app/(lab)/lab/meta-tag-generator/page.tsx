@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
 import { MetaTagGenerator } from '@/components/lab/MetaTagGenerator'
+import { MetaAudit } from '@/components/lab/MetaAudit'
 
 export const metadata: Metadata = buildMetadata({
   title: 'Meta Tag Generator with Google Preview — Free',
@@ -34,6 +35,20 @@ export default function MetaTagGeneratorPage() {
         <section className="px-6 py-8 sm:py-12">
           <div className="border-ds-border bg-ds-surface mx-auto max-w-4xl rounded-2xl border p-5 sm:p-8">
             <MetaTagGenerator />
+          </div>
+        </section>
+
+        <section className="border-ds-border border-t px-6 py-12 sm:py-16">
+          <div className="mx-auto max-w-4xl">
+            <h2 className="text-ds-text mb-2 text-xl font-bold">Check tags you already have</h2>
+            <p className="text-ds-muted mb-6 max-w-2xl leading-relaxed">
+              Paste the head of a live page and see what is missing, too long or repeated: the
+              title, description, canonical link, viewport, robots and the social tags. It reads
+              what you paste; it does not fetch your site.
+            </p>
+            <div className="border-ds-border bg-ds-surface rounded-2xl border p-5 sm:p-8">
+              <MetaAudit />
+            </div>
           </div>
         </section>
 

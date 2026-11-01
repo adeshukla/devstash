@@ -47,6 +47,7 @@ import type { Theme } from './designTokens'
 import { CssCodeBlock } from './CssCodeBlock'
 import { useUrlSync } from './useUrlSync'
 import { ShareLinkButton } from './ShareLinkButton'
+import { PresetBar } from './PresetBar'
 import { pick } from '@/lib/lab/urlState'
 
 const ANIMATIONS: AnimationKey[] = ['none', 'float', 'pulse', 'drift', 'draw', 'orbit']
@@ -822,6 +823,7 @@ function GenerateTab() {
               </button>
               <ShareLinkButton getUrl={getShareUrl} tool="illustration" />
             </div>
+            <PresetBar tool="illustration" getUrl={getShareUrl} />
             <p className="text-ds-muted mb-6 text-sm">
               The composition is generated at the selected size, not cropped to it — an Open Graph
               card is genuinely composed for 1200×630 rather than a letterboxed 16:9.

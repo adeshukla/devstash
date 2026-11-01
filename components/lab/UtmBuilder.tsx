@@ -40,6 +40,7 @@ import { useUrlSync } from './useUrlSync'
 import { KEYS, readStored, writeStored } from './storage'
 import { trackLab } from './track'
 import { LaunchChecklist } from './LaunchChecklist'
+import { BackupReminder } from './BackupReminder'
 import { WorkspaceBackup, type RestoreSummary } from './WorkspaceBackup'
 import { buildWorkspace, mergeRows, type Workspace } from '@/lib/lab/workspace'
 import { UtmRulesPanel } from './UtmRulesPanel'
@@ -774,6 +775,7 @@ export function UtmBuilder() {
       </div>
 
       <div className="flex flex-col gap-8">
+        <BackupReminder count={rows.length} build={buildBackup} />
         {rows.length > 0 && (
           <UtmSheet
             rows={rows}

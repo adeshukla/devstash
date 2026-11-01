@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui'
 import { parseWorkspace, type Workspace } from '@/lib/lab/workspace'
-import { saveBlob } from './saveFile'
+import { downloadWorkspaceFile } from './backupFile'
 import { trackLab } from './track'
 
 export interface RestoreSummary {
@@ -29,11 +29,7 @@ export function WorkspaceBackup({
 
   async function download() {
     trackLab('utm-builder', 'download_backup')
-    const date = new Date().toLocaleDateString('sv-SE')
-    await saveBlob(
-      new Blob([JSON.stringify(build(), null, 2)], { type: 'application/json' }),
-      `utm-workspace-${date}.json`
-    )
+    await downloadWorkspaceFile(build())
     setBad(false)
     setMessage('Backup saved. Keep it somewhere safe; it holds your links, channels and rules.')
   }

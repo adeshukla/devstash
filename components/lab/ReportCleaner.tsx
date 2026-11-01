@@ -143,7 +143,7 @@ export function ReportCleaner() {
         </div>
       </div>
 
-      <fieldset>
+      <fieldset className="min-w-0">
         <legend className="text-ds-text mb-1.5 text-[13px] font-medium">Clean names use</legend>
         <div className="flex flex-wrap gap-4">
           {(['-', '_'] as const).map((s) => (

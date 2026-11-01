@@ -1,5 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { auditHead } from '../../lib/lab/metaAudit.ts'
 import { pickIcon, pickIcons, iconSvg, heroArt, ringsSvg } from '../../lib/ai/landingGraphics.ts'
 import {
   cleanReport,
@@ -713,4 +714,32 @@ test('campaign pack carries the launch checklist', () => {
   })
   assert.match(html, /Before you launch/)
   assert.match(html, /type="checkbox"/)
+})
+
+test('meta audit reads a head and reports what is missing, long or repeated', () => {
+  const bad = auditHead(
+    '<head><title>Home</title><meta name="description" content="Hi"><meta property="og:image" content="/x.png"><meta name="robots" content="noindex,follow"></head>'
+  )
+  const text = bad.issues.map((i) => i.level + ':' + i.text).join('\n')
+  assert.match(text, /problem:There is no viewport/)
+  assert.match(text, /problem:The robots tag says noindex/)
+  assert.match(text, /problem:og:image must be a full/)
+  assert.match(text, /tip:The title is only 4 characters/)
+  assert.match(text, /tip:There is no canonical link/)
+  assert.match(text, /Open Graph tags missing: og:title, og:description, og:url, og:type/)
+  const dup = auditHead(
+    '<title>A</title><title>B</title><meta name="description" content="x"><meta name="description" content="y">'
+  )
+  const dupText = dup.issues.map((i) => i.text).join('\n')
+  assert.match(dupText, /There are 2 <title> tags/)
+  assert.match(dupText, /There are 2 meta descriptions/)
+  const good = auditHead(
+    '<meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>' +
+      'A solid page title for search results'.padEnd(40, 'x') +
+      '</title><meta name="description" content="' +
+      'x'.repeat(140) +
+      '"><link rel="canonical" href="https://e.com/a"><meta property="og:title" content="t"><meta property="og:description" content="d"><meta property="og:image" content="https://e.com/i.png"><meta property="og:url" content="https://e.com/a"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">'
+  )
+  assert.equal(good.issues.length, 0, JSON.stringify(good.issues))
+  assert.deepEqual(auditHead('  '), { title: '', description: '', found: [], issues: [] })
 })

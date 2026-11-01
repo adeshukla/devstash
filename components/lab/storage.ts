@@ -8,6 +8,7 @@ export const KEYS = {
   rules: 'devstash-utm-rules',
   owner: 'devstash-utm-owner',
   aliases: 'devstash-utm-aliases',
+  lastBackup: 'devstash-utm-last-backup',
 } as const
 
 export function readStored<T>(key: string, fallback: T): T {
