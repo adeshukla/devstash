@@ -34,6 +34,11 @@ const FAQ = [
       'Google Ads and Meta replace a placeholder with a real value for every click, so one tagged link can cover many ads. Add them under More options. Such a link only works once pasted into the ad platform, so it has no QR code.',
   },
   {
+    question: 'What is the campaign pack?',
+    answer:
+      'One file you can send to a client, a printer or your team: every saved link with its GA4 channel and a QR code, plus any naming problems. It opens in any browser and prints to PDF. It is made on your device.',
+  },
+  {
     question: 'Does it shorten links or count clicks?',
     answer:
       'No. Shortening and click counting need a server that stores your links, which would break the promise that nothing leaves your browser. Use the Share and Copy buttons, or your own shortener, on top of the tagged link.',

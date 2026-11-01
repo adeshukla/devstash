@@ -4,47 +4,7 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui'
 import { makeQr, qrSvg, scanWarning, MAX_LABEL, type QrCode, type QrLevel } from '@/lib/lab/qr'
 import { printQrSheet } from './qrPrint'
-
-interface SaveHandle {
-  createWritable: () => Promise<{ write: (b: Blob) => Promise<void>; close: () => Promise<void> }>
-}
-type SavePicker = (opts: {
-  suggestedName: string
-  types: { description: string; accept: Record<string, string[]> }[]
-}) => Promise<SaveHandle>
-
-/**
- * Opens the system "Save as" dialog where the browser has one (Chrome, Edge,
- * Opera) so the user picks the folder. Firefox and Safari have no such API and
- * fall back to a normal download.
- */
-async function save(blob: Blob, name: string) {
-  const picker = (window as unknown as { showSaveFilePicker?: SavePicker }).showSaveFilePicker
-  if (picker) {
-    try {
-      const ext = name.slice(name.lastIndexOf('.'))
-      const handle = await picker({
-        suggestedName: name,
-        types: [
-          { description: ext.slice(1).toUpperCase() + ' image', accept: { [blob.type]: [ext] } },
-        ],
-      })
-      const file = await handle.createWritable()
-      await file.write(blob)
-      await file.close()
-      return
-    } catch (e) {
-      if ((e as DOMException).name === 'AbortError') return // user cancelled
-    }
-  }
-  const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
-  a.download = name
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  URL.revokeObjectURL(a.href)
-}
+import { saveBlob } from './saveFile'
 
 const LEVELS: { value: QrLevel; label: string }[] = [
   { value: 'L', label: 'Smallest code' },
@@ -122,7 +82,7 @@ export function QrPanel({
     canvas.width = size
     canvas.height = Math.round((size * img.naturalHeight) / img.naturalWidth)
     canvas.getContext('2d')?.drawImage(img, 0, 0, canvas.width, canvas.height)
-    canvas.toBlob((b) => b && save(b, `${fileBase}.png`), 'image/png')
+    canvas.toBlob((b) => b && saveBlob(b, `${fileBase}.png`), 'image/png')
   }
 
   return (
@@ -223,7 +183,8 @@ export function QrPanel({
           variant="outline"
           disabled={!qr}
           onClick={() =>
-            qr && save(new Blob([qrSvg(qr, style)], { type: 'image/svg+xml' }), `${fileBase}.svg`)
+            qr &&
+            saveBlob(new Blob([qrSvg(qr, style)], { type: 'image/svg+xml' }), `${fileBase}.svg`)
           }
         >
           Download SVG

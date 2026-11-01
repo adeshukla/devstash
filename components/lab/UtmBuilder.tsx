@@ -704,6 +704,7 @@ export function UtmBuilder() {
           <UtmSheet
             rows={rows}
             rules={rules}
+            owner={owner}
             onRemove={(id) => updateRows(rows.filter((r) => r.id !== id))}
             onEdit={editRow}
             onQr={setQrUrl}

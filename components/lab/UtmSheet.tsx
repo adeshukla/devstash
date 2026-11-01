@@ -4,10 +4,12 @@ import { useState } from 'react'
 import { Button } from '@/components/ui'
 import { copyText } from '@/lib/utils/clipboard'
 import { ChannelNote } from './ChannelNote'
-import { makeQr } from '@/lib/lab/qr'
+import { makeQr, qrSvg } from '@/lib/lab/qr'
+import { buildPackHtml, type PackItem } from '@/lib/lab/campaignPack'
+import { saveBlob } from './saveFile'
 import { printQrSheet, type PrintItem } from './qrPrint'
-import { ruleIssues, type UtmRules } from '@/lib/lab/utmRules'
-import { tokensIn, lintRows, toCsv, toTsv, type SheetRow } from '@/lib/lab/utm'
+import { ruleIssues, rulesActive, rulesVersion, type UtmRules } from '@/lib/lab/utmRules'
+import { ga4Channel, tokensIn, lintRows, toCsv, toTsv, type SheetRow } from '@/lib/lab/utm'
 
 function downloadCsv(rows: SheetRow[]) {
   const blob = new Blob([toCsv(rows)], { type: 'text/csv' })
@@ -27,6 +29,7 @@ const action =
 export function UtmSheet({
   rows,
   rules,
+  owner,
   onRemove,
   onEdit,
   onQr,
@@ -34,6 +37,7 @@ export function UtmSheet({
 }: {
   rows: SheetRow[]
   rules: UtmRules
+  owner: string
   onRemove: (id: string) => void
   onEdit: (row: SheetRow) => void
   onQr: (url: string) => void
@@ -49,6 +53,40 @@ export function UtmSheet({
     if (!(await copyText(toTsv(rows)))) return
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  async function downloadPack() {
+    const items: PackItem[] = []
+    for (const row of rows) {
+      let svg = ''
+      if (!tokensIn(row.url).length) {
+        try {
+          svg = qrSvg(await makeQr(row.url, 'M'), { fg: '#000000', bg: '#ffffff', label: '' })
+        } catch {
+          // too long for a QR code: the pack lists the link without one
+        }
+      }
+      items.push({
+        url: row.url,
+        source: row.fields.source,
+        medium: row.fields.medium,
+        campaign: row.fields.campaign,
+        channel: ga4Channel(row.fields.source, row.fields.medium),
+        svg,
+      })
+    }
+    const names = [...new Set(rows.map((r) => r.fields.campaign).filter(Boolean))]
+    const html = buildPackHtml({
+      title: names.length
+        ? `Campaign pack: ${names.slice(0, 3).join(', ')}${names.length > 3 ? '…' : ''}`
+        : 'Campaign pack',
+      owner: owner.trim(),
+      date: new Date().toLocaleDateString('sv-SE'),
+      rules: rulesActive(rules) ? rulesVersion(rules) : '',
+      issues,
+      items,
+    })
+    await saveBlob(new Blob([html], { type: 'text/html' }), 'campaign-pack.html')
   }
 
   async function printSheet() {
@@ -96,6 +134,9 @@ export function UtmSheet({
           </Button>
           <Button type="button" size="sm" variant="outline" onClick={() => downloadCsv(rows)}>
             Download CSV
+          </Button>
+          <Button type="button" size="sm" variant="outline" onClick={downloadPack}>
+            Download campaign pack
           </Button>
           <Button type="button" size="sm" variant="outline" onClick={printSheet}>
             Print QR sheet

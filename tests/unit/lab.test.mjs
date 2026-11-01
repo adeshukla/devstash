@@ -1,5 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { buildPackHtml } from '../../lib/lab/campaignPack.ts'
 import {
   websitePayload,
   whatsappPayload,
@@ -398,4 +399,39 @@ test('Google Ads suffix keeps only utm_ parameters without the question mark', (
     'utm_source=google&utm_term={keyword}'
   )
   assert.equal(adsSuffix('https://e.com/'), '')
+})
+
+test('campaign pack escapes every value and keeps the QR markup', () => {
+  const html = buildPackHtml({
+    title: 'Pack <script>x</script>',
+    owner: 'A&B',
+    date: '2026-11-02',
+    rules: 'abc123',
+    issues: ['Row 1: <b>bad</b>'],
+    items: [
+      {
+        url: 'https://e.com/?a=1&b=2',
+        source: 'google',
+        medium: 'cpc',
+        campaign: 'c"q',
+        channel: 'Paid Search',
+        svg: '<svg id="qr"></svg>',
+      },
+      {
+        url: 'https://e.com/?utm_term={keyword}',
+        source: 'google',
+        medium: 'cpc',
+        campaign: 'k',
+        channel: 'Paid Search',
+        svg: '',
+      },
+    ],
+  })
+  assert.doesNotMatch(html, /<script>x/)
+  assert.doesNotMatch(html, /<b>bad/)
+  assert.match(html, /a=1&#38;b=2/)
+  assert.match(html, /Owner: A&#38;B/)
+  assert.ok(html.includes('<svg id="qr"></svg>'))
+  assert.match(html, /No QR: placeholders/)
+  assert.match(html, /2 links/)
 })
