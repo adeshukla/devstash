@@ -1,5 +1,6 @@
 import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
 import { UtmBuilder } from '@/components/lab/UtmBuilder'
@@ -68,6 +69,17 @@ export default function UtmBuilderPage() {
           <div className="border-ds-border bg-ds-surface mx-auto max-w-5xl rounded-2xl border p-5 sm:p-8">
             <UtmBuilder />
           </div>
+          <p className="text-ds-muted mx-auto mt-4 max-w-5xl text-center text-sm">
+            Already have links?{' '}
+            <Link href="/lab/utm-link-checker" className="text-ds-accent-strong underline">
+              Check them for mistakes
+            </Link>
+            . Need a code for WhatsApp, Wi-Fi or a contact?{' '}
+            <Link href="/lab/qr-code-generator" className="text-ds-accent-strong underline">
+              Make one here
+            </Link>
+            .
+          </p>
         </section>
 
         <section className="border-ds-border border-t px-6 py-16">

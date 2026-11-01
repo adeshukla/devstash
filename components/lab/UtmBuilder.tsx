@@ -39,6 +39,7 @@ import { UtmSheet } from './UtmSheet'
 import { UtmQr } from './UtmQr'
 import { UtmImport } from './UtmImport'
 import { ChannelNote } from './ChannelNote'
+import { AdsSuffixButton } from './AdsSuffixButton'
 
 const INITIAL: UtmFields = { url: '', source: '', medium: '', campaign: '', term: '', content: '' }
 const SHEET_KEY = 'devstash-utm-sheet'
@@ -668,6 +669,10 @@ export function UtmBuilder() {
           <p className="text-ds-muted mt-3 text-xs" aria-live="polite">
             Tidied so reports stay consistent: {changes.join(' · ')}
           </p>
+        )}
+
+        {ready && count === 1 && links[0].fields.source.trim().toLowerCase() === 'google' && (
+          <AdsSuffixButton url={links[0].result.url} />
         )}
 
         <div className="mt-4 flex flex-wrap items-center gap-2">

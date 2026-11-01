@@ -1,5 +1,15 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import {
+  websitePayload,
+  whatsappPayload,
+  phonePayload,
+  emailPayload,
+  wifiPayload,
+  contactPayload,
+  textPayload,
+} from '../../lib/lab/qrPayload.ts'
+import { analyzeLink, adsSuffix } from '../../lib/lab/utmCheck.ts'
 import { makeQr, qrSvg, contrastRatio, scanWarning } from '../../lib/lab/qr.ts'
 import {
   parseChannelLines,
@@ -290,4 +300,102 @@ test('QR code is generated, captioned and escaped; oversized text throws', async
   assert.match(svg, /width="512"/)
   assert.doesNotMatch(qrSvg(qr, { fg: '#000', bg: '#fff', label: '' }), /<text/)
   await assert.rejects(() => makeQr('x'.repeat(5000), 'M'))
+})
+
+test('QR payloads: website, WhatsApp, phone and email', () => {
+  assert.equal(websitePayload('example.com/a').payload, 'https://example.com/a')
+  assert.match(websitePayload('example').error, /full address/)
+  assert.match(websitePayload('ftp://example.com').error, /http/)
+  assert.equal(
+    whatsappPayload('+91 98765-43210', 'Hi there & welcome').payload,
+    'https://wa.me/919876543210?text=Hi%20there%20%26%20welcome'
+  )
+  assert.equal(whatsappPayload('0044 7911 123456', '').payload, 'https://wa.me/447911123456')
+  assert.match(whatsappPayload('07911123456', '').error, /country code/)
+  assert.match(whatsappPayload('12345', '').error, /8 to 15/)
+  assert.equal(phonePayload('+44 7911 123456').payload, 'tel:+447911123456')
+  assert.equal(
+    emailPayload('a@b.co', 'Hello there', '').payload,
+    'mailto:a@b.co?subject=Hello%20there'
+  )
+  assert.match(emailPayload('nope', '', '').error, /incomplete/)
+  assert.deepEqual(whatsappPayload('', ''), { payload: '', error: '' })
+})
+
+test('QR payloads: Wi-Fi escapes special characters and checks WPA length', () => {
+  assert.equal(
+    wifiPayload('Cafe;Net', 'pa:ss;word1', 'WPA', true).payload,
+    'WIFI:T:WPA;S:Cafe\\;Net;P:pa\\:ss\\;word1;H:true;;'
+  )
+  assert.equal(wifiPayload('Open', '', 'nopass', false).payload, 'WIFI:T:nopass;S:Open;;')
+  assert.match(wifiPayload('Net', 'short', 'WPA', false).error, /8 to 63/)
+})
+
+test('QR payloads: contact card is a valid vCard and text has a limit', () => {
+  const v = contactPayload({
+    first: 'Ana',
+    last: 'Rao',
+    org: 'Acme, Inc',
+    title: '',
+    phone: '+91 98765 43210',
+    email: 'ana@acme.co',
+    url: 'acme.co',
+  }).payload
+  assert.equal(
+    v,
+    [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      'N:Rao;Ana;;;',
+      'FN:Ana Rao',
+      'ORG:Acme\\, Inc',
+      'TEL:+919876543210',
+      'EMAIL:ana@acme.co',
+      'URL:https://acme.co/',
+      'END:VCARD',
+    ].join('\r\n')
+  )
+  assert.match(
+    contactPayload({ first: 'A', last: '', org: '', title: '', phone: '', email: 'bad', url: '' })
+      .error,
+    /email/
+  )
+  assert.match(textPayload('x'.repeat(1001)).error, /under 1000/)
+})
+
+test('link checker explains problems and builds a cleaned link', () => {
+  const a = analyzeLink(
+    'https://example.com/p?utm_source=Google&utm_medium=cpc&UTM_Campaign=Spring Sale&ref=1'
+  )
+  assert.equal(a.channel, 'Paid Search')
+  const text = a.issues.map((i) => i.text).join('\n')
+  assert.match(text, /utm_source has capital letters/)
+  assert.match(text, /"UTM_Campaign" will not be read/)
+  assert.equal(
+    a.cleaned,
+    'https://example.com/p?ref=1&utm_source=google&utm_medium=cpc&utm_campaign=spring-sale'
+  )
+  const none = analyzeLink('https://example.com/')
+  assert.match(none.issues[0].text, /no UTM parameters/)
+  assert.equal(none.cleaned, '')
+  assert.match(analyzeLink('nope').error, /full link/)
+  const bad = analyzeLink('https://e.com/?utm_source=acme&utm_medium=ppc-ads&utm_campaign=x')
+  assert.match(bad.issues.map((i) => i.text).join('\n'), /Unassigned/)
+  assert.match(
+    analyzeLink('https://e.com/#utm_source=a')
+      .issues.map((i) => i.text)
+      .join(),
+    /after a #/
+  )
+  const good = analyzeLink('https://e.com/?utm_source=google&utm_medium=cpc&utm_campaign=ok')
+  assert.equal(good.issues.filter((i) => i.level === 'problem').length, 0)
+  assert.equal(good.cleaned, '')
+})
+
+test('Google Ads suffix keeps only utm_ parameters without the question mark', () => {
+  assert.equal(
+    adsSuffix('https://e.com/p?a=1&utm_source=google&utm_term={keyword}#x'),
+    'utm_source=google&utm_term={keyword}'
+  )
+  assert.equal(adsSuffix('https://e.com/'), '')
 })

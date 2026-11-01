@@ -77,12 +77,28 @@ const TOOLS: Demo[] = [
     tag: 'Marketing',
     preview: 'utm',
   },
+  {
+    slug: 'utm-link-checker',
+    name: 'UTM Link Checker',
+    blurb:
+      'Paste links you already use: see what each tag says, which GA4 channel it lands in, what is wrong, and a cleaned link to copy. Includes a plain table of how GA4 sorts traffic.',
+    tag: 'Marketing',
+    preview: 'check',
+  },
+  {
+    slug: 'qr-code-generator',
+    name: 'QR Code Generator',
+    blurb:
+      'Static codes for a website, WhatsApp chat, Wi-Fi, contact card, email, phone or text. They never expire, save as PNG or SVG, and print. Nothing is uploaded.',
+    tag: 'Utility',
+    preview: 'qr',
+  },
 ]
 
 const PRINCIPLES = [
   {
     title: 'Runs where you are',
-    body: 'The CSS, SVG, SEO and UTM tools run entirely in your browser; none of their code makes a network request. Only the AI pipeline calls a server.',
+    body: 'The CSS, SVG, SEO, UTM and QR tools run entirely in your browser; none of their code makes a network request. Only the AI pipeline calls a server.',
   },
   {
     title: 'Real output, not mock-ups',
@@ -102,7 +118,7 @@ const FAQ = [
   {
     question: 'Is what I type sent anywhere?',
     answer:
-      'Not by the browser-side tools: the CSS playground, illustration generator, meta tag generator and UTM builder make no network requests. The AI Content Pipeline does send your input to a server, because that is where the model runs.',
+      'Not by the browser-side tools: the CSS playground, illustration generator, meta tag generator, UTM tools and QR generator make no network requests. The AI Content Pipeline does send your input to a server, because that is where the model runs.',
   },
   {
     question: 'What does the AI pipeline run on?',

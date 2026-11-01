@@ -13,7 +13,7 @@
 
 import './LabPreview.css'
 
-type PreviewKind = 'pipeline' | 'shapes' | 'illustration' | 'meta' | 'utm'
+type PreviewKind = 'pipeline' | 'shapes' | 'illustration' | 'meta' | 'utm' | 'qr' | 'check'
 
 const FRAME =
   'relative overflow-hidden rounded-lg border border-ds-border bg-ds-surface2 aspect-[16/9] w-full'
@@ -125,6 +125,52 @@ function Utm() {
   )
 }
 
+/** Modules of a code appearing one by one. Decorative: not a real, scannable code. */
+function Qr() {
+  const cells = [0, 1, 2, 3, 5, 6, 8, 10, 12, 14, 15, 17, 18, 20, 21, 22, 24]
+  return (
+    <div className={FRAME}>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="grid grid-cols-5 gap-1">
+          {Array.from({ length: 25 }, (_, i) => (
+            <span
+              key={i}
+              className={`block h-3 w-3 rounded-[2px] sm:h-4 sm:w-4 ${cells.includes(i) ? 'bg-ds-accent/80 lab-pop' : 'bg-transparent'}`}
+              style={{ animationDelay: `${(i % 7) * 0.12}s` }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Links being checked: one passes, one is flagged. */
+function Check() {
+  const rows = [
+    { label: 'utm_medium=email', ok: true },
+    { label: 'utm_medium=Email', ok: false },
+    { label: 'utm_source=google', ok: true },
+  ]
+  return (
+    <div className={FRAME}>
+      <div className="absolute inset-0 flex flex-col justify-center gap-2 p-5">
+        {rows.map((r, i) => (
+          <div key={r.label} className="flex items-center gap-2">
+            <span className="text-ds-muted text-[10px] leading-none">{r.label}</span>
+            <span
+              className={`lab-pop rounded border px-1.5 py-0.5 text-[10px] leading-none ${r.ok ? 'border-ds-success/40 bg-ds-success/10 text-ds-success' : 'border-ds-warning/40 bg-ds-warning/10 text-ds-warning-strong'}`}
+              style={{ animationDelay: `${0.25 + i * 0.3}s` }}
+            >
+              {r.ok ? 'ok' : 'fix'}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function LabPreview({ kind }: { kind: PreviewKind }) {
   switch (kind) {
     case 'pipeline':
@@ -137,6 +183,10 @@ export function LabPreview({ kind }: { kind: PreviewKind }) {
       return <Meta />
     case 'utm':
       return <Utm />
+    case 'qr':
+      return <Qr />
+    case 'check':
+      return <Check />
   }
 }
 

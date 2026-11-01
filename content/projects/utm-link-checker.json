@@ -1,0 +1,33 @@
+{
+  "slug": "utm-link-checker",
+  "title": "UTM Link Checker",
+  "description": "Paste tagged links to see each UTM parameter, the GA4 channel it lands in, what is wrong and a cleaned link, plus a plain table of how GA4 sorts traffic into channels.",
+  "longDescription": "The builder prevents mistakes in new links; the checker finds them in links that already exist. It reads each link, flags missing or misspelled parameters, capital letters, spaces, duplicates and tags placed after a #, predicts the GA4 channel, and builds a cleaned version. It runs entirely in the browser.",
+  "status": "live",
+  "featured": false,
+  "order": 8,
+  "category": "tool",
+  "tech": ["Next.js", "TypeScript", "Tailwind CSS"],
+  "liveUrl": "/lab/utm-link-checker",
+  "image": "/images/projects/utm-link-checker.webp",
+  "startDate": "2026-11-02",
+  "year": 2026,
+  "highlights": [
+    "Fully client-side: links are never uploaded or stored",
+    "Rescues mistyped names such as UTM_Source into the cleaned link instead of just flagging them",
+    "Problems and tips are labelled in words, not only colour",
+    "Shares its channel logic with the UTM builder, so the two never disagree"
+  ],
+  "caseStudy": {
+    "problem": "A team inherits a spreadsheet of live campaign links. Some have capital letters, a medium GA4 does not recognise, or parameters after a #. Nobody can see which until a report looks wrong weeks later.",
+    "approach": "Parse each link with the native URL API, check it against the rules GA4 actually uses to sort traffic, explain every finding in a sentence, and offer a cleaned link.",
+    "decisions": [
+      "No live request. Browsers block fetching other sites, so the tool cannot follow redirects; it says so instead of pretending.",
+      "Findings are split into problems (the data will be wrong) and tips (the data is fine but harder to use).",
+      "The channel table is a simplified copy of Google's documentation and says what it leaves out."
+    ],
+    "outcome": "// TODO: No usage data yet. This is a self-initiated tool, not a deployed one."
+  },
+  "coverStats": ["no data sent", "GA4 channels", "cleaned links"],
+  "relatedPosts": []
+}

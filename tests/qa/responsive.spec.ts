@@ -23,6 +23,8 @@ const ROUTES = [
   '/terms',
   '/projects/praxis',
   '/lab/utm-builder',
+  '/lab/utm-link-checker',
+  '/lab/qr-code-generator',
   '/lab/css-shapes-playground',
   '/lab/illustration-generator',
   '/lab/meta-tag-generator',

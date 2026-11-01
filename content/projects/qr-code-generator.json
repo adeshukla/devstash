@@ -1,0 +1,34 @@
+{
+  "slug": "qr-code-generator",
+  "title": "QR Code Generator",
+  "description": "Static QR codes for a website, WhatsApp chat, Wi-Fi, contact card, email, phone or text. Saves as PNG or SVG, prints, and never expires because nothing is redirected.",
+  "longDescription": "A free QR generator that treats the code as what it is: text stored in a pattern. There is no redirect service, so a printed code keeps working and nothing you type, including a Wi-Fi password, is sent to a server. Colours, a caption, size and damage tolerance are optional, with a warning when the colours risk an unreadable code.",
+  "status": "live",
+  "featured": false,
+  "order": 7,
+  "category": "tool",
+  "tech": ["Next.js", "TypeScript", "Tailwind CSS"],
+  "liveUrl": "/lab/qr-code-generator",
+  "image": "/images/projects/qr-code-generator.webp",
+  "startDate": "2026-11-02",
+  "year": 2026,
+  "highlights": [
+    "Fully client-side: no API route, nothing is uploaded or stored",
+    "Static codes, so there is no redirect that can lapse and no subscription",
+    "Seven content types, each validated with a plain-language message (country code for WhatsApp, WPA password length for Wi-Fi)",
+    "Contrast check that warns about light-on-dark or low-contrast colours before printing",
+    "Save as PNG or SVG through the system Save dialog where the browser has one, or print"
+  ],
+  "caseStudy": {
+    "problem": "Most free QR generators create dynamic codes that route through the vendor's short link. They look free, then stop working when a trial or subscription ends, and the person who printed a thousand flyers finds out too late.",
+    "approach": "Generate static codes entirely in the browser. The payload for each type follows the format phones already understand: a wa.me link for WhatsApp, the WIFI: scheme for Wi-Fi, a vCard for contacts, mailto: and tel: for the rest.",
+    "decisions": [
+      "Static only. A dynamic code needs a server that stores your link and keeps redirecting it; that breaks the promise that nothing leaves the browser.",
+      "Validate on the way in. WhatsApp links with a leading 0 or a missing country code fail silently, so the form says what is wrong instead of producing a dead code.",
+      "Warn about colours rather than block them. Light-on-dark codes fail on many cameras, but the person may know their scanner."
+    ],
+    "outcome": "// TODO: No usage data yet. This is a self-initiated tool, not a deployed one."
+  },
+  "coverStats": ["static codes", "7 content types", "no data sent"],
+  "relatedPosts": []
+}

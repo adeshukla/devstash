@@ -118,6 +118,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Every /lab/* page is a real, working tool.
   const labToolRoutes: MetadataRoute.Sitemap = [
     'utm-builder',
+    'utm-link-checker',
+    'qr-code-generator',
     'css-shapes-playground',
     'meta-tag-generator',
     'illustration-generator',
