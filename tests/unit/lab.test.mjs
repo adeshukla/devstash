@@ -1,5 +1,14 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { makeQr, qrSvg, contrastRatio, scanWarning } from '../../lib/lab/qr.ts'
+import {
+  parseChannelLines,
+  encodeRules,
+  decodeRules,
+  rulesVersion,
+  ruleIssues,
+} from '../../lib/lab/utmRules.ts'
+import { withMonth, placeholdersFor } from '../../lib/lab/utm.ts'
 import {
   buildUtmUrl,
   normalizeValue,
@@ -200,4 +209,85 @@ test('sheet import reads headers in any order, cleans values and reports bad lin
 test('sheet import without a header uses url, source, medium, campaign order', () => {
   const r = parseSheet('https://a.com\tgoogle\tcpc\tsale')
   assert.match(r.rows[0].url, /utm_campaign=sale/)
+})
+
+test('ad-platform placeholders survive cleaning and keep raw braces in the link', () => {
+  const r = buildUtmUrl(
+    fields({
+      source: 'google',
+      medium: 'cpc',
+      campaign: 'Spring Sale',
+      term: '{keyword}',
+      content: 'v1-{creative}',
+    })
+  )
+  assert.match(r.url, /utm_term=\{keyword\}/)
+  assert.match(r.url, /utm_content=v1-\{creative\}/)
+  assert.match(r.url, /utm_campaign=spring-sale/)
+  assert.equal(normalizeValue('{notreal} Hi'), 'notreal-hi')
+  assert.equal(placeholdersFor('Facebook')[0].token, '{{campaign.name}}')
+})
+
+test('separator rule rewrites campaign words but not source or medium', () => {
+  const r = buildUtmUrl(
+    fields({ source: 'my-src', medium: 'cpc', campaign: 'Spring Sale-2026' }),
+    '_'
+  )
+  assert.match(r.url, /utm_campaign=spring_sale_2026/)
+  assert.match(r.url, /utm_source=my-src/)
+  assert.equal(withMonth('spring', new Date(2026, 10, 3), '_'), 'spring_2026_11')
+})
+
+test('CSV export carries the GA4 channel and audit columns', () => {
+  const row = {
+    id: '1',
+    fields: fields({ source: 'google', medium: 'cpc' }),
+    url: 'https://e.com/',
+    createdAt: '2026-11-02',
+    owner: 'Ana',
+    rules: 'abc123',
+  }
+  const [head, line] = toCsv([row]).split('\n')
+  assert.match(head, /ga4_channel,created_at,owner,rules_version$/)
+  assert.match(line, /Paid Search,2026-11-02,Ana,abc123$/)
+})
+
+test('team rules round-trip through a share link and flag rows that break them', () => {
+  const { channels, errors } = parseChannelLines(
+    'Google Ads, google, cpc\nbad line\nNewsletter, Newsletter, Email'
+  )
+  assert.equal(channels.length, 2)
+  assert.deepEqual(
+    errors.map((e) => e.line),
+    [2]
+  )
+  const rules = { channels, separator: '_' }
+  assert.deepEqual(decodeRules(encodeRules(rules)), { channels, separator: '_' })
+  assert.equal(decodeRules('not-base64!'), null)
+  assert.equal(rulesVersion(rules), rulesVersion({ channels, separator: '_' }))
+  const rows = [
+    { id: '1', fields: fields({ source: 'tiktok', medium: 'cpc', campaign: 'a-b' }), url: 'u1' },
+    { id: '2', fields: fields({ source: 'google', medium: 'cpc', campaign: 'a_b' }), url: 'u2' },
+  ]
+  const text = ruleIssues(rows, rules).join('\n')
+  assert.match(text, /Row 1: tiktok\/cpc is not one of the team/)
+  assert.match(text, /Row 1: campaign "a-b" should use "_"/)
+  assert.doesNotMatch(text, /Row 2/)
+})
+
+test('QR contrast and scan warnings', () => {
+  assert.equal(Math.round(contrastRatio('#000000', '#ffffff')), 21)
+  assert.equal(scanWarning({ fg: '#000000', bg: '#ffffff' }), '')
+  assert.match(scanWarning({ fg: '#ffffff', bg: '#000000' }), /light code on a dark/i)
+  assert.match(scanWarning({ fg: '#777777', bg: '#999999' }), /too close/i)
+})
+
+test('QR code is generated, captioned and escaped; oversized text throws', async () => {
+  const qr = await makeQr('https://example.com/?utm_source=google', 'M')
+  assert.ok(qr.size > 20 && qr.path.startsWith('M'))
+  const svg = qrSvg(qr, { fg: '#000', bg: '#fff', label: 'Scan <me>' }, 512)
+  assert.match(svg, /Scan &#60;me&#62;/)
+  assert.match(svg, /width="512"/)
+  assert.doesNotMatch(qrSvg(qr, { fg: '#000', bg: '#fff', label: '' }), /<text/)
+  await assert.rejects(() => makeQr('x'.repeat(5000), 'M'))
 })

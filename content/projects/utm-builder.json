@@ -1,7 +1,7 @@
 {
   "slug": "utm-builder",
   "title": "UTM Link Builder",
-  "description": "Three plain steps to a clean tracking link or QR code, with many pages and channels at once, cleaned values so GA4 reports do not split, and CSV export. Built from tagging 200+ URLs.",
+  "description": "Three plain steps to a clean tracking link or QR code, with a GA4 channel check, shareable team naming rules, sheet import, ad-platform values and a QR print kit. Built from tagging 200+ URLs.",
   "longDescription": "A small utility, not a landing page — enter a base URL and campaign parameters, get a properly tagged link back with a one-click copy. Nothing is sent to a server; the whole thing runs in the browser using the native URL and URLSearchParams APIs.",
   "status": "live",
   "featured": true,

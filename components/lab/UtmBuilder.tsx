@@ -11,6 +11,9 @@ import {
   matchPreset,
   normalizeValue,
   parseUrlList,
+  placeholdersFor,
+  tokensIn,
+  GOOGLE_PLACEHOLDERS,
   PRESETS,
   splitUtm,
   withMonth,
@@ -19,7 +22,18 @@ import {
   type SheetRow,
   type UtmFields,
 } from '@/lib/lab/utm'
+import { buildSearch } from '@/lib/lab/urlState'
+import {
+  NO_RULES,
+  decodeRules,
+  encodeRules,
+  rulesActive,
+  rulesVersion,
+  type UtmRules,
+} from '@/lib/lab/utmRules'
 import { useUrlSync } from './useUrlSync'
+import { UtmRulesPanel } from './UtmRulesPanel'
+import { AdValues } from './AdValues'
 import { ShareLinkButton } from './ShareLinkButton'
 import { UtmSheet } from './UtmSheet'
 import { UtmQr } from './UtmQr'
@@ -30,6 +44,8 @@ const INITIAL: UtmFields = { url: '', source: '', medium: '', campaign: '', term
 const SHEET_KEY = 'devstash-utm-sheet'
 const RECENT_KEY = 'devstash-utm-recent'
 const PRESETS_KEY = 'devstash-utm-presets'
+const RULES_KEY = 'devstash-utm-rules'
+const OWNER_KEY = 'devstash-utm-owner'
 
 function readStored<T>(key: string, fallback: T): T {
   try {
@@ -111,6 +127,10 @@ export function UtmBuilder() {
   const [touchedUrl, setTouchedUrl] = useState(false)
   const [imported, setImported] = useState(false)
   const [qrUrl, setQrUrl] = useState<string | null>(null)
+  const [rules, setRules] = useState<UtmRules>(NO_RULES)
+  const [owner, setOwner] = useState('')
+  const locked = rulesActive(rules)
+  const sep = locked ? rules.separator : undefined
 
   // Never `s`, `q` or `search` as share keys: GA4 reads those as site-search terms.
   const getShareUrl = useUrlSync(
@@ -123,8 +143,14 @@ export function UtmBuilder() {
       t: fields.term,
       n: fields.content,
       ch: channels.map(channelKey).join(','),
+      r: locked ? encodeRules(rules) : '',
     },
     (get) => {
+      const sharedRules = decodeRules(get('r') ?? '')
+      if (sharedRules) {
+        setRules(sharedRules)
+        writeStored(RULES_KEY, encodeRules(sharedRules))
+      }
       const many = get('us') ?? ''
       setBulk(Boolean(many))
       setMany(many)
@@ -142,11 +168,14 @@ export function UtmBuilder() {
         .filter(([s, m]) => s && m)
         .map(
           ([source, medium]) =>
-            matchPreset(source, medium, PRESETS) ?? {
+            matchPreset(source, medium, sharedRules ? sharedRules.channels : PRESETS) ?? {
               label: `${source} / ${medium}`,
               source,
               medium,
             }
+        )
+        .filter(
+          (c) => !sharedRules || sharedRules.channels.some((p) => channelKey(p) === channelKey(c))
         )
       setChannels(restored)
       setCustomOpen(!restored.length && Boolean(get('src') || get('m')))
@@ -160,6 +189,9 @@ export function UtmBuilder() {
     setMine(
       readStored<ChannelPreset[]>(PRESETS_KEY, []).filter((p) => p?.label && p.source && p.medium)
     )
+    const stored = readStored<string>(RULES_KEY, '')
+    setRules((stored && decodeRules(stored)) || NO_RULES)
+    setOwner(readStored<string>(OWNER_KEY, ''))
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [])
 
@@ -168,11 +200,26 @@ export function UtmBuilder() {
 
   const chips = useMemo(() => {
     const seen = new Set<string>()
-    return [...PRESETS, ...mine, ...channels].filter((p) => {
+    const pool = locked ? rules.channels : [...PRESETS, ...mine, ...channels]
+    return pool.filter((p) => {
       const k = channelKey(p)
       return seen.has(k) ? false : (seen.add(k), true)
     })
-  }, [mine, channels])
+  }, [mine, channels, locked, rules])
+
+  const placeholderSets = useMemo(() => {
+    const sources = channels.length ? channels.map((c) => c.source) : [fields.source]
+    const out: { name: string; items: ReturnType<typeof placeholdersFor> }[] = []
+    for (const s of sources) {
+      const items = placeholdersFor(s)
+      if (items.length && !out.some((o) => o.items === items))
+        out.push({
+          name: items === GOOGLE_PLACEHOLDERS ? 'Google Ads' : 'Meta (Facebook and Instagram)',
+          items,
+        })
+    }
+    return out
+  }, [channels, fields.source])
 
   const list = useMemo(() => (bulk ? parseUrlList(many) : null), [bulk, many])
   const single = fields.url.trim()
@@ -180,7 +227,10 @@ export function UtmBuilder() {
     () => (bulk ? (list?.urls ?? []) : single ? [single] : []),
     [bulk, list, single]
   )
-  const links = useMemo(() => buildMatrix(urls, fields, channels), [urls, fields, channels])
+  const links = useMemo(
+    () => buildMatrix(urls, fields, channels, sep),
+    [urls, fields, channels, sep]
+  )
   const singleError = !bulk && touchedUrl ? buildUtmUrl(fields).error : ''
   const hasInput = channels.length > 0 || UTM_KEYS.some((k) => fields[k].trim())
   const ready =
@@ -265,17 +315,68 @@ export function UtmBuilder() {
     writeStored(SHEET_KEY, next)
   }
 
+  /** Audit trail written onto every saved row. */
+  const stamp = () => ({
+    createdAt: new Date().toLocaleDateString('sv-SE'),
+    owner: owner.trim(),
+    rules: locked ? rulesVersion(rules) : '',
+  })
+
   function addToList() {
     if (!ready) return
     rememberUrls()
     updateRows([
       ...rows,
-      ...links.map((l) => ({ id: crypto.randomUUID(), fields: l.fields, url: l.result.url })),
+      ...links.map((l) => ({
+        id: crypto.randomUUID(),
+        fields: l.fields,
+        url: l.result.url,
+        ...stamp(),
+      })),
     ])
   }
 
   function importRows(next: Omit<SheetRow, 'id'>[]) {
-    updateRows([...rows, ...next.map((r) => ({ ...r, id: crypto.randomUUID() }))])
+    updateRows([...rows, ...next.map((r) => ({ ...r, id: crypto.randomUUID(), ...stamp() }))])
+  }
+
+  function applyRules(next: UtmRules) {
+    setRules(next)
+    writeStored(RULES_KEY, encodeRules(next))
+    setChannels([])
+    setCustomOpen(false)
+  }
+
+  function rulesOff() {
+    setRules(NO_RULES)
+    writeStored(RULES_KEY, '')
+  }
+
+  function updateOwner(value: string) {
+    setOwner(value)
+    writeStored(OWNER_KEY, value)
+  }
+
+  const rulesLink = () =>
+    `${window.location.origin}${window.location.pathname}${buildSearch({ r: encodeRules(rules) })}`
+
+  function insertToken(key: 'campaign' | 'term' | 'content', token: string) {
+    setFields((prev) => ({
+      ...prev,
+      [key]: prev[key] ? `${prev[key]}${sep ?? '-'}${token}` : token,
+    }))
+  }
+
+  function tryExample() {
+    setBulk(false)
+    setFields({
+      ...INITIAL,
+      url: 'https://example.com/spring-sale',
+      campaign: withMonth('spring-sale', new Date(), sep),
+    })
+    setChannels([chips[0] ?? PRESETS[0]])
+    setCustomOpen(false)
+    setTouchedUrl(false)
   }
 
   function editRow(row: SheetRow) {
@@ -361,17 +462,27 @@ export function UtmBuilder() {
           >
             {bulk ? 'Just one page' : 'Tagging several pages? Paste a list'}
           </button>
+          {!fields.url && !fields.campaign && !channels.length && (
+            <button type="button" className={`${textButton} self-start`} onClick={tryExample}>
+              Not sure? Try an example
+            </button>
+          )}
         </Step>
 
         <Step
           n={2}
           title="Where will you share it?"
-          hint="Pick one, or several to get a separate link for each."
+          hint={
+            locked
+              ? "Locked to your team's approved channels."
+              : 'Pick one, or several to get a separate link for each.'
+          }
         >
           <div className="flex flex-wrap gap-2">
             {chips.map((p) => {
               const active = channels.some((c) => channelKey(c) === channelKey(p))
-              const own = mine.some((m) => m.label === p.label && channelKey(m) === channelKey(p))
+              const own =
+                !locked && mine.some((m) => m.label === p.label && channelKey(m) === channelKey(p))
               return (
                 <span key={channelKey(p) + p.label} className="inline-flex items-stretch">
                   <button
@@ -395,17 +506,19 @@ export function UtmBuilder() {
                 </span>
               )
             })}
-            <button
-              type="button"
-              aria-pressed={customOpen}
-              onClick={openCustom}
-              className={chip(customOpen)}
-            >
-              Something else
-            </button>
+            {!locked && (
+              <button
+                type="button"
+                aria-pressed={customOpen}
+                onClick={openCustom}
+                className={chip(customOpen)}
+              >
+                Something else
+              </button>
+            )}
           </div>
 
-          {customOpen && (
+          {customOpen && !locked && (
             <div className="border-ds-border bg-ds-surface2/50 flex flex-col gap-4 rounded-xl border p-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Input
@@ -463,7 +576,7 @@ export function UtmBuilder() {
             <button
               type="button"
               className={`${textButton} mt-2`}
-              onClick={() => update('campaign', withMonth(fields.campaign, new Date()))}
+              onClick={() => update('campaign', withMonth(fields.campaign, new Date(), sep))}
             >
               + Add this month
             </button>
@@ -487,6 +600,7 @@ export function UtmBuilder() {
                 value={fields.content}
                 onChange={(e) => update('content', e.target.value)}
               />
+              <AdValues sets={placeholderSets} onInsert={insertToken} />
             </div>
           </details>
         </Step>
@@ -517,14 +631,16 @@ export function UtmBuilder() {
                   )}
                   <span className="font-mono text-sm break-all">{l.result.url}</span>
                   <ChannelNote source={l.fields.source} medium={l.fields.medium} />
-                  <button
-                    type="button"
-                    onClick={() => setQrUrl(l.result.url)}
-                    aria-label={`QR code for ${l.label || 'this link'}`}
-                    className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent mt-2 rounded-md border px-2.5 py-1 text-xs transition-colors"
-                  >
-                    QR code
-                  </button>
+                  {!tokensIn(l.result.url).length && (
+                    <button
+                      type="button"
+                      onClick={() => setQrUrl(l.result.url)}
+                      aria-label={`QR code for ${l.label || 'this link'}`}
+                      className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent mt-2 rounded-md border px-2.5 py-1 text-xs transition-colors"
+                    >
+                      QR code
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -568,11 +684,21 @@ export function UtmBuilder() {
       </div>
 
       <div className="flex flex-col gap-8 lg:col-span-2">
+        <UtmRulesPanel
+          key={locked ? rulesVersion(rules) : 'off'}
+          rules={rules}
+          owner={owner}
+          onApply={applyRules}
+          onOff={rulesOff}
+          onOwner={updateOwner}
+          getLink={rulesLink}
+        />
         <UtmImport onAdd={importRows} />
 
         {rows.length > 0 && (
           <UtmSheet
             rows={rows}
+            rules={rules}
             onRemove={(id) => updateRows(rows.filter((r) => r.id !== id))}
             onEdit={editRow}
             onQr={setQrUrl}

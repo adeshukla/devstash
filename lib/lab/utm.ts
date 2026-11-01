@@ -13,15 +13,67 @@ export interface UtmFields {
 export const UTM_KEYS = ['source', 'medium', 'campaign', 'term', 'content'] as const
 export type UtmKey = (typeof UTM_KEYS)[number]
 
-/** Lowercase, whitespace to hyphens, drop anything not URL-safe. GA4 is case-sensitive. */
+export interface AdPlaceholder {
+  token: string
+  label: string
+}
+
+// Google Ads ValueTrack parameters (support.google.com/google-ads/answer/2375447).
+export const GOOGLE_PLACEHOLDERS: AdPlaceholder[] = [
+  { token: '{campaignid}', label: 'Campaign ID' },
+  { token: '{adgroupid}', label: 'Ad group ID' },
+  { token: '{keyword}', label: 'Keyword' },
+  { token: '{matchtype}', label: 'Match type' },
+  { token: '{creative}', label: 'Ad ID' },
+]
+
+// Meta dynamic URL parameters, as listed by secondary sources; Meta's own page was not reachable.
+export const META_PLACEHOLDERS: AdPlaceholder[] = [
+  { token: '{{campaign.name}}', label: 'Campaign name' },
+  { token: '{{adset.name}}', label: 'Ad set name' },
+  { token: '{{ad.name}}', label: 'Ad name' },
+  { token: '{{placement}}', label: 'Placement' },
+]
+
+const ALL_TOKENS = new Set([...GOOGLE_PLACEHOLDERS, ...META_PLACEHOLDERS].map((p) => p.token))
+const TOKEN_RE = /\{\{?[a-z_.]+\}\}?/g
+const ENCODED_TOKEN_RE = /%7B(?:%7B)?[a-z_.]+%7D(?:%7D)?/gi
+
+/** Ad-platform placeholders offered for a source; empty when the platform has none we know. */
+export function placeholdersFor(source: string): AdPlaceholder[] {
+  const s = source.trim().toLowerCase()
+  if (s === 'google') return GOOGLE_PLACEHOLDERS
+  if (['facebook', 'fb', 'instagram', 'ig'].includes(s)) return META_PLACEHOLDERS
+  return []
+}
+
+/** Known placeholders found in a value or link. */
+export const tokensIn = (value: string) =>
+  (value.match(TOKEN_RE) ?? []).filter((t) => ALL_TOKENS.has(t))
+
+/** "-" or "_" between words; undefined leaves the value as typed. Not applied to source or medium. */
+export type Separator = '-' | '_'
+export const applySeparator = (value: string, sep?: Separator) =>
+  sep === '_' ? value.replace(/-/g, '_') : sep === '-' ? value.replace(/_/g, '-') : value
+
+/**
+ * Lowercase, whitespace to hyphens, drop anything not URL-safe. GA4 is
+ * case-sensitive. Known ad-platform placeholders such as {keyword} pass
+ * through untouched so the ad platform can fill them in.
+ */
 export function normalizeValue(raw: string): string {
-  return raw
+  const kept: string[] = []
+  const guarded = raw.replace(TOKEN_RE, (m) =>
+    ALL_TOKENS.has(m) ? `zzph${kept.push(m) - 1}zz` : m
+  )
+  return guarded
     .trim()
     .toLowerCase()
     .replace(/\s+/g, '-')
     .replace(/[^a-z0-9\-_.]/g, '')
     .replace(/-{2,}/g, '-')
     .replace(/^[-_.]+|[-_.]+$/g, '')
+    .replace(/zzph(\d+)zz/g, (_, i) => kept[Number(i)])
 }
 
 export interface BuildResult {
@@ -31,7 +83,7 @@ export interface BuildResult {
   error: string
 }
 
-export function buildUtmUrl(fields: UtmFields): BuildResult {
+export function buildUtmUrl(fields: UtmFields, sep?: Separator): BuildResult {
   const empty = { url: '', changes: [], error: '' }
   const raw = fields.url.trim()
   if (!raw) return empty
@@ -51,13 +103,20 @@ export function buildUtmUrl(fields: UtmFields): BuildResult {
   for (const key of UTM_KEYS) {
     const original = fields[key].trim()
     if (!original) continue
-    const value = normalizeValue(original)
+    const clean = normalizeValue(original)
+    const value = key === 'source' || key === 'medium' ? clean : applySeparator(clean, sep)
     if (!value) continue
     if (value !== original) changes.push(`${key}: ${original} → ${value}`)
     params.set(`utm_${key}`, value)
   }
   base.search = params.toString()
-  return { url: base.toString(), changes, error: '' }
+  // URLSearchParams encodes the braces of a placeholder; the ad platform needs them raw.
+  const url = base
+    .toString()
+    .replace(ENCODED_TOKEN_RE, (m) =>
+      ALL_TOKENS.has(decodeURIComponent(m)) ? decodeURIComponent(m) : m
+    )
+  return { url, changes, error: '' }
 }
 
 export interface ChannelPreset {
@@ -80,6 +139,10 @@ export interface SheetRow {
   id: string
   fields: UtmFields
   url: string
+  /** Audit trail, filled when the row is saved: YYYY-MM-DD, who, which team-rules version. */
+  createdAt?: string
+  owner?: string
+  rules?: string
 }
 
 const SEARCH = new Set([
@@ -181,7 +244,18 @@ export function lintRows(rows: SheetRow[]): string[] {
   return out
 }
 
-const CSV_HEADER = ['url', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']
+const CSV_HEADER = [
+  'url',
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_term',
+  'utm_content',
+  'ga4_channel',
+  'created_at',
+  'owner',
+  'rules_version',
+]
 
 function cell(value: string): string {
   return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value
@@ -189,7 +263,16 @@ function cell(value: string): string {
 
 function toTable(rows: SheetRow[], sep: string, escape: (v: string) => string): string {
   const lines = rows.map((r) =>
-    [r.url, ...UTM_KEYS.map((k) => normalizeValue(r.fields[k]))].map(escape).join(sep)
+    [
+      r.url,
+      ...UTM_KEYS.map((k) => normalizeValue(r.fields[k])),
+      ga4Channel(r.fields.source, r.fields.medium),
+      r.createdAt ?? '',
+      r.owner ?? '',
+      r.rules ?? '',
+    ]
+      .map(escape)
+      .join(sep)
   )
   return [CSV_HEADER.join(sep), ...lines].join('\n')
 }
@@ -274,7 +357,8 @@ export function parseUrlList(text: string): {
 export function buildMatrix(
   urls: string[],
   base: UtmFields,
-  channels: ChannelPreset[]
+  channels: ChannelPreset[],
+  sep?: Separator
 ): TaggedLink[] {
   const targets = channels.length
     ? channels.map((c) => ({ label: c.label, source: c.source, medium: c.medium }))
@@ -282,17 +366,17 @@ export function buildMatrix(
   return urls.flatMap((url) =>
     targets.map((t) => {
       const fields = { ...base, url, source: t.source, medium: t.medium }
-      return { label: t.label, fields, result: buildUtmUrl(fields) }
+      return { label: t.label, fields, result: buildUtmUrl(fields, sep) }
     })
   )
 }
 
 /** Adds "-YYYY-MM" to a campaign name unless it already ends with that month. */
-export function withMonth(campaign: string, now: Date): string {
-  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-  const name = normalizeValue(campaign)
+export function withMonth(campaign: string, now: Date, sep: Separator = '-'): string {
+  const month = `${now.getFullYear()}${sep}${String(now.getMonth() + 1).padStart(2, '0')}`
+  const name = applySeparator(normalizeValue(campaign), sep)
   if (name.endsWith(month)) return name
-  return name ? `${name}-${month}` : month
+  return name ? `${name}${sep}${month}` : month
 }
 
 const NON_PAID = new Set(['email', 'social', 'organic', 'referral', 'sms', 'push'])
@@ -302,6 +386,17 @@ export function linkWarnings(fields: UtmFields, url: string): string[] {
   const out: string[] = []
   if (url.length > 2000)
     out.push(`This link is ${url.length} characters; some platforms cut links over about 2,000.`)
+  const tokens = tokensIn(url)
+  if (tokens.length) {
+    out.push(
+      'This link has ad-platform placeholders. Paste it into the ad platform; opened directly it shows the placeholder text, and a QR code would not work.'
+    )
+    const google = tokens.some((t) => GOOGLE_PLACEHOLDERS.some((p) => p.token === t))
+    const meta = tokens.some((t) => META_PLACEHOLDERS.some((p) => p.token === t))
+    const owner = placeholdersFor(fields.source)
+    if ((google && owner !== GOOGLE_PLACEHOLDERS) || (meta && owner !== META_PLACEHOLDERS))
+      out.push('A placeholder here belongs to a different ad platform than the source you chose.')
+  }
   if (fields.term.trim() && NON_PAID.has(normalizeValue(fields.medium)))
     out.push(
       'utm_term is meant for paid-search keywords; it is probably not needed for this medium.'

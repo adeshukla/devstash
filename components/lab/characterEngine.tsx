@@ -3,13 +3,7 @@ import type { PaletteKey } from './illustrationEngine'
 import { cssVar, resolveToken, type ColorKey, type Theme } from './designTokens'
 
 export type CharacterScene =
-  | 'wave'
-  | 'present'
-  | 'boardroom'
-  | 'team'
-  | 'handshake'
-  | 'celebrate'
-  | 'idea'
+  'wave' | 'present' | 'boardroom' | 'team' | 'handshake' | 'celebrate' | 'idea'
 export type PersonStyle = 'masculine' | 'feminine'
 export type Density = 1 | 2 | 3
 

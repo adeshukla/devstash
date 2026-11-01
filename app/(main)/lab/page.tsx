@@ -73,7 +73,7 @@ const TOOLS: Demo[] = [
     slug: 'utm-builder',
     name: 'UTM Builder',
     blurb:
-      'Three steps to a clean tracking link or QR code. Tag many pages and channels at once, save your own channels, export CSV. Client-side; saved data stays on your device.',
+      'Three steps to a clean tracking link or QR code, with a GA4 channel check, team naming rules, sheet import and a QR print kit. Client-side; saved data stays on your device.',
     tag: 'Marketing',
     preview: 'utm',
   },
