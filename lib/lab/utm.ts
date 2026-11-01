@@ -181,20 +181,76 @@ export function splitUtm(raw: string): { base: string; fields: Omit<UtmFields, '
   return found ? { base: u.toString(), fields } : null
 }
 
-export interface ChannelLink {
+export interface TaggedLink {
+  /** Channel name shown next to the link; empty for a single custom channel. */
   label: string
   fields: UtmFields
   result: BuildResult
 }
 
-/** One link per chosen channel preset, sharing the URL, campaign, term and content. */
-export function buildForChannels(base: UtmFields, labels: string[]): ChannelLink[] {
-  return labels.flatMap((label) => {
-    const preset = PRESETS.find((p) => p.label === label)
-    if (!preset) return []
-    const fields = { ...base, source: preset.source, medium: preset.medium }
-    return [{ label, fields, result: buildUtmUrl(fields) }]
+export const channelKey = (p: { source: string; medium: string }) =>
+  `${normalizeValue(p.source)}/${normalizeValue(p.medium)}`
+
+/** The preset whose source and medium match, e.g. after pasting a tagged link. */
+export function matchPreset(
+  source: string,
+  medium: string,
+  presets: ChannelPreset[]
+): ChannelPreset | undefined {
+  const key = channelKey({ source, medium })
+  return presets.find((p) => channelKey(p) === key)
+}
+
+export const MAX_BULK_URLS = 50
+
+/** One link per line. Blank lines and repeats are dropped; invalid lines are reported. */
+export function parseUrlList(text: string): {
+  urls: string[]
+  invalid: { line: number; text: string }[]
+  truncated: boolean
+} {
+  const urls: string[] = []
+  const invalid: { line: number; text: string }[] = []
+  text.split(/\r?\n/).forEach((raw, i) => {
+    const line = raw.trim()
+    if (!line) return
+    try {
+      const u = new URL(line)
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') throw new Error('protocol')
+      if (!urls.includes(line)) urls.push(line)
+    } catch {
+      invalid.push({ line: i + 1, text: line })
+    }
   })
+  return { urls: urls.slice(0, MAX_BULK_URLS), invalid, truncated: urls.length > MAX_BULK_URLS }
+}
+
+/**
+ * Every landing page x every chosen channel. With no channel chosen, one link
+ * per page using the custom source and medium in `base`.
+ */
+export function buildMatrix(
+  urls: string[],
+  base: UtmFields,
+  channels: ChannelPreset[]
+): TaggedLink[] {
+  const targets = channels.length
+    ? channels.map((c) => ({ label: c.label, source: c.source, medium: c.medium }))
+    : [{ label: '', source: base.source, medium: base.medium }]
+  return urls.flatMap((url) =>
+    targets.map((t) => {
+      const fields = { ...base, url, source: t.source, medium: t.medium }
+      return { label: t.label, fields, result: buildUtmUrl(fields) }
+    })
+  )
+}
+
+/** Adds "-YYYY-MM" to a campaign name unless it already ends with that month. */
+export function withMonth(campaign: string, now: Date): string {
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  const name = normalizeValue(campaign)
+  if (name.endsWith(month)) return name
+  return name ? `${name}-${month}` : month
 }
 
 const NON_PAID = new Set(['email', 'social', 'organic', 'referral', 'sms', 'push'])

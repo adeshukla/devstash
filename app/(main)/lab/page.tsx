@@ -73,7 +73,7 @@ const TOOLS: Demo[] = [
     slug: 'utm-builder',
     name: 'UTM Builder',
     blurb:
-      'Cleans UTM values so GA4 reports do not split, checks a whole campaign sheet for naming problems, and exports CSV. Client-side; the sheet stays on your device.',
+      'Three steps to a clean tracking link or QR code. Tag many pages and channels at once, save your own channels, export CSV. Client-side; saved data stays on your device.',
     tag: 'Marketing',
     preview: 'utm',
   },

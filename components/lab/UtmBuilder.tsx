@@ -4,32 +4,30 @@ import { useEffect, useMemo, useState } from 'react'
 import { Input, Button } from '@/components/ui'
 import { copyText } from '@/lib/utils/clipboard'
 import {
-  buildForChannels,
+  buildMatrix,
   buildUtmUrl,
+  channelKey,
   linkWarnings,
+  matchPreset,
+  normalizeValue,
+  parseUrlList,
   PRESETS,
   splitUtm,
+  withMonth,
   UTM_KEYS,
+  type ChannelPreset,
   type SheetRow,
   type UtmFields,
 } from '@/lib/lab/utm'
 import { useUrlSync } from './useUrlSync'
 import { ShareLinkButton } from './ShareLinkButton'
 import { UtmSheet } from './UtmSheet'
+import { UtmQr } from './UtmQr'
 
 const INITIAL: UtmFields = { url: '', source: '', medium: '', campaign: '', term: '', content: '' }
 const SHEET_KEY = 'devstash-utm-sheet'
 const RECENT_KEY = 'devstash-utm-recent'
-// Short URL keys keep shared links readable. Never `s`, `q` or `search`: GA4
-// reads those as site-search terms.
-const URL_KEYS = {
-  url: 'u',
-  source: 'src',
-  medium: 'm',
-  campaign: 'c',
-  term: 't',
-  content: 'n',
-} as const
+const PRESETS_KEY = 'devstash-utm-presets'
 
 function readStored<T>(key: string, fallback: T): T {
   try {
@@ -53,30 +51,81 @@ const chip = (active: boolean) =>
     ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
     : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
 
+const textButton =
+  'text-ds-accent-strong hover:underline focus-visible:ring-ds-accent rounded text-sm focus-visible:ring-2 focus-visible:outline-none'
+
+function Step({
+  n,
+  title,
+  hint,
+  children,
+}: {
+  n: number
+  title: string
+  hint?: string
+  children: React.ReactNode
+}) {
+  return (
+    <section aria-labelledby={`utm-step-${n}`} className="flex gap-3 sm:gap-4">
+      <span
+        aria-hidden="true"
+        className="bg-ds-accent/15 text-ds-accent-strong mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-mono text-sm font-semibold"
+      >
+        {n}
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <div>
+          <h2 id={`utm-step-${n}`} className="text-ds-text text-base font-semibold">
+            {title}
+          </h2>
+          {hint && <p className="text-ds-muted mt-0.5 text-sm">{hint}</p>}
+        </div>
+        {children}
+      </div>
+    </section>
+  )
+}
+
 /**
- * UTM builder. Values are normalised (lowercase, hyphens) because GA4 treats
- * "CPC" and "cpc" as different mediums. Choose one channel to fill source and
- * medium, or several to get one link each. Links go into a sheet that is
- * checked for naming problems and exported. The sheet and recent URLs stay in
- * this browser (localStorage); a share link carries the form state.
+ * UTM builder in three plain steps: where the link goes, where it is shared,
+ * what the campaign is called. Values are cleaned (lowercase, hyphens) because
+ * GA4 treats "CPC" and "cpc" as different mediums. Several pages and several
+ * channels multiply out into one link each. The saved list, recent URLs and
+ * custom channels stay in this browser (localStorage); a share link carries
+ * the form state.
  */
 export function UtmBuilder() {
   const [fields, setFields] = useState<UtmFields>(INITIAL)
-  const [channels, setChannels] = useState<string[]>([])
+  const [bulk, setBulk] = useState(false)
+  const [many, setMany] = useState('')
+  const [channels, setChannels] = useState<ChannelPreset[]>([])
+  const [customOpen, setCustomOpen] = useState(false)
+  const [mine, setMine] = useState<ChannelPreset[]>([])
+  const [presetName, setPresetName] = useState('')
+  const [presetError, setPresetError] = useState('')
   const [rows, setRows] = useState<SheetRow[]>([])
   const [recent, setRecent] = useState<string[]>([])
   const [copied, setCopied] = useState(false)
   const [touchedUrl, setTouchedUrl] = useState(false)
   const [imported, setImported] = useState(false)
+  const [qrUrl, setQrUrl] = useState<string | null>(null)
 
+  // Never `s`, `q` or `search` as share keys: GA4 reads those as site-search terms.
   const getShareUrl = useUrlSync(
     {
-      ...Object.fromEntries(
-        (Object.keys(URL_KEYS) as (keyof UtmFields)[]).map((k) => [URL_KEYS[k], fields[k]])
-      ),
-      ch: channels.join(','),
+      u: bulk ? '' : fields.url,
+      us: bulk ? many : '',
+      src: channels.length ? '' : fields.source,
+      m: channels.length ? '' : fields.medium,
+      c: fields.campaign,
+      t: fields.term,
+      n: fields.content,
+      ch: channels.map(channelKey).join(','),
     },
     (get) => {
+      const many = get('us') ?? ''
+      setBulk(Boolean(many))
+      setMany(many)
       setFields({
         url: get('u') ?? '',
         source: get('src') ?? '',
@@ -85,8 +134,20 @@ export function UtmBuilder() {
         term: get('t') ?? '',
         content: get('n') ?? '',
       })
-      const labels = (get('ch') ?? '').split(',')
-      setChannels(PRESETS.map((p) => p.label).filter((l) => labels.includes(l)))
+      const restored = (get('ch') ?? '')
+        .split(',')
+        .map((pair) => pair.split('/'))
+        .filter(([s, m]) => s && m)
+        .map(
+          ([source, medium]) =>
+            matchPreset(source, medium, PRESETS) ?? {
+              label: `${source} / ${medium}`,
+              source,
+              medium,
+            }
+        )
+      setChannels(restored)
+      setCustomOpen(!restored.length && Boolean(get('src') || get('m')))
     }
   )
 
@@ -94,53 +155,91 @@ export function UtmBuilder() {
     /* eslint-disable react-hooks/set-state-in-effect -- one-shot mount read of localStorage */
     setRows(readStored<SheetRow[]>(SHEET_KEY, []).filter((r) => r?.id && r?.url))
     setRecent(readStored<string[]>(RECENT_KEY, []))
+    setMine(
+      readStored<ChannelPreset[]>(PRESETS_KEY, []).filter((p) => p?.label && p.source && p.medium)
+    )
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [])
 
-  const update = (key: keyof UtmFields, value: string) => {
+  const update = (key: keyof UtmFields, value: string) =>
     setFields((prev) => ({ ...prev, [key]: value }))
-    // Typing source or medium by hand replaces the channel selection.
-    if (key === 'source' || key === 'medium') setChannels([])
+
+  const chips = useMemo(() => {
+    const seen = new Set<string>()
+    return [...PRESETS, ...mine, ...channels].filter((p) => {
+      const k = channelKey(p)
+      return seen.has(k) ? false : (seen.add(k), true)
+    })
+  }, [mine, channels])
+
+  const list = useMemo(() => (bulk ? parseUrlList(many) : null), [bulk, many])
+  const single = fields.url.trim()
+  const urls = useMemo(
+    () => (bulk ? (list?.urls ?? []) : single ? [single] : []),
+    [bulk, list, single]
+  )
+  const links = useMemo(() => buildMatrix(urls, fields, channels), [urls, fields, channels])
+  const singleError = !bulk && touchedUrl ? buildUtmUrl(fields).error : ''
+  const hasInput = channels.length > 0 || UTM_KEYS.some((k) => fields[k].trim())
+  const ready =
+    links.length > 0 &&
+    hasInput &&
+    links.every((l) => l.result.url) &&
+    !(bulk && list && list.invalid.length > 0)
+  const changes = [...new Set(links.flatMap((l) => l.result.changes))]
+  const warnings = [...new Set(links.flatMap((l) => linkWarnings(l.fields, l.result.url)))]
+  const needChannel = !channels.length && !(fields.source.trim() && fields.medium.trim())
+  const needCampaign = !fields.campaign.trim()
+
+  function togglePreset(p: ChannelPreset) {
+    const k = channelKey(p)
+    setChannels((prev) =>
+      prev.some((c) => channelKey(c) === k) ? prev.filter((c) => channelKey(c) !== k) : [...prev, p]
+    )
+    setCustomOpen(false)
   }
 
-  const multi = channels.length > 1
-  const links = useMemo(() => {
-    if (multi)
-      return buildForChannels(fields, channels).map((c) => ({
-        label: c.label,
-        fields: c.fields,
-        ...c.result,
-      }))
-    const r = buildUtmUrl(fields)
-    return r.url && UTM_KEYS.some((k) => fields[k].trim()) ? [{ label: '', fields, ...r }] : []
-  }, [fields, channels, multi])
-  const urlError = touchedUrl ? buildUtmUrl(fields).error : ''
-  const ready = links.length > 0 && links.every((l) => l.url)
-  const changes = [...new Set(links.flatMap((l) => l.changes))]
-  const warnings = [...new Set(links.flatMap((l) => linkWarnings(l.fields, l.url)))]
-  const missingRequired =
-    ready && !multi && !(fields.source.trim() && fields.medium.trim() && fields.campaign.trim())
-  const multiNoCampaign = ready && multi && !fields.campaign.trim()
+  function openCustom() {
+    setChannels([])
+    setCustomOpen(true)
+  }
 
-  function togglePreset(label: string) {
-    const next = channels.includes(label)
-      ? channels.filter((c) => c !== label)
-      : [...channels, label]
-    setChannels(next)
-    if (next.length === 1) {
-      const p = PRESETS.find((x) => x.label === next[0])!
-      setFields((prev) => ({ ...prev, source: p.source, medium: p.medium }))
-    } else if (next.length > 1) {
-      setFields((prev) => ({ ...prev, source: '', medium: '' }))
+  function savePreset() {
+    const label = presetName.trim().slice(0, 24)
+    const source = normalizeValue(fields.source)
+    const medium = normalizeValue(fields.medium)
+    if (!label || !source || !medium) return
+    if ([...PRESETS, ...mine].some((p) => p.label.toLowerCase() === label.toLowerCase())) {
+      setPresetError('You already have a channel with that name.')
+      return
     }
+    const preset = { label, source, medium }
+    const next = [...mine, preset]
+    setMine(next)
+    writeStored(PRESETS_KEY, next)
+    setChannels([preset])
+    setCustomOpen(false)
+    setPresetName('')
+    setPresetError('')
   }
 
-  function rememberUrl() {
-    const base = fields.url.trim()
-    if (!base) return
-    const next = [base, ...recent.filter((r) => r !== base)].slice(0, 5)
+  function removePreset(p: ChannelPreset) {
+    const next = mine.filter((m) => channelKey(m) !== channelKey(p) || m.label !== p.label)
+    setMine(next)
+    writeStored(PRESETS_KEY, next)
+    setChannels((prev) => prev.filter((c) => channelKey(c) !== channelKey(p)))
+  }
+
+  function rememberUrls() {
+    const next = [...new Set([...urls, ...recent])].slice(0, 5)
     setRecent(next)
     writeStored(RECENT_KEY, next)
+  }
+
+  function showChannelFor(source: string, medium: string) {
+    const found = matchPreset(source, medium, [...PRESETS, ...mine])
+    setChannels(found ? [found] : [])
+    setCustomOpen(!found && Boolean(source || medium))
   }
 
   function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
@@ -148,13 +247,13 @@ export function UtmBuilder() {
     if (!split) return
     e.preventDefault()
     setFields({ url: split.base, ...split.fields })
-    setChannels([])
+    showChannelFor(split.fields.source, split.fields.medium)
     setImported(true)
   }
 
   async function handleCopy() {
-    if (!ready || !(await copyText(links.map((l) => l.url).join('\n')))) return
-    rememberUrl()
+    if (!ready || !(await copyText(links.map((l) => l.result.url).join('\n')))) return
+    rememberUrls()
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -164,136 +263,269 @@ export function UtmBuilder() {
     writeStored(SHEET_KEY, next)
   }
 
-  function addToSheet() {
+  function addToList() {
     if (!ready) return
-    rememberUrl()
+    rememberUrls()
     updateRows([
       ...rows,
-      ...links.map((l) => ({ id: crypto.randomUUID(), fields: l.fields, url: l.url })),
+      ...links.map((l) => ({ id: crypto.randomUUID(), fields: l.fields, url: l.result.url })),
     ])
   }
 
   function editRow(row: SheetRow) {
+    setBulk(false)
     setFields(row.fields)
-    setChannels([])
+    showChannelFor(row.fields.source, row.fields.medium)
     updateRows(rows.filter((r) => r.id !== row.id))
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  const count = links.length
+
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <Input
-          label="Landing page URL"
-          placeholder="https://yoursite.com/landing-page"
-          value={fields.url}
-          onChange={(e) => {
-            update('url', e.target.value)
-            setImported(false)
-          }}
-          onBlur={() => setTouchedUrl(true)}
-          onPaste={handlePaste}
-          error={urlError}
-          list="utm-recent-urls"
-          autoComplete="off"
-          hint="Paste a link that is already tagged and its UTM values are filled in for you."
-        />
-        <datalist id="utm-recent-urls">
-          {recent.map((r) => (
-            <option key={r} value={r} />
-          ))}
-        </datalist>
-        {imported && (
-          <p className="text-ds-muted mt-2 text-xs" aria-live="polite">
-            Loaded the UTM values from your pasted link; edit them below.
-          </p>
-        )}
-      </div>
-
-      <div>
-        <p className="text-ds-muted mb-2 font-mono text-xs tracking-wide uppercase">
-          Channels <span className="normal-case">(pick several for one link each)</span>
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {PRESETS.map((p) => (
-            <button
-              key={p.label}
-              type="button"
-              aria-pressed={channels.includes(p.label)}
-              onClick={() => togglePreset(p.label)}
-              className={chip(channels.includes(p.label))}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Input
-          label="Source"
-          placeholder={multi ? 'set by each channel' : 'google, facebook, newsletter'}
-          value={fields.source}
-          disabled={multi}
-          onChange={(e) => update('source', e.target.value)}
-        />
-        <Input
-          label="Medium"
-          placeholder={multi ? 'set by each channel' : 'cpc, email, paid-social'}
-          value={fields.medium}
-          disabled={multi}
-          onChange={(e) => update('medium', e.target.value)}
-        />
-        <Input
-          label="Campaign"
-          wrapClass="sm:col-span-2"
-          placeholder="spring-sale-2026"
-          value={fields.campaign}
-          onChange={(e) => update('campaign', e.target.value)}
-        />
-        <Input
-          label="Term (optional)"
-          placeholder="running-shoes"
-          value={fields.term}
-          onChange={(e) => update('term', e.target.value)}
-        />
-        <Input
-          label="Content (optional)"
-          placeholder="blue-cta-variant-b"
-          value={fields.content}
-          onChange={(e) => update('content', e.target.value)}
-        />
-      </div>
-
-      <div className="border-ds-border bg-ds-surface2 rounded-xl border p-4">
-        <p className="text-ds-muted mb-2 font-mono text-xs tracking-wide uppercase">
-          {multi ? `Tagged URLs (${links.length})` : 'Tagged URL'}
-        </p>
-        {ready ? (
-          <ul className="flex flex-col gap-2">
-            {links.map((l) => (
-              <li key={l.label || 'single'} className="text-ds-text font-mono text-sm break-all">
-                {l.label && <span className="text-ds-accent-strong mr-2">{l.label}</span>}
-                {l.url}
-              </li>
-            ))}
-          </ul>
+    <div className="flex flex-col gap-8">
+      <Step n={1} title="Where does the link go?" hint="The page people land on.">
+        {bulk ? (
+          <div>
+            <label htmlFor="utm-many" className="text-ds-text mb-1.5 block text-[13px] font-medium">
+              Page links, one per line
+            </label>
+            <textarea
+              id="utm-many"
+              value={many}
+              onChange={(e) => setMany(e.target.value)}
+              rows={5}
+              placeholder={'https://yoursite.com/page-one\nhttps://yoursite.com/page-two'}
+              className="border-ds-border bg-ds-surface2 text-ds-text placeholder:text-ds-muted focus:border-ds-accent w-full resize-y rounded-lg border px-4 py-3 font-mono text-xs leading-relaxed outline-none"
+            />
+            {list && list.invalid.length > 0 && (
+              <p className="text-ds-error mt-1.5 text-xs" role="alert">
+                {list.invalid.length === 1 ? 'Line' : 'Lines'}{' '}
+                {list.invalid.map((i) => i.line).join(', ')}{' '}
+                {list.invalid.length === 1 ? 'is' : 'are'} not a full link (start with https://).
+              </p>
+            )}
+            {list?.truncated && (
+              <p className="text-ds-warning-strong mt-1.5 text-xs">
+                Only the first 50 pages are used.
+              </p>
+            )}
+          </div>
         ) : (
-          <p className="text-ds-muted font-mono text-sm">
-            Add a landing page URL and at least one UTM field to see the tagged link.
+          <div>
+            <Input
+              label="Landing page link"
+              aria-label="Landing page link"
+              placeholder="https://yoursite.com/landing-page"
+              value={fields.url}
+              onChange={(e) => {
+                update('url', e.target.value)
+                setImported(false)
+              }}
+              onBlur={() => setTouchedUrl(true)}
+              onPaste={handlePaste}
+              error={singleError}
+              list="utm-recent-urls"
+              autoComplete="off"
+              hint="Already have a tagged link? Paste it and we fill in the rest."
+            />
+            <datalist id="utm-recent-urls">
+              {recent.map((r) => (
+                <option key={r} value={r} />
+              ))}
+            </datalist>
+            {imported && (
+              <p className="text-ds-muted mt-2 text-xs" aria-live="polite">
+                Filled in from your pasted link. Check steps 2 and 3.
+              </p>
+            )}
+          </div>
+        )}
+        <button
+          type="button"
+          className={`${textButton} self-start`}
+          onClick={() => {
+            if (!bulk && fields.url.trim() && !many.trim()) setMany(fields.url.trim())
+            setBulk(!bulk)
+          }}
+        >
+          {bulk ? 'Just one page' : 'Tagging several pages? Paste a list'}
+        </button>
+      </Step>
+
+      <Step
+        n={2}
+        title="Where will you share it?"
+        hint="Pick one, or several to get a separate link for each."
+      >
+        <div className="flex flex-wrap gap-2">
+          {chips.map((p) => {
+            const active = channels.some((c) => channelKey(c) === channelKey(p))
+            const own = mine.some((m) => m.label === p.label && channelKey(m) === channelKey(p))
+            return (
+              <span key={channelKey(p) + p.label} className="inline-flex items-stretch">
+                <button
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => togglePreset(p)}
+                  className={`${chip(active)} ${own ? 'rounded-r-none' : ''}`}
+                >
+                  {p.label}
+                </button>
+                {own && (
+                  <button
+                    type="button"
+                    aria-label={`Delete saved channel ${p.label}`}
+                    onClick={() => removePreset(p)}
+                    className="border-ds-border text-ds-muted hover:text-ds-error rounded-r-lg border border-l-0 px-2 text-sm transition-colors"
+                  >
+                    ×
+                  </button>
+                )}
+              </span>
+            )
+          })}
+          <button
+            type="button"
+            aria-pressed={customOpen}
+            onClick={openCustom}
+            className={chip(customOpen)}
+          >
+            Something else
+          </button>
+        </div>
+
+        {customOpen && (
+          <div className="border-ds-border bg-ds-surface2/50 flex flex-col gap-4 rounded-xl border p-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Input
+                label="Platform (source)"
+                placeholder="google, a partner name"
+                value={fields.source}
+                onChange={(e) => update('source', e.target.value)}
+              />
+              <Input
+                label="Type of traffic (medium)"
+                placeholder="cpc, email, referral"
+                value={fields.medium}
+                onChange={(e) => update('medium', e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <Input
+                label="Save this as a channel (optional)"
+                wrapClass="flex-1"
+                placeholder="Name, e.g. Acme Partners"
+                value={presetName}
+                maxLength={24}
+                onChange={(e) => {
+                  setPresetName(e.target.value)
+                  setPresetError('')
+                }}
+                error={presetError}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={savePreset}
+                disabled={!presetName.trim() || !fields.source.trim() || !fields.medium.trim()}
+              >
+                Save channel
+              </Button>
+            </div>
+          </div>
+        )}
+      </Step>
+
+      <Step
+        n={3}
+        title="Name the campaign"
+        hint="Any short name you will recognise in your reports."
+      >
+        <div>
+          <Input
+            label="Campaign name"
+            aria-label="Campaign name"
+            placeholder="spring-sale"
+            value={fields.campaign}
+            onChange={(e) => update('campaign', e.target.value)}
+          />
+          <button
+            type="button"
+            className={`${textButton} mt-2`}
+            onClick={() => update('campaign', withMonth(fields.campaign, new Date()))}
+          >
+            + Add this month
+          </button>
+        </div>
+        <details className="group">
+          <summary className="text-ds-muted hover:text-ds-accent cursor-pointer text-sm select-none">
+            More options (optional)
+          </summary>
+          <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Input
+              label="Keyword (term)"
+              hint="For paid search ads."
+              placeholder="running-shoes"
+              value={fields.term}
+              onChange={(e) => update('term', e.target.value)}
+            />
+            <Input
+              label="Ad version (content)"
+              hint="To compare two ads."
+              placeholder="blue-button"
+              value={fields.content}
+              onChange={(e) => update('content', e.target.value)}
+            />
+          </div>
+        </details>
+      </Step>
+
+      <div className="border-ds-accent/30 bg-ds-surface2 rounded-xl border p-4 sm:p-5">
+        <h2 className="text-ds-text text-base font-semibold">
+          {count > 1 ? `Your ${count} links` : 'Your link'}
+        </h2>
+
+        {ready ? (
+          <div
+            role="region"
+            aria-label="Tagged links"
+            tabIndex={0}
+            className="focus-visible:ring-ds-accent mt-3 max-h-72 overflow-auto rounded focus-visible:ring-2 focus-visible:outline-none"
+          >
+            <ul className="flex flex-col gap-3">
+              {links.map((l) => (
+                <li key={l.fields.url + l.label} className="text-ds-text">
+                  {l.label && (
+                    <span className="text-ds-accent-strong mr-2 text-xs font-semibold">
+                      {l.label}
+                    </span>
+                  )}
+                  <span className="font-mono text-sm break-all">{l.result.url}</span>
+                  <button
+                    type="button"
+                    onClick={() => setQrUrl(l.result.url)}
+                    aria-label={`QR code for ${l.label || 'this link'}`}
+                    className="text-ds-muted hover:text-ds-accent ml-3 font-mono text-xs transition-colors"
+                  >
+                    QR code
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p className="text-ds-muted mt-2 text-sm">
+            {bulk && list && list.invalid.length > 0
+              ? 'Fix the highlighted lines in step 1.'
+              : 'Fill in the steps above and your link appears here.'}
           </p>
         )}
 
-        {changes.length > 0 && (
-          <p className="text-ds-muted mt-3 text-xs" aria-live="polite">
-            Cleaned for consistent reporting: {changes.join(' · ')}
-          </p>
-        )}
-        {(missingRequired || multiNoCampaign) && (
-          <p className="text-ds-warning-strong mt-2 text-xs">
-            {multiNoCampaign
-              ? 'Add a campaign name: GA4 reports group by it.'
-              : 'Source, medium and campaign are the three GA4 reports group by; one is still empty.'}
+        {ready && (needChannel || needCampaign) && (
+          <p className="text-ds-warning-strong mt-3 text-xs">
+            {needChannel && 'Pick where you will share it (step 2). '}
+            {needCampaign && 'Add a campaign name (step 3): reports group by it.'}
           </p>
         )}
         {warnings.map((w) => (
@@ -301,15 +533,20 @@ export function UtmBuilder() {
             {w}
           </p>
         ))}
+        {changes.length > 0 && (
+          <p className="text-ds-muted mt-3 text-xs" aria-live="polite">
+            Tidied so reports stay consistent: {changes.join(' · ')}
+          </p>
+        )}
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <Button type="button" onClick={handleCopy} disabled={!ready}>
             <span aria-live="polite">
-              {copied ? 'Copied ✓' : multi ? `Copy ${links.length} links` : 'Copy link'}
+              {copied ? 'Copied ✓' : count > 1 ? `Copy ${count} links` : 'Copy link'}
             </span>
           </Button>
-          <Button type="button" variant="outline" onClick={addToSheet} disabled={!ready}>
-            {multi ? `Add ${links.length} to sheet` : 'Add to sheet'}
+          <Button type="button" variant="outline" onClick={addToList} disabled={!ready}>
+            {count > 1 ? `Save ${count} to list` : 'Save to list'}
           </Button>
           <ShareLinkButton getUrl={getShareUrl} />
         </div>
@@ -320,9 +557,12 @@ export function UtmBuilder() {
           rows={rows}
           onRemove={(id) => updateRows(rows.filter((r) => r.id !== id))}
           onEdit={editRow}
+          onQr={setQrUrl}
           onClear={() => updateRows([])}
         />
       )}
+
+      {qrUrl && <UtmQr key={qrUrl} url={qrUrl} onClose={() => setQrUrl(null)} />}
     </div>
   )
 }

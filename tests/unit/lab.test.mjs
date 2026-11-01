@@ -108,17 +108,58 @@ test('fitToWidth truncates with an ellipsis only when over budget', () => {
 })
 
 test('splitUtm pulls utm values out of a pasted link and keeps the rest', async () => {
-  const { splitUtm, buildForChannels, linkWarnings } = await import('../../lib/lab/utm.ts')
+  const { splitUtm } = await import('../../lib/lab/utm.ts')
   const s = splitUtm('https://e.com/p?ref=1&utm_source=google&utm_medium=cpc&utm_campaign=x#top')
   assert.equal(s.base, 'https://e.com/p?ref=1#top')
   assert.equal(s.fields.source, 'google')
   assert.equal(splitUtm('https://e.com/p?ref=1'), null)
   assert.equal(splitUtm('not a url'), null)
+})
 
-  const links = buildForChannels(fields({ campaign: 'sale' }), ['Google Ads', 'Newsletter', 'Nope'])
-  assert.equal(links.length, 2)
-  assert.match(links[1].result.url, /utm_source=newsletter&utm_medium=email&utm_campaign=sale/)
+test('buildMatrix makes one link per page per channel, or one per page for a custom channel', async () => {
+  const { buildMatrix, PRESETS } = await import('../../lib/lab/utm.ts')
+  const urls = ['https://a.com/1', 'https://a.com/2']
+  const two = buildMatrix(urls, fields({ campaign: 'sale' }), [PRESETS[0], PRESETS[5]])
+  assert.equal(two.length, 4)
+  assert.match(
+    two[1].result.url,
+    /^https:\/\/a.com\/1\?utm_source=newsletter&utm_medium=email&utm_campaign=sale$/
+  )
+  const custom = buildMatrix(urls, fields({ source: 'Partner X', medium: 'referral' }), [])
+  assert.equal(custom.length, 2)
+  assert.match(custom[0].result.url, /utm_source=partner-x&utm_medium=referral/)
+})
 
+test('parseUrlList drops blanks and repeats, reports bad lines, caps the list', async () => {
+  const { parseUrlList, MAX_BULK_URLS } = await import('../../lib/lab/utm.ts')
+  const r = parseUrlList('https://a.com\n\n  https://a.com  \nnope\nftp://x.com\nhttps://b.com')
+  assert.deepEqual(r.urls, ['https://a.com', 'https://b.com'])
+  assert.deepEqual(
+    r.invalid.map((i) => i.line),
+    [4, 5]
+  )
+  const many = Array.from({ length: MAX_BULK_URLS + 5 }, (_, i) => `https://a.com/${i}`).join('\n')
+  const capped = parseUrlList(many)
+  assert.equal(capped.urls.length, MAX_BULK_URLS)
+  assert.equal(capped.truncated, true)
+})
+
+test('withMonth appends the month once and cleans the name', async () => {
+  const { withMonth } = await import('../../lib/lab/utm.ts')
+  const nov = new Date(2026, 10, 5)
+  assert.equal(withMonth('Spring Sale', nov), 'spring-sale-2026-11')
+  assert.equal(withMonth('spring-sale-2026-11', nov), 'spring-sale-2026-11')
+  assert.equal(withMonth('', nov), '2026-11')
+})
+
+test('matchPreset finds a preset from source and medium regardless of case', async () => {
+  const { matchPreset, PRESETS } = await import('../../lib/lab/utm.ts')
+  assert.equal(matchPreset('Google', 'CPC', PRESETS)?.label, 'Google Ads')
+  assert.equal(matchPreset('x', 'y', PRESETS), undefined)
+})
+
+test('linkWarnings: long link and term on a non-paid medium', async () => {
+  const { linkWarnings } = await import('../../lib/lab/utm.ts')
   assert.equal(linkWarnings(fields({ term: 'x', medium: 'email' }), 'https://e.com').length, 1)
   assert.equal(linkWarnings(fields({ term: 'x', medium: 'cpc' }), 'https://e.com').length, 0)
   assert.equal(linkWarnings(fields(), 'https://e.com/' + 'a'.repeat(2100)).length, 1)

@@ -7,7 +7,7 @@ import { UtmBuilder } from '@/components/lab/UtmBuilder'
 export const metadata: Metadata = buildMetadata({
   title: 'UTM Builder — Free Campaign URL Generator',
   description:
-    'Free UTM link builder: cleans values to lowercase so GA4 reports do not split, checks a campaign sheet for naming problems, exports CSV. Runs in your browser.',
+    'Free UTM link builder in 3 steps: pick the channel, name the campaign, copy a clean link or QR code. Tag many pages at once, export CSV. Runs in your browser.',
   canonical: '/lab/utm-builder',
 })
 
@@ -22,9 +22,9 @@ export default function UtmBuilderPage() {
             <p className="text-ds-accent mb-4 font-mono text-sm">UTM LINK BUILDER</p>
             <h1 className={`${H1_HEADLINE}`}>Stop guessing which ad drove the click.</h1>
             <p className="text-ds-muted mt-4 text-lg leading-relaxed">
-              Cleans every value to lowercase so GA4 reports do not split, checks a whole campaign
-              sheet for naming problems, and exports it. Runs in your browser; the sheet is saved
-              only on this device.
+              Pick where you will share it, name the campaign, and copy a clean link or QR code. Do
+              many pages and channels at once, then export. Runs in your browser; your saved list
+              stays on this device.
             </p>
           </div>
         </section>
