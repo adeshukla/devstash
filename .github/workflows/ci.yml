@@ -161,3 +161,8 @@ jobs:
         run: pnpm qa:responsive
         env:
           QA_BASE_URL: http://localhost:3000
+
+      - name: UTM toolkit flows and accessibility
+        run: pnpm qa:toolkit
+        env:
+          QA_BASE_URL: http://localhost:3000

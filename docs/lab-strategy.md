@@ -81,6 +81,8 @@ Also done (2026-11-02, after Adesh reviewed the older tools): the Lab hub now le
 
 Also done (2026-11-02): usage events for every Lab tool (`lab_tool_action`, carrying only the tool and the action, never typed content); campaign name pattern in team rules; ad versions in the link matrix; launch test checklist in the pack and builder; UPI payment QR (NPCI linking spec v1.6, newest public version found is from 2017, so users are told to test-pay); two guides (`ga4-campaign-names-split-by-capital-letters`, `utm-naming-convention-for-teams`); the nine AI pipeline content types were all run against the real model.
 
+Also done (2026-11-02): the builder's secondary panels (team rules, import, checklist, backup) sit under one closed "More tools" section so the first screen stays the three steps; the toolkit's browser flows are now a repo test (`pnpm qa:toolkit`, 20 tests, also run on PRs into main). Lighthouse CI now also lists the four toolkit pages. Local Lighthouse on this machine is noisy (the existing /about page scored 75 performance), so judge the toolkit pages by CI or a Vercel preview, not by local numbers.
+
 Next (needs Adesh or real data):
 
 1. **Run it on a real GA4 export** and a real Looker Studio report; report which headers fail.

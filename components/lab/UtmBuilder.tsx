@@ -439,350 +439,341 @@ export function UtmBuilder() {
     Math.max(urls.length, 1) * Math.max(channels.length, 1) * Math.max(variants.length, 1)
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-start">
-      <div className="flex flex-col gap-8">
-        <Step n={1} title="Where does the link go?" hint="The page people land on.">
-          {bulk ? (
-            <div>
-              <label
-                htmlFor="utm-many"
-                className="text-ds-text mb-1.5 block text-[13px] font-medium"
-              >
-                Page links, one per line
-              </label>
-              <textarea
-                id="utm-many"
-                value={many}
-                onChange={(e) => setMany(e.target.value)}
-                rows={5}
-                placeholder={'https://yoursite.com/page-one\nhttps://yoursite.com/page-two'}
-                className="border-ds-border bg-ds-surface2 text-ds-text placeholder:text-ds-muted focus:border-ds-accent w-full resize-y rounded-lg border px-4 py-3 font-mono text-xs leading-relaxed outline-none"
-              />
-              {list && list.invalid.length > 0 && (
-                <p className="text-ds-error mt-1.5 text-xs" role="alert">
-                  {list.invalid.length === 1 ? 'Line' : 'Lines'}{' '}
-                  {list.invalid.map((i) => i.line).join(', ')}{' '}
-                  {list.invalid.length === 1 ? 'is' : 'are'} not a full link (start with https://).
-                </p>
-              )}
-              {list?.truncated && (
-                <p className="text-ds-warning-strong mt-1.5 text-xs">
-                  Only the first 50 pages are used.
-                </p>
-              )}
-            </div>
-          ) : (
-            <div>
-              <Input
-                label="Landing page link"
-                aria-label="Landing page link"
-                placeholder="https://yoursite.com/landing-page"
-                value={fields.url}
-                onChange={(e) => {
-                  update('url', e.target.value)
-                  setImported(false)
-                }}
-                onBlur={() => setTouchedUrl(true)}
-                onPaste={handlePaste}
-                error={singleError}
-                list="utm-recent-urls"
-                autoComplete="off"
-                hint="Already have a tagged link? Paste it and we fill in the rest."
-              />
-              <datalist id="utm-recent-urls">
-                {recent.map((r) => (
-                  <option key={r} value={r} />
-                ))}
-              </datalist>
-              {imported && (
-                <p className="text-ds-muted mt-2 text-xs" aria-live="polite">
-                  Filled in from your pasted link. Check steps 2 and 3.
-                </p>
-              )}
-            </div>
-          )}
-          <button
-            type="button"
-            className={`${textButton} self-start`}
-            onClick={() => {
-              if (!bulk && fields.url.trim() && !many.trim()) setMany(fields.url.trim())
-              setBulk(!bulk)
-            }}
-          >
-            {bulk ? 'Just one page' : 'Tagging several pages? Paste a list'}
-          </button>
-          {!fields.url && !fields.campaign && !channels.length && (
-            <button type="button" className={`${textButton} self-start`} onClick={tryExample}>
-              Not sure? Try an example
-            </button>
-          )}
-        </Step>
-
-        <Step
-          n={2}
-          title="Where will you share it?"
-          hint={
-            locked
-              ? "Locked to your team's approved channels."
-              : 'Pick one, or several to get a separate link for each.'
-          }
-        >
-          <div className="flex flex-wrap gap-2">
-            {chips.map((p) => {
-              const active = channels.some((c) => channelKey(c) === channelKey(p))
-              const own =
-                !locked && mine.some((m) => m.label === p.label && channelKey(m) === channelKey(p))
-              return (
-                <span key={channelKey(p) + p.label} className="inline-flex items-stretch">
-                  <button
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => togglePreset(p)}
-                    className={`${chip(active)} ${own ? 'rounded-r-none' : ''}`}
-                  >
-                    {p.label}
-                  </button>
-                  {own && (
-                    <button
-                      type="button"
-                      aria-label={`Delete saved channel ${p.label}`}
-                      onClick={() => removePreset(p)}
-                      className="border-ds-border text-ds-muted hover:text-ds-error rounded-r-lg border border-l-0 px-2 text-sm transition-colors"
-                    >
-                      ×
-                    </button>
-                  )}
-                </span>
-              )
-            })}
-            {!locked && (
-              <button
-                type="button"
-                aria-pressed={customOpen}
-                onClick={openCustom}
-                className={chip(customOpen)}
-              >
-                Something else
-              </button>
-            )}
-          </div>
-
-          {customOpen && !locked && (
-            <div className="border-ds-border bg-ds-surface2/50 flex flex-col gap-4 rounded-xl border p-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Input
-                  label="Platform (source)"
-                  placeholder="google, a partner name"
-                  value={fields.source}
-                  onChange={(e) => update('source', e.target.value)}
-                />
-                <Input
-                  label="Type of traffic (medium)"
-                  placeholder="cpc, email, referral"
-                  value={fields.medium}
-                  onChange={(e) => update('medium', e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-                <Input
-                  label="Save this as a channel (optional)"
-                  wrapClass="flex-1"
-                  placeholder="Name, e.g. Acme Partners"
-                  value={presetName}
-                  maxLength={24}
-                  onChange={(e) => {
-                    setPresetName(e.target.value)
-                    setPresetError('')
-                  }}
-                  error={presetError}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={savePreset}
-                  disabled={!presetName.trim() || !fields.source.trim() || !fields.medium.trim()}
+    <div className="flex flex-col gap-8">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-start">
+        <div className="flex flex-col gap-8">
+          <Step n={1} title="Where does the link go?" hint="The page people land on.">
+            {bulk ? (
+              <div>
+                <label
+                  htmlFor="utm-many"
+                  className="text-ds-text mb-1.5 block text-[13px] font-medium"
                 >
-                  Save channel
-                </Button>
+                  Page links, one per line
+                </label>
+                <textarea
+                  id="utm-many"
+                  value={many}
+                  onChange={(e) => setMany(e.target.value)}
+                  rows={5}
+                  placeholder={'https://yoursite.com/page-one\nhttps://yoursite.com/page-two'}
+                  className="border-ds-border bg-ds-surface2 text-ds-text placeholder:text-ds-muted focus:border-ds-accent w-full resize-y rounded-lg border px-4 py-3 font-mono text-xs leading-relaxed outline-none"
+                />
+                {list && list.invalid.length > 0 && (
+                  <p className="text-ds-error mt-1.5 text-xs" role="alert">
+                    {list.invalid.length === 1 ? 'Line' : 'Lines'}{' '}
+                    {list.invalid.map((i) => i.line).join(', ')}{' '}
+                    {list.invalid.length === 1 ? 'is' : 'are'} not a full link (start with
+                    https://).
+                  </p>
+                )}
+                {list?.truncated && (
+                  <p className="text-ds-warning-strong mt-1.5 text-xs">
+                    Only the first 50 pages are used.
+                  </p>
+                )}
               </div>
-            </div>
-          )}
-        </Step>
-
-        <Step
-          n={3}
-          title="Name the campaign"
-          hint="Any short name you will recognise in your reports."
-        >
-          <div>
-            <Input
-              label="Campaign name"
-              aria-label="Campaign name"
-              list="utm-campaign-names"
-              autoComplete="off"
-              placeholder={
-                locked && rules.pattern
-                  ? patternExample(rules.pattern, rules.separator, new Date())
-                  : 'spring-sale'
-              }
-              hint={locked && rules.pattern ? `Team pattern: ${rules.pattern}` : undefined}
-              value={fields.campaign}
-              onChange={(e) => update('campaign', e.target.value)}
-            />
-            <datalist id="utm-campaign-names">
-              {campaignNames.map((n) => (
-                <option key={n} value={n} />
-              ))}
-            </datalist>
+            ) : (
+              <div>
+                <Input
+                  label="Landing page link"
+                  aria-label="Landing page link"
+                  placeholder="https://yoursite.com/landing-page"
+                  value={fields.url}
+                  onChange={(e) => {
+                    update('url', e.target.value)
+                    setImported(false)
+                  }}
+                  onBlur={() => setTouchedUrl(true)}
+                  onPaste={handlePaste}
+                  error={singleError}
+                  list="utm-recent-urls"
+                  autoComplete="off"
+                  hint="Already have a tagged link? Paste it and we fill in the rest."
+                />
+                <datalist id="utm-recent-urls">
+                  {recent.map((r) => (
+                    <option key={r} value={r} />
+                  ))}
+                </datalist>
+                {imported && (
+                  <p className="text-ds-muted mt-2 text-xs" aria-live="polite">
+                    Filled in from your pasted link. Check steps 2 and 3.
+                  </p>
+                )}
+              </div>
+            )}
             <button
               type="button"
-              className={`${textButton} mt-2`}
-              onClick={() => update('campaign', withMonth(fields.campaign, new Date(), sep))}
+              className={`${textButton} self-start`}
+              onClick={() => {
+                if (!bulk && fields.url.trim() && !many.trim()) setMany(fields.url.trim())
+                setBulk(!bulk)
+              }}
             >
-              + Add this month
+              {bulk ? 'Just one page' : 'Tagging several pages? Paste a list'}
             </button>
-          </div>
-          <details className="group">
-            <summary className="text-ds-muted hover:text-ds-accent cursor-pointer text-sm select-none">
-              More options (optional)
-            </summary>
-            <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Input
-                label="Keyword (term)"
-                hint="For paid search ads."
-                placeholder="running-shoes"
-                value={fields.term}
-                onChange={(e) => update('term', e.target.value)}
-              />
-              <Input
-                label="Ad version (content)"
-                hint={variants.length ? 'Replaced by the versions below.' : 'To compare two ads.'}
-                placeholder="blue-button"
-                value={fields.content}
-                disabled={variants.length > 0}
-                onChange={(e) => update('content', e.target.value)}
-              />
-              <Input
-                label="Or test several ad versions at once"
-                wrapClass="sm:col-span-2"
-                hint="Comma-separated, up to 10, for example blue-button, green-button. Makes one link per version, for every page and channel."
-                placeholder="blue-button, green-button"
-                value={variantsText}
-                onChange={(e) => setVariantsText(e.target.value)}
-              />
-              <AdValues sets={placeholderSets} onInsert={insertToken} />
-            </div>
-          </details>
-        </Step>
-      </div>
+            {!fields.url && !fields.campaign && !channels.length && (
+              <button type="button" className={`${textButton} self-start`} onClick={tryExample}>
+                Not sure? Try an example
+              </button>
+            )}
+          </Step>
 
-      <div className="border-ds-accent/30 bg-ds-surface2 rounded-xl border p-4 sm:p-5 lg:sticky lg:top-6">
-        <h2 className="text-ds-text text-base font-semibold">
-          {count > 1 ? `Your ${count} links` : 'Your link'}
-        </h2>
-
-        {ready ? (
-          <div
-            role="region"
-            aria-label="Tagged links"
-            tabIndex={0}
-            className="focus-visible:ring-ds-accent mt-3 max-h-72 overflow-auto rounded focus-visible:ring-2 focus-visible:outline-none lg:max-h-[45vh]"
+          <Step
+            n={2}
+            title="Where will you share it?"
+            hint={
+              locked
+                ? "Locked to your team's approved channels."
+                : 'Pick one, or several to get a separate link for each.'
+            }
           >
-            <ul className="flex flex-col gap-3">
-              {links.map((l) => (
-                <li
-                  key={l.fields.url + l.label}
-                  className="text-ds-text border-ds-border bg-ds-surface rounded-lg border p-3"
-                >
-                  {l.label && (
-                    <span className="text-ds-accent-strong mb-1 block text-xs font-semibold">
-                      {l.label}
-                    </span>
-                  )}
-                  <span className="font-mono text-sm break-all">{l.result.url}</span>
-                  <ChannelNote source={l.fields.source} medium={l.fields.medium} />
-                  {!tokensIn(l.result.url).length && (
+            <div className="flex flex-wrap gap-2">
+              {chips.map((p) => {
+                const active = channels.some((c) => channelKey(c) === channelKey(p))
+                const own =
+                  !locked &&
+                  mine.some((m) => m.label === p.label && channelKey(m) === channelKey(p))
+                return (
+                  <span key={channelKey(p) + p.label} className="inline-flex items-stretch">
                     <button
                       type="button"
-                      onClick={() => setQrUrl(l.result.url)}
-                      aria-label={`QR code for ${l.label || 'this link'}`}
-                      className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent mt-2 rounded-md border px-2.5 py-1 text-xs transition-colors"
+                      aria-pressed={active}
+                      onClick={() => togglePreset(p)}
+                      className={`${chip(active)} ${own ? 'rounded-r-none' : ''}`}
                     >
-                      QR code
+                      {p.label}
                     </button>
-                  )}
-                </li>
-              ))}
-            </ul>
+                    {own && (
+                      <button
+                        type="button"
+                        aria-label={`Delete saved channel ${p.label}`}
+                        onClick={() => removePreset(p)}
+                        className="border-ds-border text-ds-muted hover:text-ds-error rounded-r-lg border border-l-0 px-2 text-sm transition-colors"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </span>
+                )
+              })}
+              {!locked && (
+                <button
+                  type="button"
+                  aria-pressed={customOpen}
+                  onClick={openCustom}
+                  className={chip(customOpen)}
+                >
+                  Something else
+                </button>
+              )}
+            </div>
+
+            {customOpen && !locked && (
+              <div className="border-ds-border bg-ds-surface2/50 flex flex-col gap-4 rounded-xl border p-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Input
+                    label="Platform (source)"
+                    placeholder="google, a partner name"
+                    value={fields.source}
+                    onChange={(e) => update('source', e.target.value)}
+                  />
+                  <Input
+                    label="Type of traffic (medium)"
+                    placeholder="cpc, email, referral"
+                    value={fields.medium}
+                    onChange={(e) => update('medium', e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                  <Input
+                    label="Save this as a channel (optional)"
+                    wrapClass="flex-1"
+                    placeholder="Name, e.g. Acme Partners"
+                    value={presetName}
+                    maxLength={24}
+                    onChange={(e) => {
+                      setPresetName(e.target.value)
+                      setPresetError('')
+                    }}
+                    error={presetError}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={savePreset}
+                    disabled={!presetName.trim() || !fields.source.trim() || !fields.medium.trim()}
+                  >
+                    Save channel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Step>
+
+          <Step
+            n={3}
+            title="Name the campaign"
+            hint="Any short name you will recognise in your reports."
+          >
+            <div>
+              <Input
+                label="Campaign name"
+                aria-label="Campaign name"
+                list="utm-campaign-names"
+                autoComplete="off"
+                placeholder={
+                  locked && rules.pattern
+                    ? patternExample(rules.pattern, rules.separator, new Date())
+                    : 'spring-sale'
+                }
+                hint={locked && rules.pattern ? `Team pattern: ${rules.pattern}` : undefined}
+                value={fields.campaign}
+                onChange={(e) => update('campaign', e.target.value)}
+              />
+              <datalist id="utm-campaign-names">
+                {campaignNames.map((n) => (
+                  <option key={n} value={n} />
+                ))}
+              </datalist>
+              <button
+                type="button"
+                className={`${textButton} mt-2`}
+                onClick={() => update('campaign', withMonth(fields.campaign, new Date(), sep))}
+              >
+                + Add this month
+              </button>
+            </div>
+            <details className="group">
+              <summary className="text-ds-muted hover:text-ds-accent cursor-pointer text-sm select-none">
+                More options (optional)
+              </summary>
+              <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Input
+                  label="Keyword (term)"
+                  hint="For paid search ads."
+                  placeholder="running-shoes"
+                  value={fields.term}
+                  onChange={(e) => update('term', e.target.value)}
+                />
+                <Input
+                  label="Ad version (content)"
+                  hint={variants.length ? 'Replaced by the versions below.' : 'To compare two ads.'}
+                  placeholder="blue-button"
+                  value={fields.content}
+                  disabled={variants.length > 0}
+                  onChange={(e) => update('content', e.target.value)}
+                />
+                <Input
+                  label="Or test several ad versions at once"
+                  wrapClass="sm:col-span-2"
+                  hint="Comma-separated, up to 10, for example blue-button, green-button. Makes one link per version, for every page and channel."
+                  placeholder="blue-button, green-button"
+                  value={variantsText}
+                  onChange={(e) => setVariantsText(e.target.value)}
+                />
+                <AdValues sets={placeholderSets} onInsert={insertToken} />
+              </div>
+            </details>
+          </Step>
+        </div>
+
+        <div className="border-ds-accent/30 bg-ds-surface2 rounded-xl border p-4 sm:p-5 lg:sticky lg:top-6">
+          <h2 className="text-ds-text text-base font-semibold">
+            {count > 1 ? `Your ${count} links` : 'Your link'}
+          </h2>
+
+          {ready ? (
+            <div
+              role="region"
+              aria-label="Tagged links"
+              tabIndex={0}
+              className="focus-visible:ring-ds-accent mt-3 max-h-72 overflow-auto rounded focus-visible:ring-2 focus-visible:outline-none lg:max-h-[45vh]"
+            >
+              <ul className="flex flex-col gap-3">
+                {links.map((l) => (
+                  <li
+                    key={l.fields.url + l.label}
+                    className="text-ds-text border-ds-border bg-ds-surface rounded-lg border p-3"
+                  >
+                    {l.label && (
+                      <span className="text-ds-accent-strong mb-1 block text-xs font-semibold">
+                        {l.label}
+                      </span>
+                    )}
+                    <span className="font-mono text-sm break-all">{l.result.url}</span>
+                    <ChannelNote source={l.fields.source} medium={l.fields.medium} />
+                    {!tokensIn(l.result.url).length && (
+                      <button
+                        type="button"
+                        onClick={() => setQrUrl(l.result.url)}
+                        aria-label={`QR code for ${l.label || 'this link'}`}
+                        className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent mt-2 rounded-md border px-2.5 py-1 text-xs transition-colors"
+                      >
+                        QR code
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="text-ds-muted mt-2 text-sm">
+              {bulk && list && list.invalid.length > 0
+                ? 'Fix the highlighted lines in step 1.'
+                : 'Fill in the steps above and your link appears here.'}
+            </p>
+          )}
+
+          {ready && locked && rules.pattern && fields.campaign.trim() && !campaignFits && (
+            <p className="text-ds-warning-strong mt-3 text-xs">
+              The campaign name does not follow your team pattern {rules.pattern}, for example{' '}
+              {patternExample(rules.pattern, rules.separator, new Date())}.
+            </p>
+          )}
+          {ready && (needChannel || needCampaign) && (
+            <p className="text-ds-warning-strong mt-3 text-xs">
+              {needChannel && 'Pick where you will share it (step 2). '}
+              {needCampaign && 'Add a campaign name (step 3): reports group by it.'}
+            </p>
+          )}
+          {count >= MAX_LINKS && fullSize > MAX_LINKS && (
+            <p className="text-ds-warning-strong mt-2 text-xs">
+              Showing the first {MAX_LINKS} of {fullSize} links. Use fewer pages, channels or
+              versions.
+            </p>
+          )}
+          {warnings.map((w) => (
+            <p key={w} className="text-ds-warning-strong mt-2 text-xs">
+              {w}
+            </p>
+          ))}
+          {changes.length > 0 && (
+            <p className="text-ds-muted mt-3 text-xs" aria-live="polite">
+              Tidied so reports stay consistent: {changes.join(' · ')}
+            </p>
+          )}
+
+          {ready && count === 1 && links[0].fields.source.trim().toLowerCase() === 'google' && (
+            <AdsSuffixButton url={links[0].result.url} />
+          )}
+
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Button type="button" onClick={handleCopy} disabled={!ready}>
+              <span aria-live="polite">
+                {copied ? 'Copied ✓' : count > 1 ? `Copy ${count} links` : 'Copy link'}
+              </span>
+            </Button>
+            <Button type="button" variant="outline" onClick={addToList} disabled={!ready}>
+              {count > 1 ? `Save ${count} to list` : 'Save to list'}
+            </Button>
+            <ShareLinkButton getUrl={getShareUrl} tool="utm-builder" />
           </div>
-        ) : (
-          <p className="text-ds-muted mt-2 text-sm">
-            {bulk && list && list.invalid.length > 0
-              ? 'Fix the highlighted lines in step 1.'
-              : 'Fill in the steps above and your link appears here.'}
-          </p>
-        )}
-
-        {ready && locked && rules.pattern && fields.campaign.trim() && !campaignFits && (
-          <p className="text-ds-warning-strong mt-3 text-xs">
-            The campaign name does not follow your team pattern {rules.pattern}, for example{' '}
-            {patternExample(rules.pattern, rules.separator, new Date())}.
-          </p>
-        )}
-        {ready && (needChannel || needCampaign) && (
-          <p className="text-ds-warning-strong mt-3 text-xs">
-            {needChannel && 'Pick where you will share it (step 2). '}
-            {needCampaign && 'Add a campaign name (step 3): reports group by it.'}
-          </p>
-        )}
-        {count >= MAX_LINKS && fullSize > MAX_LINKS && (
-          <p className="text-ds-warning-strong mt-2 text-xs">
-            Showing the first {MAX_LINKS} of {fullSize} links. Use fewer pages, channels or
-            versions.
-          </p>
-        )}
-        {warnings.map((w) => (
-          <p key={w} className="text-ds-warning-strong mt-2 text-xs">
-            {w}
-          </p>
-        ))}
-        {changes.length > 0 && (
-          <p className="text-ds-muted mt-3 text-xs" aria-live="polite">
-            Tidied so reports stay consistent: {changes.join(' · ')}
-          </p>
-        )}
-
-        {ready && count === 1 && links[0].fields.source.trim().toLowerCase() === 'google' && (
-          <AdsSuffixButton url={links[0].result.url} />
-        )}
-
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <Button type="button" onClick={handleCopy} disabled={!ready}>
-            <span aria-live="polite">
-              {copied ? 'Copied ✓' : count > 1 ? `Copy ${count} links` : 'Copy link'}
-            </span>
-          </Button>
-          <Button type="button" variant="outline" onClick={addToList} disabled={!ready}>
-            {count > 1 ? `Save ${count} to list` : 'Save to list'}
-          </Button>
-          <ShareLinkButton getUrl={getShareUrl} tool="utm-builder" />
         </div>
       </div>
 
-      <div className="flex flex-col gap-8 lg:col-span-2">
-        <UtmRulesPanel
-          key={locked ? rulesVersion(rules) : 'off'}
-          rules={rules}
-          owner={owner}
-          onApply={applyRules}
-          onOff={rulesOff}
-          onOwner={updateOwner}
-          getLink={rulesLink}
-        />
-        <UtmImport onAdd={importRows} />
-        <LaunchChecklist />
-        <WorkspaceBackup build={buildBackup} onRestore={restoreBackup} />
-
+      <div className="flex flex-col gap-8">
         {rows.length > 0 && (
           <UtmSheet
             rows={rows}
@@ -794,6 +785,34 @@ export function UtmBuilder() {
             onClear={() => updateRows([])}
           />
         )}
+
+        {/* The three steps and the saved list are the tool; everything else lives here, closed. */}
+        <details
+          className="border-ds-border rounded-2xl border p-4 sm:p-5"
+          open={locked || undefined}
+        >
+          <summary className="text-ds-text cursor-pointer text-base font-semibold">
+            More tools
+            <span className="text-ds-muted ml-2 text-sm font-normal">
+              team rules, import a sheet, test checklist, backup
+              {locked && ' · team rules on'}
+            </span>
+          </summary>
+          <div className="mt-4 flex flex-col gap-4">
+            <UtmRulesPanel
+              key={locked ? rulesVersion(rules) : 'off'}
+              rules={rules}
+              owner={owner}
+              onApply={applyRules}
+              onOff={rulesOff}
+              onOwner={updateOwner}
+              getLink={rulesLink}
+            />
+            <UtmImport onAdd={importRows} />
+            <LaunchChecklist />
+            <WorkspaceBackup build={buildBackup} onRestore={restoreBackup} />
+          </div>
+        </details>
       </div>
 
       {qrUrl && <UtmQr key={qrUrl} url={qrUrl} onClose={() => setQrUrl(null)} />}

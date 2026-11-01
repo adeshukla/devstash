@@ -23,8 +23,9 @@
     "prepare": "husky",
     "qa:security": "node scripts/qa/security-audit.mjs",
     "qa:responsive": "playwright test -c playwright.qa.config.ts tests/qa/responsive.spec.ts",
+    "qa:toolkit": "playwright test -c playwright.qa.config.ts tests/qa/toolkit.spec.ts",
     "qa:a11y": "playwright test -c playwright.qa.config.ts tests/qa/a11y.spec.ts",
-    "qa": "pnpm qa:security && pnpm qa:responsive && pnpm qa:a11y",
+    "qa": "pnpm qa:security && pnpm qa:responsive && pnpm qa:a11y && pnpm qa:toolkit",
     "resume:pdf": "node scripts/automation/build-resume-pdf.mjs",
     "test:unit": "node --experimental-strip-types --no-warnings=ExperimentalWarning --test \"tests/unit/*.test.mjs\""
   },
