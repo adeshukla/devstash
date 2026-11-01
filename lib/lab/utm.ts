@@ -209,7 +209,7 @@ export function ga4Channel(source: string, medium: string): string {
   return 'Unassigned'
 }
 
-const SOURCE_ALIASES: Record<string, string> = {
+export const SOURCE_ALIASES: Record<string, string> = {
   fb: 'facebook',
   ig: 'instagram',
   li: 'linkedin',
@@ -405,7 +405,7 @@ export function linkWarnings(fields: UtmFields, url: string): string[] {
 }
 
 /** Splits CSV or tab-separated text into cells; handles quotes and escaped quotes. */
-function parseDelimited(text: string): string[][] {
+export function parseDelimited(text: string): string[][] {
   const first = text.split(/\r?\n/, 1)[0]
   const sep = first.includes('\t')
     ? '\t'

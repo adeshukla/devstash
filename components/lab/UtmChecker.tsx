@@ -157,7 +157,11 @@ export function UtmChecker() {
             })}
           </ul>
           <p className="text-ds-muted text-sm">
-            Building new links?{' '}
+            Old reports already split?{' '}
+            <Link href="/lab/utm-report-cleaner" className="text-ds-accent-strong underline">
+              Merge the rows
+            </Link>
+            . Building new links?{' '}
             <Link href="/lab/utm-builder" className="text-ds-accent-strong underline">
               Use the UTM builder
             </Link>

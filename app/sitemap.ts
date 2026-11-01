@@ -119,6 +119,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const labToolRoutes: MetadataRoute.Sitemap = [
     'utm-builder',
     'utm-link-checker',
+    'utm-report-cleaner',
     'qr-code-generator',
     'css-shapes-playground',
     'meta-tag-generator',

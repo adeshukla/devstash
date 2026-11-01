@@ -119,6 +119,7 @@ BRANDS['illustration-generator'] = monogram('IG')
 BRANDS['meta-tag-generator'] = monogram('MT')
 BRANDS['utm-builder'] = monogram('UTM')
 BRANDS['utm-link-checker'] = monogram('UC')
+BRANDS['utm-report-cleaner'] = monogram('RC')
 BRANDS['qr-code-generator'] = monogram('QR')
 
 const DEVSTASH: ProjectBrand = {

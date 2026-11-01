@@ -93,6 +93,14 @@ const TOOLS: Demo[] = [
     tag: 'Utility',
     preview: 'qr',
   },
+  {
+    slug: 'utm-report-cleaner',
+    name: 'GA4 Report Cleaner',
+    blurb:
+      'Paste a GA4 or Looker Studio export: rows that are the same campaign written differently are merged, with totals, an original-to-clean list and a Looker Studio field.',
+    tag: 'Marketing',
+    preview: 'merge',
+  },
 ]
 
 const PRINCIPLES = [

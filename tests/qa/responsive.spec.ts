@@ -24,6 +24,7 @@ const ROUTES = [
   '/projects/praxis',
   '/lab/utm-builder',
   '/lab/utm-link-checker',
+  '/lab/utm-report-cleaner',
   '/lab/qr-code-generator',
   '/lab/css-shapes-playground',
   '/lab/illustration-generator',

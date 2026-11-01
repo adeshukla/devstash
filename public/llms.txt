@@ -28,6 +28,7 @@ All run in the browser, free, no signup.
 - [Meta Tag & Social Preview Generator](https://devstash.me/lab/meta-tag-generator): previews a title and description as a Google result, an X card and a Facebook/OG card, with copyable tags
 - [UTM Builder](https://devstash.me/lab/utm-builder): campaign URL builder that keeps existing query parameters
 - [UTM Link Checker](https://devstash.me/lab/utm-link-checker): paste tagged links to see each parameter, the GA4 channel it lands in, what is wrong and a cleaned link
+- [GA4 Report Cleaner](https://devstash.me/lab/utm-report-cleaner): paste a GA4 or Looker Studio export to merge rows that are the same campaign written differently
 - [QR Code Generator](https://devstash.me/lab/qr-code-generator): static QR codes for a website, WhatsApp chat, Wi-Fi, contact card, email, phone or text; never expire
 - [CSS Shapes & Animation Playground](https://devstash.me/lab/css-shapes-playground): shapes, gradients and shadows that copy out as CSS or Tailwind classes
 - [Illustration Generator](https://devstash.me/lab/illustration-generator): animated SVG illustration from a text description

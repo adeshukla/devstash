@@ -13,7 +13,8 @@
 
 import './LabPreview.css'
 
-type PreviewKind = 'pipeline' | 'shapes' | 'illustration' | 'meta' | 'utm' | 'qr' | 'check'
+type PreviewKind =
+  'pipeline' | 'shapes' | 'illustration' | 'meta' | 'utm' | 'qr' | 'check' | 'merge'
 
 const FRAME =
   'relative overflow-hidden rounded-lg border border-ds-border bg-ds-surface2 aspect-[16/9] w-full'
@@ -171,6 +172,29 @@ function Check() {
   )
 }
 
+/** Three spellings of one campaign collapsing into one row. */
+function Merge() {
+  const rows = ['Spring_Sale', 'spring sale', 'SPRING-SALE']
+  return (
+    <div className={FRAME}>
+      <div className="absolute inset-0 flex flex-col justify-center gap-1.5 p-5">
+        {rows.map((r, i) => (
+          <span
+            key={r}
+            className="lab-rise text-ds-muted text-[10px] leading-none"
+            style={{ animationDelay: `${i * 0.2}s` }}
+          >
+            {r}
+          </span>
+        ))}
+        <span className="lab-pop border-ds-accent/40 bg-ds-accent/10 text-ds-accent-strong mt-1 self-start rounded border px-1.5 py-0.5 text-[10px] leading-none [animation-delay:.9s]">
+          spring-sale
+        </span>
+      </div>
+    </div>
+  )
+}
+
 export function LabPreview({ kind }: { kind: PreviewKind }) {
   switch (kind) {
     case 'pipeline':
@@ -187,6 +211,8 @@ export function LabPreview({ kind }: { kind: PreviewKind }) {
       return <Qr />
     case 'check':
       return <Check />
+    case 'merge':
+      return <Merge />
   }
 }
 

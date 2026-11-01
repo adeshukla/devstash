@@ -1,0 +1,33 @@
+{
+  "slug": "utm-report-cleaner",
+  "title": "GA4 Report Cleaner",
+  "description": "Paste a GA4 or Looker Studio export and merge rows that are the same campaign written differently, with merged totals, an original-to-clean list and a Looker Studio field.",
+  "longDescription": "Builders prevent bad tagging in new links, but the damage is already in old reports: one campaign split across Spring_Sale, spring-sale and SPRING-SALE. This tool reads a pasted or uploaded export, groups rows that match once capitals, spaces and separators are ignored, adds up only the columns that can be added, and hands back a clean table plus the mapping to apply it elsewhere.",
+  "status": "live",
+  "featured": false,
+  "order": 9,
+  "category": "tool",
+  "tech": ["Next.js", "TypeScript", "Tailwind CSS"],
+  "liveUrl": "/lab/utm-report-cleaner",
+  "image": "/images/projects/utm-report-cleaner.webp",
+  "startDate": "2026-11-02",
+  "year": 2026,
+  "highlights": [
+    "Fully client-side: the report is read in the browser and never uploaded",
+    "Sums only additive columns and says which rate and average columns it left out, instead of adding numbers that cannot be added",
+    "Outputs a merged table, an original-to-clean list and a Looker Studio calculated field",
+    "Understands GA4 exports, including the comment lines GA4 writes above the table"
+  ],
+  "caseStudy": {
+    "problem": "GA4 treats Spring_Sale, spring-sale and SPRING-SALE as different values. One campaign shows up as three rows, each looking much smaller than the whole, and nobody sees its real size until someone merges them by hand.",
+    "approach": "Detect the label columns from the header, reduce each label to an identity that ignores capitals, spaces and separators, group on it, and report the groups that contain more than one spelling. Alias short source names such as fb to facebook.",
+    "decisions": [
+      "Add up only columns that are additive. Summing engagement rate would produce a wrong number that looks right.",
+      "Never touch GA4. The tool says plainly that it cleans a copy of the report; the fix for the cause is consistent tagging.",
+      "Genuinely different names are left alone. Merging spring-sale with spring-promo would hide real differences."
+    ],
+    "outcome": "// TODO: No usage data yet. This is a self-initiated tool, not a deployed one."
+  },
+  "coverStats": ["no data sent", "merged totals", "Looker field"],
+  "relatedPosts": []
+}

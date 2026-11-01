@@ -1,5 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { cleanReport, mergedTsv, mappingTsv, lookerCase } from '../../lib/lab/reportClean.ts'
 import { buildPackHtml } from '../../lib/lab/campaignPack.ts'
 import {
   websitePayload,
@@ -434,4 +435,68 @@ test('campaign pack escapes every value and keeps the QR markup', () => {
   assert.ok(html.includes('<svg id="qr"></svg>'))
   assert.match(html, /No QR: placeholders/)
   assert.match(html, /2 links/)
+})
+
+test('report cleaner merges campaign variants, sums additive metrics and skips rates', () => {
+  const r = cleanReport(
+    [
+      '# ----------------------------------------',
+      '# Session campaign',
+      '# ----------------------------------------',
+      'Session campaign,Sessions,Engagement rate',
+      'spring-sale,1200,0.67',
+      'Spring_Sale,300,0.5',
+      'spring sale,90,0.44',
+      'winter-promo,500,0.6',
+    ].join('\n'),
+    '-'
+  )
+  assert.equal(r.error, '')
+  assert.deepEqual(r.metricNames, ['Sessions'])
+  assert.deepEqual(r.skippedMetrics, ['Engagement rate'])
+  assert.equal(r.groups.length, 2)
+  const g = r.groups[0]
+  assert.equal(g.canonical, 'spring-sale')
+  assert.equal(g.split, true)
+  assert.deepEqual(
+    g.variants.map((v) => v.raw),
+    ['spring-sale', 'Spring_Sale', 'spring sale']
+  )
+  assert.deepEqual(g.totals, [1590])
+  assert.equal(r.groups[1].split, false)
+  assert.match(
+    lookerCase(r),
+    /WHEN Session campaign IN \("Spring_Sale", "spring sale"\) THEN "spring-sale"/
+  )
+  assert.match(
+    mappingTsv(r),
+    /^Original\tClean\nspring-sale\tspring-sale\nSpring_Sale\tspring-sale/
+  )
+  assert.match(mergedTsv(r), /^Session campaign\tVariants merged\tSessions\nspring-sale\t3\t1590/)
+})
+
+test('report cleaner treats fb and facebook as one source, honours the separator, keeps (not set)', () => {
+  const r = cleanReport(
+    [
+      'Session source / medium,Sessions',
+      'fb / paid-social,10',
+      'facebook / Paid_Social,5',
+      '(not set),2',
+      '(Not Set),1',
+    ].join('\n'),
+    '_'
+  )
+  assert.equal(r.groups[0].canonical, 'facebook / paid_social')
+  assert.equal(r.groups[0].totals[0], 15)
+  const unset = r.groups.find((g) => g.canonical === '(not set)')
+  assert.equal(unset.variants.length, 2)
+})
+
+test('report cleaner reads a plain list and does not mistake a label for a header', () => {
+  const r = cleanReport('content-marketing\nContent_Marketing\nother', '-')
+  assert.equal(r.dims[0], 'Value')
+  assert.equal(r.groups[0].canonical, 'content-marketing')
+  assert.equal(r.groups[0].variants.length, 2)
+  assert.equal(cleanReport('', '-').rowCount, 0)
+  assert.match(cleanReport('Sessions,Users\n5,6', '-').error, /Add a header row/)
 })
