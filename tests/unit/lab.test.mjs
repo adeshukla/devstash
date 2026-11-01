@@ -1,6 +1,14 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { cleanReport, mergedTsv, mappingTsv, lookerCase } from '../../lib/lab/reportClean.ts'
+import {
+  cleanReport,
+  mergedTsv,
+  mappingTsv,
+  lookerCase,
+  applyNames,
+  rememberable,
+} from '../../lib/lab/reportClean.ts'
+import { buildWorkspace, parseWorkspace, mergeRows } from '../../lib/lab/workspace.ts'
 import { buildPackHtml } from '../../lib/lab/campaignPack.ts'
 import {
   websitePayload,
@@ -499,4 +507,64 @@ test('report cleaner reads a plain list and does not mistake a label for a heade
   assert.equal(r.groups[0].variants.length, 2)
   assert.equal(cleanReport('', '-').rowCount, 0)
   assert.match(cleanReport('Sessions,Users\n5,6', '-').error, /Add a header row/)
+})
+
+test('workspace backup round-trips, rejects foreign files and merges rows without duplicates', () => {
+  const row = (id, url) => ({
+    id,
+    url,
+    fields: {
+      url: 'https://e.com',
+      source: 'google',
+      medium: 'cpc',
+      campaign: 'c',
+      term: '',
+      content: '',
+    },
+  })
+  const ws = buildWorkspace(
+    {
+      sheet: [row('1', 'https://e.com/?a'), row('2', 'https://e.com/?b')],
+      presets: [{ label: 'Acme', source: 'acme', medium: 'referral' }],
+      rules: 'abc',
+      owner: 'Priya',
+      aliases: { 'fb-ads': 'facebook-ads' },
+    },
+    new Date('2026-11-02T00:00:00Z')
+  )
+  const parsed = parseWorkspace(JSON.stringify(ws))
+  assert.equal(parsed.error, '')
+  assert.deepEqual(parsed.data.aliases, { 'fb-ads': 'facebook-ads' })
+  assert.equal(parsed.data.sheet.length, 2)
+  assert.match(parseWorkspace('{"app":"other","version":1}').error, /not a backup/)
+  assert.match(parseWorkspace('nope').error, /not a backup/)
+  assert.match(parseWorkspace('{"app":"devstash-utm","version":2}').error, /newer version/)
+  const broken = parseWorkspace(
+    JSON.stringify({
+      ...ws,
+      sheet: [{ id: 1 }, row('3', 'https://e.com/?c')],
+      aliases: { a: 5, b: 'ok' },
+    })
+  )
+  assert.equal(broken.data.sheet.length, 1)
+  assert.deepEqual(broken.data.aliases, { b: 'ok' })
+  const merged = mergeRows([row('9', 'https://e.com/?a')], ws.sheet)
+  assert.equal(merged.added, 1)
+  assert.equal(merged.rows.length, 2)
+})
+
+test('cleaner applies remembered merges and custom names, and lists merges to remember', () => {
+  const text = ['Session campaign,Sessions', 'facebook-ads,100', 'fb-ads,20', 'brand,5'].join('\n')
+  const plain = cleanReport(text, '-')
+  assert.equal(plain.groups.filter((g) => g.split).length, 0)
+  const r = cleanReport(text, '-', { 'fb-ads': 'facebook-ads' })
+  const g = r.groups[0]
+  assert.equal(g.canonical, 'facebook-ads')
+  assert.equal(g.split, true)
+  assert.deepEqual(g.totals, [120])
+  assert.equal(g.variants.find((v) => v.raw === 'fb-ads').remembered, true)
+  const named = applyNames(r, { 'facebook-ads': 'meta-ads' })
+  assert.equal(named.groups[0].canonical, 'meta-ads')
+  assert.deepEqual(rememberable(named), { 'facebook-ads': 'meta-ads', 'fb-ads': 'meta-ads' })
+  assert.match(mappingTsv(named), /fb-ads\tmeta-ads/)
 })

@@ -2,6 +2,7 @@ import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
+import { UtmToolkitNav } from '@/components/lab/UtmToolkitNav'
 import { UtmChecker } from '@/components/lab/UtmChecker'
 import { FaqSection } from '@/components/sections/FaqSection'
 
@@ -75,6 +76,7 @@ export default function UtmLinkCheckerPage() {
       <LabToolSchema slug="utm-link-checker" path="/lab/utm-link-checker" />
 
       <main className="bg-ds-bg min-h-screen">
+        <UtmToolkitNav current="check" />
         <section className="border-ds-border border-b px-6 py-8 sm:py-12">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-ds-accent mb-4 font-mono text-sm">UTM LINK CHECKER</p>

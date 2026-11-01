@@ -32,6 +32,9 @@ import {
   type UtmRules,
 } from '@/lib/lab/utmRules'
 import { useUrlSync } from './useUrlSync'
+import { KEYS, readStored, writeStored } from './storage'
+import { WorkspaceBackup, type RestoreSummary } from './WorkspaceBackup'
+import { buildWorkspace, mergeRows, type Workspace } from '@/lib/lab/workspace'
 import { UtmRulesPanel } from './UtmRulesPanel'
 import { AdValues } from './AdValues'
 import { ShareLinkButton } from './ShareLinkButton'
@@ -42,28 +45,11 @@ import { ChannelNote } from './ChannelNote'
 import { AdsSuffixButton } from './AdsSuffixButton'
 
 const INITIAL: UtmFields = { url: '', source: '', medium: '', campaign: '', term: '', content: '' }
-const SHEET_KEY = 'devstash-utm-sheet'
-const RECENT_KEY = 'devstash-utm-recent'
-const PRESETS_KEY = 'devstash-utm-presets'
-const RULES_KEY = 'devstash-utm-rules'
-const OWNER_KEY = 'devstash-utm-owner'
-
-function readStored<T>(key: string, fallback: T): T {
-  try {
-    const parsed: unknown = JSON.parse(window.localStorage.getItem(key) ?? 'null')
-    return (parsed as T) ?? fallback
-  } catch {
-    return fallback
-  }
-}
-
-function writeStored(key: string, value: unknown) {
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value))
-  } catch {
-    // storage blocked: everything still works for this visit
-  }
-}
+const SHEET_KEY = KEYS.sheet
+const RECENT_KEY = KEYS.recent
+const PRESETS_KEY = KEYS.presets
+const RULES_KEY = KEYS.rules
+const OWNER_KEY = KEYS.owner
 
 const chip = (active: boolean) =>
   active
@@ -208,6 +194,12 @@ export function UtmBuilder() {
     })
   }, [mine, channels, locked, rules])
 
+  // Names used before, so a new link reuses the spelling instead of inventing a new one.
+  const campaignNames = useMemo(
+    () => [...new Set(rows.map((r) => r.fields.campaign.trim()).filter(Boolean))].slice(0, 20),
+    [rows]
+  )
+
   const placeholderSets = useMemo(() => {
     const sources = channels.length ? channels.map((c) => c.source) : [fields.source]
     const out: { name: string; items: ReturnType<typeof placeholdersFor> }[] = []
@@ -351,6 +343,42 @@ export function UtmBuilder() {
   function rulesOff() {
     setRules(NO_RULES)
     writeStored(RULES_KEY, '')
+  }
+
+  const buildBackup = (): Workspace =>
+    buildWorkspace(
+      {
+        sheet: rows,
+        presets: mine,
+        rules: locked ? encodeRules(rules) : '',
+        owner,
+        aliases: readStored<Record<string, string>>(KEYS.aliases, {}),
+      },
+      new Date()
+    )
+
+  function restoreBackup(data: Workspace): RestoreSummary {
+    const merged = mergeRows(rows, data.sheet)
+    if (merged.added) updateRows(merged.rows)
+    const known = new Set(mine.map((p) => `${p.label}|${channelKey(p)}`))
+    const newPresets = data.presets.filter((p) => !known.has(`${p.label}|${channelKey(p)}`))
+    if (newPresets.length) {
+      const next = [...mine, ...newPresets]
+      setMine(next)
+      writeStored(PRESETS_KEY, next)
+    }
+    const restoredRules = data.rules ? decodeRules(data.rules) : null
+    if (restoredRules) applyRules(restoredRules)
+    if (data.owner && !owner) updateOwner(data.owner)
+    const stored = readStored<Record<string, string>>(KEYS.aliases, {})
+    const fresh = Object.keys(data.aliases).filter((k) => !(k in stored))
+    if (fresh.length) writeStored(KEYS.aliases, { ...stored, ...data.aliases })
+    return {
+      links: merged.added,
+      channels: newPresets.length,
+      merges: fresh.length,
+      rules: Boolean(restoredRules),
+    }
   }
 
   function updateOwner(value: string) {
@@ -570,10 +598,17 @@ export function UtmBuilder() {
             <Input
               label="Campaign name"
               aria-label="Campaign name"
+              list="utm-campaign-names"
+              autoComplete="off"
               placeholder="spring-sale"
               value={fields.campaign}
               onChange={(e) => update('campaign', e.target.value)}
             />
+            <datalist id="utm-campaign-names">
+              {campaignNames.map((n) => (
+                <option key={n} value={n} />
+              ))}
+            </datalist>
             <button
               type="button"
               className={`${textButton} mt-2`}
@@ -699,6 +734,7 @@ export function UtmBuilder() {
           getLink={rulesLink}
         />
         <UtmImport onAdd={importRows} />
+        <WorkspaceBackup build={buildBackup} onRestore={restoreBackup} />
 
         {rows.length > 0 && (
           <UtmSheet

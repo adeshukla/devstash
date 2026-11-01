@@ -1,0 +1,97 @@
+# Lab strategy: fewer, deeper tools that people return to
+
+Written 2026-11-02 after Adesh asked why the Lab is full of very small tools and what would
+actually bring users to the site. This is research plus a decision. It is judgement, not
+traffic data: no Search Console or keyword-volume data was available (see "What I could not find").
+
+## The honest answer to "why so many small tools?"
+
+Each tool was built to be a separate page with its own search phrase. That is a fair way to
+get indexed, but it has a cost: eight shallow pages, none of them a reason to come back.
+**Decision: no new Lab tools until the existing UTM tools meet the maturity bar below.**
+The three tools added on 2026-11-02 (link checker, QR generator, report cleaner) stay, but
+they are now treated as parts of one product, not as separate toys.
+
+## What the research says
+
+Sources are vendor and agency blogs unless noted, so treat claims as practitioner opinion.
+
+1. **The real pain is naming drift and the damage that is already done.** Inconsistent
+   capitalisation splits one campaign across rows; cleaning history is described as very hard or
+   impossible, and none of the sources describe a feature that merges old values
+   ([Garrett Digital](https://www.garrettdigital.com/blog/utm-parameters-ga4/),
+   [Measure Marketing](https://measuremarketing.pro/blog/utm-mistakes-ga4-attribution),
+   [Terminus](https://www.terminusapp.com/blog/why-is-my-utm-data-wrong-in-ga4-diagnostic/)).
+   Fixes recommended: enforced inputs instead of free text, a shared approved-values list,
+   validation before launch.
+2. **Templates are table stakes, governance is the value.** HubSpot's Google Sheets template is
+   the most-cited free one; one guide says that for larger teams the template matters far less than
+   the governance around it ([Uplifter](https://uplifter.ai/article/utm-spreadsheet-templates),
+   [UTM.io](https://web.utm.io/blog/utm-builder-spreadsheet-template/)).
+3. **Several things are NOT unique:** GA4 channel prediction
+   ([accs-net](https://accs-net.com/channel-group-predictor/), Chrome extensions) and single-link
+   validators ([SourceLoop](https://sourceloop.ai/tools/free-utm-validator/)).
+4. **Gaps I could not find a free tool for:** merging already-split rows in a report (only forum
+   advice to use `LOWER(TRIM())` in Looker Studio), and shareable team naming rules without an
+   account. These are the two things worth building around.
+5. **Free tools earn links when they are genuinely useful, unique and shareable**, mostly through
+   "best free tools" roundups and resource pages; Ahrefs, Moz and HubSpot all run suites of them
+   ([Growth Method](https://growthmethod.com/engineering-as-marketing/),
+   [The Stacc](https://thestacc.com/blog/free-tool-ideas-link-building/)). Links do not arrive by
+   themselves: the sources list outreach to roundups as the mechanism.
+6. **Why people come back to free utilities** (regex101, Squoosh, Excalidraw): no account, no
+   upload, no watermark ([awesome-local-first-tools](https://github.com/toolsfam/awesome-local-first-tools)).
+   I found no hard retention data, so "saved state makes people return" is a reasoned bet, not a fact.
+
+## What this means for devstash.me
+
+- `docs/seo-keywords.md` and the 2026-09 Search Console baseline already say the binding
+  constraint is **zero external backlinks**, not page speed or page count. More pages do not fix
+  that. A tool only helps if (a) it is the best answer for a specific need and (b) someone links to it.
+- Broad queries ("QR code generator", "UTM builder") are owned by large sites. Winnable ground is
+  the specific need: "merge duplicate UTM campaign rows GA4", "UTM naming rules for a team",
+  "WhatsApp link with message".
+- A tool does not keep visitors by existing. What keeps them is **their own work accumulating in
+  it**: saved links, remembered names, remembered clean-up rules. That is the retention plan.
+
+## Maturity bar (a tool earns "mature" when all are true)
+
+1. Solves one real job end to end, with output people can use without another tool.
+2. Remembers things on the device (saved list, names, rules) and can back them up and restore.
+3. Hands work to the sibling tools instead of dead-ending (checker to saved list, cleaner rules).
+4. Handles messy real input (GA4 export quirks, bad links) with plain-language errors.
+5. Verified with real data from a real GA4 export or ad account, not only made-up samples.
+6. Has at least one page that explains the problem (guide or FAQ) that can rank on its own.
+
+Until the UTM tools meet 1-6, no new tools. Candidates are parked in `docs/lab-audit.md`.
+
+## Plan
+
+Done in this pass (2026-11-02):
+
+- One shared workspace: saved links, channels, team rules, owner and remembered merges, with
+  **Back up / Restore** as one file, so data survives a cleared browser and can be shared with a team.
+- Report cleaner: editable clean names and **remembered merges** that apply automatically on the
+  next export. This is the monthly-reporting habit loop.
+- Link checker hands cleaned links to the saved list in one click.
+- One toolkit nav across Build, Check, Clean reports and QR codes.
+- Builder suggests campaign names you used before, so naming stays consistent.
+
+Next (needs Adesh or real data):
+
+1. **Run it on a real GA4 export** and a real Looker Studio report; report which headers fail.
+2. **Search Console after 4-6 weeks:** replace guessed phrases with real queries.
+3. **Outreach (manual, the only thing that earns links):** submit to "best free UTM builder" and
+   "GA4 tools" roundups, answer GA4 "campaign split by case" questions on Reddit and the GA community
+   with the cleaner where it truly helps, post the case studies on dev.to/Hashnode with canonical set.
+4. **Write the guides that can rank on their own:** "Fix GA4 campaign names split by capital letters",
+   "UTM naming convention for a team (with template)". Posts follow `docs/launch-posts.md` rules.
+5. **Decide the older tools** (CSS shapes, illustration generator, AI pipeline): keep, merge or retire.
+   They are not in the UTM product and cost attention. Needs Adesh's call.
+6. Parked: UPI QR (needs current NPCI spec), shareable team rules with a name pattern, ad-variant matrix.
+
+## What I could not find
+
+- Search volume or keyword difficulty for any term (no tool access). Use Keyword Planner or Search Console.
+- Independent retention data for free tools.
+- Whether any free tool already offers shareable team rules; absence in a limited search is not proof.

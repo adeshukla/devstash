@@ -1,10 +1,18 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
 import { copyText } from '@/lib/utils/clipboard'
-import { cleanReport, lookerCase, mappingTsv, mergedTsv } from '@/lib/lab/reportClean'
+import {
+  applyNames,
+  cleanReport,
+  lookerCase,
+  mappingTsv,
+  mergedTsv,
+  rememberable,
+} from '@/lib/lab/reportClean'
+import { KEYS, readStored, writeStored } from './storage'
 import type { Separator } from '@/lib/lab/utm'
 
 // A made-up sample so the tool can be tried without an export. Not real data.
@@ -30,7 +38,23 @@ export function ReportCleaner() {
   const [text, setText] = useState('')
   const [sep, setSep] = useState<Separator>('-')
   const [copied, setCopied] = useState('')
-  const result = useMemo(() => (text.trim() ? cleanReport(text, sep) : null), [text, sep])
+  // Merges remembered from earlier reports, kept on this device.
+  const [saved, setSaved] = useState<Record<string, string>>({})
+  // Clean names the user typed instead of the suggested ones, keyed by the suggestion.
+  const [names, setNames] = useState<Record<string, string>>({})
+  const [note, setNote] = useState('')
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot mount read of localStorage
+    setSaved(readStored<Record<string, string>>(KEYS.aliases, {}))
+  }, [])
+
+  const auto = useMemo(
+    () => (text.trim() ? cleanReport(text, sep, saved) : null),
+    [text, sep, saved]
+  )
+  const result = useMemo(() => (auto ? applyNames(auto, names) : null), [auto, names])
+  const savedCount = Object.keys(saved).length
 
   async function pickFile(file: File | undefined) {
     if (file) setText(await file.text())
@@ -41,7 +65,30 @@ export function ReportCleaner() {
     setTimeout(() => setCopied(''), 2000)
   }
 
-  const split = result?.groups.filter((g) => g.split) ?? []
+  const splitItems =
+    result?.groups
+      .map((g, i) => ({ g, key: auto?.groups[i].canonical ?? g.canonical }))
+      .filter((x) => x.g.split) ?? []
+  const split = splitItems.map((x) => x.g)
+  const appliedMemory =
+    result?.groups.reduce((n, g) => n + g.variants.filter((v) => v.remembered).length, 0) ?? 0
+
+  function remember() {
+    if (!result) return
+    const found = rememberable(result)
+    const next = { ...saved, ...found }
+    setSaved(next)
+    writeStored(KEYS.aliases, next)
+    setNames({})
+    setNote(
+      `Remembered ${Object.keys(found).length} merges. They are applied automatically the next time you paste a report here.`
+    )
+  }
+  function forget() {
+    setSaved({})
+    writeStored(KEYS.aliases, {})
+    setNote('Forgot all remembered merges.')
+  }
   const rest = result?.groups.filter((g) => !g.split) ?? []
   const spellings = split.reduce((n, g) => n + g.variants.length, 0)
   const looker = result ? lookerCase(result) : ''
@@ -123,6 +170,12 @@ export function ReportCleaner() {
               {result.rowCount} rows read, {result.groups.length} after merging
               {result.metricNames.length > 0 && `. Added up: ${result.metricNames.join(', ')}.`}
             </p>
+            {appliedMemory > 0 && (
+              <p className="text-ds-muted mt-1 text-sm">
+                {appliedMemory} {appliedMemory === 1 ? 'spelling was' : 'spellings were'} merged
+                using what you saved from earlier reports.
+              </p>
+            )}
             {result.skippedMetrics.length > 0 && (
               <p className="text-ds-muted mt-1 text-sm">
                 Left out because rates and averages cannot be added:{' '}
@@ -133,15 +186,17 @@ export function ReportCleaner() {
 
           {split.length > 0 && (
             <ul className="flex flex-col gap-3" aria-label="Merged groups">
-              {split.map((g) => (
-                <li
-                  key={g.canonical}
-                  className="border-ds-border bg-ds-surface2 rounded-xl border p-4"
-                >
-                  <p className="text-ds-text font-mono text-sm break-all">
-                    <span className="text-ds-muted font-sans text-xs">Merge into </span>
-                    <strong>{g.canonical}</strong>
-                  </p>
+              {splitItems.map(({ g, key }, gi) => (
+                <li key={key} className="border-ds-border bg-ds-surface2 rounded-xl border p-4">
+                  <label htmlFor={`rc-name-${gi}`} className="text-ds-muted block text-xs">
+                    Merge into (you can rename it)
+                  </label>
+                  <input
+                    id={`rc-name-${gi}`}
+                    value={names[key] ?? g.canonical}
+                    onChange={(e) => setNames((prev) => ({ ...prev, [key]: e.target.value }))}
+                    className="border-ds-border bg-ds-surface text-ds-text focus:border-ds-accent mt-1 w-full rounded-md border px-2 py-1 font-mono text-sm outline-none"
+                  />
                   {result.metricNames.length > 0 && (
                     <p className="text-ds-muted mt-1 text-sm">
                       Total:{' '}
@@ -156,7 +211,12 @@ export function ReportCleaner() {
                         key={v.raw}
                         className="text-ds-muted flex flex-wrap justify-between gap-x-4"
                       >
-                        <span className="font-mono break-all">{v.raw}</span>
+                        <span className="font-mono break-all">
+                          {v.raw}
+                          {v.remembered && (
+                            <span className="text-ds-muted font-sans text-xs"> (remembered)</span>
+                          )}
+                        </span>
                         <span>
                           {v.metrics.length
                             ? v.metrics.map((m) => fmt(m)).join(' · ')
@@ -211,6 +271,37 @@ export function ReportCleaner() {
                 >
                   {copied === 'looker' ? 'Copied ✓' : 'Copy Looker Studio field'}
                 </Button>
+              )}
+            </div>
+            <div className="border-ds-border flex flex-col gap-2 rounded-lg border p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={remember}
+                  disabled={!split.length}
+                >
+                  Remember these merges
+                </Button>
+                {savedCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={forget}
+                    className="text-ds-muted hover:text-ds-error text-xs underline"
+                  >
+                    Forget all {savedCount}
+                  </button>
+                )}
+              </div>
+              <p className="text-ds-muted text-sm">
+                Next month, paste a fresh report and these merges apply on their own. They stay on
+                this device; the builder&apos;s backup includes them.
+              </p>
+              {note && (
+                <p className="text-ds-success text-sm" role="status">
+                  {note}
+                </p>
               )}
             </div>
             <p className="text-ds-muted text-sm">

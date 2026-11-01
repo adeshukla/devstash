@@ -5,6 +5,9 @@ import Link from 'next/link'
 import { Button } from '@/components/ui'
 import { copyText } from '@/lib/utils/clipboard'
 import { analyzeLink, MAX_CHECK_LINKS } from '@/lib/lab/utmCheck'
+import { splitUtm, type SheetRow } from '@/lib/lab/utm'
+import { mergeRows } from '@/lib/lab/workspace'
+import { KEYS, readStored, writeStored } from './storage'
 
 const EXAMPLE =
   'https://example.com/spring?utm_source=Google&utm_medium=cpc&UTM_Campaign=Spring Sale\nhttps://example.com/news?utm_source=newsletter&utm_medium=email&utm_campaign=spring-sale-2026-03'
@@ -16,6 +19,7 @@ const EXAMPLE =
 export function UtmChecker() {
   const [text, setText] = useState('')
   const [copied, setCopied] = useState('')
+  const [added, setAdded] = useState('')
 
   const lines = useMemo(
     () =>
@@ -27,6 +31,34 @@ export function UtmChecker() {
   )
   const results = useMemo(() => lines.slice(0, MAX_CHECK_LINKS).map(analyzeLink), [lines])
   const cleanedAll = results.map((r) => r.cleaned || r.input).filter((_, i) => !results[i].error)
+
+  // Links that carry UTM tags can go to the saved list the builder uses.
+  const addable = results.filter(
+    (r) => !r.error && r.params.some((p) => p.key.toLowerCase().startsWith('utm'))
+  )
+
+  function addToSaved() {
+    const rows: SheetRow[] = []
+    for (const r of addable) {
+      const url = r.cleaned || r.input
+      const split = splitUtm(url)
+      if (!split) continue
+      rows.push({
+        id: crypto.randomUUID(),
+        url,
+        fields: { url: split.base, ...split.fields },
+        createdAt: new Date().toLocaleDateString('sv-SE'),
+        owner: readStored<string>(KEYS.owner, '').trim(),
+        rules: '',
+      })
+    }
+    const merged = mergeRows(readStored<SheetRow[]>(KEYS.sheet, []), rows)
+    writeStored(KEYS.sheet, merged.rows)
+    const skipped = rows.length - merged.added
+    setAdded(
+      `Added ${merged.added} to your saved list${skipped ? ` (${skipped} already there)` : ''}.`
+    )
+  }
 
   async function copy(value: string, id: string) {
     if (!(await copyText(value))) return
@@ -68,6 +100,23 @@ export function UtmChecker() {
 
       {results.length > 0 && (
         <div className="flex flex-col gap-4" aria-live="polite">
+          {addable.length > 0 && (
+            <div className="flex flex-wrap items-center gap-3">
+              <Button type="button" size="sm" variant="outline" onClick={addToSaved}>
+                Add {addable.length === 1 ? 'this link' : `these ${addable.length} links`} to my
+                saved list
+              </Button>
+              {added && (
+                <p className="text-ds-success text-sm" role="status">
+                  {added}{' '}
+                  <Link href="/lab/utm-builder" className="text-ds-accent-strong underline">
+                    Open the builder
+                  </Link>{' '}
+                  for the CSV, QR codes and campaign pack.
+                </p>
+              )}
+            </div>
+          )}
           {results.length > 1 && cleanedAll.length > 0 && (
             <div>
               <Button type="button" size="sm" onClick={() => copy(cleanedAll.join('\n'), 'all')}>

@@ -2,6 +2,8 @@
 
 Paste-ready brief for a fresh session. Read this file first, then CLAUDE.md.
 
+> **Update 2026-11-02: no new Lab tools until the existing UTM tools meet the maturity bar in `docs/lab-strategy.md`.** Adesh asked for fewer, deeper tools that people return to. Mature the UTM toolkit first (real GA4 export tests, guides, outreach list), then decide the older tools.
+
 ## Where things stand
 
 - Branch state: `main` == `dev` == `73fd9f7` (everything below is live on https://devstash.me and on staging).

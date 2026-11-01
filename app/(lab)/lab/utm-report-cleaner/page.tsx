@@ -2,6 +2,7 @@ import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
+import { UtmToolkitNav } from '@/components/lab/UtmToolkitNav'
 import { ReportCleaner } from '@/components/lab/ReportCleaner'
 import { FaqSection } from '@/components/sections/FaqSection'
 
@@ -51,6 +52,7 @@ export default function UtmReportCleanerPage() {
       <LabToolSchema slug="utm-report-cleaner" path="/lab/utm-report-cleaner" />
 
       <main className="bg-ds-bg min-h-screen">
+        <UtmToolkitNav current="clean" />
         <section className="border-ds-border border-b px-6 py-8 sm:py-12">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-ds-accent mb-4 font-mono text-sm">REPORT CLEANER</p>

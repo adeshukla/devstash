@@ -26,6 +26,8 @@ export interface Variant {
   raw: string
   rows: number
   metrics: number[]
+  /** True when a remembered merge, not the automatic rules, put this label here. */
+  remembered?: boolean
 }
 
 export interface Group {
@@ -79,7 +81,12 @@ const identity = (label: string) => label.replace(/[-_.\s]/g, '')
  * each line is one label. Comment lines starting with # (as GA4 writes them)
  * are skipped.
  */
-export function cleanReport(text: string, sep: Separator): CleanResult {
+export function cleanReport(
+  text: string,
+  sep: Separator,
+  /** Merges remembered from earlier reports: original label to clean label. */
+  saved: Record<string, string> = {}
+): CleanResult {
   const table = parseDelimited(
     text
       .replace(/^﻿/, '')
@@ -131,11 +138,17 @@ export function cleanReport(text: string, sep: Separator): CleanResult {
     if (labels.every((l) => !l)) continue
     rowCount++
     const raw = labels.join(' / ')
-    const parts = dimCols.flatMap((c, di) =>
-      labels[di]
-        .split('/')
-        .map((p, pi) => ({ text: p.trim(), source: /source/i.test(dims[di] ?? '') && pi === 0 }))
-    )
+    const remembered = Object.prototype.hasOwnProperty.call(saved, raw)
+    const parts = remembered
+      ? saved[raw]
+          .split('/')
+          .map((p, pi) => ({ text: p.trim(), source: /source/i.test(dims[0] ?? '') && pi === 0 }))
+      : dimCols.flatMap((c, di) =>
+          labels[di].split('/').map((p, pi) => ({
+            text: p.trim(),
+            source: /source/i.test(dims[di] ?? '') && pi === 0,
+          }))
+        )
     const key = parts.map((p) => identity(cleanPart(p.text, p.source, '-'))).join('|')
     const canonical = parts.map((p) => cleanPart(p.text, p.source, sep)).join(' / ')
     const metrics = metricCols.map((c) => toNumber(cells[c] ?? '') ?? 0)
@@ -146,7 +159,7 @@ export function cleanReport(text: string, sep: Separator): CleanResult {
     }
     let v = g.variants.find((x) => x.raw === raw)
     if (!v) {
-      v = { raw, rows: 0, metrics: metrics.map(() => 0) }
+      v = { raw, rows: 0, metrics: metrics.map(() => 0), ...(remembered && { remembered: true }) }
       g.variants.push(v)
     }
     v.rows++
@@ -164,6 +177,25 @@ export function cleanReport(text: string, sep: Separator): CleanResult {
   }
   list.sort((a, b) => Number(b.split) - Number(a.split) || (b.totals[0] ?? 0) - (a.totals[0] ?? 0))
   return { error: '', dims, metricNames, skippedMetrics: skipped, groups: list, rowCount }
+}
+
+/** A copy of the result with some clean labels replaced by names the user typed. Keys are the automatic labels. */
+export function applyNames(r: CleanResult, names: Record<string, string>): CleanResult {
+  return {
+    ...r,
+    groups: r.groups.map((g) => {
+      const custom = names[g.canonical]?.trim()
+      return custom ? { ...g, canonical: custom } : g
+    }),
+  }
+}
+
+/** Original label to clean label, for every split spelling, ready to remember for next time. */
+export function rememberable(r: CleanResult): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const g of r.groups)
+    if (g.split) for (const v of g.variants) if (v.raw !== g.canonical) out[v.raw] = g.canonical
+  return out
 }
 
 const tsvCell = (s: string) => s.replace(/[\t\r\n]/g, ' ')
