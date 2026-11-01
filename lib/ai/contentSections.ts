@@ -1,5 +1,6 @@
 import 'server-only'
 import { renderArticleHtml } from '@/lib/ai/landingPageParts'
+import { iconSvg, pickIcon } from '@/lib/ai/landingGraphics'
 
 /**
  * Turns the pipeline's own humanised article into a varied set of landing-page
@@ -128,6 +129,11 @@ function slugId(s: string, i: number): string {
   return base ? `${base}-${i}` : `section-${i}`
 }
 
+/** Section heading with an icon that matches what the section is about. */
+function heading(g: Group, id: string, n: number): string {
+  return `<div class="ds-head"><span class="ico-badge" aria-hidden="true">${iconSvg(pickIcon(g.heading, n))}</span><h2 id="${id}-h">${escapeAttr(g.heading)}</h2></div>`
+}
+
 // ─── Layouts ─────────────────────────────────────────────────────────────────
 
 function sectionOpen(id: string, cls: string, labelledBy: string): string {
@@ -135,7 +141,7 @@ function sectionOpen(id: string, cls: string, labelledBy: string): string {
 }
 
 /** Prose + a pulled-out list rendered as a side panel. */
-function layoutSplit(g: Group, id: string, alt: boolean): string {
+function layoutSplit(g: Group, id: string, alt: boolean, n: number): string {
   const bullets = extractBullets(g.body)
   const prose = renderArticleHtml(withoutLists(g.body))
   const items = bullets
@@ -145,7 +151,7 @@ function layoutSplit(g: Group, id: string, alt: boolean): string {
 ${sectionOpen(id, `ds-section ds-split${alt ? ' ds-alt' : ''}`, `${id}-h`)}
   <div class="ds-wrap ds-split-grid">
     <div class="ds-split-main">
-      <h2 id="${id}-h">${escapeAttr(g.heading)}</h2>
+      ${heading(g, id, n)}
       ${prose}
     </div>
     ${items ? `<aside class="ds-panel"><p class="ds-panel-label">Key points</p><ul class="ds-check">${items}</ul></aside>` : ''}
@@ -154,7 +160,7 @@ ${sectionOpen(id, `ds-section ds-split${alt ? ' ds-alt' : ''}`, `${id}-h`)}
 }
 
 /** Numbered steps, for groups that are genuinely sequential. */
-function layoutSteps(g: Group, id: string, alt: boolean): string {
+function layoutSteps(g: Group, id: string, alt: boolean, n: number): string {
   const steps = extractOrdered(g.body)
   const prose = renderArticleHtml(withoutLists(g.body))
   const items = steps
@@ -166,7 +172,7 @@ function layoutSteps(g: Group, id: string, alt: boolean): string {
   return `
 ${sectionOpen(id, `ds-section ds-steps${alt ? ' ds-alt' : ''}`, `${id}-h`)}
   <div class="ds-wrap">
-    <h2 id="${id}-h">${escapeAttr(g.heading)}</h2>
+    ${heading(g, id, n)}
     ${prose}
     <ol class="ds-step-list">${items}</ol>
   </div>
@@ -174,16 +180,17 @@ ${sectionOpen(id, `ds-section ds-steps${alt ? ' ds-alt' : ''}`, `${id}-h`)}
 }
 
 /** Bullet-heavy groups become a responsive card grid. */
-function layoutCards(g: Group, id: string, alt: boolean): string {
+function layoutCards(g: Group, id: string, alt: boolean, n: number): string {
   const bullets = extractBullets(g.body)
   const prose = renderArticleHtml(withoutLists(g.body))
   const cards = bullets
-    .map((b) => {
+    .map((b, i) => {
       // "**Label** — rest" becomes a card title plus body.
       const m = b.match(/^\*\*(.+?)\*\*[\s—:-]*(.*)$/)
       const title = m ? m[1] : b.split(/[.:]/)[0].slice(0, 60)
       const rest = m ? m[2] : b.slice(title.length).replace(/^[\s.:—-]+/, '')
       return `<li class="ds-card">
+        <span class="ico-badge" aria-hidden="true">${iconSvg(pickIcon(`${title} ${rest}`, n + i))}</span>
         <h3>${renderArticleHtml(title).replace(/^<p>|<\/p>$/g, '')}</h3>
         ${rest ? `<p>${renderArticleHtml(rest).replace(/^<p>|<\/p>$/g, '')}</p>` : ''}
       </li>`
@@ -192,7 +199,7 @@ function layoutCards(g: Group, id: string, alt: boolean): string {
   return `
 ${sectionOpen(id, `ds-section${alt ? ' ds-alt' : ''}`, `${id}-h`)}
   <div class="ds-wrap">
-    <h2 id="${id}-h">${escapeAttr(g.heading)}</h2>
+    ${heading(g, id, n)}
     ${prose}
     <ul class="ds-card-grid">${cards}</ul>
   </div>
@@ -200,23 +207,23 @@ ${sectionOpen(id, `ds-section${alt ? ' ds-alt' : ''}`, `${id}-h`)}
 }
 
 /** Code-bearing groups get a two-column explain/code treatment. */
-function layoutCode(g: Group, id: string, alt: boolean): string {
+function layoutCode(g: Group, id: string, alt: boolean, n: number): string {
   const body = renderArticleHtml(g.body)
   return `
 ${sectionOpen(id, `ds-section ds-code${alt ? ' ds-alt' : ''}`, `${id}-h`)}
   <div class="ds-wrap">
-    <h2 id="${id}-h">${escapeAttr(g.heading)}</h2>
+    ${heading(g, id, n)}
     <div class="ds-prose">${body}</div>
   </div>
 </section>`
 }
 
 /** Plain prose, kept narrow for readability. */
-function layoutProse(g: Group, id: string, alt: boolean): string {
+function layoutProse(g: Group, id: string, alt: boolean, n: number): string {
   return `
 ${sectionOpen(id, `ds-section${alt ? ' ds-alt' : ''}`, `${id}-h`)}
   <div class="ds-narrow">
-    <h2 id="${id}-h">${escapeAttr(g.heading)}</h2>
+    ${heading(g, id, n)}
     <div class="ds-prose">${renderArticleHtml(g.body)}</div>
   </div>
 </section>`
@@ -232,11 +239,11 @@ function renderGroup(g: Group, index: number): string {
   const bullets = extractBullets(g.body)
   const ordered = extractOrdered(g.body)
 
-  if (hasCode(g.body)) return layoutCode(g, id, alt)
-  if (ordered.length >= 2) return layoutSteps(g, id, alt)
-  if (bullets.length >= 3) return layoutCards(g, id, alt)
-  if (bullets.length >= 1) return layoutSplit(g, id, alt)
-  return layoutProse(g, id, alt)
+  if (hasCode(g.body)) return layoutCode(g, id, alt, index)
+  if (ordered.length >= 2) return layoutSteps(g, id, alt, index)
+  if (bullets.length >= 3) return layoutCards(g, id, alt, index)
+  if (bullets.length >= 1) return layoutSplit(g, id, alt, index)
+  return layoutProse(g, id, alt, index)
 }
 
 /**
@@ -283,6 +290,12 @@ export const CONTENT_SECTIONS_CSS = `
   .ds-section { padding: clamp(3rem,7vw,5.5rem) 1.25rem; }
   .ds-section.ds-alt { background: var(--surface); }
   .ds-section > * { min-width: 0; }
+  .ds-head { display: flex; align-items: center; gap: .9rem; margin: 0 0 1rem; }
+  .ds-head h2 { margin: 0; }
+  .ds-card .ico-badge { margin-bottom: .85rem; }
+  .ds-step-list { position: relative; }
+  .ds-step-list::before { content: ""; position: absolute; left: 2.25rem; top: 2.4rem; bottom: 2.4rem; width: 2px; background: var(--border); }
+  .ds-step { position: relative; }
   .ds-lead .ds-prose > p:first-child { font-size: clamp(1.0625rem,2.2vw,1.25rem); color: var(--text); }
 
   /* Visual hierarchy: one clear step between each level, tighter leading as

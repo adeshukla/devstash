@@ -3,7 +3,20 @@
 // Shared types for the /lab/ai-content-pipeline demo tool: a 3-step Groq LLM
 // chain (draft → humanize → SEO frontmatter) exposed via app/api/ai-pipeline.
 
-export type PipelineTone = 'technical' | 'conversational' | 'tutorial'
+export type PipelineTone =
+  'technical' | 'conversational' | 'tutorial' | 'professional' | 'friendly' | 'persuasive'
+
+/** What the pipeline writes: see lib/ai/contentTypeOptions.ts. */
+export type PipelineContentType =
+  | 'technical'
+  | 'marketing'
+  | 'service'
+  | 'sales'
+  | 'product'
+  | 'company'
+  | 'explainer'
+  | 'case-study'
+  | 'event'
 
 /** Hand-built page designs in lib/ai/landingDesigns.ts. */
 export type PageDesignId = 'editorial' | 'split' | 'bento' | 'minimal' | 'bold'
@@ -30,6 +43,7 @@ export interface PipelineRequest {
   topic: string
   keywords: string[]
   tone: PipelineTone
+  contentType?: PipelineContentType
   targetLength: number
   userApiKey?: string
   // Explicit opt-in (a checkbox in the UI, unchecked by default) for a 4th
@@ -90,6 +104,7 @@ export interface PipelineResponse {
   htmlVariants: HtmlVariant[]
   // Which variant htmlPage is.
   htmlDesign: PageDesignId | null
+  contentType: PipelineContentType
   metrics: PipelineMetrics
   remainingFreeRuns: number
   usedByok: boolean

@@ -142,7 +142,17 @@ const FAQ = [
 
 export default async function LabPage() {
   const projects = await getAllProjects()
-  const tools: LabTool[] = TOOLS.map((demo) => {
+  const toolkitSlugs = [
+    'utm-builder',
+    'utm-link-checker',
+    'utm-report-cleaner',
+    'qr-code-generator',
+  ]
+  const ordered = [
+    ...toolkitSlugs.map((s) => TOOLS.find((d) => d.slug === s)!),
+    ...TOOLS.filter((d) => !toolkitSlugs.includes(d.slug)),
+  ]
+  const tools: LabTool[] = ordered.map((demo) => {
     const project = projects.find((p) => p.slug === demo.slug)
     return {
       slug: demo.slug,
@@ -156,11 +166,14 @@ export default async function LabPage() {
     }
   })
 
+  const toolkitTools = tools.filter((x) => toolkitSlugs.includes(x.slug))
+  const otherTools = tools.filter((x) => !toolkitSlugs.includes(x.slug))
+
   return (
     <div>
       <JsonLd
         data={buildItemListSchema(
-          [FLAGSHIP, ...TOOLS].map((d) => ({ name: d.name, url: `/lab/${d.slug}` }))
+          [...ordered, FLAGSHIP].map((d) => ({ name: d.name, url: `/lab/${d.slug}` }))
         )}
       />
       {/* Breadcrumb emits its own BreadcrumbList JSON-LD */}
@@ -188,9 +201,20 @@ export default async function LabPage() {
         </div>
       </section>
 
-      {/* The flagship is a build, not a card in a grid — it gets the space to
-          show its own three-stage shape. */}
-      <section className="py-16">
+      <section className="py-12 pb-16">
+        <div className="max-w-site mx-auto px-6">
+          <h2 className="text-ds-text mb-2 text-2xl font-bold tracking-tight">The UTM toolkit</h2>
+          <p className="text-ds-muted mb-8 max-w-[64ch]">
+            Four tools that work as one: they share your saved links, team rules and remembered
+            clean-ups, and back up to a single file. Build links, check old ones, clean split
+            reports, make QR codes.
+          </p>
+          <LabTools tools={toolkitTools} />
+        </div>
+      </section>
+
+      {/* The AI pipeline is an experiment now: the UTM toolkit leads the page. */}
+      <section className="border-ds-border border-t py-16">
         <div className="max-w-site mx-auto px-6">
           <CardTilt>
             <Link
@@ -200,7 +224,7 @@ export default async function LabPage() {
               <article className="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-14">
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-3">
-                    <Badge variant="purple">Flagship</Badge>
+                    <Badge variant="purple">Experiment</Badge>
                     <span className="text-ds-muted text-xs">Runs server-side on every request</span>
                   </div>
                   <h2 className="text-ds-text group-hover:text-ds-accent text-2xl font-bold tracking-tight transition-colors sm:text-3xl">
@@ -232,11 +256,11 @@ export default async function LabPage() {
 
       <section className="py-4 pb-16">
         <div className="max-w-site mx-auto px-6">
-          <h2 className="text-ds-text mb-2 text-2xl font-bold tracking-tight">Tools</h2>
+          <h2 className="text-ds-text mb-2 text-2xl font-bold tracking-tight">More tools</h2>
           <p className="text-ds-muted mb-8 max-w-[60ch]">
-            Filter by type, open any card for what is inside it, or jump straight in.
+            Smaller builds that stand on their own. Open any card for what is inside it.
           </p>
-          <LabTools tools={tools} />
+          <LabTools tools={otherTools} />
         </div>
       </section>
 

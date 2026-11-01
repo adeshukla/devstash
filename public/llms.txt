@@ -32,7 +32,7 @@ All run in the browser, free, no signup.
 - [QR Code Generator](https://devstash.me/lab/qr-code-generator): static QR codes for a website, WhatsApp chat, Wi-Fi, contact card, email, phone or text; never expire
 - [CSS Shapes & Animation Playground](https://devstash.me/lab/css-shapes-playground): shapes, gradients and shadows that copy out as CSS or Tailwind classes
 - [Illustration Generator](https://devstash.me/lab/illustration-generator): animated SVG illustration from a text description
-- [AI Content Pipeline](https://devstash.me/lab/ai-content-pipeline): live 3-step LLM chain that scaffolds a draft and marks what it will not invent
+- [AI Content Pipeline](https://devstash.me/lab/ai-content-pipeline): live LLM chain that drafts marketing, service, sales, product, company, explainer, case-study, event or technical content and marks what it will not invent
 
 ## Posts that answer specific questions
 

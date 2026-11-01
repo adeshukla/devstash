@@ -13,19 +13,19 @@ interface TourSlide {
 const TOUR_SLIDES: TourSlide[] = [
   {
     title: 'Enter a topic',
-    body: 'Give it a topic, a few target keywords, a tone, and a target length — same inputs a real content brief would have.',
+    body: 'Choose what to write (marketing page, service offering, sales page and more), then give it a topic, a few keywords, a tone and a length — the inputs a real content brief would have.',
   },
   {
     title: 'Step 1 — Draft generation',
-    body: 'The first LLM call writes a raw draft blog post from your inputs, with real code examples where relevant.',
+    body: 'The first LLM call writes an honest first draft of the type you chose, with [TODO] markers where only the real company knows the facts.',
   },
   {
     title: 'Step 2 — Humanizing pass',
-    body: 'A second call rewrites the draft to strip "AI-tell" phrases (“in conclusion”, “leverage”, “delve into”…) and sound like a real developer wrote it.',
+    body: 'A second call rewrites the draft to strip "AI-tell" phrases (“in conclusion”, “leverage”, “delve into”…) and read plainly. It never invents voice, opinions or facts.',
   },
   {
     title: 'Step 3 — SEO frontmatter',
-    body: 'A third call generates title, slug, description, category, tags, and reading time as JSON — the same frontmatter shape this blog actually uses.',
+    body: 'A third call generates title, slug, description, category, tags, and reading time as JSON — ready to copy into your site.',
   },
   {
     title: 'Live metrics',

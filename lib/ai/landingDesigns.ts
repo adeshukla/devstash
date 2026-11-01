@@ -11,7 +11,14 @@ import {
   buildContentSections,
   CONTENT_SECTIONS_CSS,
 } from '@/lib/ai/contentSections'
-import type { DemoFrontmatter, PageCopy, PageDesignId } from '@/types/aiPipeline'
+import { TYPE_PROMPTS } from '@/lib/ai/contentTypes'
+import { GRAPHICS_CSS, heroArt, iconSvg, pickIcons, ringsSvg } from '@/lib/ai/landingGraphics'
+import type {
+  DemoFrontmatter,
+  PageCopy,
+  PageDesignId,
+  PipelineContentType,
+} from '@/types/aiPipeline'
 
 /**
  * Hand-built page designs for the pipeline's landing page.
@@ -48,6 +55,19 @@ interface RenderContext {
   copy: PageCopy
   fm: DemoFrontmatter
   outline: { id: string; heading: string }[]
+  /** What kind of page this is. Only a technical article reads as a dated blog post. */
+  kind: { label: string; article: boolean }
+  /** Hero illustration for this kind of page (inline SVG). */
+  art: string
+  /** One icon per key point, already rendered. */
+  icons: string[]
+  /** Soft background rings for the closing section. */
+  rings: string
+}
+
+/** "Category · 6 min read" for an article, the page type for everything else. */
+function eyebrowText({ fm, kind }: RenderContext): string {
+  return kind.article ? `${fm.category} · ${fm.readingTime} min read` : kind.label
 }
 
 interface Design {
@@ -121,7 +141,15 @@ const editorial: Design = {
   .ed-meta { display: flex; flex-wrap: wrap; gap: .4rem 1.25rem; margin: 0 0 2rem; padding: 0 0 1rem;
     list-style: none; border-bottom: 1px solid var(--border);
     font: 600 .75rem/1.5 ${MONO}; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
-  .ed-hero h1 { font-size: clamp(2.25rem,6.6vw,4.4rem); line-height: 1.03; font-weight: 600; letter-spacing: -.025em; margin: 0; }
+  .ed-grid { display: grid; gap: clamp(2rem,5vw,3.5rem); grid-template-columns: 1fr; align-items: center; }
+  @media (min-width: 900px) { .ed-grid { grid-template-columns: minmax(0,1.25fr) minmax(0,.75fr); } }
+  .ed-art { min-width: 0; max-width: 30rem; width: 100%; }
+  .ed-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; }
+  .ed-top .ed-num { margin: 0; }
+  .ed-ico { color: var(--accent); }
+  .ed-close { position: relative; overflow: hidden; }
+  .ed-close > :not(.rings) { position: relative; }
+  .ed-hero h1 { font-size: clamp(2.25rem,5.6vw,4rem); line-height: 1.03; font-weight: 600; letter-spacing: -.025em; margin: 0; }
   .ed-lead { font-size: clamp(1.125rem,2.4vw,1.4rem); line-height: 1.55; font-style: italic; color: var(--muted); max-width: 38ch; margin: 1.5rem 0 2rem; }
   .ed-points { list-style: none; margin: 0 auto; padding: 0; max-width: 1080px; display: grid; grid-template-columns: 1fr; border-top: 2px solid var(--text); }
   .ed-point { padding: 1.75rem 0; border-bottom: 1px solid var(--border); min-width: 0; }
@@ -136,23 +164,27 @@ const editorial: Design = {
   .ed-close { text-align: center; padding: clamp(4rem,10vw,7rem) 1.25rem; border-top: 1px solid var(--border); }
   .ed-close h2 { font-size: clamp(1.9rem,5vw,3rem); font-weight: 600; font-style: italic; max-width: 22ch; margin: 0 auto 1rem; }
   .ed-close p { color: var(--muted); max-width: 50ch; margin: 0 auto 2rem; }`,
-  hero: ({ copy, fm }) => `
+  hero: ({ copy, fm, kind, art }) => `
 <section class="ed-hero">
-  <div class="ds-narrow">
-    <ul class="ed-meta"><li>${e(fm.category)}</li><li>${fm.readingTime} min read</li></ul>
-    <h1>${e(copy.heroTitle)}</h1>
-    <p class="ed-lead">${e(copy.heroLead)}</p>
-    <a class="btn" href="#contact">${e(copy.cta)}</a>
+  <div class="ds-wrap ed-grid">
+    <div>
+      <ul class="ed-meta"><li>${e(kind.article ? fm.category : kind.label)}</li>${kind.article ? `<li>${fm.readingTime} min read</li>` : ''}</ul>
+      <h1>${e(copy.heroTitle)}</h1>
+      <p class="ed-lead">${e(copy.heroLead)}</p>
+      <a class="btn" href="#contact">${e(copy.cta)}</a>
+    </div>
+    <div class="ed-art" aria-hidden="true">${art}</div>
   </div>
 </section>`,
-  features: ({ copy }) => `
+  features: ({ copy, icons }) => `
 <section class="ds-section reveal" aria-label="Key points">
   <ol class="ed-points">
-    ${copy.features.map((f, i) => `<li class="ed-point"><span class="ed-num">${pad2(i + 1)}</span><h3>${e(f.title)}</h3><p>${e(f.body)}</p></li>`).join('')}
+    ${copy.features.map((f, i) => `<li class="ed-point"><div class="ed-top"><span class="ed-num">${pad2(i + 1)}</span><span class="ed-ico">${icons[i]}</span></div><h3>${e(f.title)}</h3><p>${e(f.body)}</p></li>`).join('')}
   </ol>
 </section>`,
-  closing: ({ copy }) => `
+  closing: ({ copy, rings }) => `
 <section class="ed-close reveal">
+  ${rings}
   <h2>${e(copy.closingTitle)}</h2>
   ${copy.closingLead ? `<p>${e(copy.closingLead)}</p>` : ''}
   <a class="btn" href="#contact">${e(copy.cta)}</a>
@@ -201,6 +233,10 @@ const split: Design = {
   .sp-lead { font-size: clamp(1.05rem,2vw,1.2rem); color: var(--muted); max-width: 52ch; margin: 1.25rem 0 1.75rem; }
   .sp-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; }
   .sp-actions .tags { margin: 0; }
+  .sp-side { display: grid; gap: 1.25rem; min-width: 0; }
+  .sp-art { max-width: 26rem; width: 100%; margin: 0 auto; }
+  .sp-band { position: relative; overflow: hidden; }
+  .sp-band > :not(.rings) { position: relative; }
   .sp-toc { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 1.25rem; min-width: 0;
     box-shadow: 0 30px 60px -40px rgba(0, 0, 0, .45); }
   .sp-toc-h { margin: 0 0 .75rem .5rem; font: 600 .72rem ${MONO}; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
@@ -221,11 +257,13 @@ const split: Design = {
   @media (min-width: 760px) { .sp-band { grid-template-columns: minmax(0,1fr) auto; } }
   .sp-band h2 { margin: 0 0 .35rem; }
   .sp-band p { margin: 0; color: var(--muted); }`,
-  hero: ({ copy, fm, outline }) => `
+  hero: (ctx) => {
+    const { copy, fm, outline, art } = ctx
+    return `
 <section class="sp-hero">
   <div class="ds-wrap sp-grid">
     <div>
-      <p class="eyebrow">${e(fm.category)} · ${fm.readingTime} min read</p>
+      <p class="eyebrow">${e(eyebrowText(ctx))}</p>
       <h1>${e(copy.heroTitle)}</h1>
       <p class="sp-lead">${e(copy.heroLead)}</p>
       <div class="sp-actions">
@@ -233,27 +271,33 @@ const split: Design = {
         <ul class="tags">${tags(fm)}</ul>
       </div>
     </div>
-    ${
-      outline.length
-        ? `<nav class="sp-toc" aria-label="In this page"><p class="sp-toc-h">In this page</p><ol>${outline
-            .slice(0, 6)
-            .map(
-              (o, i) => `<li><a href="#${o.id}"><span>${pad2(i + 1)}</span>${e(o.heading)}</a></li>`
-            )
-            .join('')}</ol></nav>`
-        : ''
-    }
+    <div class="sp-side">
+      <div class="sp-art" aria-hidden="true">${art}</div>
+      ${
+        outline.length
+          ? `<nav class="sp-toc" aria-label="In this page"><p class="sp-toc-h">In this page</p><ol>${outline
+              .slice(0, 6)
+              .map(
+                (o, i) =>
+                  `<li><a href="#${o.id}"><span>${pad2(i + 1)}</span>${e(o.heading)}</a></li>`
+              )
+              .join('')}</ol></nav>`
+          : ''
+      }
+    </div>
   </div>
-</section>`,
-  features: ({ copy }) => `
+</section>`
+  },
+  features: ({ copy, icons }) => `
 <section class="ds-section reveal" aria-label="Key points">
   <ul class="ds-wrap sp-cards">
-    ${copy.features.map((f, i) => `<li class="sp-card"><span class="sp-icon" aria-hidden="true">${pad2(i + 1)}</span><h3>${e(f.title)}</h3><p>${e(f.body)}</p></li>`).join('')}
+    ${copy.features.map((f, i) => `<li class="sp-card"><span class="sp-icon" aria-hidden="true">${icons[i]}</span><h3>${e(f.title)}</h3><p>${e(f.body)}</p></li>`).join('')}
   </ul>
 </section>`,
-  closing: ({ copy }) => `
+  closing: ({ copy, rings }) => `
 <section class="ds-section reveal">
   <div class="ds-wrap sp-band">
+    ${rings}
     <div><h2>${e(copy.closingTitle)}</h2>${copy.closingLead ? `<p>${e(copy.closingLead)}</p>` : ''}</div>
     <a class="btn" href="#contact">${e(copy.cta)}</a>
   </div>
@@ -306,6 +350,12 @@ const bento: Design = {
     display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
   .bn-tile h3 { margin: 0; font-size: 1.15rem; }
   .bn-tile p { margin: 0; color: var(--muted); font-size: .97rem; }
+  .bn-art { grid-column: 1 / -1; align-items: center; background: var(--surface-2); padding: clamp(1rem,3vw,2rem); }
+  .bn-art .hero-art { max-width: 26rem; margin: 0 auto; max-height: 15rem; }
+  .bn-tile .ico-badge { margin-bottom: .35rem; }
+  .bn-wide .ico-badge { background: color-mix(in srgb, var(--on-accent) 18%, transparent); color: var(--on-accent); margin-bottom: auto; }
+  .bn-close { position: relative; overflow: hidden; }
+  .bn-close > :not(.rings) { position: relative; }
   .bn-wide { background: var(--accent); border-color: transparent; justify-content: flex-end; min-height: 240px; }
   .bn-wide h3 { color: var(--on-accent); font-size: clamp(1.4rem,3vw,2rem); line-height: 1.15; }
   .bn-wide p { color: var(--on-accent); opacity: .88; font-size: 1.05rem; }
@@ -314,31 +364,36 @@ const bento: Design = {
   .bn-close { text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 28px; padding: clamp(2rem,6vw,3.5rem) 1.5rem; }
   .bn-close h2 { margin: 0 auto .5rem; max-width: 24ch; }
   .bn-close p { color: var(--muted); max-width: 52ch; margin: 0 auto 1.5rem; }`,
-  hero: ({ copy, fm }) => `
+  hero: ({ copy, fm, kind }) => `
 <section class="bn-hero">
   <div class="ds-narrow">
-    <p class="eyebrow">${e(fm.category)}</p>
+    <p class="eyebrow">${e(kind.article ? fm.category : kind.label)}</p>
     <h1>${e(copy.heroTitle)}</h1>
     <p class="bn-lead">${e(copy.heroLead)}</p>
     <a class="btn" href="#contact">${e(copy.cta)}</a>
     <ul class="tags">${tags(fm)}</ul>
   </div>
 </section>`,
-  features: ({ copy, fm, outline }) => {
+  features: ({ copy, fm, outline, kind, art, icons }) => {
     const [first, ...rest] = copy.features
+    const firstStat = kind.article
+      ? `<span class="bn-stat">${fm.readingTime} min</span><span class="bn-label">to read the whole thing</span>`
+      : `<span class="bn-stat">${copy.features.length}</span><span class="bn-label">key points above</span>`
     return `
 <section class="ds-section reveal" aria-label="Key points">
   <ul class="ds-wrap bn-grid">
-    <li class="bn-tile bn-wide"><h3>${e(first.title)}</h3><p>${e(first.body)}</p></li>
-    ${rest.map((f) => `<li class="bn-tile"><h3>${e(f.title)}</h3><p>${e(f.body)}</p></li>`).join('')}
-    <li class="bn-tile"><span class="bn-stat">${fm.readingTime} min</span><span class="bn-label">to read the whole thing</span></li>
+    <li class="bn-tile bn-art" aria-hidden="true">${art}</li>
+    <li class="bn-tile bn-wide"><span class="ico-badge" aria-hidden="true">${icons[0]}</span><h3>${e(first.title)}</h3><p>${e(first.body)}</p></li>
+    ${rest.map((f, i) => `<li class="bn-tile"><span class="ico-badge" aria-hidden="true">${icons[i + 1]}</span><h3>${e(f.title)}</h3><p>${e(f.body)}</p></li>`).join('')}
+    <li class="bn-tile">${firstStat}</li>
     <li class="bn-tile"><span class="bn-stat">${outline.length || 1}</span><span class="bn-label">${outline.length === 1 ? 'section' : 'sections'} below</span></li>
   </ul>
 </section>`
   },
-  closing: ({ copy }) => `
+  closing: ({ copy, rings }) => `
 <section class="ds-section reveal">
   <div class="ds-wrap bn-close">
+    ${rings}
     <h2>${e(copy.closingTitle)}</h2>
     ${copy.closingLead ? `<p>${e(copy.closingLead)}</p>` : ''}
     <a class="btn" href="#contact">${e(copy.cta)}</a>
@@ -392,23 +447,31 @@ const minimal: Design = {
   .mn-row:last-child { border-bottom: 1px solid var(--border); }
   @media (min-width: 760px) { .mn-row { grid-template-columns: 3rem minmax(0,1fr) minmax(0,1.6fr); align-items: baseline; } }
   .mn-n { font: 500 .85rem ${MONO}; color: var(--muted); }
-  .mn-row h3 { margin: 0; font-size: 1.25rem; }
+  .mn-grid { display: grid; gap: clamp(2rem,5vw,3.5rem); grid-template-columns: 1fr; align-items: center; }
+  @media (min-width: 960px) { .mn-grid { grid-template-columns: minmax(0,1.3fr) minmax(0,.7fr); } }
+  .mn-art { min-width: 0; max-width: 28rem; width: 100%; }
+  .mn-ico { color: var(--muted); }
+  .mn-ico .gi { width: 1.15rem; height: 1.15rem; }
+  .mn-row h3 { display: flex; align-items: center; gap: .6rem; margin: 0; font-size: 1.25rem; }
   .mn-row p { margin: 0; color: var(--muted); }
   .mn-close { padding: clamp(4rem,10vw,7rem) 1.25rem; }
   .mn-close h2 { font-size: clamp(1.9rem,5.5vw,3.25rem); letter-spacing: -.035em; max-width: 20ch; margin: 0 0 1.5rem; }`,
-  hero: ({ copy, fm }) => `
+  hero: ({ copy, fm, kind, art }) => `
 <section class="mn-hero">
-  <div class="ds-wrap">
-    <p class="eyebrow">${e(fm.category)} — ${fm.readingTime} min</p>
-    <h1>${e(copy.heroTitle)}</h1>
-    <p class="mn-lead">${e(copy.heroLead)}</p>
-    <a class="mn-link" href="#contact">${e(copy.cta)} <span aria-hidden="true">→</span></a>
+  <div class="ds-wrap mn-grid">
+    <div>
+      <p class="eyebrow">${e(kind.article ? `${fm.category} — ${fm.readingTime} min` : kind.label)}</p>
+      <h1>${e(copy.heroTitle)}</h1>
+      <p class="mn-lead">${e(copy.heroLead)}</p>
+      <a class="mn-link" href="#contact">${e(copy.cta)} <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="mn-art" aria-hidden="true">${art}</div>
   </div>
 </section>`,
-  features: ({ copy }) => `
+  features: ({ copy, icons }) => `
 <section class="ds-section reveal" aria-label="Key points">
   <ol class="ds-wrap mn-list">
-    ${copy.features.map((f, i) => `<li class="mn-row"><span class="mn-n">${pad2(i + 1)}</span><h3>${e(f.title)}</h3><p>${e(f.body)}</p></li>`).join('')}
+    ${copy.features.map((f, i) => `<li class="mn-row"><span class="mn-n">${pad2(i + 1)}</span><h3><span class="mn-ico" aria-hidden="true">${icons[i]}</span>${e(f.title)}</h3><p>${e(f.body)}</p></li>`).join('')}
   </ol>
 </section>`,
   closing: ({ copy }) => `
@@ -459,6 +522,19 @@ const bold: Design = {
   .bd-hero .eyebrow { color: var(--on-hero-muted); }
   .bd-hero h1 { color: var(--on-hero); font-size: clamp(2.4rem,7.6vw,5.2rem); font-weight: 850; line-height: 1; letter-spacing: -.045em; max-width: 17ch; margin: 0; }
   .bd-lead { color: var(--on-hero-muted); font-size: clamp(1.1rem,2.3vw,1.35rem); max-width: 48ch; margin: 1.5rem 0 2.25rem; }
+  .bd-grid { display: grid; gap: clamp(2rem,5vw,3.5rem); grid-template-columns: 1fr; align-items: center; }
+  @media (min-width: 900px) { .bd-grid { grid-template-columns: minmax(0,1.25fr) minmax(0,.75fr); } }
+  /* The illustration sits on the solid hero, so it is re-coloured from the hero's own colours. */
+  .bd-art { min-width: 0; max-width: 28rem; width: 100%;
+    --accent: var(--on-hero); --on-accent: var(--hero-bg); --accent-2: var(--on-hero); --bg: var(--hero-bg);
+    --surface: color-mix(in srgb, var(--on-hero) 14%, transparent);
+    --surface-2: color-mix(in srgb, var(--on-hero) 22%, transparent);
+    --border: color-mix(in srgb, var(--on-hero) 34%, transparent);
+    --text: var(--on-hero); }
+  .bd-ico { color: var(--accent); margin-bottom: .6rem; }
+  .bd-close { position: relative; overflow: hidden; }
+  .bd-close > :not(.rings) { position: relative; }
+  .bd-close .rings { color: var(--on-hero); }
   .bd-hero .btn { background: var(--on-hero); color: var(--hero-bg); }
   .bd-hero .tags { margin-top: 1.75rem; }
   .bd-hero .tag { color: var(--on-hero-muted); border-color: color-mix(in srgb, var(--on-hero) 35%, transparent); }
@@ -472,24 +548,31 @@ const bold: Design = {
   .bd-close h2 { color: var(--on-hero); font-size: clamp(1.9rem,5.5vw,3.25rem); max-width: 22ch; margin: 0 auto 1rem; }
   .bd-close p { color: var(--on-hero-muted); max-width: 50ch; margin: 0 auto 2rem; }
   .bd-close .btn { background: var(--on-hero); color: var(--hero-bg); }`,
-  hero: ({ copy, fm }) => `
+  hero: (ctx) => {
+    const { copy, fm, art } = ctx
+    return `
 <section class="bd-hero">
-  <div class="ds-wrap">
-    <p class="eyebrow">${e(fm.category)} · ${fm.readingTime} min read</p>
-    <h1>${e(copy.heroTitle)}</h1>
-    <p class="bd-lead">${e(copy.heroLead)}</p>
-    <a class="btn" href="#contact">${e(copy.cta)}</a>
-    <ul class="tags">${tags(fm)}</ul>
+  <div class="ds-wrap bd-grid">
+    <div>
+      <p class="eyebrow">${e(eyebrowText(ctx))}</p>
+      <h1>${e(copy.heroTitle)}</h1>
+      <p class="bd-lead">${e(copy.heroLead)}</p>
+      <a class="btn" href="#contact">${e(copy.cta)}</a>
+      <ul class="tags">${tags(fm)}</ul>
+    </div>
+    <div class="bd-art" aria-hidden="true">${art}</div>
   </div>
-</section>`,
-  features: ({ copy }) => `
+</section>`
+  },
+  features: ({ copy, icons }) => `
 <section class="ds-section reveal" aria-label="Key points">
   <ol class="ds-wrap bd-cols">
-    ${copy.features.map((f, i) => `<li class="bd-col"><span class="bd-big" aria-hidden="true">${pad2(i + 1)}</span><h3>${e(f.title)}</h3><p>${e(f.body)}</p></li>`).join('')}
+    ${copy.features.map((f, i) => `<li class="bd-col"><span class="bd-big" aria-hidden="true">${pad2(i + 1)}</span><span class="bd-ico ico-badge" aria-hidden="true">${icons[i]}</span><h3>${e(f.title)}</h3><p>${e(f.body)}</p></li>`).join('')}
   </ol>
 </section>`,
-  closing: ({ copy }) => `
+  closing: ({ copy, rings }) => `
 <section class="bd-close reveal">
+  ${rings}
   <h2>${e(copy.closingTitle)}</h2>
   ${copy.closingLead ? `<p>${e(copy.closingLead)}</p>` : ''}
   <a class="btn" href="#contact">${e(copy.cta)}</a>
@@ -570,34 +653,50 @@ const BASE_CSS = `
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
-function head(fm: DemoFrontmatter, copy: PageCopy, d: Design): string {
+function head(
+  fm: DemoFrontmatter,
+  copy: PageCopy,
+  d: Design,
+  kind: { label: string; article: boolean }
+): string {
+  // The blog's own address and author only make sense for a technical article;
+  // a company page generated here belongs to whoever downloads it.
   const canonical = `https://devstash.me/blog/${fm.slug}`
-  const jsonLd = JSON.stringify({
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: fm.title,
-    description: fm.description,
-    keywords: fm.tags.join(', '),
-    articleSection: fm.category,
-    author: { '@type': 'Person', name: 'Adesh Shukla', url: 'https://devstash.me' },
-    mainEntityOfPage: canonical,
-  }).replace(/</g, '\\u003c')
+  const jsonLd = JSON.stringify(
+    kind.article
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'BlogPosting',
+          headline: fm.title,
+          description: fm.description,
+          keywords: fm.tags.join(', '),
+          articleSection: fm.category,
+          author: { '@type': 'Person', name: 'Adesh Shukla', url: 'https://devstash.me' },
+          mainEntityOfPage: canonical,
+        }
+      : {
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: fm.title,
+          description: fm.description,
+          keywords: fm.tags.join(', '),
+        }
+  ).replace(/</g, '\\u003c')
   return `<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${e(fm.title)}</title>
 <meta name="description" content="${e(fm.description)}">
 <meta name="keywords" content="${e(fm.tags.join(', '))}">
-<meta name="author" content="Adesh Shukla">
+${kind.article ? '<meta name="author" content="Adesh Shukla">' : ''}
 <meta name="robots" content="index,follow">
 <meta name="theme-color" content="${d.light.bg}">
-<link rel="canonical" href="${e(canonical)}">
-<meta property="og:type" content="article">
+${kind.article ? `<link rel="canonical" href="${e(canonical)}">` : ''}
+<meta property="og:type" content="${kind.article ? 'article' : 'website'}">
 <meta property="og:title" content="${e(fm.title)}">
 <meta property="og:description" content="${e(fm.description)}">
-<meta property="og:url" content="${e(canonical)}">
-<meta property="article:section" content="${e(fm.category)}">
-${fm.tags.map((t) => `<meta property="article:tag" content="${e(t)}">`).join('\n')}
+${kind.article ? `<meta property="og:url" content="${e(canonical)}">\n<meta property="article:section" content="${e(fm.category)}">` : ''}
+${kind.article ? fm.tags.map((t) => `<meta property="article:tag" content="${e(t)}">`).join('\n') : ''}
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${e(fm.title)}">
 <meta name="twitter:description" content="${e(copy.heroLead)}">
@@ -607,6 +706,7 @@ ${themeCss(d)}
 ${BASE_CSS}
 ${REVEAL_SAFE_CSS}
 ${CONTENT_SECTIONS_CSS}
+${GRAPHICS_CSS}
 ${CONTACT_FORM_CSS}
 ${d.css}
 </style>
@@ -618,14 +718,24 @@ export function renderLandingPage(
   designId: PageDesignId,
   copy: PageCopy,
   fm: DemoFrontmatter,
-  articleMarkdown: string
+  articleMarkdown: string,
+  contentType: PipelineContentType = 'technical'
 ): string {
   const d = DESIGNS.find((x) => x.id === designId) ?? DESIGNS[0]
-  const ctx: RenderContext = { copy, fm, outline: articleOutline(articleMarkdown) }
+  const kind = { label: TYPE_PROMPTS[contentType].label, article: contentType === 'technical' }
+  const ctx: RenderContext = {
+    copy,
+    fm,
+    outline: articleOutline(articleMarkdown),
+    kind,
+    art: heroArt(contentType),
+    icons: pickIcons(copy.features.map((f) => `${f.title} ${f.body}`)).map(iconSvg),
+    rings: ringsSvg(),
+  }
   const year = new Date().getFullYear()
   return `<!doctype html>
 <html lang="en">
-${head(fm, copy, d)}
+${head(fm, copy, d, kind)}
 <body>
 <header class="ds-header">
   <a class="ds-mark" href="#top">${e(copy.brand)}</a>

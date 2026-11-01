@@ -1,5 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { pickIcon, pickIcons, iconSvg, heroArt, ringsSvg } from '../../lib/ai/landingGraphics.ts'
 import {
   cleanReport,
   mergedTsv,
@@ -567,4 +568,37 @@ test('cleaner applies remembered merges and custom names, and lists merges to re
   assert.equal(named.groups[0].canonical, 'meta-ads')
   assert.deepEqual(rememberable(named), { 'facebook-ads': 'meta-ads', 'fb-ads': 'meta-ads' })
   assert.match(mappingTsv(named), /fb-ads\tmeta-ads/)
+})
+
+test('landing graphics: icons match the text, never repeat in a row, and every art is well-formed', () => {
+  assert.equal(pickIcon('Your data stays private and secure', 0), 'shield')
+  assert.equal(pickIcon('Reports delivered every month', 0), 'chart')
+  assert.equal(pickIcon('Something with no keyword at all', 1), 'check')
+  const icons = pickIcons(['Fast setup', 'Quick start', 'Speedy help'])
+  assert.notEqual(icons[0], icons[1])
+  assert.notEqual(icons[1], icons[2])
+  assert.match(iconSvg('rocket'), /^<svg class="gi"[^>]*aria-hidden="true"/)
+  for (const type of [
+    'technical',
+    'marketing',
+    'service',
+    'sales',
+    'product',
+    'company',
+    'explainer',
+    'case-study',
+    'event',
+  ]) {
+    const svg = heroArt(type)
+    assert.ok(svg.startsWith('<svg class="hero-art"') && svg.trim().endsWith('</svg>'), type)
+    assert.equal((svg.match(/<svg/g) || []).length, 1, type)
+    assert.equal(
+      (svg.match(/<g[ >]/g) || []).length,
+      (svg.match(/<\/g>/g) || []).length,
+      type + ' g balance'
+    )
+    assert.doesNotMatch(svg, /undefined|NaN/, type)
+    assert.doesNotMatch(svg, /<text/, type + ' must carry no figures or labels')
+  }
+  assert.match(ringsSvg(), /aria-hidden="true"/)
 })

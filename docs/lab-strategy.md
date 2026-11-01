@@ -77,6 +77,8 @@ Done in this pass (2026-11-02):
 - One toolkit nav across Build, Check, Clean reports and QR codes.
 - Builder suggests campaign names you used before, so naming stays consistent.
 
+Also done (2026-11-02, after Adesh reviewed the older tools): the Lab hub now leads with the UTM toolkit and shows the AI pipeline as an "Experiment" under it. The AI pipeline keeps its free daily cap (3 runs per browser per day, then bring your own key) and now writes nine content types (marketing, service, sales, product, company, explainer, case study, event, technical) with graphics in every page design.
+
 Next (needs Adesh or real data):
 
 1. **Run it on a real GA4 export** and a real Looker Studio report; report which headers fail.

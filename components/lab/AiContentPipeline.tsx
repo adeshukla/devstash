@@ -5,13 +5,18 @@ import { Button, Input } from '@/components/ui'
 import { AiPipelineTour, TOUR_SEEN_KEY } from '@/components/lab/AiPipelineTour'
 import { AiPipelineResults } from '@/components/lab/AiPipelineResults'
 import { trackAndLog, ANALYTICS_EVENTS } from '@/lib/analytics/events'
-import type { PageDesignId, PipelineResponse, PipelineTone } from '@/types/aiPipeline'
-
-const TONE_OPTIONS: { label: string; value: PipelineTone }[] = [
-  { label: 'Technical', value: 'technical' },
-  { label: 'Conversational', value: 'conversational' },
-  { label: 'Tutorial', value: 'tutorial' },
-]
+import {
+  CONTENT_TYPE_OPTIONS,
+  DEFAULT_CONTENT_TYPE,
+  TONE_LABELS,
+  contentTypeOption,
+} from '@/lib/ai/contentTypeOptions'
+import type {
+  PageDesignId,
+  PipelineContentType,
+  PipelineResponse,
+  PipelineTone,
+} from '@/types/aiPipeline'
 
 // Mirrors DESIGNS in lib/ai/landingDesigns.ts (server-only, so not imported).
 const DESIGN_OPTIONS: { label: string; value: PageDesignId | 'auto' }[] = [
@@ -41,7 +46,9 @@ const selectClass =
 export function AiContentPipeline() {
   const [topic, setTopic] = useState('')
   const [keywordsInput, setKeywordsInput] = useState('')
-  const [tone, setTone] = useState<PipelineTone>('technical')
+  const [contentType, setContentType] = useState<PipelineContentType>(DEFAULT_CONTENT_TYPE)
+  const typeOption = contentTypeOption(contentType)
+  const [tone, setTone] = useState<PipelineTone>(typeOption.tones[0])
   const [targetLength, setTargetLength] = useState(600)
   const [topicError, setTopicError] = useState<string | undefined>()
   const [generateHtmlPage, setGenerateHtmlPage] = useState(true)
@@ -103,6 +110,7 @@ export function AiContentPipeline() {
           topic: trimmedTopic,
           keywords,
           tone,
+          contentType,
           targetLength,
           userApiKey: capReached ? byokKey.trim() : undefined,
           generateHtmlPage,
@@ -125,6 +133,7 @@ export function AiContentPipeline() {
       setResult(pipelineResult)
       setFormState({ status: 'idle', message: '' })
       trackAndLog(ANALYTICS_EVENTS.aiPipelineRun, {
+        contentType,
         tone,
         usedByok: String(pipelineResult.usedByok),
         remainingFreeRuns: pipelineResult.remainingFreeRuns,
@@ -160,6 +169,30 @@ export function AiContentPipeline() {
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="content-type" className="text-ds-text text-[13px] font-medium">
+            What should it write?
+          </label>
+          <select
+            id="content-type"
+            value={contentType}
+            onChange={(e) => {
+              const next = e.target.value as PipelineContentType
+              setContentType(next)
+              setTone(contentTypeOption(next).tones[0])
+            }}
+            disabled={isLoading}
+            className={selectClass}
+          >
+            {CONTENT_TYPE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <p className="text-ds-muted text-xs leading-relaxed">{typeOption.hint}</p>
+        </div>
+
         <Input
           label="Topic"
           value={topic}
@@ -167,7 +200,7 @@ export function AiContentPipeline() {
           error={topicError}
           disabled={isLoading}
           required
-          placeholder="Why your Next.js images are still slow"
+          placeholder={typeOption.topicPlaceholder}
         />
 
         <Input
@@ -175,30 +208,36 @@ export function AiContentPipeline() {
           value={keywordsInput}
           onChange={(e) => setKeywordsInput(e.target.value)}
           disabled={isLoading}
-          placeholder="next/image, lcp, core web vitals"
+          placeholder={typeOption.keywordPlaceholder}
           hint="Comma-separated, up to 8."
         />
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <label className="text-ds-text text-[13px] font-medium">Tone</label>
+            <label htmlFor="content-tone" className="text-ds-text text-[13px] font-medium">
+              Tone
+            </label>
             <select
+              id="content-tone"
               value={tone}
               onChange={(e) => setTone(e.target.value as PipelineTone)}
               disabled={isLoading}
               className={selectClass}
             >
-              {TONE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
+              {typeOption.tones.map((value) => (
+                <option key={value} value={value}>
+                  {TONE_LABELS[value]}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-ds-text text-[13px] font-medium">Target length</label>
+            <label htmlFor="content-length" className="text-ds-text text-[13px] font-medium">
+              Target length
+            </label>
             <select
+              id="content-length"
               value={targetLength}
               onChange={(e) => setTargetLength(Number(e.target.value))}
               disabled={isLoading}
@@ -227,8 +266,9 @@ export function AiContentPipeline() {
             </span>
             <span className="text-ds-muted mt-0.5 block text-xs leading-relaxed">
               A 4th call writes the page copy; the page itself is rendered in five hand-built
-              designs, each carrying the full edited article, responsive down to 300px. You switch
-              between them after the run — no extra calls.
+              designs with icons and an illustration that fit the kind of page, each carrying the
+              full edited content, responsive down to 300px. You switch between them after the run —
+              no extra calls.
             </span>
           </span>
         </label>

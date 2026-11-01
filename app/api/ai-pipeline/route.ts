@@ -5,6 +5,7 @@ import { callGroq, callWithFallback, hasAnyProviderConfigured, GroqCallError } f
 import { AI_TELL_PHRASES, countAiTellPhrases } from '@/lib/ai/aiTellPhrases'
 import { countHumanInputMarkers } from '@/lib/ai/humanInputMarkers'
 import { articleOutline, firstSentence } from '@/lib/ai/contentSections'
+import { TYPE_PROMPTS, codeRule, toneNote } from '@/lib/ai/contentTypes'
 import { DESIGNS, DESIGN_IDS, renderLandingPage } from '@/lib/ai/landingDesigns'
 import { BLOG_CATEGORIES } from '@/types/blog'
 import type {
@@ -13,6 +14,7 @@ import type {
   PageCopy,
   HtmlVariant,
   PageDesignId,
+  PipelineContentType,
 } from '@/types/aiPipeline'
 
 // ─── Config ─────────────────────────────────────────────────────────────────
@@ -52,7 +54,29 @@ const PipelineRequestSchema = z.object({
     .min(3, 'Topic must be at least 3 characters.')
     .max(200, 'Topic is too long.'),
   keywords: z.array(z.string().trim().min(1).max(40)).max(8, 'Use at most 8 keywords.').default([]),
-  tone: z.enum(['technical', 'conversational', 'tutorial']),
+  tone: z.enum([
+    'technical',
+    'conversational',
+    'tutorial',
+    'professional',
+    'friendly',
+    'persuasive',
+  ]),
+  // Older clients send no type: they were all writing technical articles.
+  contentType: z
+    .enum([
+      'technical',
+      'marketing',
+      'service',
+      'sales',
+      'product',
+      'company',
+      'explainer',
+      'case-study',
+      'event',
+    ])
+    .optional()
+    .default('technical'),
   targetLength: z
     .number()
     .int()
@@ -70,7 +94,7 @@ const FrontmatterFromLlmSchema = z.object({
   title: z.string().min(3).max(100),
   slug: z.string().min(3).max(100),
   description: z.string().min(10).max(300),
-  category: z.enum(CATEGORY_VALUES),
+  category: z.string().trim().min(2).max(60),
   tags: z.array(z.string()).max(10),
   readingTime: z.number().int().min(1).max(60),
 })
@@ -125,14 +149,15 @@ function slugify(input: string): string {
 function fallbackFrontmatter(
   topic: string,
   humanized: string,
-  keywords: string[]
+  keywords: string[],
+  contentType: PipelineContentType
 ): DemoFrontmatter {
   const wordCount = humanized.trim().split(/\s+/).filter(Boolean).length
   return {
     title: topic.slice(0, 100),
     slug: slugify(topic) || 'untitled-post',
     description: humanized.trim().slice(0, 155),
-    category: 'ai-workflows',
+    category: contentType === 'technical' ? 'ai-workflows' : TYPE_PROMPTS[contentType].label,
     tags: keywords.slice(0, 6),
     readingTime: Math.max(1, Math.ceil(wordCount / 200)),
   }
@@ -233,7 +258,9 @@ export async function POST(request: Request) {
     )
   }
 
-  const { topic, keywords, tone, targetLength, userApiKey, generateHtmlPage, design } = parsed.data
+  const { topic, keywords, tone, contentType, targetLength, userApiKey, generateHtmlPage, design } =
+    parsed.data
+  const type = TYPE_PROMPTS[contentType]
   const counter = await readRunCounter()
 
   if (!userApiKey && counter.count >= DAILY_CAP) {
@@ -262,6 +289,25 @@ export async function POST(request: Request) {
     options?: Parameters<typeof callGroq>[2]
   ) => (userApiKey ? callGroq(userApiKey, messages, options) : callWithFallback(messages, options))
 
+  // The two JSON steps (SEO fields, page copy) have deterministic fallbacks, so a
+  // provider refusing to produce valid JSON (a 400) must not throw away a good
+  // draft. A bad key or a rate limit still stops the run: those need telling.
+  const emptyStep = {
+    content: '',
+    promptTokens: 0,
+    completionTokens: 0,
+    latencyMs: 0,
+    provider: 'fallback',
+  } as Awaited<ReturnType<typeof runStep>>
+  const softFail = (err: unknown) => {
+    if (err instanceof GroqCallError && (err.status === 401 || err.status === 429)) throw err
+    console.error(
+      '[api/ai-pipeline] JSON step failed, using fallback:',
+      err instanceof Error ? err.message : 'unknown'
+    )
+    return emptyStep
+  }
+
   try {
     // ── Step 1: scaffold (honest first draft) ──
     // NOT a "write the whole post" pass. An 8B model asked to "use real code
@@ -275,25 +321,27 @@ export async function POST(request: Request) {
       [
         {
           role: 'system',
-          content:
-            'You are a technical writer producing an honest first-draft scaffold of a blog post for developers. You never fabricate code, benchmarks, metrics, results, opinions, or personal experience.',
+          content: `You are ${type.role}. You never fabricate facts, figures, results, names, opinions or personal experience.`,
         },
         {
           role: 'user',
-          content: `Write a first-draft scaffold of a technical blog post for developers about "${topic}".
+          content: `Write a first draft of ${type.brief} about "${topic}".
 Target keywords to include naturally: ${keywords.join(', ') || 'none specified'}.
-Tone: ${tone}.
+Tone: ${toneNote(tone)}
 Target length: approximately ${targetLength} words.
 
-Rules:
-- Explain the real concepts accurately. General, verifiable technical knowledge is welcome and should be genuinely useful — not filler.
-- Include a code example only when it is short, standard, and you are confident it is correct and runnable exactly as written (e.g. documented usage of a well-known library, or a basic language feature). Keep snippets minimal and idiomatic.
-- NEVER invent code that depends on the author's own project, private APIs, results, or setup, and never write code you are not sure runs. Where a real example from the author's own work would be more valuable, insert a placeholder on its own line instead: [TODO: your real, tested code — what it should show].
-- NEVER fabricate performance numbers, benchmarks, metrics, personal anecdotes, opinions, or results. Insert a placeholder instead: [TODO: the real number / experience needed].
-- Use [TODO: ...] placeholders wherever the post would be stronger with the author's first-hand substance. An honest placeholder is always better than an invented fact.
-- No generic filler intros or outros, no empty hedging.
+Structure:
+${type.structure}
 
-Output plain text only. No markdown frontmatter, no JSON.`,
+Rules:
+- Explain things accurately in plain, specific language. Genuinely useful content, not filler.
+${codeRule(type.allowCode)}
+- ${type.honesty}
+- Use [TODO: ...] placeholders wherever the content would be stronger with the author's own real facts. An honest placeholder is always better than an invented fact.
+- No generic filler intros or outros, no empty hedging.
+- Formatting: "## " for section headings, "- " for bullet items, "1. " for numbered steps, **bold** only for list labels. No other markdown.
+
+Output plain text only. No frontmatter, no JSON.`,
         },
       ],
       TEXT_STEP_OPTIONS
@@ -321,7 +369,7 @@ Output plain text only. No markdown frontmatter, no JSON.`,
 - Tighten wordy or redundant phrasing.
 Do NOT invent opinions, personal anecdotes, first-hand experience, frustration, humor, metrics, or any fact that is not already in the draft — fabricated voice reads as fake and is dishonest.
 Preserve every [TODO: ...] placeholder EXACTLY as written — never remove, rephrase, fill in, or comment on them. They mark where the author will add real content.
-Keep every code example intact and technically accurate, and preserve all real information. Do not shorten the post materially.
+${type.allowCode ? 'Keep every code example intact and technically accurate. ' : 'Keep every "## " heading, bullet list and numbered list exactly as structured. '}Preserve all real information. Do not shorten the content materially.
 Output plain text only.
 
 Draft:
@@ -342,11 +390,11 @@ ${draftResult.content}
         },
         {
           role: 'user',
-          content: `Generate SEO frontmatter for the blog post below.
+          content: `Generate SEO frontmatter for the content below.
 Return ONLY a JSON object with exactly these keys: title, slug, description, category, tags, readingTime.
 - slug: lowercase kebab-case, no special characters
 - description: 130-160 characters
-- category: one of ${CATEGORY_VALUES.join(', ')}
+- category: ${contentType === 'technical' ? `one of ${CATEGORY_VALUES.join(', ')}` : `exactly "${type.label}"`}
 - tags: array of 3-6 lowercase strings
 - readingTime: integer estimate at 200 words per minute
 Ignore any [TODO: ...] placeholders in the post — never include their text in any field.
@@ -358,7 +406,7 @@ ${humanizeResult.content}
         },
       ],
       { ...TEXT_STEP_OPTIONS, jsonMode: true, maxTokens: 500 }
-    )
+    ).catch(softFail)
 
     let frontmatter: DemoFrontmatter
     try {
@@ -366,10 +414,14 @@ ${humanizeResult.content}
       const validated = FrontmatterFromLlmSchema.safeParse(parsedJson)
       frontmatter = validated.success
         ? validated.data
-        : fallbackFrontmatter(topic, humanizeResult.content, keywords)
+        : fallbackFrontmatter(topic, humanizeResult.content, keywords, contentType)
     } catch {
-      frontmatter = fallbackFrontmatter(topic, humanizeResult.content, keywords)
+      frontmatter = fallbackFrontmatter(topic, humanizeResult.content, keywords, contentType)
     }
+    // Only the technical article uses the blog's own categories.
+    if (contentType !== 'technical') frontmatter = { ...frontmatter, category: type.label }
+    else if (!CATEGORY_VALUES.includes(frontmatter.category))
+      frontmatter = { ...frontmatter, category: 'ai-workflows' }
 
     // ── Step 4 (on by default): landing page in every design ──
     // The model writes only the copy, as small validated JSON. The page itself
@@ -403,12 +455,12 @@ ${humanizeResult.content}
           },
           {
             role: 'user',
-            content: `Write the copy for a landing page that presents the article below.
+            content: `Write the copy for ${type.pageKind} that presents the content below.
 Return ONLY a JSON object with exactly these keys:
-- brand: a 1-3 word name for the page, derived from the subject. Not "DevStash", not generic ("Solutions", "Hub").
+- brand: a 1-3 word name for the page, derived from the subject. Not "DevStash", not generic ("Solutions", "Hub"). Do not invent a company name unless the content names one.
 - heroTitle: a headline of at most 70 characters that states the article's main point plainly.
 - heroLead: one or two sentences, at most 220 characters, saying who this is for and what they get from it.
-- cta: a 2-4 word button label that invites the reader to get in touch about this subject (for example "Talk through your setup").
+- cta: a 2-4 word button label that invites the reader to get in touch about this subject (examples: ${type.ctaHint}).
 - features: exactly 3 objects {"title","body"}, each a different real point from the article. title: 2-6 words. body: one sentence, at most 160 characters.
 - closingTitle: a closing headline of at most 70 characters inviting the reader to talk about this subject.
 - closingLead: one sentence, at most 160 characters.
@@ -435,7 +487,7 @@ ${excerpt}
           maxTokens: 900,
           modelOverride: 'openai/gpt-oss-120b',
         }
-      )
+      ).catch(softFail)
 
       let copy: PageCopy
       try {
@@ -451,7 +503,7 @@ ${excerpt}
         id: d.id,
         name: d.name,
         blurb: d.blurb,
-        html: renderLandingPage(d.id, copy, frontmatter, humanizeResult.content),
+        html: renderLandingPage(d.id, copy, frontmatter, humanizeResult.content, contentType),
       }))
       htmlDesign =
         design === 'auto' ? DESIGN_IDS[Math.floor(Math.random() * DESIGN_IDS.length)] : design
@@ -511,6 +563,7 @@ ${excerpt}
       htmlPage,
       htmlVariants,
       htmlDesign,
+      contentType,
       metrics,
       remainingFreeRuns,
       usedByok: Boolean(userApiKey),

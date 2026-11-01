@@ -7,7 +7,7 @@ import { AiContentPipeline } from '@/components/lab/AiContentPipeline'
 export const metadata: Metadata = buildMetadata({
   title: 'AI Content Pipeline Demo — Live 3-Step LLM Chain',
   description:
-    'A live 3-step LLM pipeline: scaffold an honest draft, strip AI-tell phrases in a copy-edit pass, then generate SEO frontmatter, with real token usage and latency shown.',
+    'A live LLM pipeline that writes marketing, service, sales and other pages honestly: draft, copy-edit, SEO fields and five designed pages, token use shown.',
   canonical: '/lab/ai-content-pipeline',
 })
 
@@ -61,12 +61,15 @@ export default function AiContentPipelinePage() {
           <div className="mx-auto max-w-2xl">
             <h2 className="text-ds-text mb-4 text-xl font-bold">What actually happens on submit</h2>
             <p className="text-ds-muted leading-relaxed">
-              Your topic, keywords, tone, and length go to a Next.js route handler, which makes
-              three sequential calls to Groq’s{' '}
+              Your content type, topic, keywords, tone, and length go to a Next.js route handler,
+              which makes three sequential calls to Groq’s{' '}
               <code className="text-ds-accent">openai/gpt-oss-20b</code> model — scaffold,
-              copy-edit, then a JSON frontmatter call matching this blog’s real frontmatter shape.
-              The scaffold step is told to leave <code className="text-ds-accent">[TODO: …]</code>{' '}
-              placeholders wherever it would otherwise have to invent code, a benchmark, or personal
+              copy-edit, then a JSON call for the title, slug, description, category and tags. You
+              choose what it writes: a marketing page, a service offering, a sales page, a product
+              launch, a company overview, an explainer, a case study, an event page or a technical
+              article. The scaffold step is told to leave{' '}
+              <code className="text-ds-accent">[TODO: …]</code> placeholders wherever it would
+              otherwise have to invent a price, a client, a result, a date, a benchmark or personal
               experience — an honest draft you finish, not fake content you publish. Nothing is
               saved anywhere; the output only exists in your browser for this run.
             </p>
@@ -74,9 +77,10 @@ export default function AiContentPipelinePage() {
               With “also build a landing page” on (the default), a 4th call writes only the page
               copy, as validated JSON restating the article. The page itself is rendered from five
               hand-built designs — editorial, product split, bento, minimal and bold — each with its
-              own type and palette, the full copy-edited article and a contact section that opens a
-              drafted email. All five come back from one run, responsive down to 300px, so you can
-              switch styles and download the one you want without spending more tokens.
+              own type and palette, icons and an illustration that fit the kind of page, the full
+              copy-edited content and a contact section that opens a drafted email. All five come
+              back from one run, responsive down to 300px, so you can switch styles and download the
+              one you want without spending more tokens.
             </p>
           </div>
         </section>
