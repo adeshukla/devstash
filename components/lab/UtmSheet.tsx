@@ -19,19 +19,28 @@ function downloadCsv(rows: SheetRow[]) {
 export function UtmSheet({
   rows,
   onRemove,
+  onEdit,
   onClear,
 }: {
   rows: SheetRow[]
   onRemove: (id: string) => void
+  onEdit: (row: SheetRow) => void
   onClear: () => void
 }) {
   const [copied, setCopied] = useState(false)
+  const [copiedRow, setCopiedRow] = useState<string | null>(null)
   const issues = lintRows(rows)
 
   async function copyForSheets() {
     if (!(await copyText(toTsv(rows)))) return
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  async function copyRow(row: SheetRow) {
+    if (!(await copyText(row.url))) return
+    setCopiedRow(row.id)
+    setTimeout(() => setCopiedRow(null), 2000)
   }
 
   return (
@@ -72,14 +81,32 @@ export function UtmSheet({
           >
             <span className="text-ds-muted font-mono text-xs">{i + 1}</span>
             <p className="text-ds-text min-w-0 flex-1 font-mono text-xs break-all">{row.url}</p>
-            <button
-              type="button"
-              onClick={() => onRemove(row.id)}
-              aria-label={`Remove row ${i + 1}`}
-              className="text-ds-muted hover:text-ds-error shrink-0 font-mono text-xs transition-colors"
-            >
-              Remove
-            </button>
+            <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:gap-3">
+              <button
+                type="button"
+                onClick={() => copyRow(row)}
+                aria-label={`Copy row ${i + 1}`}
+                className="text-ds-muted hover:text-ds-accent shrink-0 font-mono text-xs transition-colors"
+              >
+                {copiedRow === row.id ? 'Copied ✓' : 'Copy'}
+              </button>
+              <button
+                type="button"
+                onClick={() => onEdit(row)}
+                aria-label={`Edit row ${i + 1}: moves it back into the form`}
+                className="text-ds-muted hover:text-ds-accent shrink-0 font-mono text-xs transition-colors"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={() => onRemove(row.id)}
+                aria-label={`Remove row ${i + 1}`}
+                className="text-ds-muted hover:text-ds-error shrink-0 font-mono text-xs transition-colors"
+              >
+                Remove
+              </button>
+            </div>
           </li>
         ))}
       </ul>

@@ -155,3 +155,58 @@ function toTable(rows: SheetRow[], sep: string, escape: (v: string) => string): 
 export const toCsv = (rows: SheetRow[]) => toTable(rows, ',', cell)
 /** Tab-separated, pastes straight into Google Sheets or Excel. */
 export const toTsv = (rows: SheetRow[]) => toTable(rows, '\t', (v) => v.replace(/[\t\n]/g, ' '))
+
+/**
+ * A pasted link that already carries utm_ params: returns the link without
+ * them plus their values, so the visitor can adjust instead of retype.
+ * Null when there is nothing to import.
+ */
+export function splitUtm(raw: string): { base: string; fields: Omit<UtmFields, 'url'> } | null {
+  let u: URL
+  try {
+    u = new URL(raw.trim())
+  } catch {
+    return null
+  }
+  const fields = { source: '', medium: '', campaign: '', term: '', content: '' }
+  let found = false
+  for (const key of UTM_KEYS) {
+    const v = u.searchParams.get(`utm_${key}`)
+    if (v) {
+      fields[key] = v
+      found = true
+    }
+    u.searchParams.delete(`utm_${key}`)
+  }
+  return found ? { base: u.toString(), fields } : null
+}
+
+export interface ChannelLink {
+  label: string
+  fields: UtmFields
+  result: BuildResult
+}
+
+/** One link per chosen channel preset, sharing the URL, campaign, term and content. */
+export function buildForChannels(base: UtmFields, labels: string[]): ChannelLink[] {
+  return labels.flatMap((label) => {
+    const preset = PRESETS.find((p) => p.label === label)
+    if (!preset) return []
+    const fields = { ...base, source: preset.source, medium: preset.medium }
+    return [{ label, fields, result: buildUtmUrl(fields) }]
+  })
+}
+
+const NON_PAID = new Set(['email', 'social', 'organic', 'referral', 'sms', 'push'])
+
+/** Soft hints about a finished link; none of them block copying. */
+export function linkWarnings(fields: UtmFields, url: string): string[] {
+  const out: string[] = []
+  if (url.length > 2000)
+    out.push(`This link is ${url.length} characters; some platforms cut links over about 2,000.`)
+  if (fields.term.trim() && NON_PAID.has(normalizeValue(fields.medium)))
+    out.push(
+      'utm_term is meant for paid-search keywords; it is probably not needed for this medium.'
+    )
+  return out
+}

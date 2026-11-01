@@ -106,3 +106,20 @@ test('fitToWidth truncates with an ellipsis only when over budget', () => {
   assert.ok(r.text.endsWith('…'))
   assert.ok(measure(r.text) <= 100)
 })
+
+test('splitUtm pulls utm values out of a pasted link and keeps the rest', async () => {
+  const { splitUtm, buildForChannels, linkWarnings } = await import('../../lib/lab/utm.ts')
+  const s = splitUtm('https://e.com/p?ref=1&utm_source=google&utm_medium=cpc&utm_campaign=x#top')
+  assert.equal(s.base, 'https://e.com/p?ref=1#top')
+  assert.equal(s.fields.source, 'google')
+  assert.equal(splitUtm('https://e.com/p?ref=1'), null)
+  assert.equal(splitUtm('not a url'), null)
+
+  const links = buildForChannels(fields({ campaign: 'sale' }), ['Google Ads', 'Newsletter', 'Nope'])
+  assert.equal(links.length, 2)
+  assert.match(links[1].result.url, /utm_source=newsletter&utm_medium=email&utm_campaign=sale/)
+
+  assert.equal(linkWarnings(fields({ term: 'x', medium: 'email' }), 'https://e.com').length, 1)
+  assert.equal(linkWarnings(fields({ term: 'x', medium: 'cpc' }), 'https://e.com').length, 0)
+  assert.equal(linkWarnings(fields(), 'https://e.com/' + 'a'.repeat(2100)).length, 1)
+})
