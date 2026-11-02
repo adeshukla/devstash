@@ -50,6 +50,9 @@ export type Scene =
   | 'template-vs-custom'
   | 'slow-phone'
   | 'ads-checklist'
+  | 'split-rows'
+  | 'naming-rules'
+  | 'easing-curve'
 
 const BLOG_SCENE: Record<BlogCategory, Scene> = {
   frontend: 'frontend',
@@ -141,6 +144,10 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   'why-is-my-website-slow-on-mobile': 'slow-phone',
   'google-ads-landing-page-checklist': 'ads-checklist',
   'how-much-does-a-landing-page-cost': 'template-vs-custom',
+  // The three 'tutorials' posts all fell through to the same open-book scene.
+  'ga4-campaign-names-split-by-capital-letters': 'split-rows',
+  'utm-naming-convention-for-teams': 'naming-rules',
+  'understanding-css-cubic-bezier-easing': 'easing-curve',
 }
 
 interface CategoryIllustrationProps {
@@ -295,6 +302,12 @@ export function SceneContent({ scene }: { scene: Scene }) {
       return <SlowPhoneScene />
     case 'ads-checklist':
       return <AdsChecklistScene />
+    case 'split-rows':
+      return <SplitRowsScene />
+    case 'naming-rules':
+      return <NamingRulesScene />
+    case 'easing-curve':
+      return <EasingCurveScene />
   }
 }
 
@@ -342,6 +355,9 @@ export const ALL_SCENES: Scene[] = [
   'template-vs-custom',
   'slow-phone',
   'ads-checklist',
+  'split-rows',
+  'naming-rules',
+  'easing-curve',
 ]
 
 // Keyword index — maps a scene to the words a topic string is checked
@@ -455,6 +471,28 @@ export const SCENE_KEYWORDS: Record<Scene, string[]> = {
     'checklist',
     'message match',
     'conversion',
+  ],
+  'split-rows': [
+    'ga4',
+    'duplicate campaigns',
+    'split rows',
+    'merge rows',
+    'capital letters',
+    'utm report',
+  ],
+  'naming-rules': [
+    'utm naming',
+    'naming convention',
+    'campaign naming',
+    'utm rules',
+    'tracking links',
+  ],
+  'easing-curve': [
+    'easing',
+    'cubic-bezier',
+    'timing function',
+    'css transition',
+    'animation curve',
   ],
   'component-parts': [
     'component library',
@@ -2499,6 +2537,205 @@ function AdsChecklistScene() {
       <rect x="238" y="128" width="64" height="8" rx="4" className="fill-ds-text/80" />
       <rect x="238" y="144" width="86" height="4" rx="2" className="fill-ds-muted/40" />
       <rect x="238" y="160" width="58" height="20" rx="6" className="fill-ds-accent" />
+    </g>
+  )
+}
+
+// ── Split rows — one campaign spelled three ways, merged into one row ──────
+function SplitRowsScene() {
+  return (
+    <g>
+      {['Spring_Sale', 'spring-sale', 'SPRING-SALE'].map((name, i) => (
+        <g key={name}>
+          <rect
+            x="62"
+            y={58 + i * 34}
+            width="110"
+            height="24"
+            rx="7"
+            className="fill-ds-surface stroke-ds-border2"
+            strokeWidth="1.5"
+          />
+          <text
+            x="76"
+            y={74 + i * 34}
+            className="fill-ds-muted font-mono"
+            fontSize="10"
+            fontWeight="600"
+          >
+            {name}
+          </text>
+          <path
+            d={`M176 ${70 + i * 34}C196 ${70 + i * 34} 200 112 218 112`}
+            className="stroke-ds-accent/60"
+            strokeWidth="2"
+            strokeLinecap="round"
+            fill="none"
+          />
+        </g>
+      ))}
+      <g className="animate-float">
+        <rect
+          x="222"
+          y="92"
+          width="116"
+          height="40"
+          rx="9"
+          className="fill-ds-surface2 stroke-ds-accent"
+          strokeWidth="2"
+        />
+        <text x="236" y="116" className="fill-ds-text font-mono" fontSize="11" fontWeight="700">
+          spring-sale
+        </text>
+        <circle cx="338" cy="92" r="11" className="fill-ds-success" />
+        <path
+          d="M332 92l4 4 7-8"
+          className="stroke-ds-bg"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      </g>
+      <text x="62" y="174" className="fill-ds-muted/70 font-mono" fontSize="9">
+        3 rows
+      </text>
+      <text x="222" y="152" className="fill-ds-muted/70 font-mono" fontSize="9">
+        1 campaign
+      </text>
+    </g>
+  )
+}
+
+// ── Naming rules — source_medium_campaign pieces, one approved spelling ────
+function NamingRulesScene() {
+  const chips = [
+    { label: 'source', x: 62, cls: 'stroke-ds-accent fill-ds-accent/15' },
+    { label: 'medium', x: 152, cls: 'stroke-ds-purple fill-ds-purple/15' },
+    { label: 'campaign', x: 242, cls: 'stroke-ds-success fill-ds-success/15' },
+  ]
+  return (
+    <g>
+      {chips.map((c, i) => (
+        <g key={c.label}>
+          <rect x={c.x} y="50" width="82" height="28" rx="14" className={c.cls} strokeWidth="1.8" />
+          <text
+            x={c.x + 41}
+            y="68"
+            textAnchor="middle"
+            className="fill-ds-text font-mono"
+            fontSize="10"
+            fontWeight="600"
+          >
+            {c.label}
+          </text>
+          {i < 2 && (
+            <text
+              x={c.x + 87}
+              y="69"
+              textAnchor="middle"
+              className="fill-ds-muted font-mono"
+              fontSize="13"
+            >
+              _
+            </text>
+          )}
+        </g>
+      ))}
+      <rect
+        x="62"
+        y="100"
+        width="124"
+        height="72"
+        rx="10"
+        className="fill-ds-surface stroke-ds-border2"
+        strokeWidth="1.5"
+      />
+      <text x="74" y="118" className="fill-ds-muted font-mono" fontSize="9">
+        approved channels
+      </text>
+      {[0, 1, 2].map((i) => (
+        <rect
+          key={i}
+          x={74 + i * 34}
+          y="130"
+          width="28"
+          height="14"
+          rx="7"
+          className={i === 1 ? 'fill-ds-accent animate-pulse2' : 'fill-ds-border2'}
+        />
+      ))}
+      <rect x="74" y="152" width="96" height="4" rx="2" className="fill-ds-muted/30" />
+      <g>
+        <text x="212" y="118" className="fill-ds-muted font-mono" fontSize="10">
+          Spring_Sale
+        </text>
+        <path d="M210 114h68" className="stroke-ds-error" strokeWidth="1.8" strokeLinecap="round" />
+        <circle cx="322" cy="114" r="9" className="fill-ds-error/20" />
+        <path
+          d="M318 110l8 8m0-8l-8 8"
+          className="stroke-ds-error"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+      </g>
+      <g className="animate-float">
+        <text x="212" y="152" className="fill-ds-text font-mono" fontSize="11" fontWeight="700">
+          spring-sale
+        </text>
+        <circle cx="322" cy="148" r="9" className="fill-ds-success" />
+        <path
+          d="M317 148l3.5 3.5 6-7"
+          className="stroke-ds-bg"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      </g>
+    </g>
+  )
+}
+
+// ── Easing curve — a cubic-bezier with its two handles, and the ball it moves ─
+function EasingCurveScene() {
+  return (
+    <g>
+      <rect
+        x="66"
+        y="38"
+        width="156"
+        height="152"
+        rx="8"
+        className="fill-ds-surface stroke-ds-border2"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M66 190L222 38"
+        className="stroke-ds-border2"
+        strokeWidth="1"
+        strokeDasharray="4 4"
+      />
+      <path d="M78 178L116 164M210 50L116 50" className="stroke-ds-muted/50" strokeWidth="1.5" />
+      <path
+        d="M78 178C116 164 116 50 210 50"
+        className="stroke-ds-accent"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <circle cx="116" cy="164" r="6" className="fill-ds-purple" />
+      <circle cx="116" cy="50" r="6" className="fill-ds-purple" />
+      <circle cx="78" cy="178" r="4" className="fill-ds-text" />
+      <circle cx="210" cy="50" r="4" className="fill-ds-text animate-pulse2" />
+      <rect x="248" y="104" width="94" height="8" rx="4" className="fill-ds-border2" />
+      <circle cx="300" cy="108" r="12" className="fill-ds-accent animate-float" />
+      <text x="248" y="140" className="fill-ds-muted font-mono" fontSize="9">
+        ease-out
+      </text>
+      <text x="248" y="84" className="fill-ds-muted/70 font-mono" fontSize="9">
+        0.25, 0.1, 0.25, 1
+      </text>
     </g>
   )
 }

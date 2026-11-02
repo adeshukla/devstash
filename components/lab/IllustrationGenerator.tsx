@@ -135,6 +135,9 @@ const SCENE_LABELS: Record<Scene, string> = {
   'template-vs-custom': 'Template vs Custom',
   'slow-phone': 'Slow on Mobile',
   'ads-checklist': 'Ads Checklist',
+  'split-rows': 'Split Rows',
+  'naming-rules': 'Naming Rules',
+  'easing-curve': 'Easing Curve',
 }
 
 const DENSITY_LABELS: Record<Density, string> = { 1: 'Minimal', 2: 'Balanced', 3: 'Rich' }
