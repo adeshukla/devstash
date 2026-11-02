@@ -83,6 +83,8 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
   const n = cards.length
   const [order, setOrder] = useState(() => cards.map((_, i) => i))
   const [flipped, setFlipped] = useState(false)
+  // Alternates a/b on every flip so the touch (2D) squash animation can restart
+  const [flipTick, setFlipTick] = useState<'a' | 'b' | undefined>()
   // Back faces mount the first time their card is flipped, then stay. Six
   // backs were ~240 elements in the first render and hydration that nobody
   // sees until they flip; their links repeat the front's, so SEO loses nothing.
@@ -243,6 +245,7 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
     setNudging(false)
     setOpened((o) => (o.includes(order[0]) ? o : [...o, order[0]]))
     setFlipped((f) => !f)
+    setFlipTick((t) => (t === 'a' ? 'b' : 'a'))
   }
 
   function onPointerDown(e: PointerEvent<HTMLDivElement>) {
@@ -381,7 +384,11 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
               onKeyDown={onKeyDown}
             >
               <div className="deck-wob">
-                <div className="deck-inner" data-flipped={(isTop && flipped) || undefined}>
+                <div
+                  className="deck-inner"
+                  data-flipped={(isTop && flipped) || undefined}
+                  data-tick={isTop ? flipTick : undefined}
+                >
                   <div className="deck-face" inert={isTop && flipped}>
                     {card.front}
                   </div>
