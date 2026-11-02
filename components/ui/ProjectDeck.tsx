@@ -94,6 +94,8 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
   const drag = useRef<{ x0: number; y0: number; dx: number; dy: number } | null>(null)
   const focusTopAfterMove = useRef(false)
   const busy = useRef(false)
+  // Back: the card that is about to come on top, which starts beside the stack
+  const entering = useRef<HTMLDivElement | null>(null)
 
   const layout = useCallback(() => {
     const deck = deckRef.current
@@ -116,6 +118,25 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
 
   useLayoutEffect(() => {
     layout()
+    const el = entering.current
+    if (el) {
+      entering.current = null
+      // Already on top (z-index) but parked beside the stack, no transition; then
+      // let it spring into place. Coming from behind and jumping in front mid-flight
+      // is what flashed and blended on real phones.
+      const out = Math.min(el.offsetWidth * 0.82, (deckRef.current?.clientWidth ?? 400) * 0.5)
+      el.dataset.state = 'dragging'
+      el.style.setProperty('--x', `${-out}px`)
+      el.style.setProperty('--y', '-24px')
+      el.style.setProperty('--r', '-12deg')
+      busy.current = true
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          busy.current = false
+          layout()
+        })
+      )
+    }
     if (focusTopAfterMove.current) {
       focusTopAfterMove.current = false
       cardRefs.current[order[0]]?.focus()
@@ -231,12 +252,14 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
     })
   }
 
-  // Bottom card out from behind the stack, then on top of it.
+  // The bottom card comes in from the side, on top of the stack.
   function prev() {
-    tuck(cardRefs.current[order[n - 1]], -1, () => {
-      setFlipped(false)
-      setOrder((o) => [o[o.length - 1], ...o.slice(0, -1)])
-    })
+    setNudging(false)
+    if (busy.current) return
+    const el = cardRefs.current[order[n - 1]]
+    if (el && !reducedMotion()) entering.current = el
+    setFlipped(false)
+    setOrder((o) => [o[o.length - 1], ...o.slice(0, -1)])
   }
 
   function flip() {
@@ -372,7 +395,6 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
               tabIndex={isTop ? 0 : -1}
               inert={!isTop}
               data-top={isTop || undefined}
-              data-deep={pos >= 3 || undefined}
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}
