@@ -1207,6 +1207,40 @@ html[data-hero-intro] .hero-ov-design {
 .deck-back {
   transform: rotateY(180deg);
 }
+/* Touch screens: no 3D at all. Phone GPUs depth-sort the stacked preserve-3d
+   cards differently from desktop and an emulator, so a card on its way to the
+   back showed through the new top card (doubled "Live 2026", art ghosting).
+   The flip becomes a cross-fade; the stack is ordinary 2D layers. */
+@media (hover: none) {
+  .deck-card {
+    perspective: none;
+  }
+  .deck-wob,
+  .deck-inner {
+    transform-style: flat;
+  }
+  .deck-inner[data-flipped] {
+    transform: none;
+  }
+  .deck-face {
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+    transition:
+      opacity 0.3s ease,
+      box-shadow 0.5s ease,
+      border-color 0.5s ease;
+  }
+  .deck-back {
+    transform: none;
+    opacity: 0;
+  }
+  .deck-inner[data-flipped] > .deck-face:not(.deck-back) {
+    opacity: 0;
+  }
+  .deck-inner[data-flipped] > .deck-back {
+    opacity: 1;
+  }
+}
 [data-theme='light'] .deck-face {
   box-shadow: 0 24px 48px -26px rgb(15 23 42 / 0.3);
 }
