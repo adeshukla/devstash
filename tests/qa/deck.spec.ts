@@ -54,20 +54,16 @@ test('the Live badge sits below the card art, not on it', async ({ page }) => {
   expect(box.badgeTop).toBeGreaterThanOrEqual(box.artBottom - 1)
 })
 
-test.describe('touch flip is flat 2D', () => {
+test.describe('touch flip is the desktop 3D flip', () => {
   test.use({ viewport: { width: 375, height: 812 }, hasTouch: true, isMobile: true })
 
-  test('no 3D context on cards, and flipping cross-fades to the back', async ({ page }) => {
+  test('flipping rotates the card in 3D', async ({ page }) => {
     await page.goto('/')
-    const flat = await page.evaluate(
-      () => getComputedStyle(document.querySelector('.deck-inner')!).transformStyle
-    )
-    expect(flat).toBe('flat')
     await page.getByRole('button', { name: 'Flip', exact: true }).click()
-    await page.waitForTimeout(600)
-    const back = await page.evaluate(
-      () => getComputedStyle(document.querySelector('.deck-card[data-top] .deck-back')!).opacity
+    await page.waitForTimeout(1200)
+    const t = await page.evaluate(
+      () => getComputedStyle(document.querySelector('.deck-card[data-top] .deck-inner')!).transform
     )
-    expect(back).toBe('1')
+    expect(t).toContain('matrix3d') // rotateY(180deg)
   })
 })

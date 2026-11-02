@@ -1207,79 +1207,27 @@ html[data-hero-intro] .hero-ov-design {
 .deck-back {
   transform: rotateY(180deg);
 }
-/* Touch screens: no 3D at all. Phone GPUs depth-sort the stacked preserve-3d
-   cards differently from desktop and an emulator, so a card on its way to the
-   back showed through the new top card (doubled "Live 2026", art ghosting).
-   The flip becomes a cross-fade; the stack is ordinary 2D layers. */
+/* Touch screens keep the same 3D flip as desktop, but lighter on the GPU: on
+   a real phone, big blurred shadows on six stacked moving layers left stale
+   tiles (a previous card's text drawn over the new top card), and the glow's
+   colour cross-fade repainted a 620px gradient mid-swipe. */
 @media (hover: none) {
-  /* Cards three or more deep are never visible enough to be worth a layer */
-  .deck-card[data-deep] {
-    visibility: hidden;
-  }
-  /* The glow's colour cross-fade repaints a 620px gradient every frame, in the
-     middle of the card animation; on a phone it snaps instead. */
   .deck-stage {
     transition: none;
   }
-  .deck-card {
-    perspective: none;
-  }
-  /* Big blurred shadows on six stacked, moving layers leave stale tiles on
-     phone GPUs (a previous card's text drawn over the new top card). */
   .deck-face,
   .deck-card[data-top] .deck-face,
   [data-theme='light'] .deck-face,
   [data-theme='light'] .deck-card[data-top] .deck-face {
     box-shadow: 0 6px 14px -8px rgb(0 0 0 / 0.45);
   }
-  .deck-wob,
-  .deck-inner {
-    transform-style: flat;
-  }
-  .deck-inner[data-flipped] {
-    transform: none;
-  }
-  .deck-face {
-    backface-visibility: visible;
-    -webkit-backface-visibility: visible;
-    /* the face swap happens at the squash's midpoint */
+  /* Cards three or more deep aren't worth a layer. They hide only after the
+     spring has landed them, so a card sent to the back is seen arriving. */
+  .deck-card[data-deep] {
+    visibility: hidden;
     transition:
-      opacity 0s linear 0.17s,
-      box-shadow 0.5s ease,
-      border-color 0.5s ease;
-  }
-  /* A flat 2D flip: squash to a sliver, swap faces, expand. Two identical
-     keyframes so each flip restarts it. */
-  .deck-inner[data-tick='a'] {
-    animation: deck-squash-a 0.34s ease-in-out;
-  }
-  .deck-inner[data-tick='b'] {
-    animation: deck-squash-b 0.34s ease-in-out;
-  }
-  @keyframes deck-squash-a {
-    50% {
-      transform: scaleX(0.04);
-    }
-  }
-  @keyframes deck-squash-b {
-    50% {
-      transform: scaleX(0.04);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .deck-inner[data-tick] {
-      animation: none;
-    }
-  }
-  .deck-back {
-    transform: none;
-    opacity: 0;
-  }
-  .deck-inner[data-flipped] > .deck-face:not(.deck-back) {
-    opacity: 0;
-  }
-  .deck-inner[data-flipped] > .deck-back {
-    opacity: 1;
+      transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1),
+      visibility 0s linear 0.75s;
   }
 }
 [data-theme='light'] .deck-face {
