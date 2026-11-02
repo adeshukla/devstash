@@ -56,6 +56,12 @@ const TAP_PX = 6 // moved less than this = a tap, which flips the card
 const TUCK_MS = 260
 const FAN_ON_ARRIVAL_MS = 2400 // how long the deck stays fanned each time it scrolls into view (from 30% visible)
 
+// Phones and tablets: no hover, and the fan-out kept sticking there (real
+// devices fire hover/tap events an emulator doesn't), so touch never fans.
+function canHover() {
+  return window.matchMedia('(hover: hover)').matches
+}
+
 function reducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
@@ -144,7 +150,7 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
       if (e.pointerType === 'mouse' && !drag.current) setFanned(false)
     }
     const tap = (e: globalThis.PointerEvent) => {
-      if (e.pointerType === 'mouse' || reducedMotion()) return
+      if (e.pointerType === 'mouse' || reducedMotion() || !canHover()) return
       // The deck and its Back/Flip/Next buttons handle their own taps. Treating a
       // button press as "tap the section" fanned the deck out mid-move on phones.
       if ((e.target as HTMLElement).closest('.deck-stage')) return
@@ -168,7 +174,7 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
   }, [])
   useEffect(() => {
     const deck = deckRef.current
-    if (!deck || reducedMotion()) return
+    if (!deck || reducedMotion() || !canHover()) return
     let fold: number | undefined
     let armed = true
     const io = new IntersectionObserver(

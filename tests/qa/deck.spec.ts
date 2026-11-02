@@ -41,3 +41,15 @@ test.describe('on a touch screen', () => {
     expect(spread).toBeLessThan(30) // resting poses are within ±16px; the fan is ±85px here
   })
 })
+
+test('the Live badge sits below the card art, not on it', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await page.goto('/')
+  const box = await page.evaluate(() => {
+    const card = document.querySelector('.deck-card[data-top]')!
+    const art = card.querySelector('.deck-art')!.getBoundingClientRect()
+    const badge = [...card.querySelectorAll('span')].find((s) => s.textContent?.trim() === 'Live')!
+    return { artBottom: art.bottom, badgeTop: badge.getBoundingClientRect().top }
+  })
+  expect(box.badgeTop).toBeGreaterThanOrEqual(box.artBottom - 1)
+})
