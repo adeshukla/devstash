@@ -185,7 +185,10 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
         window.clearTimeout(fold)
         fold = window.setTimeout(() => {
           setGreeting(false)
-          if (!deck.matches(':hover')) setFanned(false)
+          // Touch screens leave :hover stuck on whatever was last tapped, which kept the
+          // stack fanned for good after a tap on a card. Only a real mouse keeps it open.
+          const mouseOver = window.matchMedia('(hover: hover)').matches && deck.matches(':hover')
+          if (!mouseOver) setFanned(false)
         }, FAN_ON_ARRIVAL_MS)
       },
       { threshold: [0, 0.3] }

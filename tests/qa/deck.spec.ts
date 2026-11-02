@@ -20,3 +20,24 @@ test('touching a deck button does not fan the stack out', async ({ page }) => {
     await expect(deck).not.toHaveAttribute('data-greeting')
   }
 })
+
+// Touch leaves :hover stuck on the tapped card, which used to keep the stack
+// fanned out (cards peeking from both sides) after the first tap on a phone.
+test.describe('on a touch screen', () => {
+  test.use({ viewport: { width: 375, height: 812 }, hasTouch: true, isMobile: true })
+
+  test('the stack folds back after a card is tapped', async ({ page }) => {
+    await page.goto('/')
+    await page.waitForTimeout(6000)
+    await page.locator('.deck-card[data-top]').tap()
+    await page.waitForTimeout(5000)
+    const spread = await page.evaluate(() =>
+      Math.max(
+        ...[...document.querySelectorAll<HTMLElement>('.deck-card')].map((c) =>
+          Math.abs(parseFloat(c.style.getPropertyValue('--x')))
+        )
+      )
+    )
+    expect(spread).toBeLessThan(30) // resting poses are within ±16px; the fan is ±85px here
+  })
+})
