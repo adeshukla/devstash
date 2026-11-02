@@ -91,7 +91,8 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
 
   const layout = useCallback(() => {
     const deck = deckRef.current
-    if (!deck) return
+    // A card is mid-slide: re-laying out now would snap it back and overlap the stack.
+    if (!deck || busy.current) return
     const k = Math.min(1, deck.clientWidth / 680)
     const poses = fanned ? FAN : REST
     order.forEach((ci, pos) => {
@@ -144,7 +145,9 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
     }
     const tap = (e: globalThis.PointerEvent) => {
       if (e.pointerType === 'mouse' || reducedMotion()) return
-      if (deckRef.current?.contains(e.target as Node)) return // the deck handles its own taps
+      // The deck and its Back/Flip/Next buttons handle their own taps. Treating a
+      // button press as "tap the section" fanned the deck out mid-move on phones.
+      if ((e.target as HTMLElement).closest('.deck-stage')) return
       setFanned(true)
       setGreeting(true)
       window.clearTimeout(touchFold)
