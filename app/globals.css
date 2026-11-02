@@ -1225,10 +1225,34 @@ html[data-hero-intro] .hero-ov-design {
   .deck-face {
     backface-visibility: visible;
     -webkit-backface-visibility: visible;
+    /* the face swap happens at the squash's midpoint */
     transition:
-      opacity 0.3s ease,
+      opacity 0s linear 0.17s,
       box-shadow 0.5s ease,
       border-color 0.5s ease;
+  }
+  /* A flat 2D flip: squash to a sliver, swap faces, expand. Two identical
+     keyframes so each flip restarts it. */
+  .deck-inner[data-tick='a'] {
+    animation: deck-squash-a 0.34s ease-in-out;
+  }
+  .deck-inner[data-tick='b'] {
+    animation: deck-squash-b 0.34s ease-in-out;
+  }
+  @keyframes deck-squash-a {
+    50% {
+      transform: scaleX(0.04);
+    }
+  }
+  @keyframes deck-squash-b {
+    50% {
+      transform: scaleX(0.04);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .deck-inner[data-tick] {
+      animation: none;
+    }
   }
   .deck-back {
     transform: none;
