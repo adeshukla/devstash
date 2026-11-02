@@ -76,10 +76,10 @@ function Front({ project }: { project: Project }) {
         )}
       </div>
       {/* The project's own logo, overlapping the artwork like an app icon */}
-      <div className="relative z-10 -mt-6 flex items-end justify-between pr-1 pl-3">
+      <div className="relative z-10 flex items-end justify-between pr-1 pl-3">
         <Mark
           slug={project.slug}
-          className="ring-ds-surface h-12 w-12 overflow-hidden rounded-[13px] ring-4"
+          className="ring-ds-surface -mt-6 h-12 w-12 overflow-hidden rounded-[13px] ring-4"
         />
         <div className="flex items-center gap-3">
           <Badge variant={status.variant} dot>
