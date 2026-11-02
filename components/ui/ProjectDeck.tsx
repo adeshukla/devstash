@@ -375,6 +375,7 @@ export function ProjectDeck({ cards, label }: ProjectDeckProps) {
               tabIndex={isTop ? 0 : -1}
               inert={!isTop}
               data-top={isTop || undefined}
+              data-deep={pos >= 3 || undefined}
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}
