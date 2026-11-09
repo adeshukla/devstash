@@ -1,7 +1,7 @@
 {
   "slug": "meta-tag-generator",
-  "title": "Meta Tags & Social Preview Generator",
-  "description": "One title and description as three previews — Google (with pixel-width cut-off), X card, Facebook OG — and copyable HTML, Next.js metadata or JSON-LD.",
+  "title": "Next.js SEO Kit",
+  "description": "Google, X and Facebook previews with pixel-width cut-off, plus copy-ready Next.js metadata, FAQ schema, robots.ts, sitemap.ts and an OG image file.",
   "longDescription": "Type a title, description, URL, and OG image — see exactly how it renders as a Google search result, an X/Twitter summary card, and a Facebook/OG card, side by side, with character counters against the 50–60 / 130–160 ranges search engines actually truncate at. Or paste real content first: a local extractive-summarization pass (word-frequency sentence scoring plus a filler-phrase cleanup — not an AI model call) drafts a starting title and description for you to edit. Copy the finished `<title>`/`<meta>`/`og:*`/`twitter:*` block when it looks right. Unlike the other /lab samples, this one isn't a portfolio demo — it's a genuinely useful tool for anyone shipping a page.",
   "status": "live",
   "featured": true,
@@ -30,6 +30,6 @@
     ],
     "outcome": "// TODO: No usage data yet — this is a self-initiated sample tool, not a deployed internal tool."
   },
-  "coverStats": ["3 live previews", "title 50–60", "description 130–160"],
+  "coverStats": ["3 live previews", "5 Next.js files", "title 50–60"],
   "relatedPosts": ["nextjs-16-app-router-patterns"]
 }

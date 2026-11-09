@@ -47,6 +47,14 @@ import {
 } from '../../lib/lab/utm.ts'
 import { buildSearch, pick } from '../../lib/lab/urlState.ts'
 import { escapeAttr, buildHtml, buildJsonLd, fitToWidth } from '../../lib/lab/metaTags.ts'
+import {
+  parseFaqs,
+  buildFaqJsonLd,
+  buildRobotsTs,
+  buildSitemapTs,
+  buildOgImageTsx,
+  origin,
+} from '../../lib/lab/seoKit.ts'
 
 const fields = (over = {}) => ({
   url: 'https://example.com/lp',
@@ -742,4 +750,58 @@ test('meta audit reads a head and reports what is missing, long or repeated', ()
   )
   assert.equal(good.issues.length, 0, JSON.stringify(good.issues))
   assert.deepEqual(auditHead('  '), { title: '', description: '', found: [], issues: [] })
+})
+
+test('seo kit: FAQ blocks parse, multi-line answers join, schema cannot close its script', () => {
+  const faqs = parseFaqs('Q: One?\nA: Yes.\nStill yes.\n\nnot a block\n\nq: Two?\na: </script><b>')
+  assert.deepEqual(faqs, [
+    { q: 'One?', a: 'Yes. Still yes.' },
+    { q: 'Two?', a: '</script><b>' },
+  ])
+  const out = buildFaqJsonLd(faqs)
+  assert.equal(out.match(/<\/script>/g).length, 1)
+  assert.match(out, /"@type": "FAQPage"/)
+})
+
+test('seo kit: regressions found by stress testing', () => {
+  // pairs without a blank line between them stay separate
+  assert.deepEqual(parseFaqs('Q: One?\nA: Yes.\nQ: Two?\nA: No.'), [
+    { q: 'One?', a: 'Yes.' },
+    { q: 'Two?', a: 'No.' },
+  ])
+  // full URLs pasted into the sitemap are not glued onto the site address
+  const full = buildSitemapTs(
+    'https://x.com',
+    'https://x.com/a?utm=1#top\n/my page\n/a\n//evil.com/x'
+  )
+  assert.doesNotMatch(full, /x\.com\/https/)
+  assert.match(full, /\{ url: "https:\/\/x\.com\/a" \}/)
+  assert.equal(full.match(/x\.com\/a"/g).length, 1, 'duplicates are removed')
+  assert.match(full, /my%20page/)
+  assert.match(full, /"https:\/\/x\.com\/evil\.com\/x"/, '//host/x stays a path on this site')
+  // robots: leading slash added, whole-site rules dropped, repeats removed
+  const robots = buildRobotsTs('x.com', 'admin\n/\n*\n/a\n/a')
+  assert.match(robots, /disallow: \["\/admin","\/a"\]/)
+  // not web addresses
+  assert.equal(origin('example'), '')
+  assert.equal(origin('ftp://x.com'), '')
+  assert.equal(origin('localhost:3000'), 'https://localhost:3000')
+})
+
+test('seo kit: robots never blocks /_next/, sitemap uses the site origin, OG file escapes text', () => {
+  const robots = buildRobotsTs('example.com/some/page', '/admin/\n/_next/\n')
+  assert.match(robots, /disallow: \["\/admin\/"\]/)
+  assert.doesNotMatch(robots, /_next/)
+  assert.match(robots, /sitemap: "https:\/\/example\.com\/sitemap\.xml"/)
+  const sitemap = buildSitemapTs('https://example.com/', '/\nabout')
+  assert.match(sitemap, /\{ url: "https:\/\/example\.com" \}/)
+  assert.match(sitemap, /\{ url: "https:\/\/example\.com\/about" \}/)
+  const og = buildOgImageTsx({
+    title: 'A "quoted" {brace}',
+    siteName: '',
+    background: 'red; x',
+    accent: '#fff',
+  })
+  assert.match(og, /\{"A \\"quoted\\" \{brace\}"\}/)
+  assert.match(og, /background: "#0b0f19"/)
 })

@@ -93,7 +93,7 @@ export function LabTools({ tools }: { tools: LabTool[] }) {
                   {tool.example && (
                     <div className="border-ds-border bg-ds-surface2 rounded-lg border p-3">
                       <p className="text-ds-muted text-xs">Real output · {tool.example.input}</p>
-                      <p className="text-ds-text mt-1 font-mono text-xs break-all">
+                      <p className="text-ds-text mt-1 font-mono text-xs [overflow-wrap:anywhere]">
                         {tool.example.output}
                       </p>
                     </div>

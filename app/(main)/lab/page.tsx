@@ -68,9 +68,9 @@ const TOOLS: Demo[] = [
   },
   {
     slug: 'meta-tag-generator',
-    name: 'Meta Tag & Social Preview Generator',
+    name: 'Next.js SEO Kit',
     blurb:
-      'Drafts a title and description, previews them as Google, X and Facebook cards with pixel-width truncation, and outputs HTML, Next.js metadata or JSON-LD.',
+      'Previews your title as Google, X and Facebook cards, then writes the Next.js files: metadata, FAQ schema, robots.ts, sitemap.ts and an OG image.',
     tag: 'SEO',
     preview: 'meta',
   },
@@ -182,10 +182,10 @@ function examples(): Record<string, { input: string; output: string }> {
       output: whatsappPayload('+91 98765 43210', 'Hello').payload,
     },
     'meta-tag-generator': {
-      input: 'A title and a description',
+      input: 'A shop title with an "&" in it',
       output: buildHtml({
-        title: 'Free UTM Link Builder',
-        description: 'Build clean tracking links.',
+        title: 'Shoes & Socks | Spring Sale',
+        description: 'Free shipping on running shoes.',
         url: '',
         siteName: '',
         image: '',
@@ -211,7 +211,7 @@ const JOBS = [
   { job: 'Make a QR code', tool: 'QR Code Generator', href: '/lab/qr-code-generator' },
   {
     job: 'See how my page looks on Google',
-    tool: 'Meta Tag Generator',
+    tool: 'Next.js SEO Kit',
     href: '/lab/meta-tag-generator',
   },
 ]

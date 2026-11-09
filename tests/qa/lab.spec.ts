@@ -58,6 +58,28 @@ test.describe('Meta tag generator', () => {
     await expect(page.getByText(/Tip: There is no canonical link/)).toBeVisible()
     await expect(page.getByText(/og:image must be a full/)).toBeVisible()
   })
+
+  test('the SEO kit writes FAQ schema and a robots file', async ({ page }) => {
+    await page.goto('/lab/meta-tag-generator')
+    await page.getByRole('button', { name: 'Try an example', exact: true }).click()
+    await expect(page.getByText('2 questions read')).toBeVisible()
+    await expect(page.getByText(/"@type": "FAQPage"/)).toBeVisible()
+    await page.getByRole('tab', { name: 'robots.ts' }).click()
+    await page.getByLabel('Your site address').fill('example.com')
+    await expect(page.getByText(/https:\/\/example\.com\/sitemap\.xml/)).toBeVisible()
+  })
+
+  test('the SEO kit refuses to guess: sitemap needs a site address, pasted URLs are not doubled', async ({
+    page,
+  }) => {
+    await page.goto('/lab/meta-tag-generator')
+    await page.getByRole('tab', { name: 'sitemap.ts' }).click()
+    await expect(page.getByText(/Add your site address first/)).toBeVisible()
+    await page.getByLabel('Your site address').fill('https://x.com')
+    await page.getByLabel('Your page paths').fill('https://x.com/a?utm=1\n/b')
+    await expect(page.getByText('{ url: "https://x.com/a" }')).toBeVisible()
+    await expect(page.getByText(/x\.com\/https/)).toHaveCount(0)
+  })
 })
 
 test.describe('Saved looks and backup reminder', () => {

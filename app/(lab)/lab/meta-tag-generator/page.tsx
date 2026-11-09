@@ -4,11 +4,12 @@ import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
 import { MetaTagGenerator } from '@/components/lab/MetaTagGenerator'
 import { MetaAudit } from '@/components/lab/MetaAudit'
+import { SeoKit } from '@/components/lab/SeoKit'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Meta Tag Generator with Google Preview — Free',
+  title: 'Next.js SEO Kit: Meta Tags, Schema, Sitemap',
   description:
-    'Free meta tag generator: Google, X and Facebook previews with pixel-width truncation, plus HTML, Next.js metadata and JSON-LD output. Runs in your browser.',
+    'Next.js SEO kit: metadata, FAQ schema, robots.ts, sitemap.ts and OG image code, plus Google, X and Facebook previews. Runs in your browser.',
   canonical: '/lab/meta-tag-generator',
 })
 
@@ -20,14 +21,14 @@ export default function MetaTagGeneratorPage() {
       <main className="bg-ds-bg min-h-screen">
         <section className="border-ds-border border-b px-6 py-8 text-center sm:py-12">
           <div className="mx-auto max-w-2xl">
-            <p className="text-ds-accent mb-4 font-mono text-sm">META TAGS &amp; SOCIAL PREVIEW</p>
+            <p className="text-ds-accent mb-4 font-mono text-sm">NEXT.JS SEO KIT</p>
             <h1 className={`${H1_HEADLINE}`}>See your link before you ship it.</h1>
             <p className="text-ds-muted mt-6 text-lg leading-relaxed">
               Paste real content and it drafts a starting title and description locally — no AI
               call, just sentence scoring and cleanup. Then see a live Google search preview, an
               X/Twitter card, and a Facebook/OG card, with character counts against the ranges
               search engines actually truncate at. Copy the finished &lt;meta&gt; block when it
-              looks right.
+              looks right. Further down: the other SEO files a Next.js site needs, as code.
             </p>
           </div>
         </section>
@@ -48,6 +49,23 @@ export default function MetaTagGeneratorPage() {
             </p>
             <div className="border-ds-border bg-ds-surface rounded-2xl border p-5 sm:p-8">
               <MetaAudit />
+            </div>
+          </div>
+        </section>
+
+        <section className="border-ds-border border-t px-6 py-12 sm:py-16">
+          <div className="mx-auto max-w-4xl">
+            <h2 className="text-ds-text mb-2 text-xl font-bold">
+              The other SEO files for a Next.js site
+            </h2>
+            <p className="text-ds-muted mb-6 max-w-2xl leading-relaxed">
+              FAQ schema, <code className="text-ds-accent">robots.ts</code>,{' '}
+              <code className="text-ds-accent">sitemap.ts</code> and an{' '}
+              <code className="text-ds-accent">opengraph-image.tsx</code> for the App Router. Fill
+              in a few fields and copy the file.
+            </p>
+            <div className="border-ds-border bg-ds-surface rounded-2xl border p-5 sm:p-8">
+              <SeoKit />
             </div>
           </div>
         </section>
