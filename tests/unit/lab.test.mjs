@@ -1,6 +1,17 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
+import {
+  validateEventName,
+  validateParams,
+  validateRecommended,
+  checkEvent,
+  buildDataLayer,
+  buildGtag,
+  jsValue,
+  TEMPLATES,
+} from '../../lib/lab/ga4Event.ts'
+import { wrapLines, fitText, buildOgSvg } from '../../lib/lab/ogImage.ts'
 import { buildWhatsAppLink, withRef, htmlSnippet, COUNTRIES } from '../../lib/lab/whatsapp.ts'
 import {
   parseRobots,
@@ -1025,6 +1036,191 @@ test('WhatsApp link: campaign code goes into the message, Hindi kept, text is en
     '<a href="https://wa.me/1?text=a&amp;b=&quot;c&quot;" target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>'
   )
   assert.equal(new Set(COUNTRIES.map((c) => `${c.name}`)).size, COUNTRIES.length)
+})
+
+test('GA4 event names follow Google’s documented rules', () => {
+  const probs = (n) => validateEventName(n).filter((i) => i.level === 'problem').length
+  assert.deepEqual(validateEventName('generate_lead'), [])
+  assert.equal(probs('My Event'), 1, 'a space is a problem')
+  assert.ok(
+    validateEventName('My Event').some((i) => i.level === 'tip'),
+    'capitals get a case tip'
+  )
+  assert.equal(probs('1abc'), 1, 'must start with a letter')
+  assert.equal(probs('a'.repeat(41)), 1, 'over 40 characters')
+  assert.equal(probs('a'.repeat(40)), 0)
+  assert.equal(probs('page_view'), 1, 'a reserved name')
+  assert.equal(probs('Page_View'), 0, 'case sensitive: a different name is not reserved')
+  assert.equal(probs('query_id_x'), 1, 'the one documented reserved event prefix')
+  assert.equal(probs('google_lead'), 0, 'google_ is documented for parameters, so only a tip here')
+  assert.ok(validateEventName('google_lead').some((i) => i.level === 'tip'))
+  assert.equal(probs('सदस्यता_पूर्ण'), 0, 'non-English letters are allowed')
+})
+
+test('GA4 parameters: limits, reserved prefixes, personal data', () => {
+  const P = (name, value = 'x') => ({ name, value })
+  const probs = (ps) =>
+    validateParams(ps)
+      .filter((i) => i.level === 'problem')
+      .map((i) => i.text)
+  assert.equal(probs(Array.from({ length: 25 }, (_, i) => P(`p${i}`))).length, 0)
+  assert.match(probs(Array.from({ length: 26 }, (_, i) => P(`p${i}`)))[0], /26 parameters/)
+  assert.match(probs([P('a'), P('a')])[0], /used twice/)
+  for (const bad of ['google_x', 'ga_x', 'firebase_x', '_x'])
+    assert.ok(probs([P(bad)]).length > 0, bad)
+  assert.match(probs([P('note', 'y'.repeat(101))])[0], /limit is 100/)
+  assert.equal(probs([P('note', 'y'.repeat(100))]).length, 0)
+  assert.equal(probs([P('page_location', 'u'.repeat(900))]).length, 0, 'page_location may be 1000')
+  assert.equal(probs([P('page_title', 't'.repeat(301))]).length, 1, 'page_title may be 300')
+  assert.match(probs([P('contact', 'adesh@example.com')])[0], /email address/)
+  const digits = validateParams([P('ref', '98765 43210')])
+  assert.ok(digits.length === 1 && digits[0].level === 'tip', 'long digits are a tip, not a block')
+  assert.match(probs([P('', 'orphan value')])[0], /no name/)
+})
+
+test('GA4 recommended events: required parameters, value needs currency, numbers stay numbers', () => {
+  const P = (name, value) => ({ name, value })
+  const texts = (n, ps, items) => validateRecommended(n, ps, items).map((i) => i.text)
+  assert.deepEqual(texts('custom_thing', [], false), [], 'a custom event has no recommended rules')
+  assert.ok(
+    texts('purchase', [P('currency', 'INR'), P('value', '499')], true).some((t) =>
+      /transaction_id/.test(t)
+    )
+  )
+  assert.ok(
+    texts(
+      'purchase',
+      [P('transaction_id', 'T1'), P('currency', 'INR'), P('value', '1')],
+      false
+    ).some((t) => /items array/.test(t))
+  )
+  assert.ok(texts('generate_lead', [P('value', '500')], false).some((t) => /currency/.test(t)))
+  assert.ok(
+    texts('generate_lead', [P('currency', 'INR'), P('value', '₹500')], false).some((t) =>
+      /must be a number/.test(t)
+    )
+  )
+  assert.deepEqual(texts('generate_lead', [P('currency', 'INR'), P('value', '500')], false), [])
+  assert.ok(
+    texts('select_content', [P('content_id', '12345')], false).some((t) => /not a digit/.test(t))
+  )
+  assert.deepEqual(texts('search', [P('search_term', 't-shirts')], false), [])
+  assert.equal(jsValue('500'), '500')
+  assert.equal(jsValue('007'), "'007'", 'a leading zero is an ID, not a number')
+  assert.equal(jsValue('1e5'), "'1e5'")
+  assert.equal(jsValue("it's"), "'it\\'s'")
+  assert.equal(jsValue('</script>'), "'\\u003c/script>'")
+  assert.equal(TEMPLATES.length, 10)
+})
+
+test('GA4 event code: dataLayer push and gtag call', () => {
+  const ps = [
+    { name: 'currency', value: 'INR' },
+    { name: 'value', value: '500' },
+    { name: 'my param', value: 'a b' },
+    { name: '', value: 'ignored' },
+  ]
+  assert.equal(
+    buildGtag('generate_lead', ps, false),
+    "gtag('event', 'generate_lead', {\n  currency: 'INR',\n  value: 500,\n  'my param': 'a b',\n});"
+  )
+  assert.equal(
+    buildDataLayer('generate_lead', ps.slice(0, 2), true),
+    "window.dataLayer = window.dataLayer || [];\nwindow.dataLayer.push({\n  event: 'generate_lead',\n  currency: 'INR',\n  value: 500,\n  items: [{ item_id: 'SKU_12345', item_name: 'Example product' }],\n});"
+  )
+  assert.equal(buildGtag('login', [], false), "gtag('event', 'login');")
+  assert.equal(buildGtag('', ps, false), '')
+  // problems come before tips
+  const issues = checkEvent('My_Event', [{ name: 'a', value: 'adesh@example.com' }], false)
+  assert.equal(issues[0].level, 'problem')
+  assert.equal(issues.at(-1).level, 'tip')
+})
+
+test('OG image: wrapping, fitting and the SVG', () => {
+  const m = (t, s) => Array.from(t).length * s * 0.5
+  assert.deepEqual(wrapLines('aaa bbb ccc', 40, 10, m), ['aaa bbb', 'ccc'])
+  const broken = wrapLines('abcdefghij', 30, 10, m)
+  assert.equal(broken.join(''), 'abcdefghij')
+  assert.ok(broken.every((l) => m(l, 10) <= 30))
+  // Hindi: a long word breaks only between whole letters, never before a vowel sign
+  const hindi = wrapLines('मुझेजानकारीचाहिए', 40, 10, m)
+  assert.equal(hindi.join(''), 'मुझेजानकारीचाहिए')
+  assert.ok(
+    hindi.every((l) => !/^\p{M}/u.test(l)),
+    'no line starts with a combining mark'
+  )
+
+  const box = { width: 1000, height: 300 }
+  const o = { max: 100, min: 40, lineHeight: 1.15, maxLines: 3 }
+  assert.equal(fitText('Short title', box, m, o).fontSize, 100)
+  const mid = fitText('A much longer title that needs more room than one line gives it', box, m, o)
+  assert.ok(mid.fontSize < 100 && mid.fontSize >= 40 && !mid.truncated)
+  const huge = fitText('word '.repeat(200), box, m, o)
+  assert.equal(huge.truncated, true)
+  assert.ok(huge.lines.length <= 3 && huge.lines.at(-1).endsWith('…'))
+
+  const base = {
+    title: 'Fish & <Chips> "to go"',
+    subtitle: 'Sub',
+    siteName: 'site.com',
+    theme: 'night',
+    accent: '',
+    align: 'left',
+    pattern: 'grid',
+    size: 'og',
+  }
+  const svg = buildOgSvg(base, m)
+  assert.match(svg, /width="1200" height="630"/)
+  // the title wraps onto two lines here, and every special character is escaped on both
+  assert.match(svg, /Fish &amp; &lt;Chips&gt; &quot;to/)
+  assert.match(svg, /go&quot;/)
+  assert.doesNotMatch(svg, /<Chips>/)
+  assert.match(svg, /<path d="M/, 'grid pattern is drawn')
+  assert.match(svg, /fill="#60a5fa"/, 'empty accent uses the theme accent')
+  assert.match(
+    buildOgSvg({ ...base, accent: 'javascript:bad' }, m),
+    /fill="#60a5fa"/,
+    'a bad colour falls back'
+  )
+  const square = buildOgSvg({ ...base, accent: '#ff0000', align: 'center', size: 'square' }, m)
+  assert.match(square, /width="1080" height="1080"/)
+  assert.match(square, /text-anchor="middle"/)
+  assert.match(square, /fill="#ff0000"/)
+  assert.match(buildOgSvg({ ...base, title: '' }, m), /Your title goes here/)
+})
+
+test('OG image: the accent bar never touches the site name or the title, at any title length', () => {
+  const m = (t, s) => Array.from(t).length * s * 0.5
+  for (const size of ['og', 'cover', 'square'])
+    for (const title of [
+      'Short',
+      'A title long enough to wrap onto several lines in the image '.repeat(3),
+      'word '.repeat(200),
+    ]) {
+      const svg = buildOgSvg(
+        {
+          title,
+          subtitle: 'Sub',
+          siteName: 'site.com',
+          theme: 'night',
+          accent: '',
+          align: 'left',
+          pattern: 'none',
+          size,
+        },
+        m
+      )
+      const site = Number(svg.match(/<text x="\d+" y="(\d+)" font-size="\d+" font-weight="600"/)[1])
+      const bar = Number(svg.match(/<rect x="\d+" y="(\d+)" width="64" height="6"/)[1])
+      const first = svg.match(/<text x="\d+" y="(\d+)" font-size="(\d+)" font-weight="700"/)
+      // a tall script (Devanagari) can reach one full em above its baseline
+      const firstTop = Number(first[1]) - Number(first[2]) * 1.0
+      assert.ok(bar >= site + 8, `${size}: bar ${bar} is below the site name at ${site}`)
+      assert.ok(
+        firstTop >= bar + 6 + 8,
+        `${size}: title starts at ${firstTop}, below the bar at ${bar}`
+      )
+    }
 })
 
 // Synthetic exports in GA4's CSV layout (comment header, Grand total line, rate columns).

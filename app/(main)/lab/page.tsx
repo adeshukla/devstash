@@ -18,6 +18,7 @@ import { cleanReport } from '@/lib/lab/reportClean'
 import { whatsappPayload } from '@/lib/lab/qrPayload'
 import { buildHtml } from '@/lib/lab/metaTags'
 import { buildWhatsAppLink } from '@/lib/lab/whatsapp'
+import { buildGtag } from '@/lib/lab/ga4Event'
 
 const title = 'Lab — Interactive Tools & Live Demos'
 const description =
@@ -82,6 +83,22 @@ const TOOLS: Demo[] = [
       'A click-to-chat link with a country picker, a message already typed and a campaign code, plus a QR code and an HTML snippet.',
     tag: 'Marketing',
     preview: 'chat',
+  },
+  {
+    slug: 'ga4-event-builder',
+    name: 'GA4 Event Builder',
+    blurb:
+      'Build a GA4 event, check its name and parameters against Google’s limits, and copy the dataLayer push or gtag.js call.',
+    tag: 'Analytics',
+    preview: 'event',
+  },
+  {
+    slug: 'og-image-maker',
+    name: 'OG Image Maker',
+    blurb:
+      'Fit a title into a share image or blog cover, pick a look, and download a PNG or SVG. Drawn in your browser, works with Hindi.',
+    tag: 'Design',
+    preview: 'card',
   },
   {
     slug: 'utm-builder',
@@ -215,6 +232,17 @@ function examples(): Record<string, { input: string; output: string }> {
         ref: 'diwali-poster',
       }).link,
     },
+    'ga4-event-builder': {
+      input: 'generate_lead with currency INR and value 500',
+      output: buildGtag(
+        'generate_lead',
+        [
+          { name: 'currency', value: 'INR' },
+          { name: 'value', value: '500' },
+        ],
+        false
+      ).replace(/\s*\n\s*/g, ' '),
+    },
     'css-shapes-playground': {
       input: 'A morphing blob',
       output: 'border-radius: 42% 58% 63% 37% / 47% 42% 58% 53%;',
@@ -231,6 +259,16 @@ const JOBS = [
     job: 'Get customers to message me on WhatsApp',
     tool: 'WhatsApp Link Generator',
     href: '/lab/whatsapp-link-generator',
+  },
+  {
+    job: 'Check a GA4 event before I ship it',
+    tool: 'GA4 Event Builder',
+    href: '/lab/ga4-event-builder',
+  },
+  {
+    job: 'Make a share image for a page',
+    tool: 'OG Image Maker',
+    href: '/lab/og-image-maker',
   },
   {
     job: 'See how my page looks on Google',
@@ -301,7 +339,7 @@ export default async function LabPage() {
       <section className="border-ds-border border-b py-10">
         <div className="max-w-site mx-auto px-6">
           <h2 className="text-ds-text text-xl font-bold tracking-tight">What do you need to do?</h2>
-          <ul className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {JOBS.map((j) => (
               <li key={j.href}>
                 <Link

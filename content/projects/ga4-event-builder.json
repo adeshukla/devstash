@@ -1,0 +1,34 @@
+{
+  "slug": "ga4-event-builder",
+  "title": "GA4 Event Builder",
+  "description": "Build a GA4 custom event, check its name and parameters against Google's limits and reserved names, and copy the dataLayer push for Tag Manager or the gtag.js call.",
+  "longDescription": "A GA4 event that breaks one of Google's rules is not rejected loudly: it is dropped, and the gap shows up weeks later in a report. This tool checks the event name and parameters as you type against the rules in Google's own documentation (name format and 40-character limit, reserved names, 25 parameters, 100-character values, reserved prefixes), checks recommended events for their required parameters, flags values that look like an email address, and writes the code to send it, either as a dataLayer push for Google Tag Manager or as a gtag.js call.",
+  "status": "live",
+  "featured": false,
+  "order": 10,
+  "category": "tool",
+  "tech": ["Next.js", "TypeScript", "Tailwind CSS"],
+  "liveUrl": "/lab/ga4-event-builder",
+  "image": "/images/projects/ga4-event-builder.webp",
+  "startDate": "2026-11-09",
+  "year": 2026,
+  "highlights": [
+    "Fully client-side: event names and values are never uploaded or stored",
+    "Checks against Google's documented rules: name format, 40-character limit, reserved names, 25 parameters, 100-character values",
+    "Ten recommended events with the parameters Google marks as required, and a check that value comes with a currency",
+    "Flags values that look like an email address, since Google's policy forbids personal data",
+    "Same event as a Tag Manager dataLayer push or a gtag.js call, with the setup step that each one still needs"
+  ],
+  "caseStudy": {
+    "problem": "A team adds a custom event with a space in its name, or a 50-character one, or a parameter that is the customer's email. GA4 does not warn the person who wrote it. The event is dropped or the data is not allowed, and nobody notices until a report is empty.",
+    "approach": "Take the limits and reserved names from Google's own documentation, check them while the event is being written, and generate the exact code to send it. Recommended events start from the parameters Google names.",
+    "decisions": [
+      "Rules come from Google's help pages, not memory, and the page says they change. Only the event-name prefix Google documents for web (query_id) is an error; the others are shown as advice.",
+      "A dataLayer push alone sends nothing, so the tool says what Tag Manager still needs: a trigger and a tag that reads the parameters.",
+      "Personal data is flagged, not blocked, because only the person who owns the data can tell what is personal."
+    ],
+    "outcome": "// TODO: No usage data yet. This is a self-initiated tool, not a deployed one."
+  },
+  "coverStats": ["Google's own rules", "dataLayer + gtag", "no data sent"],
+  "relatedPosts": []
+}

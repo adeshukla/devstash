@@ -27,6 +27,8 @@ const ROUTES = [
   '/lab/utm-report-cleaner',
   '/lab/qr-code-generator',
   '/lab/whatsapp-link-generator',
+  '/lab/ga4-event-builder',
+  '/lab/og-image-maker',
   '/lab/css-shapes-playground',
   '/lab/illustration-generator',
   '/lab/meta-tag-generator',

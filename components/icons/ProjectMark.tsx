@@ -122,6 +122,8 @@ BRANDS['utm-link-checker'] = monogram('UC')
 BRANDS['utm-report-cleaner'] = monogram('RC')
 BRANDS['qr-code-generator'] = monogram('QR')
 BRANDS['whatsapp-link-generator'] = monogram('WA')
+BRANDS['ga4-event-builder'] = monogram('GA')
+BRANDS['og-image-maker'] = monogram('OG')
 
 const DEVSTASH: ProjectBrand = {
   generic: true,

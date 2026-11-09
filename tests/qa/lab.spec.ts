@@ -218,6 +218,8 @@ test.describe('Every tool page has the same frame', () => {
     '/lab/illustration-generator',
     '/lab/ai-content-pipeline',
     '/lab/whatsapp-link-generator',
+    '/lab/ga4-event-builder',
+    '/lab/og-image-maker',
   ]
   for (const path of PAGES) {
     test(`${path} has an FAQ, a "Free tool" footer and no accessibility violations`, async ({
@@ -319,5 +321,99 @@ test.describe('AI crawler check and robots.ts opt-out', () => {
     await expect(code).toContainText('rules: [')
     await expect(code).toContainText('"GPTBot","ClaudeBot","Google-Extended"')
     await expect(code).not.toContainText('OAI-SearchBot')
+  })
+})
+
+test.describe('GA4 event builder', () => {
+  test('starts from a recommended event, checks it and switches between dataLayer and gtag', async ({
+    page,
+  }) => {
+    await page.goto('/lab/ga4-event-builder')
+    await page.getByLabel('Start from a recommended event').selectOption('generate_lead')
+    const code = page.locator('pre').filter({ hasText: 'dataLayer' })
+    await expect(code).toContainText("event: 'generate_lead'")
+    await expect(code).toContainText('value: 500')
+    await expect(page.getByText('No problems found')).toBeVisible()
+    // value without a currency is a problem
+    await page.getByLabel('Parameter 1 name').fill('')
+    await expect(page.getByText(/"currency" is required if you set "value"/)).toBeVisible()
+    await page.getByRole('tab', { name: 'gtag.js' }).click()
+    await expect(page.locator('pre').filter({ hasText: "gtag('event'" })).toContainText(
+      "gtag('event', 'generate_lead'"
+    )
+  })
+
+  test('flags a bad name and personal data', async ({ page }) => {
+    await page.goto('/lab/ga4-event-builder')
+    await page.getByLabel('Event name').fill('My Event')
+    await expect(page.getByText(/Use only letters, numbers and underscores/)).toBeVisible()
+    await expect(page.getByText(/Event names are case sensitive:/)).toBeVisible()
+    await page.getByLabel('Event name').fill('page_view')
+    await expect(page.getByText(/name Google reserves/)).toBeVisible()
+    await page.getByLabel('Event name').fill('quote_requested')
+    await page.getByLabel('Parameter 1 name').fill('contact')
+    await page.getByLabel('Parameter 1 value').fill('adesh@example.com')
+    await expect(page.getByText(/looks like an email address/)).toBeVisible()
+  })
+})
+
+test.describe('OG image maker', () => {
+  // Chrome opens a native Save dialog that a test cannot answer; Firefox and Safari fall back to a
+  // plain download, so that is the path checked here.
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      delete (window as unknown as { showSaveFilePicker?: unknown }).showSaveFilePicker
+    })
+  })
+
+  const pngSize = (buf: Buffer) => ({ w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) })
+
+  test('draws a Hindi title and downloads a real 1200 x 630 PNG and an SVG', async ({ page }) => {
+    await page.goto('/lab/og-image-maker')
+    await page.getByLabel('Title', { exact: true }).fill('ट्रेल रनिंग जूते: मानसून गाइड')
+    await page.getByLabel('Site name (optional)').fill('northpeak.example')
+    const preview = page.getByRole('img', { name: /Preview: ट्रेल रनिंग/ })
+    await expect(preview).toBeVisible()
+    const src = decodeURIComponent((await preview.getAttribute('src')) ?? '')
+    expect(src).toContain('<svg')
+    expect(src).toContain('ट्रेल')
+    expect(src).toContain('northpeak.example')
+
+    const [png] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('button', { name: 'Download PNG' }).click(),
+    ])
+    expect(png.suggestedFilename()).toBe('og-image-1200x630.png')
+    const bytes = await (await import('node:fs/promises')).readFile((await png.path())!)
+    expect(bytes.subarray(1, 4).toString()).toBe('PNG')
+    expect(pngSize(bytes)).toEqual({ w: 1200, h: 630 })
+
+    const [svg] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('button', { name: 'Download SVG' }).click(),
+    ])
+    const text = await (await import('node:fs/promises')).readFile((await svg.path())!, 'utf8')
+    expect(text.startsWith('<svg')).toBe(true)
+    expect(text).toContain('ट्रेल')
+  })
+
+  test('a long title still fits, the size changes the file, and a hard-to-see accent is flagged', async ({
+    page,
+  }) => {
+    await page.goto('/lab/og-image-maker')
+    const long =
+      'The complete beginner guide to choosing lightweight trail running shoes for the monsoon '.repeat(
+        3
+      )
+    await page.getByLabel('Title', { exact: true }).fill(long.trim())
+    await expect(page.getByRole('img', { name: /Preview:/ })).toBeVisible()
+    await page.getByLabel('Size').selectOption('cover')
+    const [png] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('button', { name: 'Download PNG' }).click(),
+    ])
+    expect(png.suggestedFilename()).toBe('og-image-1600x900.png')
+    await page.getByLabel('Accent colour').fill('#0c1020')
+    await expect(page.getByRole('alert').filter({ hasText: 'hard to see' })).toBeVisible()
   })
 })

@@ -19,7 +19,17 @@
 import './LabPreview.css'
 
 type PreviewKind =
-  'pipeline' | 'shapes' | 'illustration' | 'meta' | 'utm' | 'qr' | 'check' | 'merge' | 'chat'
+  | 'pipeline'
+  | 'shapes'
+  | 'illustration'
+  | 'meta'
+  | 'utm'
+  | 'qr'
+  | 'check'
+  | 'merge'
+  | 'chat'
+  | 'event'
+  | 'card'
 
 const FRAME =
   'relative overflow-hidden rounded-lg border border-ds-border bg-ds-surface2 aspect-[16/9] w-full'
@@ -521,8 +531,75 @@ function Chat() {
   )
 }
 
+/** An event call with the "no problems" check beside it. */
+function EventArt() {
+  const lines = ['dataLayer.push({', "  event: 'generate_lead',", '  value: 500,', '})']
+  return (
+    <Canvas>
+      <rect
+        x="40"
+        y="34"
+        width="400"
+        height="150"
+        rx="16"
+        className="fill-ds-surface stroke-ds-border"
+      />
+      {lines.map((l, i) => (
+        <text
+          key={l}
+          x="62"
+          y={72 + i * 32}
+          className={`fill-ds-text ${MONO}`}
+          fontSize="19"
+          xmlSpace="preserve"
+        >
+          {l}
+        </text>
+      ))}
+      <rect
+        x="40"
+        y="200"
+        width="196"
+        height="38"
+        rx="19"
+        className="fill-ds-success/15 stroke-ds-success"
+      />
+      <text x="62" y="225" className={`fill-ds-success ${MONO}`} fontSize="15">
+        ✓ no problems
+      </text>
+    </Canvas>
+  )
+}
+
+/** A share image with a title fitted into it. */
+function CardArt() {
+  return (
+    <Canvas>
+      <rect
+        x="48"
+        y="30"
+        width="384"
+        height="210"
+        rx="16"
+        className="fill-ds-surface stroke-ds-border"
+      />
+      <rect x="76" y="60" width="64" height="6" rx="3" className="fill-ds-accent" />
+      <rect x="76" y="92" width="300" height="20" rx="6" className="fill-ds-text/80" />
+      <rect x="76" y="122" width="230" height="20" rx="6" className="fill-ds-text/80" />
+      <rect x="76" y="160" width="190" height="10" rx="5" className="fill-ds-border" />
+      <text x="76" y="214" className={`fill-ds-accent-strong ${MONO}`} fontSize="14">
+        1200 × 630
+      </text>
+    </Canvas>
+  )
+}
+
 export function LabPreview({ kind }: { kind: PreviewKind }) {
   switch (kind) {
+    case 'event':
+      return <EventArt />
+    case 'card':
+      return <CardArt />
     case 'chat':
       return <Chat />
     case 'pipeline':

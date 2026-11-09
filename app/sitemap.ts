@@ -122,6 +122,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'utm-report-cleaner',
     'qr-code-generator',
     'whatsapp-link-generator',
+    'ga4-event-builder',
+    'og-image-maker',
     'css-shapes-playground',
     'meta-tag-generator',
     'illustration-generator',

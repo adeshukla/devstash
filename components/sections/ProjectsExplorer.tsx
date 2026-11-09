@@ -311,10 +311,8 @@ export function ProjectsExplorer({
                   )}
                 >
                   {label}{' '}
-                  {/* Faded only when not selected: at 80% the selected chip measured 4.0:1, below 4.5:1. */}
-                  <span className={cn('font-mono text-xs', category !== key && 'opacity-80')}>
-                    {n}
-                  </span>
+                  {/* Not faded: at 80% opacity the count measured 3.9-4.0:1, below the 4.5:1 minimum. */}
+                  <span className="font-mono text-xs">{n}</span>
                 </button>
               )
             )}

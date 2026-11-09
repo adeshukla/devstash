@@ -1,0 +1,34 @@
+{
+  "slug": "og-image-maker",
+  "title": "OG Image Maker",
+  "description": "Make an Open Graph share image or blog cover from a title: five themes, patterns, three sizes, PNG and SVG downloads. Drawn in the browser, works with Hindi.",
+  "longDescription": "Most pages share a plain link because making a preview image takes a design tool. This one fits a title into an image for you: it wraps the words, shrinks the type until the title fits, and keeps letters and their marks together in scripts such as Devanagari. The image is drawn from your device's own fonts, so the preview is exactly the file you download. Nothing is uploaded.",
+  "status": "live",
+  "featured": false,
+  "order": 11,
+  "category": "tool",
+  "tech": ["Next.js", "TypeScript", "SVG", "Canvas"],
+  "liveUrl": "/lab/og-image-maker",
+  "image": "/images/projects/og-image-maker.webp",
+  "startDate": "2026-11-09",
+  "year": 2026,
+  "highlights": [
+    "Fully client-side: the title and the image never leave the browser",
+    "The title is wrapped and sized to fit, and cut with an ellipsis only at the smallest size",
+    "Long words break between whole characters, so Hindi letters and their marks stay together",
+    "Preview and download are the same SVG, so what you see is what you save",
+    "1200 x 630 share image, 1600 x 900 cover and a square size, as PNG or SVG"
+  ],
+  "caseStudy": {
+    "problem": "A blog post or tool page goes out with a plain link because nobody wants to open a design tool for a share image. Or the image is made, and a long title runs off the edge.",
+    "approach": "Measure the real width of the text on a canvas, wrap it greedily, and step the font size down until the title fits the box in at most four lines. Draw the result as an SVG and turn the same SVG into the PNG.",
+    "decisions": [
+      "System fonts only. A picture made in the browser cannot load a web font, so using web fonts would make the preview and the file differ.",
+      "Break long words between graphemes, not code points, so a Devanagari letter is never separated from its vowel sign.",
+      "A warning, not a block, when the accent colour is hard to see on the chosen background."
+    ],
+    "outcome": "// TODO: No usage data yet. This is a self-initiated tool, not a deployed one."
+  },
+  "coverStats": ["PNG + SVG", "3 sizes", "no data sent"],
+  "relatedPosts": []
+}
