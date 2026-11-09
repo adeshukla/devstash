@@ -1,0 +1,115 @@
+---
+title: 'QR Codes That Never Expire: Static vs Dynamic, Explained'
+seoTitle: 'QR Codes That Never Expire: Static vs Dynamic'
+slug: 'qr-codes-that-never-expire-static-vs-dynamic'
+description: 'Why some free QR codes stop working, how static and dynamic codes differ, and how to make one that never expires, with WhatsApp, UPI and Wi-Fi examples.'
+author: 'Adesh Shukla'
+createdAt: '2026-11-09'
+updatedAt: '2026-11-09'
+category: 'tutorials'
+tags: ['qr-codes', 'static-qr', 'free-tools', 'print-marketing']
+readingTime: 6
+canonical: 'https://devstash.me/blog/qr-codes-that-never-expire-static-vs-dynamic'
+draft: false
+featured: false
+faqs:
+  - question: 'Do QR codes expire?'
+    answer: 'The printed pattern never expires. What can stop is the service behind it. A dynamic code points to a short link on the generator’s server, so it can stop working if that service lapses. A static code holds your content itself, so it works for as long as what it points to still exists.'
+  - question: 'How can I tell if a QR code is dynamic?'
+    answer: 'Scan it with your phone camera and read the address in the preview before opening it. If it is a short link on a domain you do not recognise, and not the page you expected, the code is dynamic.'
+  - question: 'Can I change where a static QR code points after printing?'
+    answer: 'No, the destination is part of the pattern. Point the code at a page on your own domain, for example yoursite.com/menu, and change what that address shows or redirects to when you need to.'
+  - question: 'Can I count scans with a static code?'
+    answer: 'Not inside the generator, because a static code never contacts it. Tag the link with UTM parameters and watch the visits in GA4, which counts the people who arrive, not the scans.'
+  - question: 'Is it safe to put a Wi-Fi password in a QR code?'
+    answer: 'Anyone who scans the code can read the password it contains. Print it only where guests should have access, and print a new code if you change the password.'
+---
+
+A QR code on a flyer, a menu or a shop window looks permanent. Whether it is depends on one question: does the code contain your address, or the address of someone else's server?
+
+This post explains the difference between static and dynamic codes, how to check which one you have before you print a thousand of them, and how to make a code that keeps working.
+
+## What is actually inside the code
+
+A **static** code stores your content in the pattern itself: a web address, a phone number, Wi-Fi details. A phone reads the pattern and acts on it. Nobody else is involved.
+
+A **dynamic** code stores a short link that belongs to the generator. When someone scans it, their phone goes to the generator's server, which sends them on to your page. That detour is what lets you change the destination later and count scans. It is also why the code depends on the generator: if the plan lapses or the service stops, the redirect can stop, even though the printed pattern is unchanged.
+
+Vendor guides, including ones from companies that sell dynamic codes, describe it this way. What happens after a plan ends differs from one provider to the next. Some keep inactive codes for a limited time, and getting one working again usually means paying.
+
+| Feature | Static | Dynamic |
+| --- | --- | --- |
+| What the code contains | Your content | A short link on the generator's domain |
+| Works if the generator stops | Yes | It can stop |
+| Change the destination after printing | No | Yes |
+| Scan counts in the generator | No | Usually yes |
+| Typical cost | Free, no account | Often a subscription |
+
+Neither kind is wrong. They trade permanence against flexibility.
+
+## How to tell which one you have
+
+Open your phone camera and point it at the code, but do not open the link. Read the address in the preview.
+
+- Your own page, or the phone number, or the Wi-Fi name you typed: static.
+- A short address on a domain you do not recognise: dynamic. It points at the generator, and the generator points at you.
+
+Do this before you print, not after.
+
+## Static does not mean it cannot break
+
+A static code that points to a page stops working if that page is deleted or moved. You cannot edit a printed pattern.
+
+The fix needs no third party: point the code at a page on **your own domain**, such as `yoursite.com/menu`, and change what that address shows or redirects to when something changes. You get the permanence of a static code and the edit-later ability of a dynamic one, and no one else's server in the middle.
+
+## Counting scans without a dynamic code
+
+A static code cannot count its own scans, because it never contacts the generator. Tag the link instead. Build it with the [UTM builder](/lab/utm-builder), for example `?utm_source=poster&utm_medium=...&utm_campaign=diwali-26`, and GA4 shows the visits that arrive from it.
+
+One catch with the medium. GA4's default channel grouping does not recognise `qr`, so the [link checker](/lab/utm-link-checker) reports a link with `utm_medium=qr` as Unassigned. You can accept that and build a report on the source, or pick a medium GA4 does recognise, such as `referral`, so the visits land in a named channel. Check the result in the checker before you print. The [UTM naming convention guide](/blog/utm-naming-convention-for-teams) covers choosing the values.
+
+This counts people who arrive on your site. It does not count scans that never loaded the page.
+
+## Make one that never expires
+
+The [QR code generator](/lab/qr-code-generator) makes static codes in your browser. Nothing is uploaded and there is no redirect.
+
+1. Pick what the code should open: a website, WhatsApp, UPI payment, Wi-Fi, contact card, email, phone number or text.
+2. Fill in the details. The form explains what is wrong in plain words, for example a missing country code.
+3. Keep a dark code on a light background. The tool warns when your colours risk an unreadable code.
+4. Download **SVG** for print shops and signs, because it stays sharp at any size, or **PNG** for documents and screens.
+5. Print a sample at the final size and scan it with two different phones before the full run.
+
+A code should be printed at least 2 cm wide, with the blank border around it left clear.
+
+## Pick the right type
+
+- **Website.** Tag the link first, as above.
+- **WhatsApp.** Use the [WhatsApp link generator](/lab/whatsapp-link-generator). It adds the country code for you and can put a campaign code in the message. A WhatsApp link opens WhatsApp, not your website, so it cannot carry UTM tags; the code in the message tells you where the chat came from.
+- **UPI payment.** The code holds the UPI ID and payee name you type, so anyone who scans can pay that ID. Check the name, then pay a small amount from another UPI app before you print. The tool follows NPCI's UPI linking specification, and the newest public version I could find is from 2017, so the test payment matters.
+- **Wi-Fi.** Anyone who scans can read the password. Print it only where guests should have access.
+- **Contact card.** Phones offer to save the contact. Everything you typed is stored inside the code.
+
+## Error correction: why a scuffed code still scans
+
+A QR code carries extra data so a reader can recover when part of the pattern is damaged. There are four levels, which Denso Wave, the company that created QR codes, [lists as able to restore about 7%, 15%, 25% or 30% of the data](https://www.qrcode.com/en/about/error_correction.html). A higher level makes the pattern denser.
+
+For a screen, the standard level is enough. For print that may get scuffed, such as a sticker on a counter, choose a tougher level. The generator offers both, under style and size.
+
+## When dynamic is the right choice
+
+Use a dynamic code when you need to change where printed codes point and you cannot host a redirect yourself, or when you want scan counts inside the tool, and you accept paying for as long as the codes are in use.
+
+Before you buy, read the terms for three things: what happens to the code if you stop paying, how long inactive codes are kept, and whether you can export your list of destinations.
+
+## Checklist before printing
+
+- Scan the code with two phones and open the link.
+- Confirm the page it points to will exist for as long as the print will.
+- If you tagged the link, open GA4's Realtime report and check the visit appears under the channel you expect.
+- For UPI, make a small test payment from another app.
+- Print one sample at the final size and scan that.
+
+## Need tracking set up on a campaign page?
+
+I build landing pages and the tagging that goes with them. See [my services](/services) or [get in touch](/contact).

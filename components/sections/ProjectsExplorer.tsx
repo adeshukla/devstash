@@ -310,7 +310,11 @@ export function ProjectsExplorer({
                       : 'border-ds-border text-ds-muted hover:border-ds-border2 hover:text-ds-text'
                   )}
                 >
-                  {label} <span className="font-mono text-xs opacity-80">{n}</span>
+                  {label}{' '}
+                  {/* Faded only when not selected: at 80% the selected chip measured 4.0:1, below 4.5:1. */}
+                  <span className={cn('font-mono text-xs', category !== key && 'opacity-80')}>
+                    {n}
+                  </span>
                 </button>
               )
             )}
