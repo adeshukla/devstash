@@ -1,0 +1,33 @@
+# ----------------------------------------
+# Traffic acquisition: Session source / medium
+# Account: Northpeak Store (SYNTHETIC SAMPLE - invented numbers, GA4 CSV layout)
+# Property: northpeak.example - GA4
+# ----------------------------------------
+#
+# Start date: 20261101
+# End date: 20261107
+Session source / medium,Sessions,Engaged sessions,Total users,Engagement rate,Average engagement time per session,Key events,Total revenue
+google / cpc,4210,2442,3452,0.58,61.4,131,241040
+Google / cpc,388,213,314,0.549,58.2,11,19690
+google / CPC,95,54,79,0.5684,60,3,5430
+google / organic,2650,1776,2067,0.6702,84.9,50,82500
+(direct) / (none),3120,1903,2309,0.6099,70.2,69,118680
+facebook / paid_social,1840,754,1619,0.4098,33.7,20,31200
+fb / paid_social,410,164,357,0.4,31.9,4,6080
+Facebook / Paid_Social,120,50,106,0.4167,35.1,1,1580
+ig / paid_social,560,207,504,0.3696,29.4,5,7450
+instagram / social,230,101,205,0.4391,36.8,2,2940
+newsletter / email,760,547,486,0.7197,102.3,35,70350
+Newsletter / Email,140,98,92,0.7,98.6,6,11940
+newsletter / e-mail,55,38,36,0.6909,96.1,2,3960
+whatsapp / referral,330,208,234,0.6303,77.5,12,22800
+Whatsapp / Referral,70,43,50,0.6143,75,2,3760
+t.co / referral,85,41,77,0.4824,41.2,1,1400
+l.instagram.com / referral,190,87,173,0.4579,39.9,1,1420
+bing / organic,140,91,112,0.65,80.3,2,3260
+bing / cpc,60,31,50,0.5167,52.8,1,1700
+Bing / CPC,22,11,19,0.5,51,0,0
+quora.com / referral,12,7,11,0.5833,55,0,0
+(not set) / (not set),48,6,46,0.125,8.3,0,0
+
+Grand total,15535,8872,12398,0.5711,0,358,637180

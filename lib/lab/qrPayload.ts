@@ -40,6 +40,14 @@ export function phoneDigits(input: string): { digits: string; error: string } {
     return { digits: '', error: 'Start with the country code (91 for India), not 0.' }
   if (digits.length < 8 || digits.length > 15)
     return { digits: '', error: 'A full number with country code has 8 to 15 digits.' }
+  // 10 digits with no "+" is almost always a national number (9876543210). Without its
+  // country code the link points at the wrong person, so ask instead of guessing.
+  if (digits.length === 10 && !trimmed.startsWith('+') && !trimmed.startsWith('00'))
+    return {
+      digits: '',
+      error:
+        'That is 10 digits, so the country code is missing. Add it first (91 for India), or start the number with + if it is already there.',
+    }
   return { digits, error: '' }
 }
 

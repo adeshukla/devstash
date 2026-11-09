@@ -1,0 +1,31 @@
+# ----------------------------------------
+# Traffic acquisition: Session campaign
+# Account: Northpeak Store (SYNTHETIC SAMPLE - invented numbers, GA4 CSV layout)
+# Property: northpeak.example - GA4
+# ----------------------------------------
+#
+# Start date: 20261101
+# End date: 20261107
+Session campaign,Sessions,Engaged sessions,Total users,Engagement rate,Average engagement time per session,Key events,Total revenue
+diwali-sale-2026,2380,1428,1952,0.6,66,90,173700
+Diwali_Sale_2026,640,371,525,0.5797,63.1,22,41800
+diwali sale 2026,210,120,174,0.5714,62,7,13160
+DIWALI-SALE-2026,95,53,80,0.5579,60.2,3,5610
+दिवाली-सेल,480,283,384,0.5896,64,18,34380
+दिवाली_सेल,130,74,105,0.5692,62.5,5,9450
+होली-ऑफर,75,38,64,0.5067,48,2,3000
+black-friday-2026,1520,821,1307,0.5401,55.6,44,90200
+Black_Friday_2026,410,217,357,0.5293,54,11,22330
+bf-2026,90,45,79,0.5,49,2,4000
+newsletter-nov,760,547,486,0.7197,102.3,35,70350
+Newsletter_Nov,140,98,92,0.7,98.6,6,11940
+brand-search,1180,779,932,0.6602,79.4,48,95040
+Brand Search,205,131,164,0.639,77,8,15680
+retargeting-30d,540,243,481,0.45,40.2,14,24080
+Retargeting_30d,160,70,144,0.4375,39.1,4,6800
+(organic),2790,1841,2148,0.6599,83.1,53,87450
+(direct),3120,1903,2309,0.6099,70.2,69,118680
+(referral),287,158,253,0.5505,50.4,3,4440
+(not set),410,82,390,0.2,12.1,0,0
+
+Grand total,15622,9302,12426,0.5954,0,444,832090

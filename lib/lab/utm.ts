@@ -56,10 +56,25 @@ export type Separator = '-' | '_'
 export const applySeparator = (value: string, sep?: Separator) =>
   sep === '_' ? value.replace(/-/g, '_') : sep === '-' ? value.replace(/_/g, '-') : value
 
+const BARE_HOST = /^(localhost|[^\s/?#:@]+\.[^\s/?#:@]+)(:\d+)?([/?#]\S*)?$/i
+
+/**
+ * Adds https:// when a bare domain was typed ("example.com/pricing"). Anything that already
+ * has a scheme, or is not a plausible address, is returned as typed so the caller's own
+ * checks still reject mailto:, javascript: and plain words.
+ */
+export function withScheme(raw: string): string {
+  const s = raw.trim()
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(s)) return s
+  return BARE_HOST.test(s) ? `https://${s}` : s
+}
+
 /**
  * Lowercase, whitespace to hyphens, drop anything not URL-safe. GA4 is
- * case-sensitive. Known ad-platform placeholders such as {keyword} pass
- * through untouched so the ad platform can fill them in.
+ * case-sensitive. Letters and digits from any language are kept (a Hindi or
+ * accented campaign name stays readable); symbols and emoji are dropped. Known
+ * ad-platform placeholders such as {keyword} pass through untouched so the ad
+ * platform can fill them in.
  */
 export function normalizeValue(raw: string): string {
   const kept: string[] = []
@@ -70,7 +85,7 @@ export function normalizeValue(raw: string): string {
     .trim()
     .toLowerCase()
     .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9\-_.]/g, '')
+    .replace(/[^\p{L}\p{M}\p{N}\-_.]/gu, '')
     .replace(/-{2,}/g, '-')
     .replace(/^[-_.]+|[-_.]+$/g, '')
     .replace(/zzph(\d+)zz/g, (_, i) => kept[Number(i)])
@@ -90,7 +105,7 @@ export function buildUtmUrl(fields: UtmFields, sep?: Separator): BuildResult {
 
   let base: URL
   try {
-    base = new URL(raw)
+    base = new URL(withScheme(raw))
   } catch {
     return { ...empty, error: 'That URL looks incomplete — include https://' }
   }
@@ -337,14 +352,15 @@ export function parseUrlList(text: string): {
   const urls: string[] = []
   const invalid: { line: number; text: string }[] = []
   text.split(/\r?\n/).forEach((raw, i) => {
-    const line = raw.trim()
-    if (!line) return
+    const typed = raw.trim()
+    if (!typed) return
+    const line = withScheme(typed)
     try {
       const u = new URL(line)
       if (u.protocol !== 'http:' && u.protocol !== 'https:') throw new Error('protocol')
       if (!urls.includes(line)) urls.push(line)
     } catch {
-      invalid.push({ line: i + 1, text: line })
+      invalid.push({ line: i + 1, text: typed })
     }
   })
   return { urls: urls.slice(0, MAX_BULK_URLS), invalid, truncated: urls.length > MAX_BULK_URLS }

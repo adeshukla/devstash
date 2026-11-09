@@ -13,10 +13,12 @@ import {
 
 export const MAX_REPORT_ROWS = 5000
 
-// Only these can be added together. Rates and averages (engagement rate, average
-// session duration) cannot, so they are listed as skipped instead of summed.
+// Only these can be added together. Rates and averages (engagement rate, average session
+// duration) cannot, and neither can users: one person can appear under two spellings, so
+// adding them would count that person twice. "New users" is safe, since a person is new once.
+// The rest are listed as skipped instead of summed.
 const ADDITIVE =
-  /^(sessions|engaged sessions|users|total users|new users|active users|event count|events|conversions|key events|views|clicks|impressions|cost|revenue|total revenue|purchases|transactions|orders)$/i
+  /^(sessions|engaged sessions|new users|event count|events|conversions|key events|views|clicks|impressions|cost|revenue|total revenue|purchases|transactions|orders)$/i
 // A column header, not a data value that merely contains the word "content" or "campaign".
 const DIMENSION =
   /^(utm_)?((session|first user|first|last click|user|manual)\s+)*(default channel group|channel group|source\s*\/\s*medium|source|medium|campaign|campaign name|term|ad content|content|channel)$/i
@@ -48,7 +50,14 @@ export interface CleanResult {
   skippedMetrics: string[]
   groups: Group[]
   rowCount: number
+  /** Data rows in the export. More than rowCount means the rest were not read, so totals are short. */
+  totalRows: number
+  /** "Total" and "Grand total" lines left out, so they are not counted as a campaign or added twice. */
+  totalLinesIgnored: number
 }
+
+/** A summary line GA4 adds under the data, not a real campaign, source or medium. */
+const TOTAL_LINE = /^(grand\s+)?total$/i
 
 const empty = (error: string): CleanResult => ({
   error,
@@ -57,10 +66,27 @@ const empty = (error: string): CleanResult => ({
   skippedMetrics: [],
   groups: [],
   rowCount: 0,
+  totalRows: 0,
+  totalLinesIgnored: 0,
 })
 
-const toNumber = (s: string): number | null => {
-  const t = s.replace(/[,\s]/g, '')
+/**
+ * Reads a number the way the export wrote it. When a cell has both "." and ",", the one that
+ * comes last is the decimal point ("1,234.50" and "1.234,50" are both 1234.5). With only one
+ * kind, `european` (a semicolon-separated file) decides: "1.200" is twelve hundred there, but
+ * 1.2 in a comma file.
+ */
+const toNumber = (s: string, european = false): number | null => {
+  let t = s.replace(/[\s'’]/g, '')
+  const dot = t.lastIndexOf('.')
+  const comma = t.lastIndexOf(',')
+  if (dot >= 0 && comma >= 0) {
+    t = dot > comma ? t.replace(/,/g, '') : t.replace(/\./g, '').replace(',', '.')
+  } else if (comma >= 0) {
+    t = european ? t.replace(',', '.') : t.replace(/,/g, '')
+  } else if (dot >= 0 && european && /^-?\d{1,3}(\.\d{3})+$/.test(t)) {
+    t = t.replace(/\./g, '')
+  }
   return t !== '' && /^-?\d+(\.\d+)?$/.test(t) ? Number(t) : null
 }
 
@@ -87,14 +113,16 @@ export function cleanReport(
   /** Merges remembered from earlier reports: original label to clean label. */
   saved: Record<string, string> = {}
 ): CleanResult {
-  const table = parseDelimited(
-    text
-      .replace(/^﻿/, '')
-      .split(/\r?\n/)
-      .filter((l) => !l.trim().startsWith('#'))
-      .join('\n')
-  )
+  const lines = text
+    .replace(/^﻿/, '')
+    .split(/\r?\n/)
+    .filter((l) => !l.trim().startsWith('#'))
+  const table = parseDelimited(lines.join('\n'))
   if (!table.length) return empty('')
+  // A semicolon-separated file comes from a locale that writes 1.234,50.
+  const first = lines.find((l) => l.trim()) ?? ''
+  const european = (first.match(/;/g)?.length ?? 0) > (first.match(/,/g)?.length ?? 0)
+  const num = (s: string) => toNumber(s, european)
 
   const headIdx = table.findIndex((r) => r.some((c) => DIMENSION.test(c.trim())))
   let dimCols: number[]
@@ -113,9 +141,7 @@ export function cleanReport(
       .filter(({ h, i }) => {
         if (!h || dimCols.includes(i)) return false
         const cells = body.map((r) => r[i] ?? '').filter((c) => c.trim() !== '')
-        return (
-          cells.length > 0 && cells.filter((c) => toNumber(c) !== null).length / cells.length >= 0.8
-        )
+        return cells.length > 0 && cells.filter((c) => num(c) !== null).length / cells.length >= 0.8
       })
     metricCols = numeric.filter(({ h }) => ADDITIVE.test(h)).map(({ i }) => i)
     skipped = numeric.filter(({ h }) => !ADDITIVE.test(h)).map(({ h }) => h)
@@ -133,9 +159,14 @@ export function cleanReport(
 
   const groups = new Map<string, Group>()
   let rowCount = 0
+  let totalLinesIgnored = 0
   for (const cells of body.slice(0, MAX_REPORT_ROWS)) {
     const labels = dimCols.map((c) => (cells[c] ?? '').trim())
     if (labels.every((l) => !l)) continue
+    if (labels[0] && TOTAL_LINE.test(labels[0])) {
+      totalLinesIgnored++
+      continue
+    }
     rowCount++
     const raw = labels.join(' / ')
     const remembered = Object.prototype.hasOwnProperty.call(saved, raw)
@@ -151,7 +182,7 @@ export function cleanReport(
         )
     const key = parts.map((p) => identity(cleanPart(p.text, p.source, '-'))).join('|')
     const canonical = parts.map((p) => cleanPart(p.text, p.source, sep)).join(' / ')
-    const metrics = metricCols.map((c) => toNumber(cells[c] ?? '') ?? 0)
+    const metrics = metricCols.map((c) => num(cells[c] ?? '') ?? 0)
     let g = groups.get(key)
     if (!g) {
       g = { canonical, variants: [], totals: metrics.map(() => 0), split: false }
@@ -176,7 +207,16 @@ export function cleanReport(
     g.variants.sort((a, b) => (b.metrics[0] ?? 0) - (a.metrics[0] ?? 0) || b.rows - a.rows)
   }
   list.sort((a, b) => Number(b.split) - Number(a.split) || (b.totals[0] ?? 0) - (a.totals[0] ?? 0))
-  return { error: '', dims, metricNames, skippedMetrics: skipped, groups: list, rowCount }
+  return {
+    error: '',
+    dims,
+    metricNames,
+    skippedMetrics: skipped,
+    groups: list,
+    rowCount,
+    totalRows: body.length,
+    totalLinesIgnored,
+  }
 }
 
 /** A copy of the result with some clean labels replaced by names the user typed. Keys are the automatic labels. */
@@ -220,15 +260,25 @@ export function mappingTsv(r: CleanResult): string {
 const q = (s: string) => `"${s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
 
 /**
- * A Looker Studio calculated field that maps every split variant to its clean
- * label. Empty when the export has more than one label column, because one
- * field cannot cover two dimensions.
+ * How a field is named inside a Looker Studio formula. Google's examples use plain words and
+ * spaces as they are ("Price * Quantity Sold"), so those stay bare. A name with a symbol, such
+ * as "Session source / medium", would read as a division, so it goes in backticks. The docs do
+ * not state this rule; it is the way Looker Studio's own field picker writes such names.
+ */
+export function lookerField(name: string): string {
+  return /^[\p{L}\p{N}_ ]+$/u.test(name) ? name : `\`${name.replace(/`/g, '')}\``
+}
+
+/**
+ * A Looker Studio calculated field that maps every label the table renames to its clean
+ * label, including a lone "ig / paid_social" that became "instagram / paid-social", so a
+ * Looker report and the merged table agree. Empty when the export has more than one label
+ * column, because one field cannot cover two dimensions.
  */
 export function lookerCase(r: CleanResult): string {
   if (r.dims.length !== 1) return ''
-  const field = r.dims[0]
+  const field = lookerField(r.dims[0])
   const whens = r.groups
-    .filter((g) => g.split)
     .map((g) => {
       const others = g.variants.map((v) => v.raw).filter((raw) => raw !== g.canonical)
       return others.length

@@ -28,7 +28,7 @@ const FAQ = [
   {
     question: 'What does it add up?',
     answer:
-      'Columns that can be added: sessions, users, events, conversions, key events, views, clicks, impressions, cost, revenue, purchases, transactions and orders. Rates and averages, such as engagement rate, cannot be added, so they are listed as left out.',
+      'Columns that can be added: sessions, engaged sessions, new users, events, conversions, key events, views, clicks, impressions, cost, revenue, purchases, transactions and orders. Rates and averages, such as engagement rate, cannot be added. Total users and active users cannot either, because one person can appear under two spellings and would be counted twice. These are listed as left out.',
   },
   {
     question: 'How do I use the Looker Studio field?',

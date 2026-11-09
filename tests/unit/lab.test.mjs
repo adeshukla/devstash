@@ -1,5 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { auditHead } from '../../lib/lab/metaAudit.ts'
 import { pickIcon, pickIcons, iconSvg, heroArt, ringsSvg } from '../../lib/ai/landingGraphics.ts'
 import {
@@ -7,6 +8,7 @@ import {
   mergedTsv,
   mappingTsv,
   lookerCase,
+  lookerField,
   applyNames,
   rememberable,
 } from '../../lib/lab/reportClean.ts'
@@ -44,6 +46,8 @@ import {
   parseSheet,
   parseVariants,
   buildMatrix,
+  parseUrlList,
+  withScheme,
 } from '../../lib/lab/utm.ts'
 import { buildSearch, pick } from '../../lib/lab/urlState.ts'
 import { escapeAttr, buildHtml, buildJsonLd, fitToWidth } from '../../lib/lab/metaTags.ts'
@@ -81,7 +85,12 @@ test('UTM keeps existing query params and the hash, and rejects non-http URLs', 
   const r = buildUtmUrl(fields({ url: 'https://example.com/a?ref=1#top', source: 'x' }))
   assert.equal(r.url, 'https://example.com/a?ref=1&utm_source=x#top')
   assert.match(buildUtmUrl(fields({ url: 'javascript:alert(1)' })).error, /http/)
-  assert.match(buildUtmUrl(fields({ url: 'example.com' })).error, /https/)
+  // A bare domain is completed with https://; a plain word is still refused.
+  assert.equal(
+    buildUtmUrl(fields({ url: 'example.com', source: 'x' })).url,
+    'https://example.com/?utm_source=x'
+  )
+  assert.match(buildUtmUrl(fields({ url: 'example' })).error, /https/)
 })
 
 test('normalizeValue strips unsafe characters', () => {
@@ -804,4 +813,144 @@ test('seo kit: robots never blocks /_next/, sitemap uses the site origin, OG fil
   })
   assert.match(og, /\{"A \\"quoted\\" \{brace\}"\}/)
   assert.match(og, /background: "#0b0f19"/)
+})
+
+const f = (over = {}) => ({
+  url: 'https://a.com/p',
+  source: 'google',
+  medium: 'cpc',
+  campaign: 'sale',
+  term: '',
+  content: '',
+  ...over,
+})
+
+test('builder: a bare domain gets https, other schemes and plain words are still refused', () => {
+  assert.equal(withScheme('example.com/pricing'), 'https://example.com/pricing')
+  assert.equal(withScheme('localhost:3000/x'), 'https://localhost:3000/x')
+  assert.equal(withScheme('https://a.com'), 'https://a.com')
+  assert.equal(
+    buildUtmUrl(f({ url: 'example.com/pricing' })).url,
+    'https://example.com/pricing?utm_source=google&utm_medium=cpc&utm_campaign=sale'
+  )
+  assert.match(buildUtmUrl(f({ url: 'mailto:a@b.com' })).error, /http/)
+  assert.match(buildUtmUrl(f({ url: 'javascript:alert(1)' })).error, /http/)
+  assert.match(buildUtmUrl(f({ url: 'pricing' })).error, /incomplete/)
+  assert.match(buildUtmUrl(f({ url: 'hello world' })).error, /incomplete/)
+  assert.deepEqual(parseUrlList('a.com/x\nnot a url\nhttps://a.com/x').urls, ['https://a.com/x'])
+  assert.deepEqual(parseUrlList('a.com/x\nnot a url').invalid, [{ line: 2, text: 'not a url' }])
+})
+
+test('names in any language survive; symbols and emoji do not', () => {
+  assert.equal(normalizeValue('दिवाली सेल 2026'), 'दिवाली-सेल-2026')
+  assert.equal(normalizeValue('Café Sale!'), 'café-sale')
+  assert.equal(normalizeValue('🔥 Spring Sale'), 'spring-sale')
+  assert.equal(normalizeValue('a&b=c#d'), 'abcd')
+  const built = buildUtmUrl(f({ campaign: 'दिवाली सेल' })).url
+  assert.equal(new URL(built).searchParams.get('utm_campaign'), 'दिवाली-सेल')
+})
+
+test('report cleaner: different Hindi or accented campaigns are not merged into one', () => {
+  const hi = cleanReport('Session campaign,Sessions\nदिवाली-सेल,10\nदिवाली_सेल,5\nहोली-ऑफर,7', '-')
+  assert.equal(hi.groups.length, 2)
+  const merged = hi.groups.find((g) => g.variants.length === 2)
+  assert.equal(merged.canonical, 'दिवाली-सेल')
+  assert.equal(merged.totals[0], 15)
+  const accents = cleanReport('Session campaign,Sessions\nCafé,1\nCafe,2', '-')
+  assert.equal(accents.groups.length, 2)
+})
+
+test('report cleaner: reads European and US number formats, and says when rows were cut', () => {
+  const eu = cleanReport(
+    'Session campaign;Sessions;Revenue\nSpring-Sale;1.200;1.234,50\nspring_sale;300;99,10',
+    '-'
+  )
+  assert.deepEqual(eu.groups[0].totals, [1500, 1333.6])
+  const us = cleanReport(
+    'Session campaign,Sessions,Revenue\nspring-sale,"1,200","1,234.50"\nSpring_Sale,300,99.10',
+    '-'
+  )
+  assert.deepEqual(us.groups[0].totals, [1500, 1333.6])
+  const lakh = cleanReport(
+    'Session campaign,Sessions\nspring-sale,"1,20,000"\nSpring_Sale,"2,50,000"',
+    '-'
+  )
+  assert.equal(lakh.groups[0].totals[0], 370000)
+  const big =
+    'Session campaign,Sessions\n' + Array.from({ length: 5200 }, (_, i) => `c${i},1`).join('\n')
+  const r = cleanReport(big, '-')
+  assert.equal(r.rowCount, 5000)
+  assert.equal(r.totalRows, 5200)
+  assert.equal(cleanReport('Session campaign,Sessions\na,1', '-').totalRows, 1)
+})
+
+test('QR: a 10-digit number with no country code is refused, with a + it is accepted', () => {
+  assert.match(whatsappPayload('98765 43210', '').error, /country code is missing/)
+  assert.match(phonePayload('9876543210').error, /country code is missing/)
+  assert.equal(whatsappPayload('91 98765 43210', '').payload, 'https://wa.me/919876543210')
+  assert.equal(whatsappPayload('+65 8123 4567', '').payload, 'https://wa.me/6581234567')
+  assert.equal(phonePayload('+91 98765 43210').payload, 'tel:+919876543210')
+})
+
+// Synthetic exports in GA4's CSV layout (comment header, Grand total line, rate columns).
+const fixture = (name) => readFileSync(new URL(`../fixtures/${name}`, import.meta.url), 'utf8')
+
+test('report cleaner on a GA4-shaped source / medium export', () => {
+  const r = cleanReport(fixture('ga4-source-medium.csv'), '-')
+  assert.equal(r.error, '')
+  assert.equal(r.totalLinesIgnored, 1, 'the Grand total line is left out')
+  assert.deepEqual(r.skippedMetrics, [
+    'Total users',
+    'Engagement rate',
+    'Average engagement time per session',
+  ])
+  assert.deepEqual(r.metricNames, ['Sessions', 'Engaged sessions', 'Key events', 'Total revenue'])
+  const by = Object.fromEntries(r.groups.map((g) => [g.canonical, g]))
+  assert.equal(by['google / cpc'].totals[0], 4693)
+  assert.equal(by['facebook / paid-social'].variants.length, 3)
+  assert.equal(by['newsletter / email'].variants.length, 3, 'e-mail merges with email')
+  // different mediums of one source are NOT merged
+  assert.ok(by['instagram / social'] && by['instagram / paid-social'])
+  assert.ok(
+    by['(not set) / (not set)'] && by['(direct) / (none)'],
+    'reserved labels stay as they are'
+  )
+  assert.equal(
+    r.groups.reduce((n, g) => n + g.totals[0], 0),
+    15535,
+    'nothing lost, nothing counted twice'
+  )
+  assert.ok(!r.groups.some((g) => /total/i.test(g.canonical)))
+})
+
+test('report cleaner on a GA4-shaped campaign export, Hindi names included', () => {
+  const r = cleanReport(fixture('ga4-campaigns.csv'), '-')
+  assert.equal(
+    r.groups.reduce((n, g) => n + g.totals[0], 0),
+    15622,
+    'matches the file row by row'
+  )
+  const by = Object.fromEntries(r.groups.map((g) => [g.canonical, g]))
+  assert.equal(by['diwali-sale-2026'].variants.length, 4)
+  assert.equal(by['दिवाली-सेल'].totals[0], 610)
+  assert.ok(by['होली-ऑफर'] && !by['होली-ऑफर'].split, 'a different Hindi campaign is left alone')
+  assert.ok(by['bf-2026'] && by['black-friday-2026'], 'different names are never guessed to match')
+})
+
+test('Looker field names, and the formula agrees with the merged table', () => {
+  assert.equal(lookerField('Session campaign'), 'Session campaign')
+  assert.equal(lookerField('Session source / medium'), '`Session source / medium`')
+  const sm = lookerCase(cleanReport(fixture('ga4-source-medium.csv'), '-'))
+  assert.match(
+    sm,
+    /WHEN `Session source \/ medium` IN \("Google \/ cpc", "google \/ CPC"\) THEN "google \/ cpc"/
+  )
+  assert.match(
+    sm,
+    /IN \("ig \/ paid_social"\) THEN "instagram \/ paid-social"/,
+    'a lone renamed label is mapped too'
+  )
+  assert.match(sm, /ELSE `Session source \/ medium`\nEND$/)
+  const camp = lookerCase(cleanReport(fixture('ga4-campaigns.csv'), '-'))
+  assert.match(camp, /WHEN Session campaign IN/)
 })

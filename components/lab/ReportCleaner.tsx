@@ -8,6 +8,7 @@ import {
   applyNames,
   cleanReport,
   lookerCase,
+  lookerField,
   mappingTsv,
   mergedTsv,
   rememberable,
@@ -97,7 +98,7 @@ export function ReportCleaner() {
   const looker = result ? lookerCase(result) : ''
   const field = result?.dims.length === 1 ? result.dims[0] : 'Your field'
   const sheetsFormula = '=LOWER(REGEXP_REPLACE(TRIM(A2),"[ _]+","-"))'
-  const lookerFormula = `LOWER(REGEXP_REPLACE(TRIM(${field}), "[ _]+", "-"))`
+  const lookerFormula = `LOWER(REGEXP_REPLACE(TRIM(${lookerField(field)}), "[ _]+", "-"))`
 
   const copyBtn =
     'border-ds-border text-ds-text hover:border-ds-accent hover:text-ds-accent rounded-md border px-2.5 py-1 text-xs transition-colors'
@@ -173,6 +174,20 @@ export function ReportCleaner() {
               {result.rowCount} rows read, {result.groups.length} after merging
               {result.metricNames.length > 0 && `. Added up: ${result.metricNames.join(', ')}.`}
             </p>
+            {result.totalLinesIgnored > 0 && (
+              <p className="text-ds-muted mt-1 text-sm">
+                Left out {result.totalLinesIgnored} &quot;Total&quot;{' '}
+                {result.totalLinesIgnored === 1 ? 'line' : 'lines'} so{' '}
+                {result.totalLinesIgnored === 1 ? 'it is' : 'they are'} not counted as a campaign.
+              </p>
+            )}
+            {result.totalRows > result.rowCount + result.totalLinesIgnored && (
+              <p className="text-ds-warning-strong mt-1 text-sm" role="alert">
+                Only the first {result.rowCount.toLocaleString()} of{' '}
+                {result.totalRows.toLocaleString()} rows were read, so these totals are short. Split
+                the export into smaller date ranges and clean each one.
+              </p>
+            )}
             {appliedMemory > 0 && (
               <p className="text-ds-muted mt-1 text-sm">
                 {appliedMemory} {appliedMemory === 1 ? 'spelling was' : 'spellings were'} merged
@@ -181,8 +196,8 @@ export function ReportCleaner() {
             )}
             {result.skippedMetrics.length > 0 && (
               <p className="text-ds-muted mt-1 text-sm">
-                Left out because rates and averages cannot be added:{' '}
-                {result.skippedMetrics.join(', ')}.
+                Left out because rates, averages and user counts cannot be added (one person can
+                appear in two rows): {result.skippedMetrics.join(', ')}.
               </p>
             )}
           </div>
