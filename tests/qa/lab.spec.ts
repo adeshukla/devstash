@@ -176,3 +176,44 @@ test.describe('Report cleaner on a GA4-shaped file', () => {
     await page.screenshot({ path: 'test-results/cleaner-ga4-sample.png', fullPage: true })
   })
 })
+
+test.describe('Every tool page has the same frame', () => {
+  const PAGES = [
+    '/lab/meta-tag-generator',
+    '/lab/css-shapes-playground',
+    '/lab/illustration-generator',
+    '/lab/ai-content-pipeline',
+  ]
+  for (const path of PAGES) {
+    test(`${path} has an FAQ, a "Free tool" footer and no accessibility violations`, async ({
+      page,
+    }) => {
+      for (const scheme of ['light', 'dark'] as const) {
+        await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: scheme })
+        await page.goto(path)
+        await expect(page.locator('main').getByText(/^Free tool by Adesh Shukla/)).toBeVisible()
+        await expect(page.getByText(/\d+ questions/)).toBeVisible()
+        const faq = await page.evaluate(() =>
+          [...document.querySelectorAll('script[type="application/ld+json"]')].some((s) =>
+            (s.textContent ?? '').includes('"FAQPage"')
+          )
+        )
+        expect(faq, 'FAQPage JSON-LD is on the page').toBe(true)
+        const results = await new AxeBuilder({ page }).analyze()
+        expect(results.violations.map((v) => `${v.id}: ${v.nodes[0]?.target}`)).toEqual([])
+      }
+    })
+  }
+
+  test('the AI pipeline tour stays closed until asked for, and Done closes it', async ({
+    page,
+  }) => {
+    await page.goto('/lab/ai-content-pipeline')
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Run the pipeline' })).toBeEnabled()
+    await page.getByRole('button', { name: 'How it works' }).click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+    await page.getByRole('button', { name: 'Skip' }).click()
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+  })
+})

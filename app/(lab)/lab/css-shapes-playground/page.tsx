@@ -7,6 +7,35 @@ import { BorderCustomizer } from '@/components/lab/BorderCustomizer'
 import { ShadowCustomizer } from '@/components/lab/ShadowCustomizer'
 import { SurfaceStudio } from '@/components/lab/SurfaceStudio'
 import { CssCodeBlock } from '@/components/lab/CssCodeBlock'
+import { FaqSection } from '@/components/sections/FaqSection'
+
+const FAQ = [
+  {
+    question: 'What can I build with it?',
+    answer:
+      'Shapes (11 presets, four-corner radius sliders, or a polygon you draw), animations with speed and easing, glass, gradient and layered-shadow surfaces, animated borders, button effects and box-shadow animations. Each one gives you copyable CSS.',
+  },
+  {
+    question: 'Do the animations respect reduced motion?',
+    answer:
+      'Yes. The generated animation CSS includes a prefers-reduced-motion block that switches the animation off for people who ask their device for less motion.',
+  },
+  {
+    question: 'Is there Tailwind output?',
+    answer:
+      'The glass and surface studio can copy Tailwind classes. The shape generator gives plain CSS only.',
+  },
+  {
+    question: 'Can I save or share what I made?',
+    answer:
+      'Copy share link reopens the same shape from a link, and Save keeps a named look on this device. Nothing is stored on a server.',
+  },
+  {
+    question: 'Is anything uploaded?',
+    answer:
+      'No. Everything runs in your browser and the code is generated on the page as you adjust it.',
+  },
+]
 
 const SECTIONS = [
   { id: 'shapes', label: 'Shapes' },
@@ -383,8 +412,15 @@ export default function CssShapesPlaygroundPage() {
           </div>
         </section>
 
+        <FaqSection
+          items={FAQ}
+          title="CSS shapes questions"
+          intro="What you can build, what the output looks like, and what stays on your device."
+          ask={false}
+        />
+
         <p className="text-ds-muted border-ds-border border-t px-6 py-8 text-center font-mono text-xs">
-          Sample project by Adesh Shukla — every effect above is live CSS, copyable from this page.
+          Free tool by Adesh Shukla — every effect above is live CSS, copyable from this page.
         </p>
 
         <style>{`

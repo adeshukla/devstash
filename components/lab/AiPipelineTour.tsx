@@ -33,8 +33,6 @@ const TOUR_SLIDES: TourSlide[] = [
   },
 ]
 
-const TOUR_SEEN_KEY = 'devstash:ai-content-pipeline:tour-seen'
-
 interface AiPipelineTourProps {
   open: boolean
   step: number
@@ -115,5 +113,3 @@ export function AiPipelineTour({ open, step, onStepChange, onClose }: AiPipeline
     </div>
   )
 }
-
-export { TOUR_SEEN_KEY }

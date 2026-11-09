@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button, Input } from '@/components/ui'
-import { AiPipelineTour, TOUR_SEEN_KEY } from '@/components/lab/AiPipelineTour'
+import { AiPipelineTour } from '@/components/lab/AiPipelineTour'
 import { AiPipelineResults } from '@/components/lab/AiPipelineResults'
 import { trackAndLog, ANALYTICS_EVENTS } from '@/lib/analytics/events'
 import {
@@ -62,19 +62,13 @@ export function AiContentPipeline() {
   const [tourOpen, setTourOpen] = useState(false)
   const [tourStep, setTourStep] = useState(0)
 
-  useEffect(() => {
-    if (!window.localStorage.getItem(TOUR_SEEN_KEY)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot mount read of localStorage
-      setTourOpen(true)
-    }
-  }, [])
-
+  // The tour opens only when asked for ("How it works"): a full-screen overlay on arrival
+  // hid the tool from people who came to use it.
   function closeTour() {
     setTourOpen(false)
-    window.localStorage.setItem(TOUR_SEEN_KEY, '1')
   }
 
-  function reopenTour() {
+  function openTour() {
     setTourStep(0)
     setTourOpen(true)
   }
@@ -161,7 +155,7 @@ export function AiContentPipeline() {
       <div className="mb-4 flex justify-end">
         <button
           type="button"
-          onClick={reopenTour}
+          onClick={openTour}
           className="text-ds-muted hover:text-ds-accent font-mono text-xs transition-colors"
         >
           How it works

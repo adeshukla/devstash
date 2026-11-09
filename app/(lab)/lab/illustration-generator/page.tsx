@@ -3,6 +3,34 @@ import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
 import { IllustrationGenerator } from '@/components/lab/IllustrationGenerator'
+import { FaqSection } from '@/components/sections/FaqSection'
+
+const FAQ = [
+  {
+    question: 'Is this AI image generation?',
+    answer:
+      'No. Your description is turned into a number that drives a small procedural composer, which places real SVG shapes, charts and networks. There is no image-generation model and no external call.',
+  },
+  {
+    question: 'Why does the same text always give the same picture?',
+    answer:
+      'The picture is calculated from your text, so the same description gives the same layout. Shuffle layout changes the arrangement without touching your text.',
+  },
+  {
+    question: 'What can I download?',
+    answer:
+      'The illustration as SVG or PNG, the SVG code to copy, or a link that reopens it. You can also save a named look on this device.',
+  },
+  {
+    question: 'Will it draw exactly what I describe?',
+    answer:
+      'No. It picks abstract motifs from keywords in your description, such as networks, bars or geometric shapes, and you can override them. The figures are flat and stylised, not realistic.',
+  },
+  {
+    question: 'Is my description sent anywhere?',
+    answer: 'No. It is all local geometry in your browser.',
+  },
+]
 
 export const metadata: Metadata = buildMetadata({
   title: 'Free SVG Illustration Generator, Animated',
@@ -60,8 +88,15 @@ export default function IllustrationGeneratorPage() {
           </div>
         </section>
 
+        <FaqSection
+          items={FAQ}
+          title="Illustration generator questions"
+          intro="How it makes a picture, what you can download, and what it does not do."
+          ask={false}
+        />
+
         <p className="text-ds-muted border-ds-border border-t px-6 py-8 text-center font-mono text-xs">
-          Sample tool by Adesh Shukla — fully client-side, no image-generation API involved.
+          Free tool by Adesh Shukla — fully client-side, no image-generation API involved.
         </p>
       </main>
     </>

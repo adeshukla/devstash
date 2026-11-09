@@ -154,7 +154,7 @@ export default function UtmBuilderPage() {
         />
 
         <p className="text-ds-muted border-ds-border border-t px-6 py-8 text-center font-mono text-xs">
-          Sample tool by Adesh Shukla — fully client-side, nothing you enter here is sent anywhere.
+          Free tool by Adesh Shukla — fully client-side, nothing you enter here is sent anywhere.
         </p>
       </main>
     </>

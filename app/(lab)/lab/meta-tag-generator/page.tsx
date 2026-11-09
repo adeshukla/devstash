@@ -5,6 +5,35 @@ import { LabToolSchema } from '@/components/lab/LabToolSchema'
 import { MetaTagGenerator } from '@/components/lab/MetaTagGenerator'
 import { MetaAudit } from '@/components/lab/MetaAudit'
 import { SeoKit } from '@/components/lab/SeoKit'
+import { FaqSection } from '@/components/sections/FaqSection'
+
+const FAQ = [
+  {
+    question: 'What does the kit generate?',
+    answer:
+      'Google, X and Facebook previews with a pixel-width cut-off, and code for HTML meta tags, Next.js metadata, JSON-LD, FAQ schema, robots.ts, sitemap.ts and an opengraph-image.tsx for the App Router.',
+  },
+  {
+    question: 'Will FAQ schema give me expandable results in Google?',
+    answer:
+      'Probably not. Google now shows FAQ rich results only for a small set of well-known government and health sites. The markup is still valid and other search and AI tools can read it. The questions and answers must also be visible on the page.',
+  },
+  {
+    question: 'Why does robots.ts leave out /_next/?',
+    answer:
+      'Google needs the scripts and styles under /_next/ to render your page. Blocking them can stop it seeing your content, so the generator never writes that rule.',
+  },
+  {
+    question: 'Does it check my live page?',
+    answer:
+      'No. The head check reads tags you paste in. It does not fetch your site, and nothing you type is sent anywhere.',
+  },
+  {
+    question: 'Is the title and description draft written by AI?',
+    answer:
+      'No. It scores sentences in the text you paste and picks and trims real ones. There is no model call, so it cannot invent facts.',
+  },
+]
 
 export const metadata: Metadata = buildMetadata({
   title: 'Next.js SEO Kit: Meta Tags, Schema, Sitemap',
@@ -102,6 +131,13 @@ export default function MetaTagGeneratorPage() {
             </p>
           </div>
         </section>
+
+        <FaqSection
+          items={FAQ}
+          title="Next.js SEO kit questions"
+          intro="What it generates, what it does not check, and the one Google change worth knowing."
+          ask={false}
+        />
 
         <p className="text-ds-muted border-ds-border border-t px-6 py-8 text-center font-mono text-xs">
           Free tool by Adesh Shukla — everything runs client-side, nothing is sent anywhere.

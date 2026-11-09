@@ -3,9 +3,42 @@ import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
 import { AiContentPipeline } from '@/components/lab/AiContentPipeline'
+import { FaqSection } from '@/components/sections/FaqSection'
+
+const FAQ = [
+  {
+    question: 'What does each step do?',
+    answer:
+      'Step one writes a first draft of the page type you chose. Step two copy-edits it to remove common AI phrases. Step three produces the title, slug, description, category, tags and reading time as SEO fields. It then lays the result out in five designed page styles.',
+  },
+  {
+    question: 'Will the text pass as human-written or beat AI detectors?',
+    answer:
+      'That is not what it tries to do. It leaves [TODO] markers wherever only you know the facts, such as real numbers, code or experience, and it never invents a voice or credentials. Fill the markers with real details before you publish.',
+  },
+  {
+    question: 'How many free runs do I get?',
+    answer:
+      'A few per day in your browser, with no signup. After that you can paste your own Groq API key to keep going.',
+  },
+  {
+    question: 'What happens to my API key?',
+    answer: 'It is used only for that one request. It is never logged or stored.',
+  },
+  {
+    question: 'Which model does it use?',
+    answer:
+      'A model hosted on Groq. If Groq is unavailable it falls back automatically to Cerebras, so a run can still finish.',
+  },
+  {
+    question: 'Is the result ready to publish?',
+    answer:
+      'Treat it as a scaffold. Read it, replace every [TODO] with something true, and edit it in your own voice first.',
+  },
+]
 
 export const metadata: Metadata = buildMetadata({
-  title: 'AI Content Pipeline Demo — Live 3-Step LLM Chain',
+  title: 'AI Content Pipeline: Draft, Edit and SEO Fields',
   description:
     'A live LLM pipeline that writes marketing, service, sales and other pages honestly: draft, copy-edit, SEO fields and five designed pages, token use shown.',
   canonical: '/lab/ai-content-pipeline',
@@ -84,6 +117,13 @@ export default function AiContentPipelinePage() {
             </p>
           </div>
         </section>
+
+        <FaqSection
+          items={FAQ}
+          title="AI content pipeline questions"
+          intro="What each step does, what it will not do, and what happens to your key."
+          ask={false}
+        />
 
         <p className="text-ds-muted border-ds-border border-t px-6 py-8 text-center font-mono text-xs">
           Free tool by Adesh Shukla — runs a real 3-step Groq LLM pipeline server-side. A few free
