@@ -26,6 +26,7 @@ const ROUTES = [
   '/lab/utm-link-checker',
   '/lab/utm-report-cleaner',
   '/lab/qr-code-generator',
+  '/lab/whatsapp-link-generator',
   '/lab/css-shapes-playground',
   '/lab/illustration-generator',
   '/lab/meta-tag-generator',

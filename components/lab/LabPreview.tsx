@@ -19,7 +19,7 @@
 import './LabPreview.css'
 
 type PreviewKind =
-  'pipeline' | 'shapes' | 'illustration' | 'meta' | 'utm' | 'qr' | 'check' | 'merge'
+  'pipeline' | 'shapes' | 'illustration' | 'meta' | 'utm' | 'qr' | 'check' | 'merge' | 'chat'
 
 const FRAME =
   'relative overflow-hidden rounded-lg border border-ds-border bg-ds-surface2 aspect-[16/9] w-full'
@@ -479,8 +479,52 @@ function Merge() {
   )
 }
 
+/** A chat bubble with the message already typed, above the wa.me link that opens it. */
+function Chat() {
+  return (
+    <Canvas>
+      <rect
+        x="40"
+        y="34"
+        width="300"
+        height="92"
+        rx="18"
+        className="fill-ds-surface stroke-ds-border"
+      />
+      <path d="M52 126 L40 146 L82 126 Z" className="fill-ds-surface stroke-ds-border" />
+      <text x="62" y="68" className="fill-ds-text" fontSize="18" fontWeight="600">
+        Hi, please share
+      </text>
+      <text x="62" y="96" className="fill-ds-text" fontSize="18" fontWeight="600">
+        your price list.
+      </text>
+      <rect
+        x="62"
+        y="106"
+        width="96"
+        height="9"
+        rx="4.5"
+        className="lab-grow fill-ds-accent/40 [animation-delay:.3s]"
+      />
+      <rect
+        x="40"
+        y="176"
+        width="400"
+        height="54"
+        rx="14"
+        className="fill-ds-surface stroke-ds-border"
+      />
+      <text x="60" y="209" className={`fill-ds-accent-strong ${MONO}`} fontSize="16">
+        wa.me/919876543210
+      </text>
+    </Canvas>
+  )
+}
+
 export function LabPreview({ kind }: { kind: PreviewKind }) {
   switch (kind) {
+    case 'chat':
+      return <Chat />
     case 'pipeline':
       return <Pipeline />
     case 'shapes':

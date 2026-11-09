@@ -9,6 +9,7 @@ import {
   origin,
   parseFaqs,
 } from '@/lib/lab/seoKit'
+import { TRAINING_TOKENS } from '@/lib/lab/aiCrawlers'
 import { CssCodeBlock } from './CssCodeBlock'
 import { trackLab } from './track'
 
@@ -55,12 +56,13 @@ export function SeoKit() {
   const [siteName, setSiteName] = useState('')
   const [bg, setBg] = useState('#0b0f19')
   const [accent, setAccent] = useState('#3b82f6')
+  const [optOut, setOptOut] = useState(false)
 
   const faqs = useMemo(() => parseFaqs(faqText), [faqText])
 
   const code = {
     faq: faqs.length ? buildFaqJsonLd(faqs) : '',
-    robots: buildRobotsTs(site, disallow),
+    robots: buildRobotsTs(site, disallow, optOut),
     sitemap: buildSitemapTs(site, paths),
     og: buildOgImageTsx({ title: ogTitle, siteName, background: bg, accent }),
   }[tab]
@@ -159,6 +161,26 @@ export function SeoKit() {
               className={`${inputCls} resize-y font-mono text-xs`}
             />
           </Field>
+          <label className="text-ds-text flex items-start gap-3 text-sm">
+            <input
+              type="checkbox"
+              checked={optOut}
+              onChange={(e) => {
+                setOptOut(e.target.checked)
+                trackLab('seo-kit', 'ai_opt_out', e.target.checked ? 'on' : 'off')
+              }}
+              className="accent-ds-accent mt-1 h-4 w-4"
+            />
+            <span>
+              Opt out of AI training and archiving
+              <span className="text-ds-muted block">
+                Adds a rule for {TRAINING_TOKENS.join(', ')}. This leaves Google Search, ChatGPT
+                search, Claude search and Perplexity search alone. A visit that a person triggers by
+                asking an assistant to open your page may ignore robots.txt (OpenAI, Perplexity and
+                Meta say so).
+              </span>
+            </span>
+          </label>
           <p className="text-ds-muted text-sm leading-relaxed">
             Do not block <code className="text-ds-accent">/_next/</code>. Google needs those script
             and style files to render your page, so any line starting with it is left out. A lone{' '}

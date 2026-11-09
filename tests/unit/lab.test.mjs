@@ -1,6 +1,14 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
+import { buildWhatsAppLink, withRef, htmlSnippet, COUNTRIES } from '../../lib/lab/whatsapp.ts'
+import {
+  parseRobots,
+  isAllowed,
+  checkCrawlers,
+  CRAWLERS,
+  TRAINING_TOKENS,
+} from '../../lib/lab/aiCrawlers.ts'
 import { auditHead } from '../../lib/lab/metaAudit.ts'
 import { pickIcon, pickIcons, iconSvg, heroArt, ringsSvg } from '../../lib/ai/landingGraphics.ts'
 import {
@@ -890,6 +898,133 @@ test('QR: a 10-digit number with no country code is refused, with a + it is acce
   assert.equal(whatsappPayload('91 98765 43210', '').payload, 'https://wa.me/919876543210')
   assert.equal(whatsappPayload('+65 8123 4567', '').payload, 'https://wa.me/6581234567')
   assert.equal(phonePayload('+91 98765 43210').payload, 'tel:+919876543210')
+})
+
+test('robots.txt matching: own group beats *, longest rule wins, Allow wins a tie', () => {
+  const g = parseRobots(
+    [
+      '# comment',
+      'User-agent: *',
+      'Disallow: /private/',
+      'Allow: /private/public/',
+      '',
+      'User-agent: GPTBot',
+      'User-agent: ClaudeBot',
+      'Disallow: /',
+      'Allow: /blog/$',
+      '',
+      'User-agent: Tie',
+      'Disallow: /x',
+      'Allow: /x',
+    ].join('\n')
+  )
+  // wildcard group applies to a crawler with no group of its own
+  assert.deepEqual(isAllowed(g, 'PerplexityBot', '/private/a'), { allowed: false, via: 'wildcard' })
+  assert.equal(
+    isAllowed(g, 'PerplexityBot', '/private/public/a').allowed,
+    true,
+    'longer Allow wins'
+  )
+  assert.equal(isAllowed(g, 'PerplexityBot', '/blog').allowed, true)
+  // two user-agent lines share one set of rules, and names are case-insensitive
+  assert.deepEqual(isAllowed(g, 'claudebot', '/anything'), { allowed: false, via: 'own' })
+  assert.equal(isAllowed(g, 'GPTBot', '/blog/').allowed, true, '$ anchors the end of the path')
+  assert.equal(isAllowed(g, 'GPTBot', '/blog/post').allowed, false)
+  assert.equal(isAllowed(g, 'Tie', '/x').allowed, true, 'Allow beats Disallow when equally long')
+  // no rules at all, and an empty Disallow, both mean allowed
+  assert.deepEqual(isAllowed([], 'GPTBot', '/'), { allowed: true, via: 'none' })
+  assert.equal(isAllowed(parseRobots('User-agent: *\nDisallow:'), 'GPTBot', '/x').allowed, true)
+})
+
+test('AI crawler check on a real-looking robots.txt', () => {
+  const by = (txt) => Object.fromEntries(checkCrawlers(txt).map((r) => [r.token, r]))
+  const some = by(
+    'User-agent: *\nAllow: /\nDisallow: /admin/\n\nUser-agent: GPTBot\nDisallow: /\n\nUser-agent: ClaudeBot\nDisallow: /\n'
+  )
+  assert.equal(some.GPTBot.status, 'blocked')
+  assert.equal(some.ClaudeBot.status, 'blocked')
+  assert.equal(some['OAI-SearchBot'].status, 'allowed')
+  assert.equal(some.PerplexityBot.via, 'wildcard')
+  // blocking everything with * also blocks AI crawlers, unless one has its own group
+  const all = by('User-agent: *\nDisallow: /\n\nUser-agent: OAI-SearchBot\nAllow: /')
+  assert.equal(all.GPTBot.status, 'blocked')
+  assert.equal(all['OAI-SearchBot'].status, 'allowed')
+  // a crawler that may read the blog but not the rest is reported as partial
+  const part = by('User-agent: GPTBot\nDisallow: /\nAllow: /blog/')
+  assert.equal(part.GPTBot.status, 'partial')
+  // no robots.txt: everything allowed, nothing blocked
+  const none = checkCrawlers('')
+  assert.ok(none.every((r) => r.status === 'allowed' && r.via === 'none'))
+  assert.equal(new Set(CRAWLERS.map((c) => c.token)).size, CRAWLERS.length, 'tokens are unique')
+})
+
+test('robots.ts generator: opt out of AI training adds one group and leaves search crawlers alone', () => {
+  const plain = buildRobotsTs('example.com', '/admin', false)
+  assert.match(plain, /rules: \{/)
+  assert.doesNotMatch(plain, /GPTBot/)
+  const out = buildRobotsTs('example.com', '/admin', true)
+  assert.match(out, /rules: \[/)
+  assert.match(
+    out,
+    /userAgent: \["GPTBot","ClaudeBot","Google-Extended","Applebot-Extended","CCBot","meta-externalagent"\]/
+  )
+  assert.match(out, /disallow: \["\/admin"\]/)
+  assert.doesNotMatch(out, /OAI-SearchBot|PerplexityBot|Claude-SearchBot/)
+  // what the generator writes is what the checker reports
+  const asTxt =
+    'User-agent: *\nAllow: /\n\n' +
+    `User-agent: ${TRAINING_TOKENS.join('\nUser-agent: ')}\nDisallow: /`
+  const r = checkCrawlers(asTxt)
+  for (const c of r)
+    assert.equal(c.status === 'blocked', TRAINING_TOKENS.includes(c.token), c.token)
+})
+
+test('WhatsApp link: country code added, leading 0 dropped, repeated code caught, + is complete', () => {
+  const wa = (o) => buildWhatsAppLink({ country: '91', number: '', message: '', ref: '', ...o })
+  const india = wa({ number: '98765 43210', message: 'Hi' })
+  assert.equal(india.link, 'https://wa.me/919876543210?text=Hi')
+  assert.equal(india.digits, '919876543210')
+  assert.equal(
+    wa({ country: '44', number: '07911 123456' }).digits,
+    '447911123456',
+    'trunk 0 removed'
+  )
+  const twice = wa({ number: '91 98765 43210' })
+  assert.equal(twice.digits, '919876543210')
+  assert.equal(twice.notes.length, 1, 'tells the person the code was not added twice')
+  assert.equal(
+    wa({ country: '91', number: '+65 8123 4567' }).digits,
+    '6581234567',
+    '+ means complete'
+  )
+  assert.equal(wa({ number: '0044 7911 123456' }).digits, '447911123456')
+  assert.deepEqual(wa({ number: '   ' }), { link: '', digits: '', text: '', error: '', notes: [] })
+  assert.match(wa({ number: '123' }).error, /8 to 15/)
+  assert.match(wa({ number: '0' }).error, /without the country code/)
+  assert.match(
+    wa({ number: '000' }).error,
+    /not 0/,
+    '00 is the international prefix, then a stray 0'
+  )
+})
+
+test('WhatsApp link: campaign code goes into the message, Hindi kept, text is encoded', () => {
+  assert.equal(withRef('Hi, price list', 'Diwali Poster'), 'Hi, price list [ref: diwali-poster]')
+  assert.equal(withRef('', 'poster-1'), 'Hi [ref: poster-1]')
+  assert.equal(withRef('Hello', ''), 'Hello')
+  assert.equal(withRef('Hello', 'दिवाली पोस्टर'), 'Hello [ref: दिवाली-पोस्टर]')
+  const r = buildWhatsAppLink({
+    country: '91',
+    number: '9876543210',
+    message: 'A & B\nline',
+    ref: 'x',
+  })
+  assert.match(r.link, /\?text=A%20%26%20B%0Aline%20%5Bref%3A%20x%5D$/)
+  assert.equal(
+    htmlSnippet('https://wa.me/1?text=a&b="c"'),
+    '<a href="https://wa.me/1?text=a&amp;b=&quot;c&quot;" target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>'
+  )
+  assert.equal(new Set(COUNTRIES.map((c) => `${c.name}`)).size, COUNTRIES.length)
 })
 
 // Synthetic exports in GA4's CSV layout (comment header, Grand total line, rate columns).

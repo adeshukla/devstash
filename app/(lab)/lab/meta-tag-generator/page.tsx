@@ -5,6 +5,7 @@ import { LabToolSchema } from '@/components/lab/LabToolSchema'
 import { MetaTagGenerator } from '@/components/lab/MetaTagGenerator'
 import { MetaAudit } from '@/components/lab/MetaAudit'
 import { SeoKit } from '@/components/lab/SeoKit'
+import { AiCrawlerCheck } from '@/components/lab/AiCrawlerCheck'
 import { FaqSection } from '@/components/sections/FaqSection'
 
 const FAQ = [
@@ -27,6 +28,21 @@ const FAQ = [
     question: 'Does it check my live page?',
     answer:
       'No. The head check reads tags you paste in. It does not fetch your site, and nothing you type is sent anywhere.',
+  },
+  {
+    question: 'Will opting out of AI training hurt my Google ranking?',
+    answer:
+      'No. Google says its Google-Extended control does not affect inclusion in Google Search and is not a ranking signal. The opt-out also leaves the search crawlers of OpenAI, Anthropic and Perplexity allowed, so those products can still find and link to you.',
+  },
+  {
+    question: 'Does the AI crawler check read my live robots.txt?',
+    answer:
+      'No. It reads the text you paste. Open yoursite.com/robots.txt, copy it in, and it shows which of 13 known crawlers are blocked. The list comes from each vendor’s own documentation and can go out of date.',
+  },
+  {
+    question: 'Can robots.txt stop an assistant from reading my page?',
+    answer:
+      'Not always. Crawlers that collect content on their own are meant to follow it. A fetch that a person triggers by asking an assistant to open a page may ignore it: OpenAI, Perplexity and Meta say so for their user-triggered fetchers, while Anthropic says its bots honor robots.txt.',
   },
   {
     question: 'Is the title and description draft written by AI?',
@@ -78,6 +94,24 @@ export default function MetaTagGeneratorPage() {
             </p>
             <div className="border-ds-border bg-ds-surface rounded-2xl border p-5 sm:p-8">
               <MetaAudit />
+            </div>
+          </div>
+        </section>
+
+        <section className="border-ds-border border-t px-6 py-12 sm:py-16">
+          <div className="mx-auto max-w-4xl">
+            <h2 className="text-ds-text mb-2 text-xl font-bold">
+              Which AI crawlers can read your site?
+            </h2>
+            <p className="text-ds-muted mb-6 max-w-2xl leading-relaxed">
+              Paste your <code className="text-ds-accent">robots.txt</code> and see which of 13
+              known AI crawlers it blocks: OpenAI, Anthropic, Google, Perplexity, Apple, Meta and
+              Common Crawl. It follows the same rules crawlers use: a crawler&apos;s own group wins
+              over <code className="text-ds-accent">*</code>, and the longest matching rule wins.
+              The robots.ts tab above can write the opt-out for you.
+            </p>
+            <div className="border-ds-border bg-ds-surface rounded-2xl border p-5 sm:p-8">
+              <AiCrawlerCheck />
             </div>
           </div>
         </section>

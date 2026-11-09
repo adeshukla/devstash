@@ -4,12 +4,12 @@ const TOOLS = [
   { id: 'build', label: 'Build links', href: '/lab/utm-builder' },
   { id: 'check', label: 'Check links', href: '/lab/utm-link-checker' },
   { id: 'clean', label: 'Clean reports', href: '/lab/utm-report-cleaner' },
-  { id: 'qr', label: 'QR codes', href: '/lab/qr-code-generator' },
 ] as const
 
 /**
- * The four tools share one saved list, one set of team rules and one set of
- * remembered merges, so they are presented as one toolkit.
+ * The three tools share one saved list, one set of team rules and one set of
+ * remembered merges, so they are presented as one toolkit. The standalone QR
+ * generator does not use any of that, so it is not part of it.
  */
 export function UtmToolkitNav({ current }: { current: (typeof TOOLS)[number]['id'] }) {
   return (

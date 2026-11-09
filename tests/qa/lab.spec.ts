@@ -26,10 +26,43 @@ test.describe('Lab hub', () => {
     await page.goto('/lab')
     const cards = page.locator('section', { hasText: 'More tools' }).locator('article')
     const count = await cards.count()
-    expect(count % 2).toBe(1)
     const first = await cards.first().boundingBox()
     const last = await cards.last().boundingBox()
-    expect(last!.width).toBeGreaterThan(first!.width * 1.8)
+    if (count % 2 === 1) expect(last!.width).toBeGreaterThan(first!.width * 1.8)
+    else expect(last!.width).toBeLessThan(first!.width * 1.2)
+  })
+
+  test('the toolkit is three tools; the QR generator sits under More tools with no toolkit nav', async ({
+    page,
+  }) => {
+    await page.goto('/lab')
+    await expect(page.getByText(/Three tools that work as one/)).toBeVisible()
+    const more = page.locator('section', { hasText: 'More tools' })
+    await expect(more.getByRole('heading', { name: 'QR Code Generator' })).toBeVisible()
+    const toolkit = page.locator('section', { hasText: 'The UTM toolkit' })
+    await expect(toolkit.getByRole('heading', { name: 'QR Code Generator' })).toHaveCount(0)
+
+    await page.goto('/lab/utm-builder')
+    const nav = page.getByRole('navigation', { name: 'UTM toolkit' })
+    await expect(nav.getByRole('link')).toHaveCount(3)
+    await expect(nav.getByRole('link', { name: 'QR codes' })).toHaveCount(0)
+
+    await page.goto('/lab/qr-code-generator')
+    await expect(page.getByRole('navigation', { name: 'UTM toolkit' })).toHaveCount(0)
+  })
+
+  test('the WhatsApp link generator has a card, a job shortcut and a real example link', async ({
+    page,
+  }) => {
+    await page.goto('/lab')
+    await expect(
+      page.getByRole('link', { name: /Get customers to message me on WhatsApp/ })
+    ).toHaveAttribute('href', '/lab/whatsapp-link-generator')
+    await expect(
+      page.getByText(
+        'https://wa.me/919876543210?text=Hi%2C%20please%20share%20your%20price%20list.%20%5Bref%3A%20diwali-poster%5D'
+      )
+    ).toBeVisible()
   })
 
   test('copy link puts the full tool address on the clipboard', async ({ page }) => {
@@ -53,7 +86,8 @@ test.describe('Lab hub', () => {
 test.describe('Meta tag generator', () => {
   test('checks pasted head tags and lists what is wrong', async ({ page }) => {
     await page.goto('/lab/meta-tag-generator')
-    await page.getByRole('button', { name: 'Not sure? Try an example' }).click()
+    // the head-tag check comes first on the page; the AI crawler check has its own example button
+    await page.getByRole('button', { name: 'Not sure? Try an example' }).first().click()
     await expect(page.getByText(/Problem: There is no viewport/)).toBeVisible()
     await expect(page.getByText(/Tip: There is no canonical link/)).toBeVisible()
     await expect(page.getByText(/og:image must be a full/)).toBeVisible()
@@ -183,6 +217,7 @@ test.describe('Every tool page has the same frame', () => {
     '/lab/css-shapes-playground',
     '/lab/illustration-generator',
     '/lab/ai-content-pipeline',
+    '/lab/whatsapp-link-generator',
   ]
   for (const path of PAGES) {
     test(`${path} has an FAQ, a "Free tool" footer and no accessibility violations`, async ({
@@ -215,5 +250,74 @@ test.describe('Every tool page has the same frame', () => {
     await expect(page.getByRole('dialog')).toBeVisible()
     await page.getByRole('button', { name: 'Skip' }).click()
     await expect(page.getByRole('dialog')).toHaveCount(0)
+  })
+})
+
+test.describe('WhatsApp link generator', () => {
+  test('builds the link from a country and a number, adds the campaign code, and warns about a repeated code', async ({
+    page,
+  }) => {
+    await page.goto('/lab/whatsapp-link-generator')
+    await page.getByLabel('WhatsApp number').fill('98765 43210')
+    await page.getByRole('button', { name: 'Price list' }).click()
+    await page.getByLabel('Campaign code (optional)').fill('Diwali Poster')
+    await expect(page.getByText(/^https:\/\/wa\.me\/919876543210\?text=/)).toBeVisible()
+    await expect(page.getByText('+919876543210')).toBeVisible()
+    await expect(
+      page.getByText('Hi, please share your price list. [ref: diwali-poster]', { exact: true })
+    ).toBeVisible()
+    const link = await page.getByText(/^https:\/\/wa\.me\//).textContent()
+    expect(decodeURIComponent(link ?? '')).toContain('[ref: diwali-poster]')
+    await expect(page.getByRole('button', { name: 'Download PNG' })).toBeVisible()
+    // a number that already starts with the country code is not given it twice
+    await page.getByLabel('WhatsApp number').fill('91 98765 43210')
+    await expect(page.getByText(/Removed the \+91 you typed/)).toBeVisible()
+    await expect(page.getByText(/^https:\/\/wa\.me\/919876543210/)).toBeVisible()
+    // too short a number is explained, not turned into a link
+    await page.getByLabel('WhatsApp number').fill('123')
+    await expect(page.getByText(/8 to 15 digits/)).toBeVisible()
+    await expect(page.getByText(/^https:\/\/wa\.me\//)).toHaveCount(0)
+  })
+
+  test('copies the link and an HTML snippet', async ({ page, context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+    await page.goto('/lab/whatsapp-link-generator')
+    await page.getByLabel('Country').selectOption({ label: 'United Kingdom (+44)' })
+    await page.getByLabel('WhatsApp number').fill('07911 123456')
+    await page.getByRole('button', { name: 'Copy link' }).click()
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      'https://wa.me/447911123456'
+    )
+    await page.getByRole('button', { name: 'Copy as HTML link' }).click()
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      '<a href="https://wa.me/447911123456" target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>'
+    )
+  })
+})
+
+test.describe('AI crawler check and robots.ts opt-out', () => {
+  test('shows which AI crawlers a pasted robots.txt blocks', async ({ page }) => {
+    await page.goto('/lab/meta-tag-generator')
+    const section = page.locator('section', { hasText: 'Which AI crawlers can read your site?' })
+    await section.getByRole('button', { name: 'Not sure? Try an example' }).click()
+    await expect(section.getByText('2 of 13 AI crawlers blocked')).toBeVisible()
+    const row = (token: string) => section.locator('li', { hasText: token }).first()
+    await expect(row('GPTBot')).toContainText('Blocked')
+    await expect(row('ClaudeBot')).toContainText('Blocked')
+    await expect(row('OAI-SearchBot')).toContainText('Allowed')
+    await expect(row('Google-Extended')).toContainText('does not affect Google Search')
+  })
+
+  test('the robots.ts tab can opt out of AI training and leaves search crawlers alone', async ({
+    page,
+  }) => {
+    await page.goto('/lab/meta-tag-generator')
+    await page.getByRole('tab', { name: 'robots.ts' }).click()
+    await page.getByLabel('Your site address').fill('example.com')
+    await page.getByLabel(/Opt out of AI training/).check()
+    const code = page.locator('pre').filter({ hasText: 'MetadataRoute.Robots' })
+    await expect(code).toContainText('rules: [')
+    await expect(code).toContainText('"GPTBot","ClaudeBot","Google-Extended"')
+    await expect(code).not.toContainText('OAI-SearchBot')
   })
 })

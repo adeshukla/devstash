@@ -17,6 +17,7 @@ import { analyzeLink } from '@/lib/lab/utmCheck'
 import { cleanReport } from '@/lib/lab/reportClean'
 import { whatsappPayload } from '@/lib/lab/qrPayload'
 import { buildHtml } from '@/lib/lab/metaTags'
+import { buildWhatsAppLink } from '@/lib/lab/whatsapp'
 
 const title = 'Lab — Interactive Tools & Live Demos'
 const description =
@@ -73,6 +74,14 @@ const TOOLS: Demo[] = [
       'Previews your title as Google, X and Facebook cards, then writes the Next.js files: metadata, FAQ schema, robots.ts, sitemap.ts and an OG image.',
     tag: 'SEO',
     preview: 'meta',
+  },
+  {
+    slug: 'whatsapp-link-generator',
+    name: 'WhatsApp Link Generator',
+    blurb:
+      'A click-to-chat link with a country picker, a message already typed and a campaign code, plus a QR code and an HTML snippet.',
+    tag: 'Marketing',
+    preview: 'chat',
   },
   {
     slug: 'utm-builder',
@@ -197,6 +206,15 @@ function examples(): Record<string, { input: string; output: string }> {
         .slice(0, 2)
         .join('  '),
     },
+    'whatsapp-link-generator': {
+      input: 'India, 98765 43210, "Hi, please share your price list.", code diwali-poster',
+      output: buildWhatsAppLink({
+        country: '91',
+        number: '98765 43210',
+        message: 'Hi, please share your price list.',
+        ref: 'diwali-poster',
+      }).link,
+    },
     'css-shapes-playground': {
       input: 'A morphing blob',
       output: 'border-radius: 42% 58% 63% 37% / 47% 42% 58% 53%;',
@@ -210,6 +228,11 @@ const JOBS = [
   { job: 'Fix a report with split rows', tool: 'Report Cleaner', href: '/lab/utm-report-cleaner' },
   { job: 'Make a QR code', tool: 'QR Code Generator', href: '/lab/qr-code-generator' },
   {
+    job: 'Get customers to message me on WhatsApp',
+    tool: 'WhatsApp Link Generator',
+    href: '/lab/whatsapp-link-generator',
+  },
+  {
     job: 'See how my page looks on Google',
     tool: 'Next.js SEO Kit',
     href: '/lab/meta-tag-generator',
@@ -219,12 +242,7 @@ const JOBS = [
 export default async function LabPage() {
   const samples = examples()
   const projects = await getAllProjects()
-  const toolkitSlugs = [
-    'utm-builder',
-    'utm-link-checker',
-    'utm-report-cleaner',
-    'qr-code-generator',
-  ]
+  const toolkitSlugs = ['utm-builder', 'utm-link-checker', 'utm-report-cleaner']
   const ordered = [
     ...toolkitSlugs.map((s) => TOOLS.find((d) => d.slug === s)!),
     ...TOOLS.filter((d) => !toolkitSlugs.includes(d.slug)),
@@ -283,7 +301,7 @@ export default async function LabPage() {
       <section className="border-ds-border border-b py-10">
         <div className="max-w-site mx-auto px-6">
           <h2 className="text-ds-text text-xl font-bold tracking-tight">What do you need to do?</h2>
-          <ul className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <ul className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {JOBS.map((j) => (
               <li key={j.href}>
                 <Link
@@ -303,9 +321,9 @@ export default async function LabPage() {
         <div className="max-w-site mx-auto px-6">
           <h2 className="text-ds-text mb-2 text-2xl font-bold tracking-tight">The UTM toolkit</h2>
           <p className="text-ds-muted mb-8 max-w-[64ch]">
-            Four tools that work as one: they share your saved links, team rules and remembered
-            clean-ups, and back up to a single file. Build links, check old ones, clean split
-            reports, make QR codes.
+            Three tools that work as one: they share your saved links, team rules and remembered
+            clean-ups, and back up to a single file. Build links (with QR codes and a print kit),
+            check old ones, clean split reports.
           </p>
           <LabTools tools={toolkitTools} />
         </div>

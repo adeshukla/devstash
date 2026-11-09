@@ -85,6 +85,8 @@ Also done (2026-11-02): the builder's secondary panels (team rules, import, chec
 
 Also done (2026-11-02, hub and small tools): larger SVG previews; each hub card shows a real result computed by the tool's own code; a "What do you need to do?" row of jobs; an odd last card spans the row; a copy-link button per card; the meta tag generator can check pasted head tags; saved looks (name + share link, kept on the device) for the CSS, illustration and meta tools; a one-time backup reminder after five saved UTM links. Browser checks for these are in `tests/qa/lab.spec.ts` (run by `pnpm qa:toolkit`). The 200px responsive suite caught two real overflows during this work (a fieldset and the saved-looks block), both fixed.
 
+Changed (2026-11-09): the standalone QR generator is no longer in the "UTM toolkit" group or its nav. It does not use the saved list, team rules or backup, so the toolkit copy overclaimed; the toolkit is now three tools (builder, checker, cleaner) and the builder still makes QR codes. Also added, as extensions of existing tools rather than new standalone ones: a WhatsApp link generator (`/lab/whatsapp-link-generator`) and an AI-crawler robots.txt check plus `robots.ts` opt-out inside the Next.js SEO Kit. The "no new tools" rule above still applies to anything else.
+
 Next (needs Adesh or real data):
 
 1. **Run it on a real GA4 export** and a real Looker Studio report; report which headers fail.

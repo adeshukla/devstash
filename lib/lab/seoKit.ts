@@ -1,6 +1,8 @@
 // Generators for the Next.js SEO files a new App Router site needs. Pure, no React and
 // no "@/" imports so node:test can run it.
 
+import { TRAINING_TOKENS } from './aiCrawlers.ts'
+
 export interface Faq {
   q: string
   a: string
@@ -78,7 +80,11 @@ export function origin(site: string): string {
  * `app/robots.ts`. Blocking /_next/ stops Googlebot rendering the page, so it is filtered out.
  * Paths get a leading slash; "/" and "*" alone would hide the whole site, so they are dropped.
  */
-export function buildRobotsTs(site: string, disallowText: string): string {
+export function buildRobotsTs(
+  site: string,
+  disallowText: string,
+  optOutAiTraining = false
+): string {
   const base = origin(site)
   const disallow = [
     ...new Set(
@@ -92,11 +98,27 @@ export function buildRobotsTs(site: string, disallowText: string): string {
     '',
     'export default function robots(): MetadataRoute.Robots {',
     '  return {',
-    '    rules: {',
-    "      userAgent: '*',",
-    "      allow: '/',",
-    ...(disallow.length ? [`      disallow: ${JSON.stringify(disallow)},`] : []),
-    '    },',
+    ...(optOutAiTraining
+      ? [
+          '    rules: [',
+          '      {',
+          "        userAgent: '*',",
+          "        allow: '/',",
+          ...(disallow.length ? [`        disallow: ${JSON.stringify(disallow)},`] : []),
+          '      },',
+          '      {',
+          `        userAgent: ${JSON.stringify(TRAINING_TOKENS)},`,
+          "        disallow: '/',",
+          '      },',
+          '    ],',
+        ]
+      : [
+          '    rules: {',
+          "      userAgent: '*',",
+          "      allow: '/',",
+          ...(disallow.length ? [`      disallow: ${JSON.stringify(disallow)},`] : []),
+          '    },',
+        ]),
     ...(base ? [`    sitemap: ${JSON.stringify(`${base}/sitemap.xml`)},`] : []),
     '  }',
     '}',

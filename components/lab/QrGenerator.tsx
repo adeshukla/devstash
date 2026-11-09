@@ -168,13 +168,25 @@ export function QrGenerator() {
             />
           )}
           {kind === 'whatsapp' && (
-            <Textarea
-              label="Message ready to send (optional)"
-              rows={3}
-              placeholder="Hi, I would like to know more about…"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
+            <>
+              <Textarea
+                label="Message ready to send (optional)"
+                rows={3}
+                placeholder="Hi, I would like to know more about…"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+              <p className="text-ds-muted text-sm">
+                Easier with a country picker, message templates and a campaign code? Use the{' '}
+                <Link
+                  href="/lab/whatsapp-link-generator"
+                  className="text-ds-accent-strong underline"
+                >
+                  WhatsApp link generator
+                </Link>
+                .
+              </p>
+            </>
           )}
 
           {kind === 'wifi' && (
