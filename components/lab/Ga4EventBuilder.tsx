@@ -11,9 +11,15 @@ import {
   type Param,
 } from '@/lib/lab/ga4Event'
 import { CssCodeBlock } from './CssCodeBlock'
+import { TabList, tabPanelProps } from './TabList'
 import { trackLab } from './track'
 
 type Target = 'gtm' | 'gtag'
+
+const TARGETS: { id: Target; label: string }[] = [
+  { id: 'gtm', label: 'Tag Manager (dataLayer)' },
+  { id: 'gtag', label: 'gtag.js' },
+]
 
 interface Row extends Param {
   id: number
@@ -173,51 +179,35 @@ export function Ga4EventBuilder() {
       <div className="flex flex-col gap-4">
         <div className="border-ds-accent/30 bg-ds-surface2 rounded-xl border p-4 sm:p-5">
           <h2 className="text-ds-text mb-3 text-base font-semibold">Your code</h2>
-          <div
-            role="tablist"
-            aria-label="Where the event goes"
-            className="mb-3 flex flex-wrap gap-2"
-          >
-            {(
-              [
-                ['gtm', 'Tag Manager (dataLayer)'],
-                ['gtag', 'gtag.js'],
-              ] as const
-            ).map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={target === id}
-                onClick={() => setTarget(id)}
-                className={
-                  target === id
-                    ? 'border-ds-accent text-ds-text rounded-full border px-3 py-1 text-sm font-medium'
-                    : 'border-ds-border text-ds-muted hover:text-ds-text rounded-full border px-3 py-1 text-sm'
-                }
-              >
-                {label}
-              </button>
-            ))}
+          <div className="mb-3">
+            <TabList
+              tabs={TARGETS}
+              value={target}
+              label="Where the event goes"
+              prefix="ga4-target"
+              onChange={setTarget}
+            />
           </div>
-          {code ? (
-            <CssCodeBlock code={code} label="JavaScript" />
-          ) : (
-            <p className="text-ds-muted text-sm">Name the event and your code appears here.</p>
-          )}
-          {code && target === 'gtm' && (
-            <p className="text-ds-muted mt-3 text-xs leading-relaxed">
-              A push alone sends nothing to GA4. In Tag Manager, add a Custom Event trigger with
-              this event name, and a GA4 event tag that reads each parameter from a Data Layer
-              Variable.
-            </p>
-          )}
-          {code && target === 'gtag' && (
-            <p className="text-ds-muted mt-3 text-xs leading-relaxed">
-              Google does not process events placed above the Google tag snippet, so run this after
-              it.
-            </p>
-          )}
+          <div {...tabPanelProps('ga4-target', target)}>
+            {code ? (
+              <CssCodeBlock code={code} label="JavaScript" />
+            ) : (
+              <p className="text-ds-muted text-sm">Name the event and your code appears here.</p>
+            )}
+            {code && target === 'gtm' && (
+              <p className="text-ds-muted mt-3 text-xs leading-relaxed">
+                A push alone sends nothing to GA4. In Tag Manager, add a Custom Event trigger with
+                this event name, and a GA4 event tag that reads each parameter from a Data Layer
+                Variable.
+              </p>
+            )}
+            {code && target === 'gtag' && (
+              <p className="text-ds-muted mt-3 text-xs leading-relaxed">
+                Google does not process events placed above the Google tag snippet, so run this
+                after it.
+              </p>
+            )}
+          </div>
         </div>
 
         {name.trim() && (

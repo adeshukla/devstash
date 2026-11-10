@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
+import jsQR from 'jsqr'
 
 /**
  * Lab hub and the smaller tools: what only a browser can break. Pure logic has
@@ -416,4 +417,112 @@ test.describe('OG image maker', () => {
     await page.getByLabel('Accent colour').fill('#0c1020')
     await expect(page.getByRole('alert').filter({ hasText: 'hard to see' })).toBeVisible()
   })
+})
+
+test.describe('QR codes scan back to what was typed', () => {
+  /** Draws the code that is on the page onto a canvas and reads it with an independent decoder. */
+  async function scanOnPage(page: import('@playwright/test').Page): Promise<string | null> {
+    const px = await page.evaluate(async () => {
+      const svg = document.querySelector('[aria-label="QR code"] svg') as SVGSVGElement
+      svg.setAttribute('width', '400')
+      svg.setAttribute('height', '400')
+      const xml = new XMLSerializer().serializeToString(svg)
+      const img = new Image()
+      await new Promise<void>((ok, bad) => {
+        img.onload = () => ok()
+        img.onerror = () => bad(new Error('decode'))
+        img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(xml)}`
+      })
+      const c = document.createElement('canvas')
+      c.width = c.height = 400
+      const ctx = c.getContext('2d')!
+      ctx.fillStyle = '#fff'
+      ctx.fillRect(0, 0, 400, 400)
+      ctx.drawImage(img, 0, 0, 400, 400)
+      return Array.from(ctx.getImageData(0, 0, 400, 400).data)
+    })
+    return jsQR(new Uint8ClampedArray(px), 400, 400)?.data ?? null
+  }
+
+  test('a website code opens the page that was typed', async ({ page }) => {
+    await page.goto('/lab/qr-code-generator')
+    await page.getByLabel('Website link').fill('devstash.me/lab')
+    await expect(page.getByRole('img', { name: 'QR code' })).toBeVisible()
+    expect(await scanOnPage(page)).toBe('https://devstash.me/lab')
+  })
+
+  test('a Hindi text code reads back as the same Hindi text', async ({ page }) => {
+    await page.goto('/lab/qr-code-generator')
+    await page.getByRole('button', { name: 'Text', exact: true }).click()
+    await page.getByLabel('Text', { exact: true }).fill('दिवाली सेल: 50% छूट')
+    await expect(page.getByRole('img', { name: 'QR code' })).toBeVisible()
+    expect(await scanOnPage(page)).toBe('दिवाली सेल: 50% छूट')
+  })
+
+  test('the WhatsApp generator code opens the link shown next to it', async ({ page }) => {
+    await page.goto('/lab/whatsapp-link-generator')
+    await page.getByLabel('WhatsApp number').fill('98765 43210')
+    await page.getByLabel('Campaign code (optional)').fill('diwali-poster')
+    await expect(page.getByRole('img', { name: 'QR code' })).toBeVisible()
+    const shown = (await page.getByText(/^https:\/\/wa\.me\//).textContent()) ?? ''
+    expect(await scanOnPage(page)).toBe(shown)
+  })
+})
+
+test.describe('Tabs work from the keyboard and are wired to their panel', () => {
+  const PAGES = [
+    {
+      path: '/lab/meta-tag-generator',
+      list: 'SEO file',
+      first: 'FAQ schema',
+      second: 'robots.ts',
+      last: 'OG image',
+    },
+    {
+      path: '/lab/ga4-event-builder',
+      list: 'Where the event goes',
+      first: 'Tag Manager (dataLayer)',
+      second: 'gtag.js',
+      last: 'gtag.js',
+    },
+  ]
+  for (const p of PAGES) {
+    test(`${p.path}: arrow keys, Home and End move between tabs; the panel is labelled by the selected tab`, async ({
+      page,
+    }) => {
+      await page.goto(p.path)
+      const list = page.getByRole('tablist', { name: p.list })
+      const first = list.getByRole('tab', { name: p.first })
+      const second = list.getByRole('tab', { name: p.second })
+      const last = list.getByRole('tab', { name: p.last })
+
+      // only the selected tab is in the Tab order
+      await expect(first).toHaveAttribute('tabindex', '0')
+      await expect(second).toHaveAttribute('tabindex', '-1')
+
+      await first.focus()
+      await page.keyboard.press('ArrowRight')
+      await expect(second).toHaveAttribute('aria-selected', 'true')
+      await expect(second).toBeFocused()
+      await expect(second).toHaveAttribute('tabindex', '0')
+      await expect(first).toHaveAttribute('tabindex', '-1')
+
+      await page.keyboard.press('End')
+      await expect(last).toHaveAttribute('aria-selected', 'true')
+      await expect(last).toBeFocused()
+      await page.keyboard.press('ArrowRight') // wraps round to the first tab
+      await expect(first).toHaveAttribute('aria-selected', 'true')
+      await page.keyboard.press('ArrowLeft') // and back to the last
+      await expect(last).toHaveAttribute('aria-selected', 'true')
+      await page.keyboard.press('Home')
+      await expect(first).toBeFocused()
+
+      // each tab points at the panel, and the panel is named by the selected tab
+      const controls = await first.getAttribute('aria-controls')
+      const panel = page.locator(`[role=tabpanel][id="${controls}"]`)
+      await expect(panel).toHaveCount(1)
+      const selectedId = await list.locator('[aria-selected=true]').getAttribute('id')
+      await expect(panel).toHaveAttribute('aria-labelledby', selectedId!)
+    })
+  }
 })

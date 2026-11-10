@@ -21,9 +21,17 @@ export interface QrStyle {
 
 export const MAX_LABEL = 24
 
+/**
+ * The generator's default text encoding is a single-byte one that cannot represent Hindi or
+ * other non-Latin text: a code made from "दिवाली" scans back as garbage. Phone cameras read
+ * byte-mode text as UTF-8, so the text is encoded that way.
+ */
+const utf8Bytes = (s: string): number[] => Array.from(new TextEncoder().encode(s))
+
 /** Throws when the text does not fit in a QR code at that level. */
 export async function makeQr(text: string, level: QrLevel): Promise<QrCode> {
   const { default: qrcode } = await import('qrcode-generator')
+  qrcode.stringToBytes = utf8Bytes
   const code = qrcode(0, level)
   code.addData(text)
   code.make()
