@@ -147,6 +147,21 @@ test.describe('Saved looks and backup reminder', () => {
   })
 })
 
+/** Puts a report into the box in one step. Typing thousands of lines with fill() is slow in a test and is not what a paste does. */
+async function pasteReport(page: import('@playwright/test').Page, rows: string[]) {
+  // wait until React has taken over the box, or the input event would go unseen
+  await page.waitForFunction(() => {
+    const box = document.getElementById('rc-text')
+    return !!box && Object.keys(box).some((k) => k.startsWith('__reactProps'))
+  })
+  const body = ['Session campaign,Sessions', ...rows].join('\n')
+  await page.evaluate((text) => {
+    const box = document.getElementById('rc-text') as HTMLTextAreaElement
+    Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(box, text)
+    box.dispatchEvent(new Event('input', { bubbles: true }))
+  }, body)
+}
+
 test.describe('Stress-test fixes', () => {
   test('the builder completes a bare domain and keeps a Hindi campaign name', async ({ page }) => {
     await page.goto('/lab/utm-builder')
@@ -176,11 +191,34 @@ test.describe('Stress-test fixes', () => {
 
   test('the report cleaner says when rows past the limit were not read', async ({ page }) => {
     await page.goto('/lab/utm-report-cleaner')
-    const rows = Array.from({ length: 5200 }, (_, i) => `c${i},1`).join('\n')
-    await page.getByLabel('Paste your report').fill(`Session campaign,Sessions\n${rows}`)
+    await pasteReport(
+      page,
+      Array.from({ length: 5200 }, (_, i) => `c${i},1`)
+    )
     await expect(
       page.getByRole('alert').filter({ hasText: /Only the first 5,000 of 5,200 rows/ })
     ).toBeVisible()
+  })
+
+  test('a big report draws only the biggest groups and says so, and the long list opens on demand', async ({
+    page,
+  }) => {
+    await page.goto('/lab/utm-report-cleaner')
+    // 2,000 campaigns each spelled two ways, plus 500 that need no merge
+    const rows = [
+      ...Array.from({ length: 2000 }, (_, i) => [`Camp-${i},5`, `camp_${i},3`]).flat(),
+      ...Array.from({ length: 500 }, (_, i) => `solo${i},1`),
+    ]
+    await pasteReport(page, rows)
+    await expect(page.getByText('Showing the 150 biggest of 2,000 merged groups.')).toBeVisible()
+    await expect(page.locator('[aria-label="Merged groups"] > li')).toHaveCount(150)
+    // the "nothing to merge" list is not built until it is opened
+    await expect(page.locator('details li')).toHaveCount(0)
+    await page.getByText(/Rows with nothing to merge \(500\)/).click()
+    await expect(page.locator('details li')).toHaveCount(200)
+    await expect(page.getByText('…and 300 more')).toBeVisible()
+    // everything is still in what you copy
+    await expect(page.getByRole('button', { name: 'Copy merged table' })).toBeVisible()
   })
 
   test('the QR generator will not make a WhatsApp code from a number with no country code', async ({
@@ -525,4 +563,18 @@ test.describe('Tabs work from the keyboard and are wired to their panel', () => 
       await expect(panel).toHaveAttribute('aria-labelledby', selectedId!)
     })
   }
+})
+
+test('the QR Wi-Fi and contact forms explain a missing name', async ({ page }) => {
+  await page.goto('/lab/qr-code-generator')
+  await page.getByRole('button', { name: 'Wi-Fi', exact: true }).click()
+  await page.getByLabel('Password', { exact: true }).fill('longenoughpass')
+  await expect(page.getByText('Enter the network name.')).toBeVisible()
+  await page.getByLabel('Network name').fill('Cafe')
+  await expect(page.getByText('Enter the network name.')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Contact card', exact: true }).click()
+  await page.getByLabel('Phone with country code').fill('+91 98765 43210')
+  await expect(page.getByText(/Add a name or a company/)).toBeVisible()
+  await page.getByLabel('First name').fill('Adesh')
+  await expect(page.getByText(/Add a name or a company/)).toHaveCount(0)
 })

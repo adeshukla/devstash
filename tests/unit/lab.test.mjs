@@ -1223,6 +1223,20 @@ test('OG image: the accent bar never touches the site name or the title, at any 
     }
 })
 
+test('QR forms say what is missing instead of showing nothing', () => {
+  const blank = { first: '', last: '', org: '', title: '', phone: '', email: '', url: '' }
+  // Wi-Fi: a password with no network name is explained; a blank form stays quiet
+  assert.match(wifiPayload('', 'longenoughpass', 'WPA', false).error, /network name/)
+  assert.match(wifiPayload('   ', 'longenoughpass', 'WPA', false).error, /network name/)
+  assert.deepEqual(wifiPayload('', '', 'WPA', false), { payload: '', error: '' })
+  assert.equal(wifiPayload('Cafe', 'longenoughpass', 'WPA', false).error, '')
+  // contact: details with no name are explained; a blank form stays quiet
+  assert.match(contactPayload({ ...blank, phone: '+919876543210' }).error, /name or a company/)
+  assert.match(contactPayload({ ...blank, email: 'a@b.com' }).error, /name or a company/)
+  assert.deepEqual(contactPayload(blank), { payload: '', error: '' })
+  assert.equal(contactPayload({ ...blank, org: 'DevStash', phone: '+919876543210' }).error, '')
+})
+
 // Synthetic exports in GA4's CSV layout (comment header, Grand total line, rate columns).
 const fixture = (name) => readFileSync(new URL(`../fixtures/${name}`, import.meta.url), 'utf8')
 

@@ -29,7 +29,15 @@ const EXAMPLE = [
   'launch-week,220,0.7',
 ].join('\n')
 
-const fmt = (n: number) => n.toLocaleString('en-US')
+// One formatter, made once: Number#toLocaleString builds a new one on every call, which added up
+// to seconds for a large export.
+const nf = new Intl.NumberFormat('en-US')
+const fmt = (n: number) => nf.format(n)
+
+// A big export can have thousands of groups. Only this many are drawn; every one is still in the
+// copied table, mapping and Looker field.
+const SPLIT_SHOWN = 150
+const REST_SHOWN = 200
 
 /**
  * Paste an analytics export; rows that are the same campaign, source or medium
@@ -45,6 +53,8 @@ export function ReportCleaner() {
   // Clean names the user typed instead of the suggested ones, keyed by the suggestion.
   const [names, setNames] = useState<Record<string, string>>({})
   const [note, setNote] = useState('')
+  // The "nothing to merge" list is only built while it is open.
+  const [restOpen, setRestOpen] = useState(false)
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot mount read of localStorage
@@ -95,7 +105,7 @@ export function ReportCleaner() {
   }
   const rest = result?.groups.filter((g) => !g.split) ?? []
   const spellings = split.reduce((n, g) => n + g.variants.length, 0)
-  const looker = result ? lookerCase(result) : ''
+  const looker = useMemo(() => (result ? lookerCase(result) : ''), [result])
   const field = result?.dims.length === 1 ? result.dims[0] : 'Your field'
   const sheetsFormula = '=LOWER(REGEXP_REPLACE(TRIM(A2),"[ _]+","-"))'
   const lookerFormula = `LOWER(REGEXP_REPLACE(TRIM(${lookerField(field)}), "[ _]+", "-"))`
@@ -204,7 +214,7 @@ export function ReportCleaner() {
 
           {split.length > 0 && (
             <ul className="flex flex-col gap-3" aria-label="Merged groups">
-              {splitItems.map(({ g, key }, gi) => (
+              {splitItems.slice(0, SPLIT_SHOWN).map(({ g, key }, gi) => (
                 <li key={key} className="border-ds-border bg-ds-surface2 rounded-xl border p-4">
                   <label htmlFor={`rc-name-${gi}`} className="text-ds-muted block text-xs">
                     Merge into (you can rename it)
@@ -247,20 +257,35 @@ export function ReportCleaner() {
               ))}
             </ul>
           )}
+          {split.length > SPLIT_SHOWN && (
+            <p className="text-ds-muted text-sm">
+              Showing the {SPLIT_SHOWN} biggest of {fmt(split.length)} merged groups. All of them
+              are in the table, mapping and Looker field you copy below.
+            </p>
+          )}
 
           {rest.length > 0 && (
-            <details>
+            <details onToggle={(e) => setRestOpen(e.currentTarget.open)}>
               <summary className="text-ds-muted hover:text-ds-accent cursor-pointer text-sm">
-                Rows with nothing to merge ({rest.length})
+                Rows with nothing to merge ({fmt(rest.length)})
               </summary>
-              <ul className="text-ds-muted mt-2 flex flex-col gap-1 font-mono text-xs">
-                {rest.map((g) => (
-                  <li key={g.canonical} className="break-all">
-                    {g.variants[0].raw}
-                    {g.totals.length > 0 && ` — ${g.totals.map((t) => fmt(t)).join(' · ')}`}
-                  </li>
-                ))}
-              </ul>
+              {restOpen && (
+                <>
+                  <ul className="text-ds-muted mt-2 flex flex-col gap-1 font-mono text-xs">
+                    {rest.slice(0, REST_SHOWN).map((g) => (
+                      <li key={g.canonical} className="break-all">
+                        {g.variants[0].raw}
+                        {g.totals.length > 0 && ` — ${g.totals.map((t) => fmt(t)).join(' · ')}`}
+                      </li>
+                    ))}
+                  </ul>
+                  {rest.length > REST_SHOWN && (
+                    <p className="text-ds-muted mt-2 text-xs">
+                      …and {fmt(rest.length - REST_SHOWN)} more, all included in the table you copy.
+                    </p>
+                  )}
+                </>
+              )}
             </details>
           )}
 

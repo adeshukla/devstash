@@ -19,6 +19,10 @@ module.exports = {
         'http://localhost:3000/lab/utm-link-checker',
         'http://localhost:3000/lab/utm-report-cleaner',
         'http://localhost:3000/lab/qr-code-generator',
+        'http://localhost:3000/lab/whatsapp-link-generator',
+        'http://localhost:3000/lab/ga4-event-builder',
+        'http://localhost:3000/lab/og-image-maker',
+        'http://localhost:3000/lab/meta-tag-generator',
         'http://localhost:3000/contact',
       ],
       // No `settings.preset` — Lighthouse's default (unset) already emulates

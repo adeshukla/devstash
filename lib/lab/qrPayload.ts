@@ -90,7 +90,7 @@ export function wifiPayload(
   security: WifiSecurity,
   hidden: boolean
 ): PayloadResult {
-  if (!ssid) return empty
+  if (!ssid.trim()) return password ? fail('Enter the network name.') : empty
   if (security === 'WPA' && (password.length < 8 || password.length > 63))
     return fail('A WPA password is 8 to 63 characters.')
   if (security === 'WEP' && !password) return fail('Enter the network password.')
@@ -116,7 +116,12 @@ export function contactPayload(c: Contact): PayloadResult {
   const first = c.first.trim()
   const last = c.last.trim()
   const org = c.org.trim()
-  if (!first && !last && !org) return empty
+  if (!first && !last && !org) {
+    const typed = [c.title, c.phone, c.email, c.url].some((v) => v.trim())
+    return typed
+      ? fail('Add a name or a company, so the contact has something to be saved as.')
+      : empty
+  }
   const phone = phoneDigits(c.phone)
   if (phone.error) return fail(phone.error)
   const email = c.email.trim()
