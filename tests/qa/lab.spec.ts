@@ -406,17 +406,41 @@ test.describe('OG image maker', () => {
   })
 
   const pngSize = (buf: Buffer) => ({ w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) })
+  // a stand-in for a hero image: deep teal sky, warm sun, dark hills
+  const HERO = `<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f4c5c"/><stop offset="0.7" stop-color="#e36414"/><stop offset="1" stop-color="#fb8b24"/></linearGradient></defs><rect width="1600" height="900" fill="url(#g)"/><circle cx="1150" cy="520" r="150" fill="#ffd28a"/><path d="M0 700C300 600 500 760 800 680S1300 620 1600 720V900H0Z" fill="#1b263b"/></svg>`
+  const hero = { name: 'hero.svg', mimeType: 'image/svg+xml', buffer: Buffer.from(HERO) }
+
+  const open = async (page: import('@playwright/test').Page, title: string) =>
+    page
+      .locator('summary', { hasText: new RegExp(`^${title}`) })
+      .first()
+      .click()
+  const previewSvg = async (page: import('@playwright/test').Page) =>
+    decodeURIComponent(
+      ((await page.getByRole('img', { name: /^Preview:/ }).getAttribute('src')) ?? '').split(
+        ','
+      )[1] ?? ''
+    )
+  const lum = (hex: string) => {
+    const lin = (v: number) =>
+      v / 255 <= 0.03928 ? v / 255 / 12.92 : ((v / 255 + 0.055) / 1.055) ** 2.4
+    const n = parseInt(hex.slice(1), 16)
+    return 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255)
+  }
+  const contrast = (a: string, b: string) => {
+    const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p)
+    return (x + 0.05) / (y + 0.05)
+  }
 
   test('draws a Hindi title and downloads a real 1200 x 630 PNG and an SVG', async ({ page }) => {
     await page.goto('/lab/og-image-maker')
     await page.getByLabel('Title', { exact: true }).fill('ट्रेल रनिंग जूते: मानसून गाइड')
-    await page.getByLabel('Site name (optional)').fill('northpeak.example')
+    await open(page, 'Tag line')
+    await page.getByLabel('Tag line', { exact: true }).fill('northpeak.example')
     const preview = page.getByRole('img', { name: /Preview: ट्रेल रनिंग/ })
     await expect(preview).toBeVisible()
-    const src = decodeURIComponent((await preview.getAttribute('src')) ?? '')
-    expect(src).toContain('<svg')
-    expect(src).toContain('ट्रेल')
-    expect(src).toContain('northpeak.example')
+    await expect.poll(() => previewSvg(page)).toMatch(/northpeak.example/i)
+    expect(await previewSvg(page)).toContain('ट्रेल')
 
     const [png] = await Promise.all([
       page.waitForEvent('download'),
@@ -436,24 +460,178 @@ test.describe('OG image maker', () => {
     expect(text).toContain('ट्रेल')
   })
 
-  test('a long title still fits, the size changes the file, and a hard-to-see accent is flagged', async ({
+  test('every text has its own font, weight, colour and case, and the preview follows', async ({
     page,
   }) => {
     await page.goto('/lab/og-image-maker')
-    const long =
-      'The complete beginner guide to choosing lightweight trail running shoes for the monsoon '.repeat(
-        3
+    await page.getByLabel('Title', { exact: true }).fill('Hello world')
+    await page.getByLabel('Title font', { exact: true }).selectOption({ label: 'Heavy display' })
+    await page.getByLabel('Title weight', { exact: true }).selectOption({ label: 'Black' })
+    await page.getByLabel('Title colour, hex value', { exact: true }).fill('#ff0000')
+    await page.getByLabel('Title in capitals', { exact: true }).check()
+    await page.getByLabel('Title in italics', { exact: true }).check()
+    await expect
+      .poll(() => previewSvg(page))
+      .toMatch(
+        /font-family="Impact,[^"]*" font-size="\d+" font-weight="900" font-style="italic"[^>]*fill="#ff0000"[^>]*>HELLO WORLD</
       )
-    await page.getByLabel('Title', { exact: true }).fill(long.trim())
-    await expect(page.getByRole('img', { name: /Preview:/ })).toBeVisible()
-    await page.getByLabel('Size').selectOption('cover')
+
+    // the subtitle is separate: its own text and look, the title unchanged
+    await open(page, 'Subtitle')
+    await page.getByLabel('Subtitle', { exact: true }).fill('quiet line')
+    await page.getByLabel('Subtitle font').selectOption({ label: 'Mono' })
+    await expect
+      .poll(() => previewSvg(page))
+      .toMatch(/font-family="Consolas,[^"]*"[^>]*>quiet line</)
+    expect(await previewSvg(page)).toMatch(/>HELLO WORLD</)
+
+    // removing a colour override returns the text to the theme colour
+    await page.getByRole('button', { name: 'Reset' }).first().click()
+    await expect.poll(() => previewSvg(page)).not.toContain('fill="#ff0000"')
+  })
+
+  test('a picture gives the style: colours found, matched with readable text, then used as background or beside the text', async ({
+    page,
+  }) => {
+    await page.goto('/lab/og-image-maker')
+    await page.getByLabel('Title', { exact: true }).fill('From the hero image')
+    await page.locator('input[aria-label="Choose a picture"]').setInputFiles(hero)
+    const swatches = page
+      .getByRole('list', { name: 'Colours found in the picture' })
+      .getByRole('listitem')
+    await expect(swatches.first()).toBeVisible()
+    expect(await swatches.count()).toBeGreaterThanOrEqual(3)
+
+    await page.getByRole('button', { name: 'Match its colours' }).click()
+    await expect
+      .poll(async () =>
+        ((await previewSvg(page)).match(/stop-color="(#[0-9a-f]{6})"/i)?.[1] ?? '').toLowerCase()
+      )
+      .not.toBe('#f6f1e7')
+    const svg = await previewSvg(page)
+    const stops = [...svg.matchAll(/stop-color="(#[0-9a-f]{6})"/gi)].map((m) => m[1])
+    const titleFill = svg.match(/font-weight="700"[^>]*fill="(#[0-9a-f]{6})"/i)![1]
+    expect(contrast(titleFill, stops[0])).toBeGreaterThanOrEqual(4.5)
+    await expect(page.getByRole('status')).toContainText('Colours taken from the picture')
+
+    await page.getByRole('button', { name: 'Use as background' }).click()
+    await expect.poll(() => previewSvg(page)).toContain('<image href="data:image/jpeg;base64,')
+    expect(await previewSvg(page)).toMatch(/fill-opacity="0\.\d+"\/>/) // the darkening layer
+    expect((await previewSvg(page)).match(/<image /g)).toHaveLength(1)
+
+    await open(page, 'Layout and size')
+    await page.getByRole('button', { name: 'Picture on the left' }).click()
+    await expect.poll(async () => ((await previewSvg(page)).match(/<image /g) ?? []).length).toBe(1)
+    expect(await previewSvg(page)).toContain('clipPath id="pcsp"')
+    expect(await previewSvg(page)).not.toContain('id="pcbg"')
+
+    // a swatch can be given a role by hand
+    await page
+      .getByRole('button', { name: /^Use #[0-9a-f]{6} as accent colour$/i })
+      .first()
+      .click()
+    await page.getByRole('button', { name: 'Remove the picture' }).click()
+    await expect.poll(() => previewSvg(page)).not.toContain('<image')
+    await expect(page.getByRole('list', { name: 'Colours found in the picture' })).toHaveCount(0)
+  })
+
+  test('a file that is not a picture is explained, not accepted', async ({ page }) => {
+    await page.goto('/lab/og-image-maker')
+    await page
+      .locator('input[aria-label="Choose a picture"]')
+      .setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello') })
+    await expect(page.getByRole('alert').filter({ hasText: 'Choose an image file' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Match its colours' })).toHaveCount(0)
+  })
+
+  test('graphics: pattern, mark, corner shape, frame, panel and logo each change the image', async ({
+    page,
+  }) => {
+    await page.goto('/lab/og-image-maker')
+    await page.getByLabel('Title', { exact: true }).fill('Graphics')
+    await open(page, 'Graphics')
+    await page.getByRole('button', { name: 'Stripes', exact: true }).click()
+    await expect.poll(() => previewSvg(page)).toMatch(/<path d="M-\d+ \d+L/)
+    await page.getByRole('button', { name: 'Grain', exact: true }).click()
+    await expect.poll(() => previewSvg(page)).toContain('id="grain"')
+    await page.getByRole('button', { name: 'Blob', exact: true }).click()
+    await expect.poll(() => previewSvg(page)).toMatch(/scale\([\d.]+\)" d="M50 4C/)
+    await page.getByLabel('Frame around the image').check()
+    await expect.poll(() => previewSvg(page)).toMatch(/fill="none" stroke="#c2410c" stroke-width/)
+    await page.getByLabel('Panel behind the text').check()
+    await expect.poll(() => previewSvg(page)).toMatch(/fill="#ffffff" fill-opacity="0\.8"/)
+    await page.locator('input[aria-label="Choose a logo"]').setInputFiles(hero)
+    await expect.poll(() => previewSvg(page)).toContain('<image href="data:image/png;base64,')
+    await page.getByLabel('Round logo').check()
+    await expect.poll(() => previewSvg(page)).toContain('clipPath id="logoc"')
+    await page.getByRole('button', { name: 'Remove the logo' }).click()
+    await expect.poll(() => previewSvg(page)).not.toContain('<image')
+  })
+
+  test('looks change the whole style and keep the texts; the text and background colours are checked for contrast', async ({
+    page,
+  }) => {
+    await page.goto('/lab/og-image-maker')
+    await page.getByLabel('Title', { exact: true }).fill('Keep this title')
+    await page.getByRole('button', { name: 'Poster', exact: true }).click()
+    await expect.poll(() => previewSvg(page)).toMatch(/font-family="Impact,/)
+    expect(await previewSvg(page)).toContain('KEEP THIS TITLE')
+    await page.getByRole('button', { name: 'Reset the style' }).click()
+    await expect.poll(() => previewSvg(page)).toMatch(/font-family="Georgia,/)
+    expect(await previewSvg(page)).toContain('Keep this title')
+    await open(page, 'Colours and background')
+    await page.getByLabel('Text colour, hex value').fill('#f6f1e7')
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'text colour is hard to read' })
+    ).toBeVisible()
+  })
+
+  test('size and download: a custom size, double resolution and JPG', async ({ page }) => {
+    await page.goto('/lab/og-image-maker')
+    await page.getByLabel('Title', { exact: true }).fill('Sizes')
+    await open(page, 'Layout and size')
+    await page.getByLabel('Size', { exact: true }).selectOption({ label: 'Custom size' })
+    await page.getByLabel('Width in pixels').fill('1000')
+    await page.getByLabel('Height in pixels').fill('500')
+    await expect.poll(() => previewSvg(page)).toContain('width="1000" height="500"')
+    await page.getByRole('button', { name: 'Double (sharper)' }).click()
     const [png] = await Promise.all([
       page.waitForEvent('download'),
       page.getByRole('button', { name: 'Download PNG' }).click(),
     ])
-    expect(png.suggestedFilename()).toBe('og-image-1600x900.png')
-    await page.getByLabel('Accent colour').fill('#0c1020')
-    await expect(page.getByRole('alert').filter({ hasText: 'hard to see' })).toBeVisible()
+    expect(png.suggestedFilename()).toBe('og-image-1000x500@2x.png')
+    expect(pngSize(await (await import('node:fs/promises')).readFile((await png.path())!))).toEqual(
+      { w: 2000, h: 1000 }
+    )
+    await page.getByRole('button', { name: 'JPG (smaller)' }).click()
+    const [jpg] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('button', { name: 'Download JPG' }).click(),
+    ])
+    expect(jpg.suggestedFilename()).toBe('og-image-1000x500@2x.jpg')
+    const head = (await (await import('node:fs/promises')).readFile((await jpg.path())!)).subarray(
+      0,
+      3
+    )
+    expect([...head]).toEqual([0xff, 0xd8, 0xff])
+  })
+
+  test('with every section open there are no accessibility problems, in light or dark', async ({
+    page,
+  }) => {
+    for (const scheme of ['light', 'dark'] as const) {
+      await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: scheme })
+      await page.goto('/lab/og-image-maker')
+      await page.locator('input[aria-label="Choose a picture"]').setInputFiles(hero)
+      await expect(page.getByRole('button', { name: 'Match its colours' })).toBeVisible()
+      for (let i = 0; i < 12; i++) {
+        const closed = page.locator('details:not([open]) > summary')
+        if (!(await closed.count())) break
+        await closed.first().click()
+      }
+      const results = await new AxeBuilder({ page }).analyze()
+      expect(results.violations.map((v) => `${v.id}: ${v.nodes[0]?.target}`)).toEqual([])
+    }
   })
 })
 

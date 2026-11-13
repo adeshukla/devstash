@@ -11,7 +11,24 @@ import {
   jsValue,
   TEMPLATES,
 } from '../../lib/lab/ga4Event.ts'
-import { wrapLines, fitText, buildOgSvg } from '../../lib/lab/ogImage.ts'
+import {
+  wrapLines,
+  fitText,
+  buildOgSvg,
+  DEFAULTS,
+  PRESETS,
+  applyPreset,
+  FONTS,
+} from '../../lib/lab/ogImage.ts'
+import {
+  extractPalette,
+  suggestStyle,
+  scrimFor,
+  meanColor,
+  readableOn,
+  luminance,
+  mix,
+} from '../../lib/lab/palette.ts'
 import { buildWhatsAppLink, withRef, htmlSnippet, COUNTRIES } from '../../lib/lab/whatsapp.ts'
 import {
   parseRobots,
@@ -1136,7 +1153,7 @@ test('GA4 event code: dataLayer push and gtag call', () => {
   assert.equal(issues.at(-1).level, 'tip')
 })
 
-test('OG image: wrapping, fitting and the SVG', () => {
+test('OG image: wrapping and fitting', () => {
   const m = (t, s) => Array.from(t).length * s * 0.5
   assert.deepEqual(wrapLines('aaa bbb ccc', 40, 10, m), ['aaa bbb', 'ccc'])
   const broken = wrapLines('abcdefghij', 30, 10, m)
@@ -1158,67 +1175,398 @@ test('OG image: wrapping, fitting and the SVG', () => {
   const huge = fitText('word '.repeat(200), box, m, o)
   assert.equal(huge.truncated, true)
   assert.ok(huge.lines.length <= 3 && huge.lines.at(-1).endsWith('…'))
-
-  const base = {
-    title: 'Fish & <Chips> "to go"',
-    subtitle: 'Sub',
-    siteName: 'site.com',
-    theme: 'night',
-    accent: '',
-    align: 'left',
-    pattern: 'grid',
-    size: 'og',
-  }
-  const svg = buildOgSvg(base, m)
-  assert.match(svg, /width="1200" height="630"/)
-  // the title wraps onto two lines here, and every special character is escaped on both
-  assert.match(svg, /Fish &amp; &lt;Chips&gt; &quot;to/)
-  assert.match(svg, /go&quot;/)
-  assert.doesNotMatch(svg, /<Chips>/)
-  assert.match(svg, /<path d="M/, 'grid pattern is drawn')
-  assert.match(svg, /fill="#60a5fa"/, 'empty accent uses the theme accent')
-  assert.match(
-    buildOgSvg({ ...base, accent: 'javascript:bad' }, m),
-    /fill="#60a5fa"/,
-    'a bad colour falls back'
-  )
-  const square = buildOgSvg({ ...base, accent: '#ff0000', align: 'center', size: 'square' }, m)
-  assert.match(square, /width="1080" height="1080"/)
-  assert.match(square, /text-anchor="middle"/)
-  assert.match(square, /fill="#ff0000"/)
-  assert.match(buildOgSvg({ ...base, title: '' }, m), /Your title goes here/)
 })
 
-test('OG image: the accent bar never touches the site name or the title, at any title length', () => {
-  const m = (t, s) => Array.from(t).length * s * 0.5
-  for (const size of ['og', 'cover', 'square'])
+// pixels for a palette test: [r, g, b, count]
+const pixels = (...parts) => {
+  const total = parts.reduce((n, p) => n + p[3], 0)
+  const d = new Uint8ClampedArray(total * 4)
+  let i = 0
+  for (const [r, g, b, n] of parts) for (let k = 0; k < n; k++, i += 4) d.set([r, g, b, 255], i)
+  return d
+}
+
+test('palette: dominant colours, shares, transparency and merging', () => {
+  const pal = extractPalette(pixels([200, 30, 30, 600], [20, 40, 200, 400]), 6)
+  assert.equal(pal.length, 2)
+  assert.ok(pal[0].share > 0.55 && pal[0].share < 0.65, 'the bigger colour comes first')
+  assert.match(pal[0].hex, /^#c81e1e$/i)
+  assert.ok(Math.abs(pal.reduce((n, s) => n + s.share, 0) - 1) < 0.001)
+  assert.deepEqual(
+    extractPalette(pixels([200, 30, 30, 600], [20, 40, 200, 400]), 6),
+    pal,
+    'deterministic'
+  )
+  assert.deepEqual(
+    extractPalette(new Uint8ClampedArray(400), 6),
+    [],
+    'fully transparent gives nothing'
+  )
+  const nearly = extractPalette(pixels([100, 100, 100, 300], [104, 98, 102, 300]), 6)
+  assert.equal(nearly.length, 1, 'near-identical colours merge')
+  assert.equal(meanColor(pixels([0, 0, 0, 1], [255, 255, 255, 1])), '#808080')
+})
+
+test('palette: a suggested style always has readable text', () => {
+  // dark navy with an orange accent
+  const navy = suggestStyle(
+    extractPalette(pixels([20, 33, 61, 700], [252, 163, 17, 120], [40, 60, 100, 180]), 6)
+  )
+  assert.equal(navy.dark, true)
+  assert.equal(navy.text, '#ffffff')
+  assert.ok(
+    contrastRatio(navy.accent, navy.bgFrom) >= 3,
+    'the accent stands apart from the background'
+  )
+  assert.match(navy.accent, /^#fca311$/i)
+  // light cream gets dark text
+  const cream = suggestStyle(extractPalette(pixels([246, 241, 231, 800], [194, 65, 12, 100]), 6))
+  assert.equal(cream.dark, false)
+  assert.equal(cream.text, '#111827')
+  assert.equal(suggestStyle([]), null)
+  // any background at all: the text is readable, even for mid-greys where white and black both struggle
+  let seed = 7
+  const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648
+  for (let i = 0; i < 300; i++) {
+    const hex =
+      '#' +
+      [rnd(), rnd(), rnd()]
+        .map((v) =>
+          Math.round(v * 255)
+            .toString(16)
+            .padStart(2, '0')
+        )
+        .join('')
+    const s = suggestStyle([{ hex, share: 1 }])
+    assert.ok(contrastRatio(s.text, s.bgFrom) >= 4.5, `${hex} -> ${s.bgFrom} on ${s.text}`)
+    assert.ok(contrastRatio(s.accent, s.bgFrom) >= 3 || s.accent === s.text, `accent on ${hex}`)
+  }
+  for (const g of ['#777777', '#7a7a7a', '#808080', '#8a8a8a'])
+    assert.ok(
+      contrastRatio(
+        suggestStyle([{ hex: g, share: 1 }]).text,
+        suggestStyle([{ hex: g, share: 1 }]).bgFrom
+      ) >= 4.5,
+      g
+    )
+})
+
+test('palette: the scrim over a photo makes the text readable with as little darkening as needed', () => {
+  const bright = scrimFor('#e8e8e8', '#ffffff')
+  assert.equal(bright.color, '#000000')
+  assert.ok(bright.opacity > 0.4 && bright.opacity <= 0.85)
+  assert.ok(
+    contrastRatio('#ffffff', mix('#e8e8e8', bright.color, bright.opacity)) >= 4.5 ||
+      bright.opacity === 0.85
+  )
+  assert.equal(
+    scrimFor('#101010', '#ffffff').opacity,
+    0.15,
+    'a dark photo needs only the lightest scrim'
+  )
+  const lightText = scrimFor('#202020', '#111827')
+  assert.equal(lightText.color, '#ffffff', 'dark text over a dark photo gets a light scrim')
+  assert.equal(readableOn('#ffffff'), '#111827')
+  assert.equal(readableOn('#000000'), '#ffffff')
+  assert.ok(luminance('#ffffff') > 0.99 && luminance('#000000') < 0.01)
+})
+
+const fake = (t, f) => Array.from(t).length * (f.size * 0.5 + f.spacing)
+const svgOf = (over = {}) => buildOgSvg({ ...DEFAULTS, ...over }, fake)
+const withText = (over = {}) =>
+  svgOf({
+    eyebrow: { ...DEFAULTS.eyebrow, text: 'northpeak.example' },
+    title: { ...DEFAULTS.title, text: 'Free QR codes that never expire' },
+    subtitle: { ...DEFAULTS.subtitle, text: 'Static vs dynamic, explained' },
+    badge: { ...DEFAULTS.badge, text: 'New' },
+    footer: { ...DEFAULTS.footer, text: 'devstash.me/blog' },
+    ...over,
+  })
+const count = (svg, re) => (svg.match(re) ?? []).length
+
+test('OG image: every text is its own element with its own font, and nothing unset is drawn', () => {
+  assert.equal(count(svgOf(), /<text /g), 1, 'with no text only the placeholder title is drawn')
+  assert.match(svgOf(), /Your title goes here/)
+  const svg = withText()
+  // the tag line, badge, subtitle and footer are one text each; the title may wrap onto several lines
+  assert.equal(count(svg, /font-family="Consolas/g), 1, 'footer')
+  assert.equal(count(svg, />NEW</g), 1, 'badge')
+  assert.ok(count(svg, /<text /g) >= 5)
+  assert.match(svg, /northpeak\.example/i)
+  assert.match(svg, />NEW</, 'upper-case is applied to the badge')
+  assert.match(svg, /font-family="Georgia,/, 'the title uses the serif stack')
+  assert.match(svg, /font-family="Consolas,/, 'the footer uses the mono stack')
+  // each text takes its own settings
+  const styled = withText({
+    title: {
+      ...DEFAULTS.title,
+      text: 'Hello',
+      font: 'heavy',
+      weight: 900,
+      italic: true,
+      color: '#ff0000',
+      opacity: 60,
+      spacing: 5,
+    },
+  })
+  assert.match(
+    styled,
+    /font-family="Impact,[^"]*" font-size="\d+" font-weight="900" font-style="italic" letter-spacing="[\d.]+" fill="#ff0000" fill-opacity="0.6"/
+  )
+  // special characters are escaped everywhere
+  const nasty = withText({
+    title: { ...DEFAULTS.title, text: 'Fish & <Chips> "to go"' },
+    footer: { ...DEFAULTS.footer, text: "a<b>'" },
+  })
+  assert.doesNotMatch(nasty, /<Chips>|<b>/)
+  assert.match(nasty, /&amp;/)
+  assert.match(nasty, /&lt;Chips&gt;/)
+})
+
+test('OG image: alignment, vertical position, sizes and every layout stay inside the canvas', () => {
+  const inside = (svg, W, H) => {
+    for (const m of svg.matchAll(/<text x="(-?[\d.]+)" y="(-?[\d.]+)"/g)) {
+      assert.ok(Number(m[2]) >= 0 && Number(m[2]) <= H, `y ${m[2]} outside 0..${H}`)
+      assert.ok(Number(m[1]) >= 0 && Number(m[1]) <= W, `x ${m[1]} outside 0..${W}`)
+    }
+  }
+  const long = 'A title long enough to wrap onto several lines in the image '.repeat(4)
+  const photo = { photo: 'data:image/jpeg;base64,AAAA', photoW: 1600, photoH: 900 }
+  for (const [w, h] of [
+    [1200, 630],
+    [1080, 1920],
+    [1080, 1080],
+    [200, 200],
+    [4000, 4000],
+    [9999, 50],
+  ])
+    for (const align of ['left', 'center', 'right'])
+      for (const vAnchor of ['top', 'middle', 'bottom'])
+        for (const layout of ['stack', 'split-left', 'split-right']) {
+          const svg = withText({
+            ...photo,
+            width: w,
+            height: h,
+            align,
+            vAnchor,
+            layout,
+            title: { ...DEFAULTS.title, text: long },
+          })
+          const W = Math.min(4000, Math.max(200, w))
+          const H = Math.min(4000, Math.max(200, h))
+          assert.match(svg, new RegExp(`width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"`))
+          inside(svg, W, H)
+          assert.doesNotMatch(svg, /NaN|undefined|Infinity/)
+        }
+  // the title follows the alignment (the badge text is always centred inside its own pill)
+  assert.match(withText({ align: 'center' }), /Georgia[^>]*text-anchor="middle"/)
+  assert.match(withText({ align: 'right' }), /Georgia[^>]*text-anchor="end"/)
+  assert.match(withText({ align: 'left' }), /Georgia[^>]*text-anchor="start"/)
+  // moving the block down moves the title down
+  const y = (svg) =>
+    Number(
+      svg.match(
+        /font-weight="700"[^>]*>Free|<text x="[\d.]+" y="(\d+)" font-family="Georgia/
+      )?.[1] ?? svg.match(/<text x="[\d.]+" y="(\d+)" font-family="Georgia/)[1]
+    )
+  assert.ok(y(withText({ vAnchor: 'top' })) < y(withText({ vAnchor: 'middle' })))
+  assert.ok(y(withText({ vAnchor: 'middle' })) < y(withText({ vAnchor: 'bottom' })))
+  assert.ok(y(withText({ offsetY: 10 })) > y(withText({ offsetY: 0 })))
+})
+
+test('OG image: backgrounds, a photo, the scrim and the split layout', () => {
+  assert.match(
+    svgOf({ bgType: 'solid', bgFrom: '#112233' }),
+    /<rect width="1200" height="630" fill="#112233"\/>/
+  )
+  assert.match(svgOf({ bgType: 'linear', bgAngle: 45 }), /rotate\(45 0\.5 0\.5\)/)
+  assert.match(svgOf({ bgType: 'radial' }), /<radialGradient id="bg"/)
+  assert.match(svgOf({ bgType: 'glow' }), /<filter id="glow"/)
+  assert.match(svgOf({ bgFrom: 'javascript:x' }), /stop-color="#f6f1e7"/, 'a bad colour falls back')
+
+  const photo = { photo: 'data:image/jpeg;base64,AAAA', photoW: 1000, photoH: 500 }
+  const bg = svgOf({
+    ...photo,
+    bgType: 'photo',
+    scrimColor: '#000000',
+    scrimOpacity: 40,
+    photoBlur: 5,
+    photoGray: true,
+  })
+  assert.match(bg, /<image href="data:image\/jpeg;base64,AAAA"/)
+  assert.match(bg, /fill-opacity="0.4"/, 'the scrim')
+  assert.match(bg, /feGaussianBlur/)
+  assert.match(bg, /feColorMatrix type="saturate" values="0"/)
+  // cover: a 2:1 picture in a 1200x630 box is scaled to fill it, and zoom enlarges it
+  const w = (s) => Number(s.match(/<image href="data:image\/jpeg[^>]* width="([\d.]+)"/)[1])
+  assert.ok(w(bg) >= 1200)
+  assert.ok(w(svgOf({ ...photo, bgType: 'photo', photoZoom: 200 })) > w(bg))
+  // a photo with no size, or anything that is not a picture data URL, is never embedded
+  assert.doesNotMatch(
+    svgOf({ photo: 'data:image/jpeg;base64,AAAA', photoW: 0, photoH: 0, bgType: 'photo' }),
+    /<image/
+  )
+  assert.doesNotMatch(
+    svgOf({ ...photo, photo: 'https://evil.example/x.png', bgType: 'photo' }),
+    /<image|evil/
+  )
+  assert.doesNotMatch(
+    svgOf({ ...photo, photo: 'javascript:alert(1)', bgType: 'photo' }),
+    /<image|javascript/
+  )
+  assert.doesNotMatch(
+    svgOf({ ...photo, photo: 'data:image/jpeg;base64,AAAA" onload="x', bgType: 'photo' }),
+    /onload/
+  )
+
+  // split layout: the picture takes 42% of the width and the text stays on the other side
+  const left = withText({ ...photo, layout: 'split-left' })
+  assert.match(left, /<clipPath id="pcsp"><rect x="0" y="0" width="504" height="630"\/>/)
+  for (const m of left.matchAll(/<text x="([\d.]+)"/g))
+    assert.ok(Number(m[1]) >= 504, 'text is right of the picture')
+  const right = withText({ ...photo, layout: 'split-right' })
+  assert.match(right, /<clipPath id="pcsp"><rect x="696" y="0" width="504" height="630"\/>/)
+  for (const m of right.matchAll(/<text x="([\d.]+)"/g))
+    assert.ok(Number(m[1]) <= 696, 'text is left of the picture')
+  assert.doesNotMatch(withText({ layout: 'split-left' }), /pcsp/, 'no picture, no panel')
+  // a picture that is the background is not drawn a second time when it gets its own panel
+  const twice = withText({ ...photo, bgType: 'photo', scrimOpacity: 40, layout: 'split-left' })
+  assert.equal(count(twice, /<image /g), 1, 'one picture, in the panel')
+  assert.doesNotMatch(twice, /fill-opacity="0.4"/, 'and no darkening layer over the whole image')
+})
+
+test('OG image: patterns, marks, corner shapes, frame, panel and logo', () => {
+  assert.match(svgOf({ pattern: 'grid' }), /<path d="M\d+ 0V630/)
+  assert.match(svgOf({ pattern: 'dots' }), /<g fill="#c2410c" fill-opacity="0.14"><circle/)
+  assert.match(svgOf({ pattern: 'rings' }), /<circle cx="\d+" cy="\d+" r="\d+" fill="none"/)
+  assert.match(svgOf({ pattern: 'stripes' }), /<path d="M-\d+ 630L/)
+  assert.match(svgOf({ pattern: 'waves' }), /<path d="M0 [\d.]+q/)
+  assert.match(svgOf({ pattern: 'plus' }), /V[\d.]+" fill="none"/)
+  assert.match(
+    svgOf({ pattern: 'grain' }),
+    /<filter id="grain"[\s\S]*<rect width="1200" height="630" filter="url\(#grain\)"/
+  )
+  assert.doesNotMatch(svgOf({ pattern: 'none' }), /grain|stroke-opacity|<circle/)
+  assert.match(
+    svgOf({ pattern: 'dots', patternColor: '#00ff00', patternOpacity: 50 }),
+    /fill="#00ff00" fill-opacity="0.5"/
+  )
+
+  const rects = (svg) => count(svg, /<rect /g)
+  const base = rects(withText({ mark: 'none', badge: { ...DEFAULTS.badge, text: '' } }))
+  assert.equal(rects(withText({ mark: 'bar', badge: { ...DEFAULTS.badge, text: '' } })), base + 1)
+  assert.equal(
+    rects(withText({ mark: 'underline', badge: { ...DEFAULTS.badge, text: '' } })),
+    base + 1
+  )
+  assert.equal(rects(withText({ mark: 'side', badge: { ...DEFAULTS.badge, text: '' } })), base + 1)
+  assert.match(withText({ mark: 'bar', markColor: '#00ff00' }), /fill="#00ff00"/)
+
+  for (const decor of ['circle', 'quarter', 'triangle', 'blob'])
+    for (const corner of ['tl', 'tr', 'bl', 'br']) {
+      const svg = svgOf({ decor, decorCorner: corner })
+      assert.match(svg, /fill-opacity="0.22"/, `${decor} ${corner}`)
+      assert.doesNotMatch(svg, /NaN/)
+    }
+  assert.match(
+    svgOf({ frame: true, frameColor: '#111111', frameRadius: 3 }),
+    /fill="none" stroke="#111111"/
+  )
+  assert.doesNotMatch(svgOf({ frame: false }), /stroke="#111111"/)
+  assert.match(
+    withText({ panel: true, panelColor: '#ffffff', panelOpacity: 50 }),
+    /fill="#ffffff" fill-opacity="0.5"/
+  )
+
+  const logo = 'data:image/png;base64,AAAA'
+  assert.match(
+    svgOf({ logo, logoPos: 'br' }),
+    /<image href="data:image\/png;base64,AAAA" x="\d+" y="\d+"/
+  )
+  assert.match(svgOf({ logo, logoRound: true }), /<clipPath id="logoc"><circle/)
+  assert.doesNotMatch(svgOf({ logo: 'https://evil.example/l.png' }), /<image|evil/)
+  for (const pos of ['tl', 'tr', 'bl', 'br'])
+    assert.doesNotMatch(svgOf({ logo, logoPos: pos }), /NaN/)
+})
+
+test('OG image: presets keep the content, reset the style, and every one builds a clean image', () => {
+  const content = {
+    ...DEFAULTS,
+    title: { ...DEFAULTS.title, text: 'मेरा शीर्षक', weight: 300, color: '#ff00ff' },
+    eyebrow: { ...DEFAULTS.eyebrow, text: 'tag' },
+    markColor: '#00ff00',
+    frame: true,
+    photo: 'data:image/jpeg;base64,AAAA',
+    photoW: 10,
+    photoH: 10,
+    sizeId: 'cover',
+    width: 1600,
+    height: 900,
+  }
+  const poster = applyPreset(
+    content,
+    PRESETS.find((p) => p.id === 'poster')
+  )
+  assert.equal(poster.title.text, 'मेरा शीर्षक')
+  assert.equal(poster.eyebrow.text, 'tag')
+  assert.equal(poster.photo, content.photo)
+  assert.equal(poster.width, 1600)
+  assert.equal(poster.title.font, 'heavy')
+  assert.equal(poster.title.color, '', 'the old colour override is gone')
+  assert.equal(poster.title.weight, 400)
+  assert.equal(poster.markColor, '', 'styles from before are reset')
+  assert.equal(
+    applyPreset(poster, PRESETS[0]).bgFrom,
+    DEFAULTS.bgFrom,
+    'Editorial is the default look'
+  )
+  // a photo background survives a preset that does not choose its own background
+  const photoBg = applyPreset(
+    { ...content, bgType: 'photo', scrimOpacity: 55 },
+    PRESETS.find((p) => p.id === 'paper')
+  )
+  assert.equal(photoBg.bgType, 'photo')
+  assert.equal(photoBg.scrimOpacity, 55)
+  for (const p of PRESETS) {
+    const o = applyPreset(
+      { ...content, title: { ...content.title, text: 'दिवाली सेल: 50% छूट '.repeat(6) } },
+      p
+    )
+    const svg = buildOgSvg(o, fake)
+    assert.ok(svg.startsWith('<svg') && svg.endsWith('</svg>'), p.id)
+    assert.doesNotMatch(svg, /NaN|undefined/, p.id)
+    assert.equal(count(svg, /<text /g) >= 1, true)
+  }
+  assert.equal(Object.keys(FONTS).length, 5)
+})
+
+test('OG image: the accent bar never touches the tag line or the title, at any title length and anchor', () => {
+  for (const vAnchor of ['top', 'middle', 'bottom'])
     for (const title of [
       'Short',
       'A title long enough to wrap onto several lines in the image '.repeat(3),
       'word '.repeat(200),
     ]) {
-      const svg = buildOgSvg(
-        {
-          title,
-          subtitle: 'Sub',
-          siteName: 'site.com',
-          theme: 'night',
-          accent: '',
-          align: 'left',
-          pattern: 'none',
-          size,
-        },
-        m
+      const svg = svgOf({
+        vAnchor,
+        eyebrow: { ...DEFAULTS.eyebrow, text: 'site.com' },
+        title: { ...DEFAULTS.title, text: title },
+        subtitle: { ...DEFAULTS.subtitle, text: 'Sub' },
+      })
+      const eb = svg.match(
+        /<text x="\d+" y="(\d+)" font-family="[^"]*" font-size="(\d+)" font-weight="600"/
       )
-      const site = Number(svg.match(/<text x="\d+" y="(\d+)" font-size="\d+" font-weight="600"/)[1])
-      const bar = Number(svg.match(/<rect x="\d+" y="(\d+)" width="64" height="6"/)[1])
-      const first = svg.match(/<text x="\d+" y="(\d+)" font-size="(\d+)" font-weight="700"/)
-      // a tall script (Devanagari) can reach one full em above its baseline
-      const firstTop = Number(first[1]) - Number(first[2]) * 1.0
-      assert.ok(bar >= site + 8, `${size}: bar ${bar} is below the site name at ${site}`)
+      const bar = Number(svg.match(/<rect x="\d+" y="(-?[\d.]+)" width="\d+" height="(\d+)"/)[1])
+      const first = svg.match(
+        /<text x="[\d.]+" y="(\d+)" font-family="Georgia[^"]*" font-size="(\d+)"/
+      )
       assert.ok(
-        firstTop >= bar + 6 + 8,
-        `${size}: title starts at ${firstTop}, below the bar at ${bar}`
+        bar >= Number(eb[1]) + 6,
+        `${vAnchor}: bar ${bar} is below the tag line baseline ${eb[1]}`
+      )
+      assert.ok(
+        Number(first[1]) - Number(first[2]) >= bar + 4,
+        `${vAnchor}: title top clears the bar`
       )
     }
 })

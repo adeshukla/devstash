@@ -96,7 +96,7 @@ const TOOLS: Demo[] = [
     slug: 'og-image-maker',
     name: 'OG Image Maker',
     blurb:
-      'Fit a title into a share image or blog cover, pick a look, and download a PNG or SVG. Drawn in your browser, works with Hindi.',
+      'Set every text, background and graphic, or take the colours from your own picture. PNG, JPG or SVG, drawn in your browser, works with Hindi.',
     tag: 'Design',
     preview: 'card',
   },

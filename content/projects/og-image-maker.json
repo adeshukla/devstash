@@ -1,8 +1,8 @@
 {
   "slug": "og-image-maker",
   "title": "OG Image Maker",
-  "description": "Make an Open Graph share image or blog cover from a title: five themes, patterns, three sizes, PNG and SVG downloads. Drawn in the browser, works with Hindi.",
-  "longDescription": "Most pages share a plain link because making a preview image takes a design tool. This one fits a title into an image for you: it wraps the words, shrinks the type until the title fits, and keeps letters and their marks together in scripts such as Devanagari. The image is drawn from your device's own fonts, so the preview is exactly the file you download. Nothing is uploaded.",
+  "description": "Make a share image or blog cover with full control of every text, background and graphic, or take the colours from your own picture. PNG, JPG or SVG, drawn in the browser.",
+  "longDescription": "Most share images come from a design tool or a template that decides everything. This one gives every text its own font, weight, size, colour, spacing and case, a choice of backgrounds (solid, gradient, glow or your own picture), patterns, marks, corner shapes, a frame, a text panel and a logo. Give it a hero image or any picture and it reads the main colours, builds a matching theme with readable text, and can use the picture as the background or beside the text. The image is drawn from your device's own fonts, so the preview is exactly the file you download. Nothing is uploaded.",
   "status": "live",
   "featured": false,
   "order": 11,
@@ -13,22 +13,25 @@
   "startDate": "2026-11-09",
   "year": 2026,
   "highlights": [
-    "Fully client-side: the title and the image never leave the browser",
-    "The title is wrapped and sized to fit, and cut with an ellipsis only at the smallest size",
-    "Long words break between whole characters, so Hindi letters and their marks stay together",
-    "Preview and download are the same SVG, so what you see is what you save",
-    "1200 x 630 share image, 1600 x 900 cover and a square size, as PNG or SVG"
+    "Fully client-side: the title, pictures and image never leave the browser",
+    "Five texts (title, subtitle, tag line, badge, footer), each with its own font, weight, size, colour, opacity, spacing, capitals and italics",
+    "Style from a picture: median-cut palette with k-means refinement, a theme with text that is always readable (4.5:1), and a darkening layer sized to the picture",
+    "Backgrounds, eight patterns, marks, corner shapes, frame, text panel, logo, split layout with a picture panel",
+    "PNG, JPG or SVG at four sizes or a custom size, with double resolution",
+    "Long words break between whole characters, so Hindi letters keep their marks"
   ],
   "caseStudy": {
-    "problem": "A blog post or tool page goes out with a plain link because nobody wants to open a design tool for a share image. Or the image is made, and a long title runs off the edge.",
-    "approach": "Measure the real width of the text on a canvas, wrap it greedily, and step the font size down until the title fits the box in at most four lines. Draw the result as an SVG and turn the same SVG into the PNG.",
+    "problem": "A page goes out with a plain link because making a share image means opening a design tool, or it uses a template that cannot be changed. When a hero image exists, matching its colours by hand is slow and the text ends up unreadable on it.",
+    "approach": "Measure real text on a canvas, wrap and fit each text to its box, and draw everything as one SVG that also becomes the PNG or JPG. Reduce a picture to a small thumbnail, find its dominant colours, and build a theme from them with a contrast check on the text.",
     "decisions": [
       "System fonts only. A picture made in the browser cannot load a web font, so using web fonts would make the preview and the file differ.",
+      "The colour extraction copies colours, not the design of the picture. Fonts and layout stay the visitor's to choose.",
+      "Contrast is a guarantee, not a hint: when neither white nor near-black text reaches 4.5:1, the background is moved until it does.",
       "Break long words between graphemes, not code points, so a Devanagari letter is never separated from its vowel sign.",
-      "A warning, not a block, when the accent colour is hard to see on the chosen background."
+      "A picture is only ever embedded as a data URL of an image type, so a typed value cannot point the image at another site."
     ],
     "outcome": "// TODO: No usage data yet. This is a self-initiated tool, not a deployed one."
   },
-  "coverStats": ["PNG + SVG", "3 sizes", "no data sent"],
+  "coverStats": ["style from a picture", "PNG + JPG + SVG", "no data sent"],
   "relatedPosts": []
 }
