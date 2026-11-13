@@ -125,6 +125,14 @@ const TOOLS: Demo[] = [
     preview: 'qr',
   },
   {
+    slug: 'changeable-qr',
+    name: 'Changeable QR Code',
+    blurb:
+      'Print one QR code and change the page it opens later. Sign in with Google or email, claim a permanent name, and point it anywhere. Free. Your email and link are stored; scans are not tracked.',
+    tag: 'Utility',
+    preview: 'qr',
+  },
+  {
     slug: 'utm-report-cleaner',
     name: 'GA4 Report Cleaner',
     blurb:
@@ -137,7 +145,7 @@ const TOOLS: Demo[] = [
 const PRINCIPLES = [
   {
     title: 'Runs where you are',
-    body: 'The CSS, SVG, SEO, UTM and QR tools run entirely in your browser; none of their code makes a network request. Only the AI pipeline calls a server.',
+    body: 'The CSS, SVG, SEO, UTM and QR tools run entirely in your browser; none of their code makes a network request. Only the AI pipeline, the OG maker’s "style from a web address" and the Changeable QR Code call a server.',
   },
   {
     title: 'Real output, not mock-ups',
@@ -157,7 +165,7 @@ const FAQ = [
   {
     question: 'Is what I type sent anywhere?',
     answer:
-      'Not by the browser-side tools: the CSS playground, illustration generator, meta tag generator, UTM tools and QR generator make no network requests. The AI Content Pipeline does send your input to a server, because that is where the model runs.',
+      'Not by the browser-side tools: the CSS playground, illustration generator, meta tag generator, UTM tools and QR generator make no network requests. The AI Content Pipeline sends your input to a server because that is where the model runs. The Changeable QR Code stores your email, name and link so the code keeps working, and the OG maker sends only a web address you type to fetch its picture.',
   },
   {
     question: 'What does the AI pipeline run on?',
@@ -207,6 +215,10 @@ function examples(): Record<string, { input: string; output: string }> {
       input: 'WhatsApp +91 98765 43210, message "Hello"',
       output: whatsappPayload('+91 98765 43210', 'Hello').payload,
     },
+    'changeable-qr': {
+      input: 'Name "spring-menu", pointing at the old menu page',
+      output: 'Scanning devstash.me/q/spring-menu opens whichever page you saved last',
+    },
     'meta-tag-generator': {
       input: 'A shop title with an "&" in it',
       output: buildHtml({
@@ -255,6 +267,11 @@ const JOBS = [
   { job: 'Check links I already use', tool: 'Link Checker', href: '/lab/utm-link-checker' },
   { job: 'Fix a report with split rows', tool: 'Report Cleaner', href: '/lab/utm-report-cleaner' },
   { job: 'Make a QR code', tool: 'QR Code Generator', href: '/lab/qr-code-generator' },
+  {
+    job: 'Print a QR code whose page I can change later',
+    tool: 'Changeable QR Code',
+    href: '/lab/changeable-qr',
+  },
   {
     job: 'Get customers to message me on WhatsApp',
     tool: 'WhatsApp Link Generator',

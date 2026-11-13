@@ -144,7 +144,7 @@ export function ChangeableQr() {
   if (!me.available)
     return (
       <p className="text-ds-muted text-sm">
-        Changeable QR links are not switched on here yet. The normal QR generator above still works.
+        Changeable QR links are not switched on here yet. The normal QR generator still works.
       </p>
     )
 
