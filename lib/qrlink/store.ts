@@ -65,19 +65,36 @@ type Entry = { url: string; email: string } | { retired: true }
 
 export const normEmail = (e: string) => e.trim().toLowerCase()
 
-/** Save a one-time sign-in token for this email and return the token to put in the link. */
-export async function makeLoginToken(email: string): Promise<string> {
+const hash = (s: string) => createHash('sha256').update(s).digest('hex')
+
+/** What an emailed link is for: confirming a new account (with its password hash) or resetting one. */
+export type TokenInfo =
+  { kind: 'signup'; email: string; pw: string } | { kind: 'reset'; email: string }
+
+/** Save a one-time token and return it for the email link. Lasts one hour. */
+export async function makeToken(info: TokenInfo): Promise<string> {
   const token = randomBytes(32).toString('base64url')
-  await need().set(`qr:t:${hash(token)}`, normEmail(email), { ex: 15 * 60 })
+  await need().set(
+    `qr:t:${hash(token)}`,
+    { ...info, email: normEmail(info.email) },
+    { ex: 60 * 60 }
+  )
   return token
 }
 
-const hash = (s: string) => createHash('sha256').update(s).digest('hex')
-
-/** Use a sign-in token. Returns the email once; the token is gone afterwards. */
-export async function consumeLoginToken(token: string): Promise<string | null> {
+/** Use a token. Returns what it was for, once; the token is gone afterwards. */
+export async function consumeToken(token: string): Promise<TokenInfo | null> {
   if (!/^[A-Za-z0-9_-]{20,80}$/.test(token)) return null
-  return need().getdel<string>(`qr:t:${hash(token)}`)
+  return need().getdel<TokenInfo>(`qr:t:${hash(token)}`)
+}
+
+/** Password hash for an email, or null when that email has only ever used Google. */
+export async function passwordOf(email: string): Promise<string | null> {
+  return need().get<string>(`qr:a:${normEmail(email)}`)
+}
+
+export async function setPassword(email: string, pw: string): Promise<void> {
+  await need().set(`qr:a:${normEmail(email)}`, pw)
 }
 
 export async function linkOf(email: string): Promise<{ name: string; url: string } | null> {

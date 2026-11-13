@@ -24,7 +24,7 @@ const FAQ = [
   {
     question: 'What do you store?',
     answer:
-      'Your email address, the name you pick and the destination link. The email is used only to sign you in. Scans are not tracked or counted.',
+      'Your email address, a scrambled (hashed) copy of your password if you use one, the name you pick and the destination link. Scans are not tracked or counted.',
   },
   {
     question: 'Can I change the name later?',
@@ -59,7 +59,8 @@ export default function ChangeableQrPage() {
             <h1 className={H1_HEADLINE}>Print once. Change the link later.</h1>
             <p className="text-ds-muted mt-4 text-lg leading-relaxed">
               Your website moved? A campaign page changed? The printed QR code keeps working: you
-              just point it at the new page. Free, and you sign in with an email link, no password.
+              just point it at the new page. Free. Sign in with Google, or with an email and
+              password.
             </p>
           </div>
         </section>

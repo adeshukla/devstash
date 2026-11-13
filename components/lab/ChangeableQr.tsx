@@ -7,8 +7,8 @@ import { trackLab } from './track'
 
 type Me =
   | { available: false }
-  | { available: true; email: null }
-  | { available: true; email: string; link: { name: string; url: string } | null }
+  | { available: true; email: null; google: boolean }
+  | { available: true; email: string; google: boolean; link: { name: string; url: string } | null }
 
 async function call(body: object): Promise<{ ok: boolean; error?: string }> {
   try {
@@ -24,12 +24,20 @@ async function call(body: object): Promise<{ ok: boolean; error?: string }> {
   }
 }
 
-/** Sign in by email, claim a permanent address, and change where its QR code points. */
+const ERRORS: Record<string, string> = {
+  google: 'Google sign-in did not work. Try again, or use your email and password.',
+  'google-off': 'Google sign-in is not switched on here.',
+}
+
+/** Sign in (email and password, or Google), claim a permanent address, and change where its QR code points. */
 export function ChangeableQr() {
   const [me, setMe] = useState<Me | null>(null)
-  const [token, setToken] = useState('')
+  const [confirmTok, setConfirmTok] = useState('')
+  const [resetTok, setResetTok] = useState('')
+  const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin')
   const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
+  const [pw, setPw] = useState('')
+  const [sent, setSent] = useState('')
   const [name, setName] = useState('')
   const [url, setUrl] = useState('')
   const [busy, setBusy] = useState(false)
@@ -49,10 +57,18 @@ export function ChangeableQr() {
   }, [])
 
   useEffect(() => {
-    const t = new URLSearchParams(window.location.search).get('token')
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reads the sign-in link once on mount
-    if (t) setToken(t)
-    else void load()
+    const q = new URLSearchParams(window.location.search)
+    const c = q.get('confirm')
+    const r = q.get('reset')
+    const e = q.get('error')
+    /* eslint-disable react-hooks/set-state-in-effect -- reads the emailed link and Google's answer once on mount */
+    if (c) setConfirmTok(c)
+    else if (r) setResetTok(r)
+    else {
+      if (e) setError(ERRORS[e] ?? '')
+      void load()
+    }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [load])
 
   async function run(body: object, after?: () => void) {
@@ -65,12 +81,13 @@ export function ChangeableQr() {
     after?.()
   }
 
-  const finishSignIn = () =>
-    run({ action: 'verify', token }, () => {
-      window.history.replaceState(null, '', window.location.pathname)
-      setToken('')
-      void load()
-    })
+  const signedIn = () => {
+    window.history.replaceState(null, '', window.location.pathname)
+    setConfirmTok('')
+    setResetTok('')
+    setPw('')
+    void load()
+  }
 
   const box = 'border-ds-border bg-ds-bg rounded-xl border p-5'
   const err = error && (
@@ -79,16 +96,47 @@ export function ChangeableQr() {
     </p>
   )
 
-  if (token)
+  if (confirmTok)
     return (
       <div className={box}>
-        <h2 className="text-ds-text text-lg font-semibold">Finish signing in</h2>
-        <p className="text-ds-muted mt-1 text-sm">One click confirms this browser.</p>
-        <Button className="mt-4" onClick={finishSignIn} loading={busy}>
-          Sign in
+        <h2 className="text-ds-text text-lg font-semibold">Confirm your email</h2>
+        <p className="text-ds-muted mt-1 text-sm">One click finishes creating your account.</p>
+        <Button
+          className="mt-4"
+          loading={busy}
+          onClick={() => void run({ action: 'confirm', token: confirmTok }, signedIn)}
+        >
+          Confirm and sign in
         </Button>
         {err}
       </div>
+    )
+
+  if (resetTok)
+    return (
+      <form
+        className={box}
+        onSubmit={(e) => {
+          e.preventDefault()
+          void run({ action: 'reset', token: resetTok, password: pw }, signedIn)
+        }}
+      >
+        <h2 className="text-ds-text text-lg font-semibold">Choose a new password</h2>
+        <Input
+          className="mt-4"
+          label="New password"
+          type="password"
+          autoComplete="new-password"
+          hint="At least 8 characters."
+          required
+          value={pw}
+          onChange={(e) => setPw(e.target.value)}
+        />
+        <Button className="mt-4" type="submit" loading={busy}>
+          Save password and sign in
+        </Button>
+        {err}
+      </form>
     )
 
   if (!me) return <p className="text-ds-muted text-sm">Loading…</p>
@@ -100,26 +148,54 @@ export function ChangeableQr() {
       </p>
     )
 
-  if (!me.email)
+  if (!me.email) {
+    const titles = {
+      signin: 'Sign in',
+      signup: 'Create your account',
+      forgot: 'Reset your password',
+    }
+    const go = (m: typeof mode) => {
+      setMode(m)
+      setError('')
+      setSent('')
+    }
+    const link = 'text-ds-accent text-sm underline underline-offset-2'
     return (
       <form
         className={box}
         onSubmit={(e) => {
           e.preventDefault()
-          void run({ action: 'login', email }, () => setSent(true))
+          if (mode === 'signin') void run({ action: 'login', email, password: pw }, signedIn)
+          else if (mode === 'signup')
+            void run({ action: 'signup', email, password: pw }, () =>
+              setSent('Check your inbox and open the link to confirm your email.')
+            )
+          else
+            void run({ action: 'forgot', email }, () =>
+              setSent('If that email has an account, a reset link is on its way.')
+            )
         }}
       >
-        <h2 className="text-ds-text text-lg font-semibold">Sign in with your email</h2>
+        <h2 className="text-ds-text text-lg font-semibold">{titles[mode]}</h2>
         {sent ? (
           <p role="status" className="text-ds-text mt-2 text-sm">
-            Check your inbox. The link works once and lasts 15 minutes.
+            {sent} The link works once and lasts an hour.
           </p>
         ) : (
           <>
-            <p className="text-ds-muted mt-1 mb-4 text-sm">
-              No password. We email you a link, and your address is used only to sign you in.
-            </p>
+            {me.google && mode !== 'forgot' && (
+              <>
+                <a
+                  href="/api/qr/google"
+                  className="border-ds-border2 text-ds-text hover:bg-ds-surface2 mt-4 inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium"
+                >
+                  Continue with Google
+                </a>
+                <p className="text-ds-muted my-3 text-xs">or use your email</p>
+              </>
+            )}
             <Input
+              className="mt-4"
               label="Email"
               type="email"
               autoComplete="email"
@@ -127,14 +203,48 @@ export function ChangeableQr() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+            {mode !== 'forgot' && (
+              <Input
+                className="mt-4"
+                label="Password"
+                type="password"
+                autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+                hint={mode === 'signup' ? 'At least 8 characters.' : undefined}
+                required
+                value={pw}
+                onChange={(e) => setPw(e.target.value)}
+              />
+            )}
             <Button className="mt-4" type="submit" loading={busy}>
-              Email me a sign-in link
+              {mode === 'signin'
+                ? 'Sign in'
+                : mode === 'signup'
+                  ? 'Create account'
+                  : 'Email me a reset link'}
             </Button>
           </>
         )}
         {err}
+        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
+          {mode !== 'signin' && (
+            <button type="button" className={link} onClick={() => go('signin')}>
+              I have an account
+            </button>
+          )}
+          {mode !== 'signup' && (
+            <button type="button" className={link} onClick={() => go('signup')}>
+              Create an account
+            </button>
+          )}
+          {mode === 'signin' && (
+            <button type="button" className={link} onClick={() => go('forgot')}>
+              Forgot password?
+            </button>
+          )}
+        </div>
       </form>
     )
+  }
 
   const link = me.link
 
@@ -172,9 +282,19 @@ export function ChangeableQr() {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
         />
-        <Button className="mt-4" type="submit" loading={busy}>
-          Create my QR code
-        </Button>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button type="submit" loading={busy}>
+            Create my QR code
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => void run({ action: 'logout' }, load)}
+          >
+            Sign out ({me.email})
+          </Button>
+        </div>
         {err}
       </form>
     )

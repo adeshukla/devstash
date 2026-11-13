@@ -19,3 +19,15 @@ test('destinations: public web pages only, never another changeable link', () =>
   ])
     assert.ok('error' in checkDestination(bad), bad)
 })
+
+import { checkPassword, hashPassword, verifyPassword } from '../../lib/qrlink/password.ts'
+
+test('passwords: length rules, hash round-trip, wrong password and missing account fail', () => {
+  assert.ok(checkPassword('short'))
+  assert.equal(checkPassword('long enough pw'), null)
+  const h = hashPassword('correct horse')
+  assert.ok(verifyPassword('correct horse', h))
+  assert.ok(!verifyPassword('wrong horse', h))
+  assert.ok(!verifyPassword('correct horse', null))
+  assert.notEqual(hashPassword('x'.repeat(8)), hashPassword('x'.repeat(8)))
+})
