@@ -415,6 +415,8 @@ test.describe('OG image maker', () => {
       .locator('summary', { hasText: new RegExp(`^${title}`) })
       .first()
       .click()
+  const everything = (page: import('@playwright/test').Page) =>
+    page.getByRole('button', { name: 'Everything', exact: true }).click()
   const previewSvg = async (page: import('@playwright/test').Page) =>
     decodeURIComponent(
       ((await page.getByRole('img', { name: /^Preview:/ }).getAttribute('src')) ?? '').split(
@@ -435,7 +437,6 @@ test.describe('OG image maker', () => {
   test('draws a Hindi title and downloads a real 1200 x 630 PNG and an SVG', async ({ page }) => {
     await page.goto('/lab/og-image-maker')
     await page.getByLabel('Title', { exact: true }).fill('ट्रेल रनिंग जूते: मानसून गाइड')
-    await open(page, 'Tag line')
     await page.getByLabel('Tag line', { exact: true }).fill('northpeak.example')
     const preview = page.getByRole('img', { name: /Preview: ट्रेल रनिंग/ })
     await expect(preview).toBeVisible()
@@ -464,6 +465,7 @@ test.describe('OG image maker', () => {
     page,
   }) => {
     await page.goto('/lab/og-image-maker')
+    await everything(page)
     await page.getByLabel('Title', { exact: true }).fill('Hello world')
     await page.getByLabel('Title font', { exact: true }).selectOption({ label: 'Heavy display' })
     await page.getByLabel('Title weight', { exact: true }).selectOption({ label: 'Black' })
@@ -494,6 +496,7 @@ test.describe('OG image maker', () => {
     page,
   }) => {
     await page.goto('/lab/og-image-maker')
+    await everything(page)
     await page.getByLabel('Title', { exact: true }).fill('From the hero image')
     await page.locator('input[aria-label="Choose a picture"]').setInputFiles(hero)
     const swatches = page
@@ -548,6 +551,7 @@ test.describe('OG image maker', () => {
     page,
   }) => {
     await page.goto('/lab/og-image-maker')
+    await everything(page)
     await page.getByLabel('Title', { exact: true }).fill('Graphics')
     await open(page, 'Graphics')
     await page.getByRole('button', { name: 'Stripes', exact: true }).click()
@@ -572,6 +576,7 @@ test.describe('OG image maker', () => {
     page,
   }) => {
     await page.goto('/lab/og-image-maker')
+    await everything(page)
     await page.getByLabel('Title', { exact: true }).fill('Keep this title')
     await page.getByRole('button', { name: 'Poster', exact: true }).click()
     await expect.poll(() => previewSvg(page)).toMatch(/font-family="Impact,/)
@@ -588,6 +593,7 @@ test.describe('OG image maker', () => {
 
   test('size and download: a custom size, double resolution and JPG', async ({ page }) => {
     await page.goto('/lab/og-image-maker')
+    await everything(page)
     await page.getByLabel('Title', { exact: true }).fill('Sizes')
     await open(page, 'Layout and size')
     await page.getByLabel('Size', { exact: true }).selectOption({ label: 'Custom size' })
@@ -616,6 +622,128 @@ test.describe('OG image maker', () => {
     expect([...head]).toEqual([0xff, 0xd8, 0xff])
   })
 
+  test('the simple view shows plain boxes; Everything adds the per-line controls', async ({
+    page,
+  }) => {
+    await page.goto('/lab/og-image-maker')
+    await expect(page.getByLabel('Title', { exact: true })).toBeVisible()
+    await expect(page.getByLabel('Title font', { exact: true })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Stripes', exact: true })).toHaveCount(0)
+    await everything(page)
+    await expect(page.getByLabel('Title font', { exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Simple', exact: true }).click()
+    await expect(page.getByLabel('Title font', { exact: true })).toHaveCount(0)
+  })
+
+  test('ready-made starts for computers and phones set the size, and the shared previews follow the words', async ({
+    page,
+  }) => {
+    await page.goto('/lab/og-image-maker')
+    await page.getByLabel('Title', { exact: true }).fill('Shown in a link card')
+    await page.getByLabel('Subtitle', { exact: true }).fill('with a subtitle under it')
+    const computer = page.getByRole('group', { name: 'For computers' })
+    const phone = page.getByRole('group', { name: 'For phones' })
+    await expect(computer.getByRole('button', { name: /Link preview/ })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    )
+    await phone.getByRole('button', { name: /Phone story/ }).click()
+    await expect.poll(() => previewSvg(page)).toContain('width="1080" height="1920"')
+    await expect(page.getByText('1080 × 1920')).toBeVisible()
+    await computer.getByRole('button', { name: /Blog cover/ }).click()
+    await expect.poll(() => previewSvg(page)).toContain('width="1600" height="900"')
+    const shared = page.locator('[data-tour=shared]')
+    await expect(shared.getByText('On a computer')).toBeVisible()
+    await expect(shared.getByText('On a phone')).toBeVisible()
+    await expect(shared.getByText('Shown in a link card')).toHaveCount(2)
+    await expect(shared.getByText('with a subtitle under it')).toHaveCount(2)
+  })
+
+  test('the guided tour walks every step, can be skipped with Escape, and gives focus back', async ({
+    page,
+  }) => {
+    await page.goto('/lab/og-image-maker')
+    const opener = page.getByRole('button', { name: 'Take a 1-minute tour' })
+    await opener.click()
+    const tour = page.getByRole('dialog', { name: /Guided tour/ })
+    await expect(tour).toContainText('Step 1 of 7')
+    await expect(tour).toContainText('Start with what it is for')
+    await tour.getByRole('button', { name: 'Try a random look' }).click()
+    for (let i = 2; i <= 7; i++) {
+      await tour.getByRole('button', { name: 'Next' }).click()
+      await expect(tour).toContainText(`Step ${i} of 7`)
+    }
+    await tour.getByRole('button', { name: 'Back' }).click()
+    await expect(tour).toContainText('Step 6 of 7')
+    await tour.getByRole('button', { name: 'Next' }).click()
+    await tour.getByRole('button', { name: 'Done' }).click()
+    await expect(tour).toHaveCount(0)
+
+    await opener.click()
+    await expect(page.getByRole('dialog', { name: /Guided tour/ })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog', { name: /Guided tour/ })).toHaveCount(0)
+    await expect(opener).toBeFocused()
+  })
+
+  test('a web address brings in its picture and style; failures are explained', async ({
+    page,
+  }) => {
+    await page.route('**/api/lab/page-image', async (route) => {
+      const asked = (route.request().postDataJSON() as { url: string }).url
+      if (asked.includes('nopage'))
+        return route.fulfill({
+          status: 422,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'That page does not name a share image (og:image).' }),
+        })
+      return route.fulfill({ status: 200, contentType: 'image/svg+xml', body: HERO })
+    })
+    await page.goto('/lab/og-image-maker')
+    await page.getByRole('button', { name: 'Get its style' }).click()
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'Type a web address first' })
+    ).toBeVisible()
+    await page.getByLabel('Web address of a page or picture').fill('nopage.example')
+    await page.getByRole('button', { name: 'Get its style' }).click()
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'does not name a share image' })
+    ).toBeVisible()
+    await page.getByLabel('Web address of a page or picture').fill('https://hero.example')
+    await page.getByLabel('Web address of a page or picture').press('Enter')
+    await expect(page.getByRole('status')).toContainText('Style taken from the picture')
+    await expect
+      .poll(async () =>
+        ((await previewSvg(page)).match(/stop-color="(#[0-9a-f]{6})"/i)?.[1] ?? '').toLowerCase()
+      )
+      .not.toBe('#f6f1e7')
+  })
+
+  test('the address fetcher refuses private addresses and other sites posting to it', async ({
+    request,
+    baseURL,
+  }) => {
+    const origin = new URL(baseURL!).origin
+    for (const url of [
+      'http://127.0.0.1/',
+      'http://localhost:3000/',
+      'http://169.254.169.254/latest/meta-data/',
+      'http://[::1]/',
+      'http://10.0.0.1/',
+      'file:///etc/passwd',
+    ]) {
+      const r = await request.post('/api/lab/page-image', { headers: { origin }, data: { url } })
+      expect(r.status(), url).toBe(422)
+    }
+    const foreign = await request.post('/api/lab/page-image', {
+      headers: { origin: 'https://evil.example' },
+      data: { url: 'https://example.com' },
+    })
+    expect(foreign.status()).toBe(403)
+    const bad = await request.post('/api/lab/page-image', { headers: { origin }, data: 'nope' })
+    expect(bad.status()).toBe(400)
+  })
+
   test('with every section open there are no accessibility problems, in light or dark', async ({
     page,
   }) => {
@@ -624,6 +752,9 @@ test.describe('OG image maker', () => {
       await page.goto('/lab/og-image-maker')
       await page.locator('input[aria-label="Choose a picture"]').setInputFiles(hero)
       await expect(page.getByRole('button', { name: 'Match its colours' })).toBeVisible()
+      const simple = await new AxeBuilder({ page }).analyze()
+      expect(simple.violations.map((v) => `${v.id}: ${v.nodes[0]?.target}`)).toEqual([])
+      await everything(page)
       for (let i = 0; i < 12; i++) {
         const closed = page.locator('details:not([open]) > summary')
         if (!(await closed.count())) break

@@ -1,6 +1,6 @@
 'use client'
 
-import { useDeferredValue, useMemo, useState, useSyncExternalStore } from 'react'
+import { useDeferredValue, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
 import { contrastRatio } from '@/lib/lab/qr'
@@ -28,6 +28,7 @@ import { extractPalette, meanColor, scrimFor, suggestStyle, type Swatch } from '
 import {
   ColorField,
   Range,
+  PlainText,
   Section,
   Seg,
   SelectField,
@@ -36,6 +37,8 @@ import {
   chip,
 } from './OgControls'
 import { loadImage } from './ogImageFile'
+import { OgPreviews } from './OgPreviews'
+import { OgTour, type TourStep } from './OgTour'
 import { saveBlob } from './saveFile'
 import { trackLab } from './track'
 
@@ -113,6 +116,45 @@ const CORNERS: { id: Corner; label: string }[] = [
   { id: 'br', label: 'Bottom right' },
 ]
 
+interface Start {
+  id: string
+  label: string
+  note: string
+  sizeId: string
+  align?: Align
+  vAnchor?: VAnchor
+}
+const STARTS: { group: string; items: Start[] }[] = [
+  {
+    group: 'For computers',
+    items: [
+      { id: 'link', label: 'Link preview', note: 'LinkedIn, Facebook, X, Slack', sizeId: 'og' },
+      { id: 'cover', label: 'Blog cover', note: 'wide, 16 : 9', sizeId: 'cover' },
+    ],
+  },
+  {
+    group: 'For phones',
+    items: [
+      {
+        id: 'story',
+        label: 'Phone story',
+        note: 'Instagram, WhatsApp status',
+        sizeId: 'story',
+        align: 'center',
+        vAnchor: 'middle',
+      },
+      {
+        id: 'square',
+        label: 'Square post',
+        note: 'Instagram, WhatsApp',
+        sizeId: 'square',
+        align: 'center',
+        vAnchor: 'middle',
+      },
+    ],
+  },
+]
+
 const fileButton =
   'border-ds-border text-ds-text hover:border-ds-accent hover:text-ds-accent inline-flex cursor-pointer items-center rounded-lg border px-3 py-1.5 text-sm transition-colors focus-within:ring-2 focus-within:ring-[var(--color-ds-accent)]'
 
@@ -130,6 +172,11 @@ export function OgImageMaker() {
   const [format, setFormat] = useState<'png' | 'jpeg'>('png')
   const [scale, setScale] = useState<'1' | '2'>('1')
   const [quality, setQuality] = useState(92)
+  const [advanced, setAdvanced] = useState(false)
+  const [tourOpen, setTourOpen] = useState(false)
+  const [addr, setAddr] = useState('')
+  const [addrBusy, setAddrBusy] = useState(false)
+  const tourBtn = useRef<HTMLButtonElement>(null)
   // Text is measured on a canvas, which only exists in the browser; render the preview there.
   const isClient = useSyncExternalStore(
     subscribe,
@@ -153,12 +200,38 @@ export function OgImageMaker() {
   const lowText = opts.bgType !== 'photo' && contrastRatio(textHex, bgHex) < 4.5
   const lowAccent = opts.bgType !== 'photo' && contrastRatio(accentHex, bgHex) < 3
 
-  async function onPhoto(file?: File) {
+  /** Colours, accent and text taken from a picture, with text that stays readable on it. */
+  function styleFrom(o: OgOptions, pal: Swatch[], mean: string) {
+    const s = suggestStyle(pal)
+    if (!s) return null
+    const photoBg = o.bgType === 'photo'
+    const sc = scrimFor(mean || '#808080', s.text)
+    return {
+      dark: s.dark,
+      patch: {
+        bgFrom: s.bgFrom,
+        bgTo: s.bgTo,
+        accent: s.accent,
+        textColor: s.text,
+        bgType: photoBg
+          ? ('photo' as const)
+          : o.bgType === 'solid'
+            ? ('solid' as const)
+            : ('linear' as const),
+        ...(photoBg ? { scrimColor: sc.color, scrimOpacity: Math.round(sc.opacity * 100) } : {}),
+      },
+    }
+  }
+
+  async function onPhoto(file?: File, autoMatch = false) {
     if (!file) return
     try {
       const img = await loadImage(file, { maxDim: 2000, as: 'jpeg', quality: 0.88 })
-      setSwatches(extractPalette(img.thumb, 6))
-      setPhotoMean(meanColor(img.thumb))
+      const pal = extractPalette(img.thumb, 6)
+      const mean = meanColor(img.thumb)
+      setSwatches(pal)
+      setPhotoMean(mean)
+      const matched = autoMatch ? styleFrom(opts, pal, mean) : null
       setOpts((o) => ({
         ...o,
         photo: img.dataUrl,
@@ -167,12 +240,15 @@ export function OgImageMaker() {
         photoX: 50,
         photoY: 50,
         photoZoom: 100,
+        ...(matched ? styleFrom(o, pal, mean)?.patch : {}),
       }))
       setNote({
         ok: true,
-        text: `Picture added (${img.width} × ${img.height}). Choose below how to use it.`,
+        text: matched
+          ? `Style taken from the picture (${img.width} × ${img.height}). The text is ${matched.dark ? 'light' : 'dark'} so it stays readable.`
+          : `Picture added (${img.width} × ${img.height}). Choose below how to use it.`,
       })
-      trackLab('og-image', 'photo_added')
+      trackLab('og-image', autoMatch ? 'from_address' : 'photo_added')
     } catch (e) {
       setNote({ ok: false, text: (e as Error).message })
     }
@@ -231,22 +307,54 @@ export function OgImageMaker() {
   }
 
   function matchColours() {
-    const s = suggestStyle(swatches)
-    if (!s) return
-    setOpts((o) => ({
-      ...o,
-      bgFrom: s.bgFrom,
-      bgTo: s.bgTo,
-      accent: s.accent,
-      textColor: s.text,
-      bgType: o.bgType === 'photo' ? 'photo' : o.bgType === 'solid' ? 'solid' : 'linear',
-      ...(o.bgType === 'photo' ? scrimFrom(s.text) : {}),
-    }))
+    const m = styleFrom(opts, swatches, photoMean)
+    if (!m) return
+    setOpts((o) => ({ ...o, ...styleFrom(o, swatches, photoMean)?.patch }))
     setNote({
       ok: true,
-      text: `Colours taken from the picture. The text is ${s.dark ? 'light' : 'dark'} so it stays readable.`,
+      text: `Colours taken from the picture. The text is ${m.dark ? 'light' : 'dark'} so it stays readable.`,
     })
     trackLab('og-image', 'match_colours')
+  }
+
+  /** The server fetches the page's share image (browsers cannot read other sites' pictures). */
+  async function fromAddress() {
+    if (!addr.trim()) {
+      setNote({ ok: false, text: 'Type a web address first.' })
+      return
+    }
+    setAddrBusy(true)
+    setNote({ ok: true, text: 'Reading that address…' })
+    try {
+      const res = await fetch('/api/lab/page-image', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ url: addr }),
+      })
+      if (!res.ok) {
+        const j = (await res.json().catch(() => null)) as { error?: string } | null
+        throw new Error(j?.error ?? 'That address could not be read.')
+      }
+      const blob = await res.blob()
+      await onPhoto(new File([blob], 'from-web', { type: blob.type }), true)
+    } catch (e) {
+      setNote({ ok: false, text: (e as Error).message })
+    } finally {
+      setAddrBusy(false)
+    }
+  }
+
+  function startFor(st: Start) {
+    const z = SIZES.find((x) => x.id === st.sizeId) ?? SIZES[0]
+    setOpts((o) => ({
+      ...o,
+      sizeId: z.id,
+      width: z.width,
+      height: z.height,
+      align: st.align ?? o.align,
+      vAnchor: st.vAnchor ?? o.vAnchor,
+    }))
+    trackLab('og-image', 'start', st.id)
   }
 
   const role = (hex: string, what: 'bg' | 'accent' | 'text') =>
@@ -322,12 +430,107 @@ export function OgImageMaker() {
     )
   }
 
+  const tourSteps: TourStep[] = [
+    {
+      target: '[data-tour=start]',
+      title: 'Start with what it is for',
+      body: 'Pick the size for where the image will be shown: a computer link preview or blog cover, or a phone story or square post. Then pick a look. You can change both any time.',
+      action: { label: 'Try a random look', run: surprise },
+    },
+    {
+      target: '[data-tour=words]',
+      title: 'Write your words',
+      body: 'Type the title, an optional subtitle, a short tag line and a footer. The picture on the right updates as you type, and long titles shrink to fit.',
+      action: {
+        label: 'Fill in an example',
+        run: () =>
+          setOpts((o) => ({
+            ...o,
+            title: { ...o.title, text: 'How we cut page load time in half' },
+            subtitle: { ...o.subtitle, text: 'Three changes that mattered, and two that did not' },
+          })),
+      },
+    },
+    {
+      target: '[data-tour=picture]',
+      title: 'Copy the style of your site',
+      body: 'Paste the address of your site or a page and the colours are taken from its share image. Or choose a picture from your device. Either way the text stays readable.',
+    },
+    {
+      target: '[data-tour=preview]',
+      title: 'See it as you build',
+      body: 'This is the exact image you will download. It is drawn from your own fonts, so what you see is what you get.',
+    },
+    {
+      target: '[data-tour=shared]',
+      title: 'And how it looks when shared',
+      body: 'Below it, the same image in a link card on a computer and in a chat on a phone. Apps cut it to a wide shape, so check that nothing important is lost.',
+    },
+    {
+      target: '[data-tour=download]',
+      title: 'Download it',
+      body: 'PNG is sharpest, JPG is smaller. Use the PNG or JPG as your og:image. The SVG is for editing later.',
+    },
+    {
+      target: '[data-tour=mode]',
+      title: 'Need more control?',
+      body: 'Choose Everything for each line font, size and colour, plus layout, patterns, shapes, a frame and a logo. Simple stays here for quick results.',
+    },
+  ]
+
   const dataUrl = svg ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}` : ''
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:items-start">
       <div className="flex flex-col gap-3">
-        <Section title="Start from a look" open>
+        <div className="flex flex-wrap items-center justify-between gap-3" data-tour="mode">
+          <Seg
+            label="Controls"
+            value={advanced ? 'all' : 'simple'}
+            options={[
+              { id: 'simple', label: 'Simple' },
+              { id: 'all', label: 'Everything' },
+            ]}
+            onChange={(v) => setAdvanced(v === 'all')}
+          />
+          <button
+            ref={tourBtn}
+            type="button"
+            onClick={() => setTourOpen(true)}
+            className={chip(false)}
+          >
+            Take a 1-minute tour
+          </button>
+        </div>
+
+        <Section title="What is it for?" tour="start" open>
+          {STARTS.map((g) => (
+            <div key={g.group} role="group" aria-label={g.group}>
+              <p className="text-ds-text mb-1.5 text-[13px] font-medium">{g.group}</p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {g.items.map((st) => {
+                  const on = opts.sizeId === st.sizeId
+                  return (
+                    <button
+                      key={st.id}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => startFor(st)}
+                      className={`rounded-lg border px-3 py-2 text-left transition-colors ${
+                        on
+                          ? 'border-ds-accent bg-ds-accent/10'
+                          : 'border-ds-border hover:border-ds-accent'
+                      }`}
+                    >
+                      <span className="text-ds-text block text-sm font-medium">{st.label}</span>
+                      <span className="text-ds-muted block text-xs">{st.note}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+          <p className="text-ds-text -mb-2 text-[13px] font-medium">Then pick a look</p>
           <div className="flex flex-wrap gap-2" role="group" aria-label="Looks">
             {PRESETS.map((p) => (
               <button
@@ -361,7 +564,45 @@ export function OgImageMaker() {
           </p>
         </Section>
 
-        <Section title="Take the style from a picture" hint="your hero image, a photo, a logo" open>
+        <Section
+          title="Take the style from a picture"
+          hint="a file or a web address"
+          tour="picture"
+          open
+        >
+          <div>
+            <label htmlFor="og-address" className="text-ds-text mb-1 block text-[13px] font-medium">
+              Web address of a page or picture
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <input
+                id="og-address"
+                type="text"
+                inputMode="url"
+                value={addr}
+                onChange={(e) => setAddr(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') void fromAddress()
+                }}
+                placeholder="https://yoursite.com"
+                spellCheck={false}
+                className="border-ds-border bg-ds-surface2 text-ds-text placeholder:text-ds-muted focus:border-ds-accent min-w-0 flex-1 rounded-lg border px-3 py-2 text-sm outline-none"
+              />
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => void fromAddress()}
+                disabled={addrBusy}
+              >
+                {addrBusy ? 'Reading…' : 'Get its style'}
+              </Button>
+            </div>
+            <p className="text-ds-muted mt-1 text-xs">
+              For a page it uses the image the page sets for sharing (og:image). This one address is
+              sent to our server to fetch the picture. Nothing is stored.
+            </p>
+          </div>
+          <p className="text-ds-muted text-center text-xs">or</p>
           <div className="flex flex-wrap items-center gap-3">
             <label className={fileButton}>
               <input
@@ -383,7 +624,8 @@ export function OgImageMaker() {
             )}
           </div>
           <p className="text-ds-muted text-xs">
-            PNG, JPG, WebP or SVG up to 15 MB. It stays in your browser and is never uploaded.
+            PNG, JPG, WebP or SVG up to 15 MB. A file you choose stays in your browser and is never
+            uploaded.
           </p>
           {note && (
             <p
@@ -460,498 +702,573 @@ export function OgImageMaker() {
                   </ul>
                 </div>
               )}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Range
-                  label="Picture zoom"
-                  value={opts.photoZoom}
-                  min={100}
-                  max={300}
-                  unit="%"
-                  onChange={(v) => set('photoZoom', v)}
-                />
-                <Range
-                  label="Picture blur"
-                  value={opts.photoBlur}
-                  min={0}
-                  max={30}
-                  onChange={(v) => set('photoBlur', v)}
-                />
-                <Range
-                  label="Picture, move left or right"
-                  value={opts.photoX}
-                  min={0}
-                  max={100}
-                  unit="%"
-                  onChange={(v) => set('photoX', v)}
-                />
-                <Range
-                  label="Picture, move up or down"
-                  value={opts.photoY}
-                  min={0}
-                  max={100}
-                  unit="%"
-                  onChange={(v) => set('photoY', v)}
-                />
-                <ColorField
-                  label="Darkening layer colour"
-                  value={opts.scrimColor}
-                  fallback="#000000"
-                  onChange={(v) => set('scrimColor', v)}
-                />
-                <Range
-                  label="Darkening layer strength"
-                  value={opts.scrimOpacity}
-                  min={0}
-                  max={90}
-                  unit="%"
-                  onChange={(v) => set('scrimOpacity', v)}
-                />
-              </div>
-              <Toggle
-                label="Black and white picture"
-                checked={opts.photoGray}
-                onChange={(v) => set('photoGray', v)}
-              />
+              {advanced && (
+                <>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Range
+                      label="Picture zoom"
+                      value={opts.photoZoom}
+                      min={100}
+                      max={300}
+                      unit="%"
+                      onChange={(v) => set('photoZoom', v)}
+                    />
+                    <Range
+                      label="Picture blur"
+                      value={opts.photoBlur}
+                      min={0}
+                      max={30}
+                      onChange={(v) => set('photoBlur', v)}
+                    />
+                    <Range
+                      label="Picture, move left or right"
+                      value={opts.photoX}
+                      min={0}
+                      max={100}
+                      unit="%"
+                      onChange={(v) => set('photoX', v)}
+                    />
+                    <Range
+                      label="Picture, move up or down"
+                      value={opts.photoY}
+                      min={0}
+                      max={100}
+                      unit="%"
+                      onChange={(v) => set('photoY', v)}
+                    />
+                    <ColorField
+                      label="Darkening layer colour"
+                      value={opts.scrimColor}
+                      fallback="#000000"
+                      onChange={(v) => set('scrimColor', v)}
+                    />
+                    <Range
+                      label="Darkening layer strength"
+                      value={opts.scrimOpacity}
+                      min={0}
+                      max={90}
+                      unit="%"
+                      onChange={(v) => set('scrimOpacity', v)}
+                    />
+                  </div>
+                  <Toggle
+                    label="Black and white picture"
+                    checked={opts.photoGray}
+                    onChange={(v) => set('photoGray', v)}
+                  />
+                </>
+              )}
             </>
           )}
         </Section>
 
-        <Section title="Text" hint="every line has its own controls" open>
-          <Section title="Title" open>
-            <TextControls
-              label="Title"
-              el={opts.title}
-              onChange={setEl('title')}
-              multiline
-              hasLeading
-              defaultColorName="main text"
-              defaultColor={textHex}
-              sizeLabel="biggest size"
-              sizeMin={2}
-              sizeMax={20}
-              placeholder="Your title goes here"
-            />
-            <p className="text-ds-muted -mt-2 text-xs">
-              The title shrinks to fit, never below 40% of this size.
-            </p>
-          </Section>
-          <Section title="Subtitle">
-            <TextControls
-              label="Subtitle"
-              el={opts.subtitle}
-              onChange={setEl('subtitle')}
-              multiline
-              hasLeading
-              defaultColorName="main text"
-              defaultColor={textHex}
-              sizeLabel="size"
-              sizeMin={1}
-              sizeMax={10}
-            />
-          </Section>
-          <Section title="Tag line" hint="top of the image">
-            <TextControls
-              label="Tag line"
-              el={opts.eyebrow}
-              onChange={setEl('eyebrow')}
-              defaultColorName="accent"
-              defaultColor={accentHex}
-              sizeLabel="size"
-              sizeMin={0.8}
-              sizeMax={6}
-              placeholder="yoursite.com"
-            />
-          </Section>
-          <Section title="Badge" hint="a small label, such as New">
-            <TextControls
-              label="Badge"
-              el={opts.badge}
-              onChange={setEl('badge')}
-              defaultColorName="readable-on-accent"
-              defaultColor="#ffffff"
-              sizeLabel="size"
-              sizeMin={0.8}
-              sizeMax={6}
-            />
-          </Section>
-          <Section title="Footer" hint="bottom of the image">
-            <TextControls
-              label="Footer"
-              el={opts.footer}
-              onChange={setEl('footer')}
-              defaultColorName="main text"
-              defaultColor={textHex}
-              sizeLabel="size"
-              sizeMin={0.8}
-              sizeMax={6}
-              placeholder="devstash.me/blog"
-            />
-          </Section>
-        </Section>
-
-        <Section title="Layout and size">
-          <SelectField
-            label="Size"
-            value={opts.sizeId}
-            options={SIZES.map((s) => ({ id: s.id, label: s.label }))}
-            onChange={(id) => {
-              const s = SIZES.find((x) => x.id === id) ?? SIZES[0]
-              setOpts((o) => ({
-                ...o,
-                sizeId: s.id,
-                ...(s.id === 'custom' ? {} : { width: s.width, height: s.height }),
-              }))
-            }}
-          />
-          {opts.sizeId === 'custom' && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <NumberBox
-                label="Width in pixels"
-                value={opts.width}
-                onChange={(v) => set('width', v)}
+        {!advanced && (
+          <>
+            <Section title="Your words" tour="words" open>
+              <PlainText
+                label="Title"
+                value={opts.title.text}
+                onChange={(v) => setEl('title')({ text: v })}
+                placeholder="Your title goes here"
+                multiline
               />
-              <NumberBox
-                label="Height in pixels"
-                value={opts.height}
-                onChange={(v) => set('height', v)}
+              <PlainText
+                label="Subtitle"
+                value={opts.subtitle.text}
+                onChange={(v) => setEl('subtitle')({ text: v })}
+                multiline
               />
-            </div>
-          )}
-          <Seg
-            label="Layout"
-            value={opts.layout}
-            options={LAYOUTS}
-            onChange={(v) => chooseLayout(v)}
-          />
-          {!hasPhoto && opts.layout !== 'stack' && (
-            <p className="text-ds-muted text-xs">A split layout needs a picture. Add one above.</p>
-          )}
-          <Seg
-            label="Text alignment"
-            value={opts.align}
-            options={ALIGN}
-            onChange={(v) => set('align', v)}
-          />
-          <Seg
-            label="Where the title sits"
-            value={opts.vAnchor}
-            options={VANCHOR}
-            onChange={(v) => set('vAnchor', v)}
-          />
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Range
-              label="Margin"
-              value={opts.padding}
-              min={2}
-              max={16}
-              step={0.5}
-              unit="%"
-              onChange={(v) => set('padding', v)}
-            />
-            <Range
-              label="Text column width"
-              value={opts.textWidth}
-              min={30}
-              max={100}
-              unit="%"
-              onChange={(v) => set('textWidth', v)}
-            />
-            <Range
-              label="Move the title block up or down"
-              value={opts.offsetY}
-              min={-40}
-              max={40}
-              unit="%"
-              onChange={(v) => set('offsetY', v)}
-            />
-          </div>
-        </Section>
-
-        <Section title="Colours and background">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <ColorField
-              label="Text colour"
-              value={opts.textColor}
-              fallback="#1c1917"
-              onChange={(v) => set('textColor', v)}
-            />
-            <ColorField
-              label="Accent colour"
-              value={opts.accent}
-              fallback="#c2410c"
-              onChange={(v) => set('accent', v)}
-            />
-          </div>
-          {lowText && (
-            <p className="text-ds-warning-strong text-sm" role="alert">
-              The text colour is hard to read on this background. Pick a lighter or darker one.
-            </p>
-          )}
-          {lowAccent && (
-            <p className="text-ds-warning-strong text-sm" role="alert">
-              This accent colour is hard to see on the background. Pick a lighter or darker one.
-            </p>
-          )}
-          <Seg
-            label="Background"
-            value={opts.bgType}
-            options={BGS.filter((b) => b.id !== 'photo' || hasPhoto)}
-            onChange={(v) => (v === 'photo' ? photoAsBackground() : set('bgType', v))}
-          />
-          {opts.bgType !== 'photo' && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <ColorField
-                label={opts.bgType === 'solid' ? 'Background colour' : 'Background, first colour'}
-                value={opts.bgFrom}
-                fallback="#f6f1e7"
-                onChange={(v) => set('bgFrom', v)}
+              <PlainText
+                label="Tag line"
+                value={opts.eyebrow.text}
+                onChange={(v) => setEl('eyebrow')({ text: v })}
+                placeholder="yoursite.com"
               />
-              {opts.bgType !== 'solid' && (
-                <ColorField
-                  label="Background, second colour"
-                  value={opts.bgTo}
-                  fallback="#ebe3d3"
-                  onChange={(v) => set('bgTo', v)}
-                />
-              )}
-              {opts.bgType === 'linear' && (
-                <Range
-                  label="Gradient angle"
-                  value={opts.bgAngle}
-                  min={0}
-                  max={360}
-                  unit="°"
-                  onChange={(v) => set('bgAngle', v)}
-                />
-              )}
-            </div>
-          )}
-        </Section>
-
-        <Section title="Graphics" hint="patterns, marks, shapes, frame, panel, logo">
-          <Seg
-            label="Pattern"
-            value={opts.pattern}
-            options={PATTERNS}
-            onChange={(v) => set('pattern', v)}
-          />
-          {opts.pattern !== 'none' && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <ColorField
-                label="Pattern colour"
-                value={opts.patternColor}
-                fallback={accentHex}
-                allowEmpty
-                onChange={(v) => set('patternColor', v)}
+              <PlainText
+                label="Footer"
+                value={opts.footer.text}
+                onChange={(v) => setEl('footer')({ text: v })}
+                placeholder="devstash.me/blog"
               />
-              <Range
-                label="Pattern strength"
-                value={opts.patternOpacity}
-                min={2}
-                max={60}
-                unit="%"
-                onChange={(v) => set('patternOpacity', v)}
-              />
-              <Range
-                label="Pattern scale"
-                value={opts.patternScale}
-                min={0.5}
-                max={3}
-                step={0.1}
-                onChange={(v) => set('patternScale', v)}
-              />
-            </div>
-          )}
-          <Seg
-            label="Mark by the title"
-            value={opts.mark}
-            options={MARKS}
-            onChange={(v) => set('mark', v)}
-          />
-          {opts.mark !== 'none' && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <ColorField
-                label="Mark colour"
-                value={opts.markColor}
-                fallback={accentHex}
-                allowEmpty
-                onChange={(v) => set('markColor', v)}
-              />
-              <Range
-                label="Mark thickness"
-                value={opts.markSize}
-                min={1}
-                max={5}
-                step={0.5}
-                onChange={(v) => set('markSize', v)}
-              />
-            </div>
-          )}
-          <Seg
-            label="Corner shape"
-            value={opts.decor}
-            options={DECORS}
-            onChange={(v) => set('decor', v)}
-          />
-          {opts.decor !== 'none' && (
-            <>
-              <Seg
-                label="Corner for the shape"
-                value={opts.decorCorner}
-                options={CORNERS}
-                onChange={(v) => set('decorCorner', v)}
-              />
+              <p className="text-ds-muted text-xs">
+                Choose Everything above to set the font, size and colour of each line.
+              </p>
+            </Section>
+            <Section title="Colours">
               <div className="grid gap-4 sm:grid-cols-2">
                 <ColorField
-                  label="Shape colour"
-                  value={opts.decorColor}
-                  fallback={accentHex}
-                  allowEmpty
-                  onChange={(v) => set('decorColor', v)}
+                  label="Text colour"
+                  value={opts.textColor}
+                  fallback="#1c1917"
+                  onChange={(v) => set('textColor', v)}
                 />
-                <Range
-                  label="Shape size"
-                  value={opts.decorSize}
-                  min={10}
-                  max={90}
-                  unit="%"
-                  onChange={(v) => set('decorSize', v)}
+                <ColorField
+                  label="Accent colour"
+                  value={opts.accent}
+                  fallback="#c2410c"
+                  onChange={(v) => set('accent', v)}
                 />
-                <Range
-                  label="Shape strength"
-                  value={opts.decorOpacity}
-                  min={4}
-                  max={100}
-                  unit="%"
-                  onChange={(v) => set('decorOpacity', v)}
-                />
+                {opts.bgType !== 'photo' && (
+                  <ColorField
+                    label="Background colour"
+                    value={opts.bgFrom}
+                    fallback="#f6f1e7"
+                    onChange={(v) => set('bgFrom', v)}
+                  />
+                )}
               </div>
-            </>
-          )}
-          <Toggle
-            label="Frame around the image"
-            checked={opts.frame}
-            onChange={(v) => set('frame', v)}
-          />
-          {opts.frame && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <ColorField
-                label="Frame colour"
-                value={opts.frameColor}
-                fallback={accentHex}
-                allowEmpty
-                onChange={(v) => set('frameColor', v)}
-              />
-              <Range
-                label="Frame thickness"
-                value={opts.frameWidth}
-                min={1}
-                max={30}
-                onChange={(v) => set('frameWidth', v)}
-              />
-              <Range
-                label="Frame distance from the edge"
-                value={opts.frameInset}
-                min={0}
-                max={10}
-                step={0.5}
-                unit="%"
-                onChange={(v) => set('frameInset', v)}
-              />
-              <Range
-                label="Frame corner rounding"
-                value={opts.frameRadius}
-                min={0}
-                max={10}
-                step={0.5}
-                unit="%"
-                onChange={(v) => set('frameRadius', v)}
-              />
-            </div>
-          )}
-          <Toggle
-            label="Panel behind the text"
-            checked={opts.panel}
-            onChange={(v) => set('panel', v)}
-          />
-          {opts.panel && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <ColorField
-                label="Panel colour"
-                value={opts.panelColor}
-                fallback="#ffffff"
-                onChange={(v) => set('panelColor', v)}
-              />
-              <Range
-                label="Panel strength"
-                value={opts.panelOpacity}
-                min={10}
-                max={100}
-                unit="%"
-                onChange={(v) => set('panelOpacity', v)}
-              />
-              <Range
-                label="Panel corner rounding"
-                value={opts.panelRadius}
-                min={0}
-                max={8}
-                step={0.5}
-                unit="%"
-                onChange={(v) => set('panelRadius', v)}
-              />
-            </div>
-          )}
-          <div className="border-ds-border flex flex-col gap-3 border-t pt-4">
-            <p className="text-ds-text text-[13px] font-medium">Logo</p>
-            <div className="flex flex-wrap items-center gap-3">
-              <label className={fileButton}>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="sr-only"
-                  aria-label="Choose a logo"
-                  onChange={(e) => {
-                    void onLogo(e.target.files?.[0])
-                    e.target.value = ''
-                  }}
-                />
-                {opts.logo ? 'Choose another logo' : 'Choose a logo'}
-              </label>
-              {opts.logo && (
-                <Button type="button" size="sm" variant="ghost" onClick={() => set('logo', '')}>
-                  Remove the logo
-                </Button>
+              {lowText && (
+                <p className="text-ds-warning-strong text-sm" role="alert">
+                  The text colour is hard to read on this background. Pick a lighter or darker one.
+                </p>
               )}
-            </div>
-            {opts.logo && (
-              <>
-                <Seg
-                  label="Logo corner"
-                  value={opts.logoPos}
-                  options={CORNERS}
-                  onChange={(v) => set('logoPos', v)}
+            </Section>
+          </>
+        )}
+        {advanced && (
+          <>
+            <Section title="Text" hint="every line has its own controls" open>
+              <Section title="Title" open>
+                <TextControls
+                  label="Title"
+                  el={opts.title}
+                  onChange={setEl('title')}
+                  multiline
+                  hasLeading
+                  defaultColorName="main text"
+                  defaultColor={textHex}
+                  sizeLabel="biggest size"
+                  sizeMin={2}
+                  sizeMax={20}
+                  placeholder="Your title goes here"
                 />
+                <p className="text-ds-muted -mt-2 text-xs">
+                  The title shrinks to fit, never below 40% of this size.
+                </p>
+              </Section>
+              <Section title="Subtitle">
+                <TextControls
+                  label="Subtitle"
+                  el={opts.subtitle}
+                  onChange={setEl('subtitle')}
+                  multiline
+                  hasLeading
+                  defaultColorName="main text"
+                  defaultColor={textHex}
+                  sizeLabel="size"
+                  sizeMin={1}
+                  sizeMax={10}
+                />
+              </Section>
+              <Section title="Tag line" hint="top of the image">
+                <TextControls
+                  label="Tag line"
+                  el={opts.eyebrow}
+                  onChange={setEl('eyebrow')}
+                  defaultColorName="accent"
+                  defaultColor={accentHex}
+                  sizeLabel="size"
+                  sizeMin={0.8}
+                  sizeMax={6}
+                  placeholder="yoursite.com"
+                />
+              </Section>
+              <Section title="Badge" hint="a small label, such as New">
+                <TextControls
+                  label="Badge"
+                  el={opts.badge}
+                  onChange={setEl('badge')}
+                  defaultColorName="readable-on-accent"
+                  defaultColor="#ffffff"
+                  sizeLabel="size"
+                  sizeMin={0.8}
+                  sizeMax={6}
+                />
+              </Section>
+              <Section title="Footer" hint="bottom of the image">
+                <TextControls
+                  label="Footer"
+                  el={opts.footer}
+                  onChange={setEl('footer')}
+                  defaultColorName="main text"
+                  defaultColor={textHex}
+                  sizeLabel="size"
+                  sizeMin={0.8}
+                  sizeMax={6}
+                  placeholder="devstash.me/blog"
+                />
+              </Section>
+            </Section>
+
+            <Section title="Layout and size">
+              <SelectField
+                label="Size"
+                value={opts.sizeId}
+                options={SIZES.map((s) => ({ id: s.id, label: s.label }))}
+                onChange={(id) => {
+                  const s = SIZES.find((x) => x.id === id) ?? SIZES[0]
+                  setOpts((o) => ({
+                    ...o,
+                    sizeId: s.id,
+                    ...(s.id === 'custom' ? {} : { width: s.width, height: s.height }),
+                  }))
+                }}
+              />
+              {opts.sizeId === 'custom' && (
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Range
-                    label="Logo size"
-                    value={opts.logoSize}
-                    min={3}
-                    max={30}
-                    unit="%"
-                    onChange={(v) => set('logoSize', v)}
+                  <NumberBox
+                    label="Width in pixels"
+                    value={opts.width}
+                    onChange={(v) => set('width', v)}
+                  />
+                  <NumberBox
+                    label="Height in pixels"
+                    value={opts.height}
+                    onChange={(v) => set('height', v)}
                   />
                 </div>
-                <Toggle
-                  label="Round logo"
-                  checked={opts.logoRound}
-                  onChange={(v) => set('logoRound', v)}
+              )}
+              <Seg
+                label="Layout"
+                value={opts.layout}
+                options={LAYOUTS}
+                onChange={(v) => chooseLayout(v)}
+              />
+              {!hasPhoto && opts.layout !== 'stack' && (
+                <p className="text-ds-muted text-xs">
+                  A split layout needs a picture. Add one above.
+                </p>
+              )}
+              <Seg
+                label="Text alignment"
+                value={opts.align}
+                options={ALIGN}
+                onChange={(v) => set('align', v)}
+              />
+              <Seg
+                label="Where the title sits"
+                value={opts.vAnchor}
+                options={VANCHOR}
+                onChange={(v) => set('vAnchor', v)}
+              />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Range
+                  label="Margin"
+                  value={opts.padding}
+                  min={2}
+                  max={16}
+                  step={0.5}
+                  unit="%"
+                  onChange={(v) => set('padding', v)}
                 />
-              </>
-            )}
-          </div>
-        </Section>
+                <Range
+                  label="Text column width"
+                  value={opts.textWidth}
+                  min={30}
+                  max={100}
+                  unit="%"
+                  onChange={(v) => set('textWidth', v)}
+                />
+                <Range
+                  label="Move the title block up or down"
+                  value={opts.offsetY}
+                  min={-40}
+                  max={40}
+                  unit="%"
+                  onChange={(v) => set('offsetY', v)}
+                />
+              </div>
+            </Section>
 
-        <Section title="Download" open>
+            <Section title="Colours and background">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <ColorField
+                  label="Text colour"
+                  value={opts.textColor}
+                  fallback="#1c1917"
+                  onChange={(v) => set('textColor', v)}
+                />
+                <ColorField
+                  label="Accent colour"
+                  value={opts.accent}
+                  fallback="#c2410c"
+                  onChange={(v) => set('accent', v)}
+                />
+              </div>
+              {lowText && (
+                <p className="text-ds-warning-strong text-sm" role="alert">
+                  The text colour is hard to read on this background. Pick a lighter or darker one.
+                </p>
+              )}
+              {lowAccent && (
+                <p className="text-ds-warning-strong text-sm" role="alert">
+                  This accent colour is hard to see on the background. Pick a lighter or darker one.
+                </p>
+              )}
+              <Seg
+                label="Background"
+                value={opts.bgType}
+                options={BGS.filter((b) => b.id !== 'photo' || hasPhoto)}
+                onChange={(v) => (v === 'photo' ? photoAsBackground() : set('bgType', v))}
+              />
+              {opts.bgType !== 'photo' && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <ColorField
+                    label={
+                      opts.bgType === 'solid' ? 'Background colour' : 'Background, first colour'
+                    }
+                    value={opts.bgFrom}
+                    fallback="#f6f1e7"
+                    onChange={(v) => set('bgFrom', v)}
+                  />
+                  {opts.bgType !== 'solid' && (
+                    <ColorField
+                      label="Background, second colour"
+                      value={opts.bgTo}
+                      fallback="#ebe3d3"
+                      onChange={(v) => set('bgTo', v)}
+                    />
+                  )}
+                  {opts.bgType === 'linear' && (
+                    <Range
+                      label="Gradient angle"
+                      value={opts.bgAngle}
+                      min={0}
+                      max={360}
+                      unit="°"
+                      onChange={(v) => set('bgAngle', v)}
+                    />
+                  )}
+                </div>
+              )}
+            </Section>
+
+            <Section title="Graphics" hint="patterns, marks, shapes, frame, panel, logo">
+              <Seg
+                label="Pattern"
+                value={opts.pattern}
+                options={PATTERNS}
+                onChange={(v) => set('pattern', v)}
+              />
+              {opts.pattern !== 'none' && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <ColorField
+                    label="Pattern colour"
+                    value={opts.patternColor}
+                    fallback={accentHex}
+                    allowEmpty
+                    onChange={(v) => set('patternColor', v)}
+                  />
+                  <Range
+                    label="Pattern strength"
+                    value={opts.patternOpacity}
+                    min={2}
+                    max={60}
+                    unit="%"
+                    onChange={(v) => set('patternOpacity', v)}
+                  />
+                  <Range
+                    label="Pattern scale"
+                    value={opts.patternScale}
+                    min={0.5}
+                    max={3}
+                    step={0.1}
+                    onChange={(v) => set('patternScale', v)}
+                  />
+                </div>
+              )}
+              <Seg
+                label="Mark by the title"
+                value={opts.mark}
+                options={MARKS}
+                onChange={(v) => set('mark', v)}
+              />
+              {opts.mark !== 'none' && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <ColorField
+                    label="Mark colour"
+                    value={opts.markColor}
+                    fallback={accentHex}
+                    allowEmpty
+                    onChange={(v) => set('markColor', v)}
+                  />
+                  <Range
+                    label="Mark thickness"
+                    value={opts.markSize}
+                    min={1}
+                    max={5}
+                    step={0.5}
+                    onChange={(v) => set('markSize', v)}
+                  />
+                </div>
+              )}
+              <Seg
+                label="Corner shape"
+                value={opts.decor}
+                options={DECORS}
+                onChange={(v) => set('decor', v)}
+              />
+              {opts.decor !== 'none' && (
+                <>
+                  <Seg
+                    label="Corner for the shape"
+                    value={opts.decorCorner}
+                    options={CORNERS}
+                    onChange={(v) => set('decorCorner', v)}
+                  />
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <ColorField
+                      label="Shape colour"
+                      value={opts.decorColor}
+                      fallback={accentHex}
+                      allowEmpty
+                      onChange={(v) => set('decorColor', v)}
+                    />
+                    <Range
+                      label="Shape size"
+                      value={opts.decorSize}
+                      min={10}
+                      max={90}
+                      unit="%"
+                      onChange={(v) => set('decorSize', v)}
+                    />
+                    <Range
+                      label="Shape strength"
+                      value={opts.decorOpacity}
+                      min={4}
+                      max={100}
+                      unit="%"
+                      onChange={(v) => set('decorOpacity', v)}
+                    />
+                  </div>
+                </>
+              )}
+              <Toggle
+                label="Frame around the image"
+                checked={opts.frame}
+                onChange={(v) => set('frame', v)}
+              />
+              {opts.frame && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <ColorField
+                    label="Frame colour"
+                    value={opts.frameColor}
+                    fallback={accentHex}
+                    allowEmpty
+                    onChange={(v) => set('frameColor', v)}
+                  />
+                  <Range
+                    label="Frame thickness"
+                    value={opts.frameWidth}
+                    min={1}
+                    max={30}
+                    onChange={(v) => set('frameWidth', v)}
+                  />
+                  <Range
+                    label="Frame distance from the edge"
+                    value={opts.frameInset}
+                    min={0}
+                    max={10}
+                    step={0.5}
+                    unit="%"
+                    onChange={(v) => set('frameInset', v)}
+                  />
+                  <Range
+                    label="Frame corner rounding"
+                    value={opts.frameRadius}
+                    min={0}
+                    max={10}
+                    step={0.5}
+                    unit="%"
+                    onChange={(v) => set('frameRadius', v)}
+                  />
+                </div>
+              )}
+              <Toggle
+                label="Panel behind the text"
+                checked={opts.panel}
+                onChange={(v) => set('panel', v)}
+              />
+              {opts.panel && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <ColorField
+                    label="Panel colour"
+                    value={opts.panelColor}
+                    fallback="#ffffff"
+                    onChange={(v) => set('panelColor', v)}
+                  />
+                  <Range
+                    label="Panel strength"
+                    value={opts.panelOpacity}
+                    min={10}
+                    max={100}
+                    unit="%"
+                    onChange={(v) => set('panelOpacity', v)}
+                  />
+                  <Range
+                    label="Panel corner rounding"
+                    value={opts.panelRadius}
+                    min={0}
+                    max={8}
+                    step={0.5}
+                    unit="%"
+                    onChange={(v) => set('panelRadius', v)}
+                  />
+                </div>
+              )}
+              <div className="border-ds-border flex flex-col gap-3 border-t pt-4">
+                <p className="text-ds-text text-[13px] font-medium">Logo</p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <label className={fileButton}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      aria-label="Choose a logo"
+                      onChange={(e) => {
+                        void onLogo(e.target.files?.[0])
+                        e.target.value = ''
+                      }}
+                    />
+                    {opts.logo ? 'Choose another logo' : 'Choose a logo'}
+                  </label>
+                  {opts.logo && (
+                    <Button type="button" size="sm" variant="ghost" onClick={() => set('logo', '')}>
+                      Remove the logo
+                    </Button>
+                  )}
+                </div>
+                {opts.logo && (
+                  <>
+                    <Seg
+                      label="Logo corner"
+                      value={opts.logoPos}
+                      options={CORNERS}
+                      onChange={(v) => set('logoPos', v)}
+                    />
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Range
+                        label="Logo size"
+                        value={opts.logoSize}
+                        min={3}
+                        max={30}
+                        unit="%"
+                        onChange={(v) => set('logoSize', v)}
+                      />
+                    </div>
+                    <Toggle
+                      label="Round logo"
+                      checked={opts.logoRound}
+                      onChange={(v) => set('logoRound', v)}
+                    />
+                  </>
+                )}
+              </div>
+            </Section>
+          </>
+        )}
+
+        <Section title="Download" tour="download" open>
           <Seg
             label="File type"
             value={format}
@@ -983,26 +1300,33 @@ export function OgImageMaker() {
         </Section>
       </div>
 
-      <div className="border-ds-accent/30 bg-ds-surface2 order-first rounded-xl border p-4 sm:p-5 lg:sticky lg:top-6 lg:order-none">
-        <h2 className="text-ds-text mb-3 text-base font-semibold">Your image</h2>
-        <div className="border-ds-border overflow-hidden rounded-lg border">
-          {dataUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- a data: URL made here, not a file next/image can optimise
-            <img
-              src={dataUrl}
-              alt={`Preview: ${opts.title.text.trim() || 'Your title goes here'}`}
-              width={W}
-              height={H}
-              className="block h-auto w-full"
-            />
-          ) : (
-            <div className="bg-ds-surface w-full" style={{ aspectRatio: `${W} / ${H}` }} />
-          )}
+      <div className="border-ds-accent/30 bg-ds-surface2 order-first rounded-xl border p-4 sm:p-5 lg:sticky lg:top-6 lg:order-none lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
+        <div data-tour="preview">
+          <h2 className="text-ds-text mb-3 text-base font-semibold">Your image</h2>
+          <div className="border-ds-border overflow-hidden rounded-lg border">
+            {dataUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- a data: URL made here, not a file next/image can optimise
+              <img
+                src={dataUrl}
+                alt={`Preview: ${opts.title.text.trim() || 'Your title goes here'}`}
+                width={W}
+                height={H}
+                className="block h-auto w-full"
+              />
+            ) : (
+              <div className="bg-ds-surface w-full" style={{ aspectRatio: `${W} / ${H}` }} />
+            )}
+          </div>
+          <p className="text-ds-muted mt-2 font-mono text-xs">
+            {W} × {H}
+            {scale === '2' ? ` · saved at ${W * 2} × ${H * 2}` : ''}
+          </p>
         </div>
-        <p className="text-ds-muted mt-2 font-mono text-xs">
-          {W} × {H}
-          {scale === '2' ? ` · saved at ${W * 2} × ${H * 2}` : ''}
-        </p>
+        <OgPreviews
+          src={dataUrl}
+          title={live.title.text.trim()}
+          subtitle={live.subtitle.text.trim()}
+        />
         <div className="mt-4 flex flex-wrap gap-2">
           <Button type="button" size="sm" onClick={() => void download()} disabled={!svg}>
             {format === 'png' ? 'Download PNG' : 'Download JPG'}
@@ -1024,6 +1348,15 @@ export function OgImageMaker() {
           writes the rest.
         </p>
       </div>
+      {tourOpen && (
+        <OgTour
+          steps={tourSteps}
+          onClose={() => {
+            setTourOpen(false)
+            tourBtn.current?.focus()
+          }}
+        />
+      )}
     </div>
   )
 }

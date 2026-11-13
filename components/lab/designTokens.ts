@@ -5,15 +5,7 @@
 // since a pasted SVG elsewhere won't have this site's CSS custom properties.
 
 export type ColorKey =
-  | 'bg'
-  | 'surface'
-  | 'surface2'
-  | 'accent'
-  | 'purple'
-  | 'success'
-  | 'warning'
-  | 'error'
-  | 'muted'
+  'bg' | 'surface' | 'surface2' | 'accent' | 'purple' | 'success' | 'warning' | 'error' | 'muted'
 
 export type Theme = 'dark' | 'light'
 

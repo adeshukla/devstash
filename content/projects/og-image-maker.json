@@ -1,8 +1,8 @@
 {
   "slug": "og-image-maker",
   "title": "OG Image Maker",
-  "description": "Make a share image or blog cover with full control of every text, background and graphic, or take the colours from your own picture. PNG, JPG or SVG, drawn in the browser.",
-  "longDescription": "Most share images come from a design tool or a template that decides everything. This one gives every text its own font, weight, size, colour, spacing and case, a choice of backgrounds (solid, gradient, glow or your own picture), patterns, marks, corner shapes, a frame, a text panel and a logo. Give it a hero image or any picture and it reads the main colours, builds a matching theme with readable text, and can use the picture as the background or beside the text. The image is drawn from your device's own fonts, so the preview is exactly the file you download. Nothing is uploaded.",
+  "description": "Make a share image or blog cover in a simple view or with full control. Take the colours from your site address or a picture, and preview it on desktop and phone.",
+  "longDescription": "Most share images come from a design tool or a template that decides everything, and the full-control tools bury what most people need. This one opens in a simple view: pick what the image is for (computer or phone), type your words, choose a look and download, with a preview as a link card on a computer and in a chat on a phone and a one-minute guided tour. Switch to Everything for per-text fonts, sizes and colours, backgrounds, patterns, shapes, a frame and a logo. Give it your site address or a picture and it reads the main colours and builds a matching theme with readable text. The image is drawn from your device fonts, so the preview is exactly the file you download. Pictures you choose never leave your browser; a web address you type is sent to the server once to fetch its picture, and nothing is stored.",
   "status": "live",
   "featured": false,
   "order": 11,
@@ -13,12 +13,15 @@
   "startDate": "2026-11-09",
   "year": 2026,
   "highlights": [
+    "Simple view by default, every control behind one Everything switch, plus a guided tour",
     "Fully client-side: the title, pictures and image never leave the browser",
     "Five texts (title, subtitle, tag line, badge, footer), each with its own font, weight, size, colour, opacity, spacing, capitals and italics",
     "Style from a picture: median-cut palette with k-means refinement, a theme with text that is always readable (4.5:1), and a darkening layer sized to the picture",
     "Backgrounds, eight patterns, marks, corner shapes, frame, text panel, logo, split layout with a picture panel",
     "PNG, JPG or SVG at four sizes or a custom size, with double resolution",
-    "Long words break between whole characters, so Hindi letters keep their marks"
+    "Long words break between whole characters, so Hindi letters keep their marks",
+    "Style from a web address: a locked-down server fetch (public hosts only, redirects re-checked, size and time limits, rate limited) reads the page og:image",
+    "Ready-made starts for computers and phones, and a preview as a desktop link card and a phone chat"
   ],
   "caseStudy": {
     "problem": "A page goes out with a plain link because making a share image means opening a design tool, or it uses a template that cannot be changed. When a hero image exists, matching its colours by hand is slow and the text ends up unreadable on it.",
@@ -28,10 +31,11 @@
       "The colour extraction copies colours, not the design of the picture. Fonts and layout stay the visitor's to choose.",
       "Contrast is a guarantee, not a hint: when neither white nor near-black text reaches 4.5:1, the background is moved until it does.",
       "Break long words between graphemes, not code points, so a Devanagari letter is never separated from its vowel sign.",
-      "A picture is only ever embedded as a data URL of an image type, so a typed value cannot point the image at another site."
+      "A picture is only ever embedded as a data URL of an image type, so a typed value cannot point the image at another site.",
+      "Fetching another site picture needs a server, because browsers block it. The route refuses private and internal addresses at connect time, re-checks every redirect, caps size and time, and answers only same-site requests."
     ],
     "outcome": "// TODO: No usage data yet. This is a self-initiated tool, not a deployed one."
   },
-  "coverStats": ["style from a picture", "PNG + JPG + SVG", "no data sent"],
+  "coverStats": ["simple + full control", "style from a URL", "desktop + phone preview"],
   "relatedPosts": []
 }

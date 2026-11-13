@@ -1647,3 +1647,79 @@ test('Looker field names, and the formula agrees with the merged table', () => {
   const camp = lookerCase(cleanReport(fixture('ga4-campaigns.csv'), '-'))
   assert.match(camp, /WHEN Session campaign IN/)
 })
+
+// ---- web address -> share image (SSRF guard + og:image finder) ----
+import { isPrivateAddress, parseWebAddress, findImageUrl } from '../../lib/lab/pageImage.ts'
+
+test('private and internal addresses are refused, public ones allowed', () => {
+  for (const ip of [
+    '127.0.0.1',
+    '10.1.2.3',
+    '172.16.0.1',
+    '172.31.255.255',
+    '192.168.1.1',
+    '169.254.169.254',
+    '100.64.0.1',
+    '0.0.0.0',
+    '224.0.0.1',
+    '::1',
+    '::',
+    'fe80::1',
+    'fd00::1',
+    '::ffff:127.0.0.1',
+    '::ffff:7f00:1',
+    '::ffff:a9fe:a9fe',
+    '64:ff9b::1.2.3.4',
+    'not-an-ip',
+  ])
+    assert.equal(isPrivateAddress(ip), true, ip)
+  for (const ip of ['8.8.8.8', '1.1.1.1', '172.32.0.1', '151.101.1.1', '2606:4700:4700::1111'])
+    assert.equal(isPrivateAddress(ip), false, ip)
+})
+
+test('web address parsing refuses the unsafe and tidies the rest', () => {
+  assert.ok('url' in parseWebAddress('example.com/page'))
+  assert.equal(parseWebAddress('example.com').url.protocol, 'https:')
+  for (const bad of [
+    '',
+    'ftp://example.com',
+    'file:///etc/passwd',
+    'http://localhost:3000',
+    'http://127.0.0.1',
+    'http://2130706433',
+    'http://[::1]/',
+    'http://user:pw@example.com',
+    'https://example.com:8080',
+    'http://intranet',
+    'http://printer.local',
+    'http://169.254.169.254/latest/meta-data',
+  ])
+    assert.ok('error' in parseWebAddress(bad), bad)
+})
+
+test('finds the page share image and resolves it', () => {
+  const html = `<head>
+    <meta name="twitter:image" content="/tw.png">
+    <meta property='og:image' content='/img/a.png?x=1&amp;y=2'>
+    <link rel="image_src" href="/old.png"></head>`
+  assert.equal(
+    findImageUrl(html, 'https://site.test/blog/post'),
+    'https://site.test/img/a.png?x=1&y=2'
+  )
+  assert.equal(
+    findImageUrl(
+      '<meta name="twitter:image" content="https://cdn.test/t.jpg">',
+      'https://site.test'
+    ),
+    'https://cdn.test/t.jpg'
+  )
+  assert.equal(
+    findImageUrl('<link rel="image_src" href="x.png">', 'https://site.test/a/'),
+    'https://site.test/a/x.png'
+  )
+  assert.equal(
+    findImageUrl('<meta property="og:image" content="javascript:alert(1)">', 'https://site.test'),
+    null
+  )
+  assert.equal(findImageUrl('<p>nothing</p>', 'https://site.test'), null)
+})

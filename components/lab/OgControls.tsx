@@ -16,15 +16,18 @@ export function Section({
   title,
   hint,
   open = false,
+  tour,
   children,
 }: {
   title: string
   hint?: string
   open?: boolean
+  /** Name the guided tour uses to find this section. */
+  tour?: string
   children: React.ReactNode
 }) {
   return (
-    <details open={open} className="border-ds-border group rounded-xl border">
+    <details open={open} data-tour={tour} className="border-ds-border group rounded-xl border">
       <summary className="text-ds-text hover:text-ds-accent flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold">
         <span>
           {title}
@@ -350,6 +353,48 @@ export function TextControls({
           onChange={(v) => onChange({ italic: v })}
         />
       </div>
+    </div>
+  )
+}
+
+/** One plain text box, for the simple view. */
+export function PlainText({
+  label,
+  value,
+  onChange,
+  placeholder,
+  multiline = false,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+  multiline?: boolean
+}) {
+  const id = useId()
+  return (
+    <div>
+      <label htmlFor={id} className="text-ds-text mb-1 block text-[13px] font-medium">
+        {label}
+      </label>
+      {multiline ? (
+        <textarea
+          id={id}
+          rows={2}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={`${field} resize-y`}
+        />
+      ) : (
+        <input
+          id={id}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={field}
+        />
+      )}
     </div>
   )
 }

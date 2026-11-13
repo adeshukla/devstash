@@ -96,7 +96,7 @@ const TOOLS: Demo[] = [
     slug: 'og-image-maker',
     name: 'OG Image Maker',
     blurb:
-      'Set every text, background and graphic, or take the colours from your own picture. PNG, JPG or SVG, drawn in your browser, works with Hindi.',
+      'Pick a size, type your words, take the colours from your site address or a picture, and preview on desktop and phone. Full control one click away.',
     tag: 'Design',
     preview: 'card',
   },
