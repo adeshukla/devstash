@@ -1,19 +1,16 @@
 import { randomBytes } from 'node:crypto'
 import { NextResponse } from 'next/server'
-import { qrSession, sessionReady } from '@/lib/qrlink/session'
-import { storeReady } from '@/lib/qrlink/store'
+import { sessionReady, signIn } from '@/lib/qrlink/session'
+import { siteBase } from '@/lib/qrlink/site'
+import { limited, storeReady } from '@/lib/qrlink/store'
+import { clientKey } from '@/lib/security/requestGuard'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const PAGE = '/lab/changeable-qr'
 
-function site(request: Request) {
-  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host')
-  const proto =
-    request.headers.get('x-forwarded-proto') ?? (host?.startsWith('localhost') ? 'http' : 'https')
-  return `${proto}://${host}`
-}
+const site = siteBase
 const fail = (request: Request, why: string) =>
   NextResponse.redirect(`${site(request)}${PAGE}?error=${why}`)
 
@@ -22,6 +19,7 @@ export async function GET(request: Request) {
   const id = process.env.GOOGLE_CLIENT_ID
   if (!id || !process.env.GOOGLE_CLIENT_SECRET || !storeReady() || !sessionReady)
     return fail(request, 'google-off')
+  if (await limited(`google:${clientKey(request)}`, 30, 600)) return fail(request, 'google')
   const url = new URL(request.url)
   const code = url.searchParams.get('code')
   const jar = request.headers.get('cookie') ?? ''
@@ -79,9 +77,7 @@ export async function GET(request: Request) {
       claims.email_verified !== true
     )
       return fail(request, 'google')
-    const session = await qrSession()
-    session.email = claims.email.trim().toLowerCase()
-    await session.save()
+    await signIn(claims.email.trim().toLowerCase())
     const res = NextResponse.redirect(`${site(request)}${PAGE}`)
     res.cookies.delete({ name: 'qr_state', path: '/api/qr/google' })
     return res

@@ -24,8 +24,9 @@
     "qa:security": "node scripts/qa/security-audit.mjs",
     "qa:responsive": "playwright test -c playwright.qa.config.ts tests/qa/responsive.spec.ts",
     "qa:toolkit": "playwright test -c playwright.qa.config.ts tests/qa/toolkit.spec.ts tests/qa/lab.spec.ts",
+    "qa:qrlink": "playwright test -c playwright.qa.config.ts tests/qa/qrlink.spec.ts --workers=1",
     "qa:a11y": "playwright test -c playwright.qa.config.ts tests/qa/a11y.spec.ts",
-    "qa": "pnpm qa:security && pnpm qa:responsive && pnpm qa:a11y && pnpm qa:toolkit",
+    "qa": "pnpm qa:security && pnpm qa:responsive && pnpm qa:a11y && pnpm qa:toolkit && pnpm qa:qrlink",
     "resume:pdf": "node scripts/automation/build-resume-pdf.mjs",
     "test:unit": "node --experimental-strip-types --no-warnings=ExperimentalWarning --test \"tests/unit/*.test.mjs\""
   },

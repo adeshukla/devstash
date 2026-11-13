@@ -25,6 +25,27 @@ const RESERVED = new Set([
   'terms',
   'test',
   'www',
+  // names people trust, so nobody can borrow them to look official
+  'amazon',
+  'apple',
+  'bank',
+  'facebook',
+  'gpay',
+  'hdfc',
+  'icici',
+  'instagram',
+  'linkedin',
+  'microsoft',
+  'paypal',
+  'paytm',
+  'phonepe',
+  'sbi',
+  'upi',
+  'whatsapp',
+  'google',
+  'youtube',
+  'twitter',
+  'netflix',
 ])
 
 /** Lowercase letters, digits and single hyphens; 3 to 20 characters. Returns the clean name or an error. */

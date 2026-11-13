@@ -80,6 +80,10 @@ export default function ChangeableQrPage() {
           <a className="text-ds-accent underline" href="/lab/qr-code-generator">
             normal QR generator
           </a>
+          . Seen a code used to mislead people? Report it to{' '}
+          <a className="text-ds-accent underline" href="mailto:hello@devstash.me">
+            hello@devstash.me
+          </a>
           .
         </p>
       </main>

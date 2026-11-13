@@ -127,7 +127,7 @@ export function ChangeableQr() {
           label="New password"
           type="password"
           autoComplete="new-password"
-          hint="At least 8 characters."
+          hint="At least 10 characters, nothing common."
           required
           value={pw}
           onChange={(e) => setPw(e.target.value)}
@@ -209,7 +209,7 @@ export function ChangeableQr() {
                 label="Password"
                 type="password"
                 autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-                hint={mode === 'signup' ? 'At least 8 characters.' : undefined}
+                hint={mode === 'signup' ? 'At least 10 characters, nothing common.' : undefined}
                 required
                 value={pw}
                 onChange={(e) => setPw(e.target.value)}

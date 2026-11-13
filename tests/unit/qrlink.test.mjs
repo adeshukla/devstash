@@ -22,12 +22,32 @@ test('destinations: public web pages only, never another changeable link', () =>
 
 import { checkPassword, hashPassword, verifyPassword } from '../../lib/qrlink/password.ts'
 
-test('passwords: length rules, hash round-trip, wrong password and missing account fail', () => {
-  assert.ok(checkPassword('short'))
-  assert.equal(checkPassword('long enough pw'), null)
-  const h = hashPassword('correct horse')
-  assert.ok(verifyPassword('correct horse', h))
-  assert.ok(!verifyPassword('wrong horse', h))
-  assert.ok(!verifyPassword('correct horse', null))
-  assert.notEqual(hashPassword('x'.repeat(8)), hashPassword('x'.repeat(8)))
+test('passwords: length, common list, site name, email name and repeats are refused', () => {
+  const bad = [
+    'short',
+    'password123',
+    'Password1234',
+    'qwertyuiop',
+    'devstash-rocks-99',
+    'aaaaaaaaaaaa',
+    '1234567890',
+    'x'.repeat(129),
+  ]
+  for (const pw of bad) assert.ok(checkPassword(pw), pw)
+  assert.ok(checkPassword('adesh-shukla-2026', 'adesh@gmail.com'), 'email name')
+  assert.equal(checkPassword('mango-river-lantern-42'), null)
+  assert.equal(checkPassword('mango-river-lantern-42', 'adesh@gmail.com'), null)
+})
+
+test('passwords: hash round-trip, wrong password and missing account fail', () => {
+  const h = hashPassword('correct horse battery')
+  assert.ok(verifyPassword('correct horse battery', h))
+  assert.ok(!verifyPassword('wrong horse battery', h))
+  assert.ok(!verifyPassword('correct horse battery', null))
+  assert.notEqual(hashPassword('same input here'), hashPassword('same input here'))
+  assert.ok(!h.includes('correct'))
+})
+
+test('usernames: brand names people trust are reserved', () => {
+  for (const n of ['paypal', 'google', 'whatsapp', 'sbi']) assert.ok('error' in checkUsername(n), n)
 })
