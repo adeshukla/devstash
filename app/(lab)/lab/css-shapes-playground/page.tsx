@@ -2,6 +2,7 @@ import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
+import { LabTour } from '@/components/lab/LabTour'
 import { ShapeCustomizer } from '@/components/lab/ShapeCustomizer'
 import { BorderCustomizer } from '@/components/lab/BorderCustomizer'
 import { ShadowCustomizer } from '@/components/lab/ShadowCustomizer'
@@ -210,6 +211,7 @@ export default function CssShapesPlaygroundPage() {
               Every demo below is real, running CSS — pick a color and build a shape three different
               ways in the customizer, and copy the exact code for anything on this page.
             </p>
+            <LabTour slug="css-shapes-playground" />
           </div>
         </section>
 

@@ -151,19 +151,7 @@ test.describe('Meta tag generator', () => {
   })
 })
 
-test.describe('Saved looks and backup reminder', () => {
-  test('a saved look stays after a reload and can be removed', async ({ page }) => {
-    await page.goto('/lab/css-shapes-playground')
-    await page.getByLabel('Name this look').fill('Hero blob')
-    await page.getByRole('button', { name: 'Save', exact: true }).click()
-    const list = page.getByRole('list', { name: 'Saved looks' })
-    await expect(list.getByRole('link', { name: 'Hero blob' })).toBeVisible()
-    await page.reload()
-    await expect(list.getByRole('link', { name: 'Hero blob' })).toBeVisible()
-    await page.getByRole('button', { name: 'Remove Hero blob' }).click()
-    await expect(list).toHaveCount(0)
-  })
-
+test.describe('Backup reminder', () => {
   test('the builder reminds you to back up once five links are saved', async ({ page }) => {
     await page.goto('/lab/utm-builder')
     await page.getByLabel('Landing page link').fill('https://example.com/lp')
@@ -1214,5 +1202,125 @@ test.describe('Lab hub: search and try-it boxes', () => {
     const results = await new AxeBuilder({ page }).analyze()
     expect(results.violations.map((v) => `${v.id}: ${v.nodes[0]?.target}`)).toEqual([])
     expect(await page.evaluate(() => window.scrollX)).toBe(0)
+  })
+})
+
+test.describe('My sessions on the other tools', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      delete (window as unknown as { showSaveFilePicker?: unknown }).showSaveFilePicker
+    })
+  })
+  const bar = (page: Page, name: string) => page.getByRole('region', { name, exact: true })
+  const wait = (page: Page, key: string) =>
+    expect
+      .poll(() => page.evaluate((k) => window.localStorage.getItem(k), key), { timeout: 5000 })
+      .not.toBeNull()
+
+  test('the three SEO boxes each keep what you pasted after a reload', async ({ page }) => {
+    await page.goto('/lab/meta-tag-generator')
+    await page.locator('#meta-audit').fill('<head><title>My page</title></head>')
+    await page.locator('#robots-check').fill('User-agent: GPTBot\nDisallow: /')
+    await page.locator('#kit-faq').fill('What is it?\nA tool.')
+    await wait(page, 'devstash-draft-meta-audit')
+    await wait(page, 'devstash-draft-ai-crawler')
+    await wait(page, 'devstash-draft-seo-kit-files')
+    await page.reload()
+    await expect(page.locator('#meta-audit')).toHaveValue('<head><title>My page</title></head>')
+    await expect(page.locator('#robots-check')).toHaveValue('User-agent: GPTBot\nDisallow: /')
+    await expect(page.locator('#kit-faq')).toHaveValue('What is it?\nA tool.')
+    await expect(bar(page, 'Tag check sessions')).toBeVisible()
+    await expect(bar(page, 'Robots check sessions')).toBeVisible()
+    await expect(bar(page, 'SEO files sessions')).toBeVisible()
+  })
+
+  test('a shape is kept, saved under a name, reopened and deleted', async ({ page }) => {
+    page.on('dialog', (d) => void d.accept())
+    await page.goto('/lab/css-shapes-playground')
+    const shape = bar(page, 'Shape sessions')
+    await page.getByRole('button', { name: 'Corner radius' }).first().click()
+    await expect(page.getByText('border-radius: 30% 30% 30% 30%;').first()).toBeVisible()
+    await wait(page, 'devstash-draft-css-shape')
+    await page.reload()
+    await expect(shape.getByText(/Picked up where you left off/)).toBeVisible()
+    await expect(page.getByText('border-radius: 30% 30% 30% 30%;').first()).toBeVisible()
+
+    await shape.getByRole('button', { name: /^Sessions/ }).click()
+    await shape.getByLabel('Save this as a new session').fill('Hero blob')
+    await shape.getByRole('button', { name: 'Save as new' }).click()
+    await expect(shape.getByText('Saved as “Hero blob”.')).toBeVisible()
+    await shape.getByRole('button', { name: 'New blank session' }).click()
+    await expect(page.getByText('border-radius: 30% 30% 30% 30%;')).toHaveCount(0)
+    await shape.getByRole('button', { name: 'Open Hero blob' }).click()
+    await expect(page.getByText('border-radius: 30% 30% 30% 30%;').first()).toBeVisible()
+    await shape.getByRole('button', { name: 'Delete Hero blob', exact: true }).click()
+    await shape.getByRole('button', { name: 'Confirm delete Hero blob' }).click()
+    await expect(shape.getByRole('button', { name: 'Open Hero blob' })).toHaveCount(0)
+  })
+
+  test('border and shadow tools can save a session', async ({ page }) => {
+    await page.goto('/lab/css-shapes-playground')
+    for (const [name, label, technique] of [
+      ['Border sessions', 'Border one', 'Marching ants'],
+      ['Shadow sessions', 'Shadow one', 'Neon layers'],
+    ]) {
+      const b = bar(page, name)
+      await b.scrollIntoViewIfNeeded()
+      await page.getByRole('button', { name: technique, exact: true }).click()
+      await b.getByRole('button', { name: /^Sessions/ }).click()
+      await b.getByLabel('Save this as a new session').fill(label)
+      await b.getByRole('button', { name: 'Save as new' }).click()
+      await expect(b.getByText(`Saved as “${label}”.`)).toBeVisible()
+    }
+  })
+
+  test('an illustration keeps its description after a reload', async ({ page }) => {
+    await page.goto('/lab/illustration-generator')
+    await page.locator('#topic').fill('quarterly sales dashboard')
+    await wait(page, 'devstash-draft-illustration')
+    await page.reload()
+    await expect(page.locator('#topic')).toHaveValue('quarterly sales dashboard')
+    const b = bar(page, 'My sessions')
+    await b.getByRole('button', { name: 'Start fresh' }).click()
+    await expect(page.locator('#topic')).toHaveValue('')
+  })
+
+  test('an OG design is saved without its pictures and a damaged file is made safe', async ({
+    page,
+  }) => {
+    await page.goto('/lab/og-image-maker')
+    const b = bar(page, 'My sessions')
+    await page.getByRole('group', { name: 'Looks' }).getByRole('button').nth(1).click()
+    await b.getByRole('button', { name: /^Sessions/ }).click()
+    await b.getByLabel('Save this as a new session').fill('Launch card')
+    await b.getByRole('button', { name: 'Save as new' }).click()
+    const download = page.waitForEvent('download')
+    await b.getByRole('button', { name: 'Export Launch card as a file' }).click()
+    const path = (await (await download).path())!
+    const body = JSON.parse(await readFile(path, 'utf8'))
+    expect(body.tool).toBe('og-image')
+    for (const k of ['photo', 'logo', 'photoW', 'photoH'])
+      expect(body.sessions[0].data).not.toHaveProperty(k)
+    expect(body.sessions[0].data.title.font).toBeTruthy()
+
+    // A file with hostile values opens as a normal design, with the bad fields reset.
+    body.sessions[0].data.layout = '"><script>window.__x=1</script>'
+    body.sessions[0].data.accent = 'red;background:url(x)'
+    body.sessions[0].name = 'Damaged'
+    const bad = path.replace(/\.json$/, '-bad.json')
+    await (await import('node:fs/promises')).writeFile(bad, JSON.stringify(body))
+    await b.getByLabel('Import a sessions file').setInputFiles(bad)
+    await b.getByRole('button', { name: 'Open Damaged' }).click()
+    expect(await page.evaluate(() => (window as unknown as { __x?: number }).__x)).toBeUndefined()
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  })
+
+  test('the new sessions bars have no accessibility problems', async ({ page }) => {
+    for (const slug of ['meta-tag-generator', 'css-shapes-playground', 'illustration-generator']) {
+      await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' })
+      await page.goto(`/lab/${slug}`)
+      const results = await new AxeBuilder({ page }).analyze()
+      expect(results.violations.map((v) => `${slug} ${v.id}: ${v.nodes[0]?.target}`)).toEqual([])
+    }
   })
 })

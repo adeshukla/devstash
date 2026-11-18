@@ -47,6 +47,8 @@ export function SessionsBar({
   data,
   blank,
   draftOmit = [],
+  heading = 'My sessions',
+  note,
   onApply,
   exportCsv,
 }: {
@@ -58,6 +60,10 @@ export function SessionsBar({
   blank: SessionData
   /** Keys left out of the unsaved-work draft, for data that is kept elsewhere already. */
   draftOmit?: string[]
+  /** Names the bar when a page has more than one, e.g. "Tag check sessions". */
+  heading?: string
+  /** What is not kept, shown in the privacy note. */
+  note?: string
   /** `source` is "draft" for work brought back on return, "session" for a saved or blank session. */
   onApply: (d: SessionData, source: 'draft' | 'session') => void
   /** Optional: a spreadsheet version of one session's data. */
@@ -238,13 +244,13 @@ export function SessionsBar({
 
   return (
     <section
-      aria-label="My sessions"
+      aria-label={heading}
       data-tour="sessions"
       className="border-ds-border bg-ds-surface mb-5 rounded-xl border"
     >
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
         <p className="text-ds-muted min-w-0 flex-1 text-sm" aria-live="polite">
-          <span className="text-ds-text font-medium">My sessions · </span>
+          <span className="text-ds-text font-medium">{heading} · </span>
           {status}
         </p>
         <Button
@@ -475,7 +481,7 @@ export function SessionsBar({
           <p className="text-ds-muted mt-3 text-xs leading-relaxed">
             Sessions live only in this browser on this device. They are not uploaded. On a shared
             computer, delete them when you are done, and export a file if you want to keep them
-            somewhere else.
+            somewhere else.{note ? ` ${note}` : ''}
           </p>
         </div>
       )}

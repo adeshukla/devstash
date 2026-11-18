@@ -202,6 +202,16 @@ export function str(v: unknown, fallback = '', max = 20_000): string {
   return typeof v === 'string' && v.length <= max ? v : fallback
 }
 
+/** Reads a number from saved data, kept inside a range; anything else means the fallback. */
+export function numIn(v: unknown, min: number, max: number, fallback: number): number {
+  return typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max ? v : fallback
+}
+
+/** Reads a #rrggbb colour from saved data; anything else means the fallback. */
+export function hexOr(v: unknown, fallback: string): string {
+  return typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v) ? v : fallback
+}
+
 /** Reads one of a fixed set of values from saved data. */
 export function oneOf<T extends string>(v: unknown, allowed: readonly T[], fallback: T): T {
   return allowed.includes(v as T) ? (v as T) : fallback

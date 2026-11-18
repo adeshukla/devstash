@@ -46,8 +46,8 @@ import { FINISH_LABELS, ALL_FINISHES, type FinishKey } from './illustrationFinis
 import type { Theme } from './designTokens'
 import { CssCodeBlock } from './CssCodeBlock'
 import { useUrlSync } from './useUrlSync'
+import { SessionsBar } from './SessionsBar'
 import { ShareLinkButton } from './ShareLinkButton'
-import { PresetBar } from './PresetBar'
 import { pick } from '@/lib/lab/urlState'
 
 const ANIMATIONS: AnimationKey[] = ['none', 'float', 'pulse', 'drift', 'draw', 'orbit']
@@ -223,35 +223,35 @@ function GenerateTab() {
 
   // Seed + options live in the URL, so a result you like can be reopened or shared.
   // Defaults are sent as '' and left out of the link.
-  const getShareUrl = useUrlSync(
-    {
-      t: topic,
-      n: nonce ? String(nonce) : '',
-      d: density === 2 ? '' : String(density),
-      p: palette === 'auto' ? '' : palette,
-      a: animation === 'float' ? '' : animation,
-      l: layout === 'auto' ? '' : layout,
-      b: backdrop === 'flat' ? '' : backdrop,
-      f: finish === 'gradient' ? '' : finish,
-      size: size.key === DEFAULT_SIZE.key ? '' : size.key,
-      m: motifOverride.join(','),
-    },
-    (get) => {
-      setTopic(get('t') ?? '')
-      const n = Number(get('n'))
-      setNonce(Number.isInteger(n) && n > 0 && n < 1e6 ? n : 0)
-      setDensity(get('d') === '1' ? 1 : get('d') === '3' ? 3 : 2)
-      setPalette(pick(get('p'), keysOf(PALETTE_LABELS), 'auto'))
-      setAnimation(pick(get('a'), ANIMATIONS, 'float'))
-      setLayout(pick(get('l'), keysOf(LAYOUT_LABELS), 'auto'))
-      setBackdrop(pick(get('b'), keysOf(BACKGROUND_LABELS), 'flat'))
-      setFinish(pick(get('f'), keysOf(FINISH_LABELS), 'gradient'))
-      setSize(SIZE_PRESETS.find((p) => p.key === get('size')) ?? DEFAULT_SIZE)
-      setMotifOverride(
-        (get('m') ?? '').split(',').filter((m): m is MotifKey => ALL_MOTIFS.includes(m as MotifKey))
-      )
-    }
-  )
+  const urlValues = {
+    t: topic,
+    n: nonce ? String(nonce) : '',
+    d: density === 2 ? '' : String(density),
+    p: palette === 'auto' ? '' : palette,
+    a: animation === 'float' ? '' : animation,
+    l: layout === 'auto' ? '' : layout,
+    b: backdrop === 'flat' ? '' : backdrop,
+    f: finish === 'gradient' ? '' : finish,
+    size: size.key === DEFAULT_SIZE.key ? '' : size.key,
+    m: motifOverride.join(','),
+  }
+  // Puts a saved illustration back. Used by the share link and by sessions.
+  const applyValues = (get: (key: string) => string | null) => {
+    setTopic(get('t') ?? '')
+    const n = Number(get('n'))
+    setNonce(Number.isInteger(n) && n > 0 && n < 1e6 ? n : 0)
+    setDensity(get('d') === '1' ? 1 : get('d') === '3' ? 3 : 2)
+    setPalette(pick(get('p'), keysOf(PALETTE_LABELS), 'auto'))
+    setAnimation(pick(get('a'), ANIMATIONS, 'float'))
+    setLayout(pick(get('l'), keysOf(LAYOUT_LABELS), 'auto'))
+    setBackdrop(pick(get('b'), keysOf(BACKGROUND_LABELS), 'flat'))
+    setFinish(pick(get('f'), keysOf(FINISH_LABELS), 'gradient'))
+    setSize(SIZE_PRESETS.find((p) => p.key === get('size')) ?? DEFAULT_SIZE)
+    setMotifOverride(
+      (get('m') ?? '').split(',').filter((m): m is MotifKey => ALL_MOTIFS.includes(m as MotifKey))
+    )
+  }
+  const getShareUrl = useUrlSync(urlValues, applyValues)
 
   const composition = useMemo(
     () =>
@@ -361,6 +361,15 @@ function GenerateTab() {
 
   return (
     <div className="flex flex-col gap-8">
+      <SessionsBar
+        tool="illustration"
+        label="illustration"
+        data={urlValues}
+        blank={Object.fromEntries(Object.keys(urlValues).map((k) => [k, '']))}
+        onApply={(d) =>
+          applyValues((k) => (typeof d[k] === 'string' && d[k] !== '' ? (d[k] as string) : null))
+        }
+      />
       {/* The Style toggle (Abstract / Character) is hidden while Abstract is the only
           style: a single button is not a choice. The character scenes need another
           quality pass; all the isCharacter branches and characterEngine imports below
@@ -826,7 +835,6 @@ function GenerateTab() {
               </button>
               <ShareLinkButton getUrl={getShareUrl} tool="illustration" />
             </div>
-            <PresetBar tool="illustration" getUrl={getShareUrl} />
             <p className="text-ds-muted mb-6 text-sm">
               The composition is generated at the selected size, not cropped to it — an Open Graph
               card is genuinely composed for 1200×630 rather than a letterboxed 16:9.

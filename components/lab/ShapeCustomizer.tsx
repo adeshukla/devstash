@@ -1,10 +1,10 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { SessionsBar } from './SessionsBar'
 import { CssCodeBlock } from './CssCodeBlock'
 import { useUrlSync } from './useUrlSync'
 import { ShareLinkButton } from './ShareLinkButton'
-import { PresetBar } from './PresetBar'
 import { pick } from '@/lib/lab/urlState'
 import {
   PolygonShapeEditor,
@@ -162,45 +162,48 @@ export function ShapeCustomizer() {
 
   // The whole customizer is mirrored into the URL so a shape can be shared.
   // Values that equal the defaults are left out of the link.
-  const getShareUrl = useUrlSync(
-    {
-      c: color === COLORS[0].value ? '' : color,
-      m: mode === 'preset' ? '' : mode,
-      shape: shape === 'blob' ? '' : shape,
-      r: mode === 'corners' ? `${corners.tl},${corners.tr},${corners.br},${corners.bl}` : '',
-      p: mode === 'polygon' ? polygonPoints.map((p) => `${p.x},${p.y}`).join(';') : '',
-      a: animation === 'none' ? '' : animation,
-      d: duration === 4 ? '' : String(duration),
-      e: easing === 'ease-in-out' ? '' : easing,
-      b: easing === 'custom' ? `${bezier[0].x},${bezier[0].y},${bezier[1].x},${bezier[1].y}` : '',
-    },
-    (get) => {
-      const c = get('c')
-      setColor(c && /^#[0-9a-f]{6}$/i.test(c) ? c : COLORS[0].value)
-      setMode(pick(get('m'), ['preset', 'corners', 'polygon'] as const, 'preset'))
-      setShape(pick(get('shape'), Object.keys(SHAPES) as ShapeKey[], 'blob'))
-      const r = nums(get('r'), 4)
-      if (r) setCorners({ tl: r[0], tr: r[1], br: r[2], bl: r[3] })
-      const poly = parsePolygon(get('p'))
-      if (poly) setPolygonPoints(poly)
-      setAnimation(
-        pick(
-          get('a'),
-          ['none', 'spin', 'pulse', 'float', 'wobble', 'shake', 'bounce'] as const,
-          'none'
-        )
+  const urlValues = {
+    c: color === COLORS[0].value ? '' : color,
+    m: mode === 'preset' ? '' : mode,
+    shape: shape === 'blob' ? '' : shape,
+    r: mode === 'corners' ? `${corners.tl},${corners.tr},${corners.br},${corners.bl}` : '',
+    p: mode === 'polygon' ? polygonPoints.map((p) => `${p.x},${p.y}`).join(';') : '',
+    a: animation === 'none' ? '' : animation,
+    d: duration === 4 ? '' : String(duration),
+    e: easing === 'ease-in-out' ? '' : easing,
+    b: easing === 'custom' ? `${bezier[0].x},${bezier[0].y},${bezier[1].x},${bezier[1].y}` : '',
+  }
+  // Puts a saved shape back. Used by the share link and by sessions.
+  const applyValues = (get: (key: string) => string | null) => {
+    const c = get('c')
+    setColor(c && /^#[0-9a-f]{6}$/i.test(c) ? c : COLORS[0].value)
+    setMode(pick(get('m'), ['preset', 'corners', 'polygon'] as const, 'preset'))
+    setShape(pick(get('shape'), Object.keys(SHAPES) as ShapeKey[], 'blob'))
+    const r = nums(get('r'), 4)
+    setCorners(r ? { tl: r[0], tr: r[1], br: r[2], bl: r[3] } : { tl: 30, tr: 30, br: 30, bl: 30 })
+    const poly = parsePolygon(get('p'))
+    setPolygonPoints(poly ?? DEFAULT_POLYGON)
+    setAnimation(
+      pick(
+        get('a'),
+        ['none', 'spin', 'pulse', 'float', 'wobble', 'shake', 'bounce'] as const,
+        'none'
       )
-      const d = Number(get('d'))
-      setDuration(Number.isFinite(d) && d > 0 && d <= 20 ? d : 4)
-      setEasing(pick(get('e'), EASINGS, 'ease-in-out'))
-      const b = nums(get('b'), 4)
-      if (b)
-        setBezier([
-          { x: b[0], y: b[1] },
-          { x: b[2], y: b[3] },
-        ])
-    }
-  )
+    )
+    const d = Number(get('d'))
+    setDuration(Number.isFinite(d) && d > 0 && d <= 20 ? d : 4)
+    setEasing(pick(get('e'), EASINGS, 'ease-in-out'))
+    const b = nums(get('b'), 4)
+    setBezier(
+      b
+        ? [
+            { x: b[0], y: b[1] },
+            { x: b[2], y: b[3] },
+          ]
+        : DEFAULT_BEZIER
+    )
+  }
+  const getShareUrl = useUrlSync(urlValues, applyValues)
 
   const shapeInfo = useMemo(() => {
     if (mode === 'preset') {
@@ -253,258 +256,270 @@ export function ShapeCustomizer() {
   }, [color, shapeInfo, animation, animationValue])
 
   return (
-    <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[280px_1fr]">
-      {/* Live preview */}
-      <div className="border-ds-border bg-ds-surface flex aspect-square items-center justify-center rounded-2xl border p-8">
-        {mode === 'polygon' ? (
-          <PolygonShapeEditor
-            points={polygonPoints}
-            onChange={setPolygonPoints}
-            color={color}
-            animation={animationValue}
-          />
-        ) : (
-          <div
-            className="h-full w-full transition-[border-radius,clip-path] duration-500 ease-out"
-            style={{
-              background: color,
-              ...shapeInfo.style,
-              animation: animationValue,
-            }}
-          />
-        )}
-      </div>
-
-      {/* Controls + code */}
-      <div className="flex flex-col gap-6">
-        <div>
-          <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">Color</p>
-          <div className="flex flex-wrap gap-3">
-            {COLORS.map((c) => (
-              <button
-                key={c.value}
-                type="button"
-                onClick={() => setColor(c.value)}
-                aria-label={`Set color to ${c.name}`}
-                aria-pressed={color === c.value}
-                className="h-9 w-9 shrink-0 rounded-full transition-transform hover:scale-110"
-                style={{
-                  background: c.value,
-                  boxShadow:
-                    color === c.value
-                      ? `0 0 0 2px var(--color-ds-bg), 0 0 0 4px ${c.value}`
-                      : undefined,
-                }}
-              />
-            ))}
-            <label className="border-ds-border text-ds-muted flex h-9 items-center gap-2 rounded-full border px-3 text-xs">
-              Custom
-              <input
-                type="color"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                className="h-5 w-5 cursor-pointer border-none bg-transparent p-0"
-                aria-label="Pick a custom color"
-              />
-            </label>
-          </div>
-        </div>
-
-        <div>
-          <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">Shape mode</p>
-          <div className="flex flex-wrap gap-2">
-            {MODES.map((m) => (
-              <button
-                key={m.key}
-                type="button"
-                onClick={() => setMode(m.key)}
-                aria-pressed={mode === m.key}
-                className={
-                  mode === m.key
-                    ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
-                    : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
-                }
-              >
-                {m.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {mode === 'preset' && (
-          <div>
-            <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
-              Shape ({Object.keys(SHAPES).length} presets)
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {(Object.entries(SHAPES) as [ShapeKey, (typeof SHAPES)[ShapeKey]][]).map(
-                ([key, s]) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setShape(key)}
-                    aria-pressed={shape === key}
-                    className={
-                      shape === key
-                        ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
-                        : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
-                    }
-                  >
-                    {s.label}
-                  </button>
-                )
-              )}
-            </div>
-          </div>
-        )}
-
-        {mode === 'corners' && (
-          <div>
-            <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
-              Corner radius (%)
-            </p>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-              {(
-                [
-                  ['tl', 'Top left'],
-                  ['tr', 'Top right'],
-                  ['bl', 'Bottom left'],
-                  ['br', 'Bottom right'],
-                ] as const
-              ).map(([key, label]) => (
-                <label key={key} className="text-ds-muted flex flex-col gap-1 text-xs">
-                  <span>
-                    {label} — {corners[key]}%
-                  </span>
-                  <input
-                    type="range"
-                    min={0}
-                    max={50}
-                    value={corners[key]}
-                    onChange={(e) =>
-                      setCorners((prev) => ({ ...prev, [key]: Number(e.target.value) }))
-                    }
-                    className="accent-ds-accent"
-                  />
-                </label>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {mode === 'polygon' && (
-          <div>
-            <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
-              {polygonPoints.length} points — drag any dot on the preview
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setPolygonPoints((p) => addPolygonPoint(p))}
-                className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors"
-              >
-                Add point
-              </button>
-              <button
-                type="button"
-                onClick={() => setPolygonPoints((p) => removePolygonPoint(p))}
-                className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors"
-              >
-                Remove point
-              </button>
-              <button
-                type="button"
-                onClick={() => setPolygonPoints((p) => randomizePolygon(p))}
-                className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors"
-              >
-                Randomize
-              </button>
-              <button
-                type="button"
-                onClick={() => setPolygonPoints(DEFAULT_POLYGON)}
-                className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors"
-              >
-                Reset
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div>
-          <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
-            Animation ({Object.keys(ANIMATION_KEYFRAMES).length} functions)
-          </p>
-          <div className="flex flex-wrap items-center gap-3">
-            {(['none', 'spin', 'pulse', 'float', 'wobble', 'shake', 'bounce'] as Animation[]).map(
-              (a) => (
-                <button
-                  key={a}
-                  type="button"
-                  onClick={() => setAnimation(a)}
-                  aria-pressed={animation === a}
-                  className={
-                    animation === a
-                      ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white capitalize'
-                      : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm capitalize transition-colors'
-                  }
-                >
-                  {a}
-                </button>
-              )
-            )}
-          </div>
-          {animation !== 'none' && (
-            <label className="text-ds-muted mt-3 flex w-fit items-center gap-2 text-xs">
-              Speed
-              <input
-                type="range"
-                min={1}
-                max={10}
-                value={duration}
-                onChange={(e) => setDuration(Number(e.target.value))}
-                className="accent-ds-accent"
-              />
-              {duration}s
-            </label>
+    <>
+      <SessionsBar
+        tool="css-shape"
+        label="css-shape"
+        heading="Shape sessions"
+        data={urlValues}
+        blank={Object.fromEntries(Object.keys(urlValues).map((k) => [k, '']))}
+        onApply={(d) =>
+          applyValues((k) => (typeof d[k] === 'string' && d[k] !== '' ? (d[k] as string) : null))
+        }
+      />
+      <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[280px_1fr]">
+        {/* Live preview */}
+        <div className="border-ds-border bg-ds-surface flex aspect-square items-center justify-center rounded-2xl border p-8">
+          {mode === 'polygon' ? (
+            <PolygonShapeEditor
+              points={polygonPoints}
+              onChange={setPolygonPoints}
+              color={color}
+              animation={animationValue}
+            />
+          ) : (
+            <div
+              className="h-full w-full transition-[border-radius,clip-path] duration-500 ease-out"
+              style={{
+                background: color,
+                ...shapeInfo.style,
+                animation: animationValue,
+              }}
+            />
           )}
         </div>
 
-        {animation !== 'none' && (
+        {/* Controls + code */}
+        <div className="flex flex-col gap-6">
           <div>
-            <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">Easing</p>
-            <div className="flex flex-wrap gap-2">
-              {EASINGS.map((e) => (
+            <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">Color</p>
+            <div className="flex flex-wrap gap-3">
+              {COLORS.map((c) => (
                 <button
-                  key={e}
+                  key={c.value}
                   type="button"
-                  onClick={() => setEasing(e)}
-                  aria-pressed={easing === e}
+                  onClick={() => setColor(c.value)}
+                  aria-label={`Set color to ${c.name}`}
+                  aria-pressed={color === c.value}
+                  className="h-9 w-9 shrink-0 rounded-full transition-transform hover:scale-110"
+                  style={{
+                    background: c.value,
+                    boxShadow:
+                      color === c.value
+                        ? `0 0 0 2px var(--color-ds-bg), 0 0 0 4px ${c.value}`
+                        : undefined,
+                  }}
+                />
+              ))}
+              <label className="border-ds-border text-ds-muted flex h-9 items-center gap-2 rounded-full border px-3 text-xs">
+                Custom
+                <input
+                  type="color"
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  className="h-5 w-5 cursor-pointer border-none bg-transparent p-0"
+                  aria-label="Pick a custom color"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
+              Shape mode
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {MODES.map((m) => (
+                <button
+                  key={m.key}
+                  type="button"
+                  onClick={() => setMode(m.key)}
+                  aria-pressed={mode === m.key}
                   className={
-                    easing === e
+                    mode === m.key
                       ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
                       : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
                   }
                 >
-                  {e}
+                  {m.label}
                 </button>
               ))}
             </div>
-            {easing === 'custom' && (
-              <div className="mt-3">
-                <CubicBezierEditor value={bezier} onChange={setBezier} />
+          </div>
+
+          {mode === 'preset' && (
+            <div>
+              <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
+                Shape ({Object.keys(SHAPES).length} presets)
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {(Object.entries(SHAPES) as [ShapeKey, (typeof SHAPES)[ShapeKey]][]).map(
+                  ([key, s]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setShape(key)}
+                      aria-pressed={shape === key}
+                      className={
+                        shape === key
+                          ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                          : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
+                      }
+                    >
+                      {s.label}
+                    </button>
+                  )
+                )}
               </div>
+            </div>
+          )}
+
+          {mode === 'corners' && (
+            <div>
+              <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
+                Corner radius (%)
+              </p>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                {(
+                  [
+                    ['tl', 'Top left'],
+                    ['tr', 'Top right'],
+                    ['bl', 'Bottom left'],
+                    ['br', 'Bottom right'],
+                  ] as const
+                ).map(([key, label]) => (
+                  <label key={key} className="text-ds-muted flex flex-col gap-1 text-xs">
+                    <span>
+                      {label} — {corners[key]}%
+                    </span>
+                    <input
+                      type="range"
+                      min={0}
+                      max={50}
+                      value={corners[key]}
+                      onChange={(e) =>
+                        setCorners((prev) => ({ ...prev, [key]: Number(e.target.value) }))
+                      }
+                      className="accent-ds-accent"
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {mode === 'polygon' && (
+            <div>
+              <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
+                {polygonPoints.length} points — drag any dot on the preview
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPolygonPoints((p) => addPolygonPoint(p))}
+                  className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors"
+                >
+                  Add point
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPolygonPoints((p) => removePolygonPoint(p))}
+                  className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors"
+                >
+                  Remove point
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPolygonPoints((p) => randomizePolygon(p))}
+                  className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors"
+                >
+                  Randomize
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPolygonPoints(DEFAULT_POLYGON)}
+                  className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
+              Animation ({Object.keys(ANIMATION_KEYFRAMES).length} functions)
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              {(['none', 'spin', 'pulse', 'float', 'wobble', 'shake', 'bounce'] as Animation[]).map(
+                (a) => (
+                  <button
+                    key={a}
+                    type="button"
+                    onClick={() => setAnimation(a)}
+                    aria-pressed={animation === a}
+                    className={
+                      animation === a
+                        ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white capitalize'
+                        : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm capitalize transition-colors'
+                    }
+                  >
+                    {a}
+                  </button>
+                )
+              )}
+            </div>
+            {animation !== 'none' && (
+              <label className="text-ds-muted mt-3 flex w-fit items-center gap-2 text-xs">
+                Speed
+                <input
+                  type="range"
+                  min={1}
+                  max={10}
+                  value={duration}
+                  onChange={(e) => setDuration(Number(e.target.value))}
+                  className="accent-ds-accent"
+                />
+                {duration}s
+              </label>
             )}
           </div>
-        )}
 
-        <CssCodeBlock code={css} />
-        <div>
-          <ShareLinkButton getUrl={getShareUrl} tool="css-shapes" />
+          {animation !== 'none' && (
+            <div>
+              <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">Easing</p>
+              <div className="flex flex-wrap gap-2">
+                {EASINGS.map((e) => (
+                  <button
+                    key={e}
+                    type="button"
+                    onClick={() => setEasing(e)}
+                    aria-pressed={easing === e}
+                    className={
+                      easing === e
+                        ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                        : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
+                    }
+                  >
+                    {e}
+                  </button>
+                ))}
+              </div>
+              {easing === 'custom' && (
+                <div className="mt-3">
+                  <CubicBezierEditor value={bezier} onChange={setBezier} />
+                </div>
+              )}
+            </div>
+          )}
+
+          <CssCodeBlock code={css} />
+          <div>
+            <ShareLinkButton getUrl={getShareUrl} tool="css-shapes" />
+          </div>
         </div>
-        <PresetBar tool="css-shapes" getUrl={getShareUrl} />
-      </div>
 
-      <style>{`
+        <style>{`
         @keyframes csShapeSpin { to { transform: rotate(360deg); } }
         @keyframes csShapePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
         @keyframes csShapeFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
@@ -517,6 +532,7 @@ export function ShapeCustomizer() {
           70% { transform: translateY(-8px) scaleY(1.02); }
         }
       `}</style>
-    </div>
+      </div>
+    </>
   )
 }

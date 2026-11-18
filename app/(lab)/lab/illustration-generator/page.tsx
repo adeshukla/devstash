@@ -2,6 +2,7 @@ import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
+import { LabTour } from '@/components/lab/LabTour'
 import { IllustrationGenerator } from '@/components/lab/IllustrationGenerator'
 import { FaqSection } from '@/components/sections/FaqSection'
 
@@ -54,6 +55,7 @@ export default function IllustrationGeneratorPage() {
               Same text, same picture; shuffle for a new arrangement. Download SVG or PNG, or copy a
               link that reopens it.
             </p>
+            <LabTour slug="illustration-generator" />
           </div>
         </section>
 

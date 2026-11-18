@@ -1,6 +1,8 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { hexOr, numIn, oneOf } from '@/lib/lab/sessions'
+import { SessionsBar } from './SessionsBar'
 import { CssCodeBlock } from './CssCodeBlock'
 
 const COLORS = [
@@ -96,95 +98,118 @@ export function ShadowCustomizer() {
   }, [technique, color, blur, spread])
 
   return (
-    <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[280px_1fr]">
-      <div className="border-ds-border bg-ds-surface flex aspect-square items-center justify-center rounded-2xl border p-8">
-        <div className="h-24 w-24 rounded-2xl" style={previewStyle} />
-      </div>
-
-      <div className="flex flex-col gap-6">
-        <div>
-          <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
-            Technique ({TECHNIQUES.length} functions)
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {TECHNIQUES.map((t) => (
-              <button
-                key={t.key}
-                type="button"
-                onClick={() => setTechnique(t.key)}
-                aria-pressed={technique === t.key}
-                className={
-                  technique === t.key
-                    ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
-                    : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
-                }
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
+    <>
+      <SessionsBar
+        tool="css-shadow"
+        label="css-shadow"
+        heading="Shadow sessions"
+        data={{ technique, color, blur, spread }}
+        blank={{ technique: 'glowPulse', color: COLORS[0].value, blur: 24, spread: 4 }}
+        onApply={(d) => {
+          setTechnique(
+            oneOf(
+              d.technique,
+              TECHNIQUES.map((t) => t.key),
+              'glowPulse'
+            )
+          )
+          setColor(hexOr(d.color, COLORS[0].value))
+          setBlur(numIn(d.blur, 8, 48, 24))
+          setSpread(numIn(d.spread, 0, 16, 4))
+        }}
+      />
+      <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[280px_1fr]">
+        <div className="border-ds-border bg-ds-surface flex aspect-square items-center justify-center rounded-2xl border p-8">
+          <div className="h-24 w-24 rounded-2xl" style={previewStyle} />
         </div>
 
-        <div className="flex flex-wrap gap-6">
-          {technique !== 'depthLift' && technique !== 'insetPress' && (
-            <div>
-              <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">Color</p>
-              <div className="flex flex-wrap gap-3">
-                {COLORS.map((c) => (
-                  <button
-                    key={c.value}
-                    type="button"
-                    onClick={() => setColor(c.value)}
-                    aria-label={`Set color to ${c.name}`}
-                    aria-pressed={color === c.value}
-                    className="h-8 w-8 shrink-0 rounded-full transition-transform hover:scale-110"
-                    style={{
-                      background: c.value,
-                      boxShadow:
-                        color === c.value
-                          ? `0 0 0 2px var(--color-ds-bg), 0 0 0 4px ${c.value}`
-                          : undefined,
-                    }}
-                  />
-                ))}
-              </div>
+        <div className="flex flex-col gap-6">
+          <div>
+            <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
+              Technique ({TECHNIQUES.length} functions)
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {TECHNIQUES.map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setTechnique(t.key)}
+                  aria-pressed={technique === t.key}
+                  className={
+                    technique === t.key
+                      ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                      : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
+                  }
+                >
+                  {t.label}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
 
-          <label className="text-ds-muted flex flex-col gap-1 text-xs">
-            Blur — {blur}px
-            <input
-              type="range"
-              min={8}
-              max={48}
-              value={blur}
-              onChange={(e) => setBlur(Number(e.target.value))}
-              className="accent-ds-accent"
-            />
-          </label>
+          <div className="flex flex-wrap gap-6">
+            {technique !== 'depthLift' && technique !== 'insetPress' && (
+              <div>
+                <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
+                  Color
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {COLORS.map((c) => (
+                    <button
+                      key={c.value}
+                      type="button"
+                      onClick={() => setColor(c.value)}
+                      aria-label={`Set color to ${c.name}`}
+                      aria-pressed={color === c.value}
+                      className="h-8 w-8 shrink-0 rounded-full transition-transform hover:scale-110"
+                      style={{
+                        background: c.value,
+                        boxShadow:
+                          color === c.value
+                            ? `0 0 0 2px var(--color-ds-bg), 0 0 0 4px ${c.value}`
+                            : undefined,
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
-          <label className="text-ds-muted flex flex-col gap-1 text-xs">
-            Spread — {spread}px
-            <input
-              type="range"
-              min={0}
-              max={16}
-              value={spread}
-              onChange={(e) => setSpread(Number(e.target.value))}
-              className="accent-ds-accent"
-            />
-          </label>
+            <label className="text-ds-muted flex flex-col gap-1 text-xs">
+              Blur — {blur}px
+              <input
+                type="range"
+                min={8}
+                max={48}
+                value={blur}
+                onChange={(e) => setBlur(Number(e.target.value))}
+                className="accent-ds-accent"
+              />
+            </label>
+
+            <label className="text-ds-muted flex flex-col gap-1 text-xs">
+              Spread — {spread}px
+              <input
+                type="range"
+                min={0}
+                max={16}
+                value={spread}
+                onChange={(e) => setSpread(Number(e.target.value))}
+                className="accent-ds-accent"
+              />
+            </label>
+          </div>
+
+          <CssCodeBlock code={css} />
         </div>
 
-        <CssCodeBlock code={css} />
-      </div>
-
-      <style>{`
+        <style>{`
         @keyframes shGlowPulse {
           0%, 100% { box-shadow: 0 0 calc(var(--sh-blur, 24px) / 2) 0 var(--sh-color, #3b82f6); }
           50%      { box-shadow: 0 0 var(--sh-blur, 24px) var(--sh-spread, 4px) var(--sh-color, #3b82f6); }
         }
       `}</style>
-    </div>
+      </div>
+    </>
   )
 }

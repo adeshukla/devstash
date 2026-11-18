@@ -175,6 +175,50 @@ export const TOURS: Record<string, TourStepData[]> = {
       body: 'Copy the link, a snippet for your website, or the QR code to print.',
     },
   ],
+  'css-shapes-playground': [
+    {
+      target: 'text:Customize it yourself',
+      title: 'Build a shape',
+      body: 'Pick a colour and a shape, and the preview changes as you go. Below the preview is the exact CSS for what you see.',
+    },
+    {
+      target: 'text:Corner radius',
+      title: 'Three ways to shape it',
+      body: 'Presets are ready-made shapes. Corner radius gives you four sliders, one per corner. Draw your own lets you drag points to make a shape that exists nowhere else.',
+    },
+    {
+      target: 'text:Copy',
+      title: 'Copy the CSS',
+      body: 'This is the real code for the shape on screen, with the animation if you chose one. Paste it into your stylesheet.',
+    },
+    {
+      target: 'text:Surfaces',
+      title: 'Glass, gradients and shadows',
+      body: 'Frosted glass, a gradient with a middle stop, and a shadow built from layers. Each one copies out as CSS or as a Tailwind class.',
+    },
+    {
+      target: 'text:Shape & motion gallery',
+      title: 'Ready-made demos',
+      body: 'Every demo below is running CSS, and each one has its own Copy button. Use them as a starting point.',
+    },
+  ],
+  'illustration-generator': [
+    {
+      target: '#topic',
+      title: 'Say what it is for',
+      body: 'Type a few words, such as "analytics dashboard" or "team onboarding". The picture is built from your words, so the same text always gives the same picture.',
+    },
+    {
+      target: 'text:Shuffle layout',
+      title: 'Not quite right? Shuffle',
+      body: 'Shuffle keeps your words and rearranges the shapes, charts and lines. Try it a few times until one fits.',
+    },
+    {
+      target: 'text:Download SVG',
+      title: 'Download or share it',
+      body: 'Save the picture as an SVG or a PNG, or copy a link that reopens this exact illustration.',
+    },
+  ],
   'changeable-qr': [
     {
       target: 'text:Print once. Change the link later.',
@@ -215,5 +259,7 @@ for (const slug of [
   'meta-tag-generator',
   'qr-code-generator',
   'whatsapp-link-generator',
+  'css-shapes-playground',
+  'illustration-generator',
 ])
   TOURS[slug].push(SESSIONS_STEP)

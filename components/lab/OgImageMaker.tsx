@@ -25,6 +25,8 @@ import {
   type VAnchor,
 } from '@/lib/lab/ogImage'
 import { extractPalette, meanColor, scrimFor, suggestStyle, type Swatch } from '@/lib/lab/palette'
+import { ogFromSession, ogToSession } from '@/lib/lab/ogSession'
+import { SessionsBar } from './SessionsBar'
 import {
   ColorField,
   Range,
@@ -483,6 +485,18 @@ export function OgImageMaker() {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:items-start">
       <div className="flex flex-col gap-3">
+        <SessionsBar
+          tool="og-image"
+          label="og-image"
+          data={ogToSession(opts)}
+          blank={ogToSession(DEFAULTS)}
+          note="Pictures (a background photo or logo) are not saved. Add them again after you open a session."
+          onApply={(d) => {
+            setOpts(ogFromSession(d))
+            setSwatches([])
+            setPhotoMean('')
+          }}
+        />
         <div className="flex flex-wrap items-center justify-between gap-3" data-tour="mode">
           <Seg
             label="Controls"

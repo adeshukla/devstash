@@ -1,6 +1,8 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { hexOr, numIn, oneOf } from '@/lib/lab/sessions'
+import { SessionsBar } from './SessionsBar'
 import { CssCodeBlock } from './CssCodeBlock'
 import {
   CubicBezierEditor,
@@ -16,6 +18,16 @@ const COLORS = [
   { name: 'Rose', value: '#f43f5e' },
   { name: 'Amber', value: '#f59e0b' },
 ]
+
+/** A saved easing curve, read back safely: anything odd means the default curve. */
+function readBezier(v: unknown): [BezierPoint, BezierPoint] {
+  if (!Array.isArray(v) || v.length !== 2) return DEFAULT_BEZIER
+  const point = (q: unknown, d: BezierPoint): BezierPoint => {
+    const o = typeof q === 'object' && q !== null ? (q as Record<string, unknown>) : {}
+    return { x: numIn(o.x, 0, 1, d.x), y: numIn(o.y, -2, 3, d.y) }
+  }
+  return [point(v[0], DEFAULT_BEZIER[0]), point(v[1], DEFAULT_BEZIER[1])]
+}
 
 type Technique =
   'gradientSweep' | 'conicSpin' | 'marchingAnts' | 'dashedRotate' | 'doubleRing' | 'glowPulse'
@@ -181,116 +193,145 @@ export function BorderCustomizer() {
   }, [technique, color, width, duration, easingCss])
 
   return (
-    <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[280px_1fr]">
-      <div className="border-ds-border bg-ds-surface flex aspect-square items-center justify-center rounded-2xl border p-8">
-        <div className="h-32 w-32" style={previewStyle}>
-          {previewInnerStyle && <div style={previewInnerStyle} />}
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-6">
-        <div>
-          <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
-            Technique ({TECHNIQUES.length} functions)
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {TECHNIQUES.map((t) => (
-              <button
-                key={t.key}
-                type="button"
-                onClick={() => setTechnique(t.key)}
-                aria-pressed={technique === t.key}
-                className={
-                  technique === t.key
-                    ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
-                    : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
-                }
-              >
-                {t.label}
-              </button>
-            ))}
+    <>
+      <SessionsBar
+        tool="css-border"
+        label="css-border"
+        heading="Border sessions"
+        data={{ technique, color, width, duration, easing, bezier }}
+        blank={{
+          technique: 'gradientSweep',
+          color: COLORS[0].value,
+          width: 3,
+          duration: 3,
+          easing: 'linear',
+          bezier: DEFAULT_BEZIER,
+        }}
+        onApply={(d) => {
+          setTechnique(
+            oneOf(
+              d.technique,
+              TECHNIQUES.map((t) => t.key),
+              'gradientSweep'
+            )
+          )
+          setColor(hexOr(d.color, COLORS[0].value))
+          setWidth(numIn(d.width, 1, 8, 3))
+          setDuration(numIn(d.duration, 0.5, 20, 3))
+          setEasing(oneOf(d.easing, ['linear', 'ease-in-out', 'custom'] as const, 'linear'))
+          setBezier(readBezier(d.bezier))
+        }}
+      />
+      <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[280px_1fr]">
+        <div className="border-ds-border bg-ds-surface flex aspect-square items-center justify-center rounded-2xl border p-8">
+          <div className="h-32 w-32" style={previewStyle}>
+            {previewInnerStyle && <div style={previewInnerStyle} />}
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-6">
+        <div className="flex flex-col gap-6">
           <div>
-            <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">Color</p>
-            <div className="flex flex-wrap gap-3">
-              {COLORS.map((c) => (
+            <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
+              Technique ({TECHNIQUES.length} functions)
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {TECHNIQUES.map((t) => (
                 <button
-                  key={c.value}
+                  key={t.key}
                   type="button"
-                  onClick={() => setColor(c.value)}
-                  aria-label={`Set color to ${c.name}`}
-                  aria-pressed={color === c.value}
-                  className="h-8 w-8 shrink-0 rounded-full transition-transform hover:scale-110"
-                  style={{
-                    background: c.value,
-                    boxShadow:
-                      color === c.value
-                        ? `0 0 0 2px var(--color-ds-bg), 0 0 0 4px ${c.value}`
-                        : undefined,
-                  }}
-                />
+                  onClick={() => setTechnique(t.key)}
+                  aria-pressed={technique === t.key}
+                  className={
+                    technique === t.key
+                      ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                      : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
+                  }
+                >
+                  {t.label}
+                </button>
               ))}
             </div>
           </div>
 
-          <label className="text-ds-muted flex flex-col gap-1 text-xs">
-            Width — {width}px
-            <input
-              type="range"
-              min={1}
-              max={8}
-              value={width}
-              onChange={(e) => setWidth(Number(e.target.value))}
-              className="accent-ds-accent"
-            />
-          </label>
-
-          <label className="text-ds-muted flex flex-col gap-1 text-xs">
-            Speed — {duration}s
-            <input
-              type="range"
-              min={1}
-              max={8}
-              value={duration}
-              onChange={(e) => setDuration(Number(e.target.value))}
-              className="accent-ds-accent"
-            />
-          </label>
-        </div>
-
-        <div>
-          <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">Easing</p>
-          <div className="flex flex-wrap gap-2">
-            {(['linear', 'ease-in-out', 'custom'] as const).map((e) => (
-              <button
-                key={e}
-                type="button"
-                onClick={() => setEasing(e)}
-                aria-pressed={easing === e}
-                className={
-                  easing === e
-                    ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
-                    : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
-                }
-              >
-                {e}
-              </button>
-            ))}
-          </div>
-          {easing === 'custom' && (
-            <div className="mt-3">
-              <CubicBezierEditor value={bezier} onChange={setBezier} />
+          <div className="flex flex-wrap gap-6">
+            <div>
+              <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">Color</p>
+              <div className="flex flex-wrap gap-3">
+                {COLORS.map((c) => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => setColor(c.value)}
+                    aria-label={`Set color to ${c.name}`}
+                    aria-pressed={color === c.value}
+                    className="h-8 w-8 shrink-0 rounded-full transition-transform hover:scale-110"
+                    style={{
+                      background: c.value,
+                      boxShadow:
+                        color === c.value
+                          ? `0 0 0 2px var(--color-ds-bg), 0 0 0 4px ${c.value}`
+                          : undefined,
+                    }}
+                  />
+                ))}
+              </div>
             </div>
-          )}
+
+            <label className="text-ds-muted flex flex-col gap-1 text-xs">
+              Width — {width}px
+              <input
+                type="range"
+                min={1}
+                max={8}
+                value={width}
+                onChange={(e) => setWidth(Number(e.target.value))}
+                className="accent-ds-accent"
+              />
+            </label>
+
+            <label className="text-ds-muted flex flex-col gap-1 text-xs">
+              Speed — {duration}s
+              <input
+                type="range"
+                min={1}
+                max={8}
+                value={duration}
+                onChange={(e) => setDuration(Number(e.target.value))}
+                className="accent-ds-accent"
+              />
+            </label>
+          </div>
+
+          <div>
+            <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">Easing</p>
+            <div className="flex flex-wrap gap-2">
+              {(['linear', 'ease-in-out', 'custom'] as const).map((e) => (
+                <button
+                  key={e}
+                  type="button"
+                  onClick={() => setEasing(e)}
+                  aria-pressed={easing === e}
+                  className={
+                    easing === e
+                      ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                      : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
+                  }
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
+            {easing === 'custom' && (
+              <div className="mt-3">
+                <CubicBezierEditor value={bezier} onChange={setBezier} />
+              </div>
+            )}
+          </div>
+
+          <CssCodeBlock code={css} />
         </div>
 
-        <CssCodeBlock code={css} />
-      </div>
-
-      <style>{`
+        <style>{`
         @keyframes bcGradientSweep { to { background-position: 300% 0, 300% 0; } }
         @keyframes bcConicSpin { to { transform: rotate(360deg); } }
         @keyframes bcMarchingAnts { to { background-position: 0 0, 28px 0; } }
@@ -304,6 +345,7 @@ export function BorderCustomizer() {
           50% { box-shadow: 0 0 20px 4px var(--bc-color, #3b82f6); }
         }
       `}</style>
-    </div>
+      </div>
+    </>
   )
 }
