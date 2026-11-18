@@ -49,6 +49,7 @@ import { useUrlSync } from './useUrlSync'
 import { SessionsBar } from './SessionsBar'
 import { ShareLinkButton } from './ShareLinkButton'
 import { pick } from '@/lib/lab/urlState'
+import { str } from '@/lib/lab/sessions'
 
 const ANIMATIONS: AnimationKey[] = ['none', 'float', 'pulse', 'drift', 'draw', 'orbit']
 const keysOf = <T extends string>(labels: Record<T, string>) => Object.keys(labels) as T[]
@@ -876,6 +877,18 @@ function MatchTab() {
 
   return (
     <div className="flex flex-col gap-8">
+      <SessionsBar
+        tool="illustration-match"
+        label="scene-match"
+        heading="Scene match sessions"
+        data={{ topic, slug, scene: selectedScene ?? '' }}
+        blank={{ topic: '', slug: '', scene: '' }}
+        onApply={(d) => {
+          setTopic(str(d.topic, '', 2000))
+          setSlug(str(d.slug, '', 200))
+          setSelectedScene(ALL_SCENES.includes(d.scene as Scene) ? (d.scene as Scene) : null)
+        }}
+      />
       <p className="text-ds-muted text-sm">
         This is the real site workflow: match a topic to one of the 16 hand-built
         CategoryIllustration scenes and get the exact override line for a real blog post or project.

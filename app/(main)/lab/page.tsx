@@ -427,7 +427,7 @@ export default async function LabPage() {
           <div className="hidden sm:block">
             <PageFacts
               items={[
-                { value: known.length, label: 'live tools' },
+                { value: groups.reduce((n, g) => n + g.tools.length, 0), label: 'live tools' },
                 { value: 3, label: 'use a server' },
                 { value: 0, label: 'signups to start' },
               ]}

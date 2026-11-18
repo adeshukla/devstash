@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import { CssCodeBlock } from './CssCodeBlock'
+import { SessionsBar } from './SessionsBar'
+import { hexOr, numIn, oneOf } from '@/lib/lab/sessions'
 
 /**
  * Three surface treatments the playground had no answer for, chosen because
@@ -168,8 +170,35 @@ function GlassPanel() {
 
   const tw = `backdrop-blur-[${blur}px] backdrop-saturate-[${saturate}%] bg-[${rgbaCompact(tint, tintAlpha)}] border border-[${rgbaCompact(tint, borderAlpha)}] rounded-[${radius}px] shadow-[0_8px_32px_rgba(0,0,0,0.18)]`
 
+  const data = { blur, saturate, tint, tintAlpha, borderAlpha, radius, highlight }
+  const blank = {
+    blur: 14,
+    saturate: 160,
+    tint: '#ffffff',
+    tintAlpha: 0.12,
+    borderAlpha: 0.25,
+    radius: 18,
+    highlight: true,
+  }
+
   return (
     <div className="flex flex-col gap-6">
+      <SessionsBar
+        tool="surface-glass"
+        label="glass"
+        heading="Glass sessions"
+        data={data}
+        blank={blank}
+        onApply={(d) => {
+          setBlur(numIn(d.blur, 0, 40, blank.blur))
+          setSaturate(numIn(d.saturate, 100, 260, blank.saturate))
+          setTint(hexOr(d.tint, blank.tint))
+          setTintAlpha(numIn(d.tintAlpha, 0, 0.5, blank.tintAlpha))
+          setBorderAlpha(numIn(d.borderAlpha, 0, 0.8, blank.borderAlpha))
+          setRadius(numIn(d.radius, 0, 40, blank.radius))
+          setHighlight(d.highlight !== false)
+        }}
+      />
       {/* Glass only reads against something busy — a flat panel behind it would
           make any blur setting look identical. */}
       <div
@@ -261,8 +290,35 @@ function GradientPanel() {
 }`
   const tw = `bg-[${value.replace(/\s+/g, '_')}]`
 
+  const data = { kind, angle, from, via, to, useVia, midpoint }
+  const blank = {
+    kind: 'linear',
+    angle: 135,
+    from: '#6366f1',
+    via: '#a855f7',
+    to: '#ec4899',
+    useVia: true,
+    midpoint: 50,
+  }
+
   return (
     <div className="flex flex-col gap-6">
+      <SessionsBar
+        tool="surface-gradient"
+        label="gradient"
+        heading="Gradient sessions"
+        data={data}
+        blank={blank}
+        onApply={(d) => {
+          setKind(oneOf(d.kind, ['linear', 'radial', 'conic'] as const, 'linear'))
+          setAngle(numIn(d.angle, 0, 360, blank.angle))
+          setFrom(hexOr(d.from, blank.from))
+          setVia(hexOr(d.via, blank.via))
+          setTo(hexOr(d.to, blank.to))
+          setUseVia(d.useVia !== false)
+          setMidpoint(numIn(d.midpoint, 5, 95, blank.midpoint))
+        }}
+      />
       <div
         className="min-h-56 rounded-xl"
         style={{ backgroundImage: value }}
@@ -365,8 +421,25 @@ ${layers.map((l) => `    ${l}`).join(',\n')};
 }`
   const tw = `rounded-[${radius}px] shadow-[${shadow.replace(/\s+/g, '_')}]`
 
+  const data = { elevation, color, intensity, sharpness, radius }
+  const blank = { elevation: 16, color: '#0f172a', intensity: 0.5, sharpness: 60, radius: 16 }
+
   return (
     <div className="flex flex-col gap-6">
+      <SessionsBar
+        tool="surface-shadow"
+        label="layered-shadow"
+        heading="Layered shadow sessions"
+        data={data}
+        blank={blank}
+        onApply={(d) => {
+          setElevation(numIn(d.elevation, 2, 48, blank.elevation))
+          setColor(hexOr(d.color, blank.color))
+          setIntensity(numIn(d.intensity, 0.05, 1, blank.intensity))
+          setSharpness(numIn(d.sharpness, 10, 200, blank.sharpness))
+          setRadius(numIn(d.radius, 0, 40, blank.radius))
+        }}
+      />
       <div className="bg-ds-surface2 grid min-h-56 place-items-center rounded-xl p-10">
         <div
           className="grid h-28 w-44 place-items-center bg-white text-sm font-medium text-slate-900"

@@ -1274,6 +1274,26 @@ test.describe('My sessions on the other tools', () => {
     }
   })
 
+  test('surface glass and scene match keep their settings after a reload', async ({ page }) => {
+    await page.goto('/lab/css-shapes-playground')
+    const glass = bar(page, 'Glass sessions')
+    await glass.scrollIntoViewIfNeeded()
+    await page.getByRole('slider', { name: /^Blur [0-9]+px$/ }).fill('30')
+    await wait(page, 'devstash-draft-surface-glass')
+    await page.reload()
+    await bar(page, 'Glass sessions').scrollIntoViewIfNeeded()
+    await expect(page.getByRole('slider', { name: /^Blur [0-9]+px$/ })).toHaveValue('30')
+
+    await page.goto('/lab/illustration-generator')
+    await page.getByRole('button', { name: 'Match a site scene' }).click()
+    await page.locator('#topic').fill('speed up a slow phone')
+    await wait(page, 'devstash-draft-illustration-match')
+    await page.reload()
+    await page.getByRole('button', { name: 'Match a site scene' }).click()
+    await expect(page.locator('#topic')).toHaveValue('speed up a slow phone')
+    await expect(bar(page, 'Scene match sessions')).toBeVisible()
+  })
+
   test('an illustration keeps its description after a reload', async ({ page }) => {
     await page.goto('/lab/illustration-generator')
     await page.locator('#topic').fill('quarterly sales dashboard')
