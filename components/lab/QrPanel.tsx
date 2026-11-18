@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui'
-import { makeQr, qrSvg, scanWarning, MAX_LABEL, type QrCode, type QrLevel } from '@/lib/lab/qr'
+import {
+  makeQr,
+  qrSvg,
+  scanWarning,
+  isLogoDataUrl,
+  MAX_LABEL,
+  type QrCode,
+  type QrLevel,
+  type QrShape,
+} from '@/lib/lab/qr'
 import { printQrSheet } from './qrPrint'
 import { saveBlob } from './saveFile'
 import { trackLab } from './track'
@@ -52,12 +61,33 @@ export function QrPanel({
   const [label, setLabel] = useState('')
   const [level, setLevel] = useState<QrLevel>('M')
   const [size, setSize] = useState(1024)
-  const style = { fg, bg, label }
+  const [shape, setShape] = useState<QrShape>('square')
+  const [logo, setLogo] = useState('')
+  const [logoError, setLogoError] = useState('')
+  const style = { fg, bg, label, shape, logo }
   const warning = scanWarning(style)
+  // A logo hides part of the code, so it needs the most error correction.
+  const effLevel: QrLevel = logo ? 'H' : level
+
+  function pickLogo(file: File | undefined) {
+    setLogoError('')
+    if (!file) return
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type) || file.size > 300_000) {
+      setLogoError('Use a PNG, JPEG or WebP under 300 KB.')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = () => {
+      const url = String(reader.result)
+      if (isLogoDataUrl(url)) setLogo(url)
+      else setLogoError('That image could not be read.')
+    }
+    reader.readAsDataURL(file)
+  }
 
   useEffect(() => {
     let live = true
-    makeQr(text, level)
+    makeQr(text, effLevel)
       .then((code) => {
         if (!live) return
         setQr(code)
@@ -72,7 +102,7 @@ export function QrPanel({
     return () => {
       live = false
     }
-  }, [text, level])
+  }, [text, effLevel])
 
   async function downloadPng() {
     if (!qr) return
@@ -149,6 +179,45 @@ export function QrPanel({
               className={field}
             />
           </label>
+          <label className="text-ds-muted flex flex-col gap-1">
+            Dot shape
+            <select
+              value={shape}
+              onChange={(e) => setShape(e.target.value as QrShape)}
+              className={field}
+            >
+              <option value="square">Square</option>
+              <option value="rounded">Rounded</option>
+              <option value="dots">Round dots</option>
+            </select>
+          </label>
+          <div className="text-ds-muted flex flex-col gap-1">
+            Logo in the middle
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                aria-label="Logo in the middle"
+                onChange={(e) => pickLogo(e.target.files?.[0])}
+                className="min-w-0 flex-1 text-xs"
+              />
+              {logo && (
+                <button
+                  type="button"
+                  onClick={() => setLogo('')}
+                  className="text-ds-accent-strong underline underline-offset-4"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+            {logoError && (
+              <span className="text-ds-warning-strong" role="alert">
+                {logoError}
+              </span>
+            )}
+            {logo && <span>Stays on your device. Damage tolerance is set to toughest.</span>}
+          </div>
           <label className="text-ds-muted flex flex-col gap-1">
             PNG width
             <select
