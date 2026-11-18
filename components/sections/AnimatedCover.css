@@ -33,9 +33,9 @@
 .ac-art {
   position: absolute;
   left: 50%;
-  top: 8%;
-  width: min(300px, 58cqw);
-  aspect-ratio: 3 / 2;
+  top: 8px;
+  height: calc(100% - 54px);
+  aspect-ratio: 8 / 5;
   transform: translateX(-50%);
   z-index: 2;
 }

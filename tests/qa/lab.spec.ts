@@ -1382,23 +1382,37 @@ test.describe('Cookie choice', () => {
 })
 
 test.describe('Lab list pictures', () => {
-  test('every tool row has a picture, and the open tool shows a larger one', async ({ page }) => {
+  test('rows match Projects and Services (no thumbnail), and the open tool shows its picture', async ({
+    page,
+  }) => {
     await page.goto('/lab')
     const rows = page.getByRole('list', { name: 'Tools' }).getByRole('button')
-    const n = await rows.count()
-    expect(n).toBeGreaterThanOrEqual(10)
-    for (let i = 0; i < n; i++) expect(await rows.nth(i).locator('svg.ta').count()).toBe(1)
+    expect(await rows.count()).toBeGreaterThanOrEqual(10)
+    expect(await page.getByRole('list', { name: 'Tools' }).locator('svg').count()).toBe(0)
     await expect(page.locator('.ac-art svg.ta').first()).toBeVisible()
   })
 
-  test('hovering a row plays its picture', async ({ page }) => {
+  test('hovering the picture plays it', async ({ page }) => {
     await page.goto('/lab')
-    const row = page.getByRole('list', { name: 'Tools' }).getByRole('button').nth(3)
-    await row.hover()
-    const name = await row
+    const cover = page.locator('.ac').first()
+    await cover.hover()
+    const name = await cover
       .locator('svg.ta [class*="k-"]')
       .first()
       .evaluate((el) => getComputedStyle(el).animationName)
     expect(name).not.toBe('none')
+  })
+
+  test('every tool has its own picture', async ({ page }) => {
+    await page.goto('/lab')
+    const rows = page.getByRole('list', { name: 'Tools' }).getByRole('button')
+    const n = await rows.count()
+    const seen = new Set<string>()
+    for (let i = 0; i < n; i++) {
+      await rows.nth(i).click()
+      await expect(page.locator('.ac-art svg.ta').first()).toBeVisible()
+      seen.add(await page.locator('.ac-art svg.ta').first().innerHTML())
+    }
+    expect(seen.size).toBe(n)
   })
 })
