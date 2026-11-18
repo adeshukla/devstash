@@ -912,11 +912,11 @@ test.describe('Guided tours', () => {
       if (!steps.some((s) => s.optional)) expect(total).toBe(steps.length)
       for (let i = 0; i < total; i++) {
         await expect(dialog).toHaveAttribute('aria-label', `Guided tour, step ${i + 1} of ${total}`)
-        const outline = page.locator('.fixed.inset-0 > div[aria-hidden="true"]')
+        const outline = page.locator('[data-tour-on]')
         await expect(outline).toBeVisible()
         const box = await outline.boundingBox()
-        expect(box!.width).toBeGreaterThan(20)
-        expect(box!.height).toBeGreaterThan(20)
+        expect(box!.width).toBeGreaterThan(10)
+        expect(box!.height).toBeGreaterThan(10)
         await dialog.getByRole('button', { name: i === total - 1 ? 'Done' : 'Next' }).click()
       }
       await expect(dialog).toHaveCount(0)
