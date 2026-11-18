@@ -9,7 +9,7 @@ import { ReportCleaner } from '@/components/lab/ReportCleaner'
 import { FaqSection } from '@/components/sections/FaqSection'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'GA4 Report Cleaner: Merge Split UTM Rows',
+  title: 'Merge Duplicate Campaigns in GA4 Reports',
   description:
     'Paste a GA4 or Looker Studio export and merge rows that are the same campaign written differently. Get merged totals, a mapping list and a Looker Studio field. Free.',
   canonical: '/lab/utm-report-cleaner',

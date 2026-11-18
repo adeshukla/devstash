@@ -9,7 +9,7 @@ import { UtmChecker } from '@/components/lab/UtmChecker'
 import { FaqSection } from '@/components/sections/FaqSection'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'UTM Link Checker: Find Tagging Mistakes',
+  title: 'Campaign Link Checker: Find UTM Tagging Mistakes',
   description:
     'Paste tagged links to see each UTM parameter, the GA4 channel it lands in, what is wrong and a cleaned link. Free, runs in your browser, nothing is uploaded.',
   canonical: '/lab/utm-link-checker',

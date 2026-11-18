@@ -24,13 +24,13 @@ test.describe('Lab hub', () => {
       'aria-selected',
       'true'
     )
-    await expect(page.getByRole('heading', { name: 'UTM Builder' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'UTM Campaign Link Builder' })).toBeVisible()
     await expect(page.getByText('utm_campaign=spring-sale').first()).toBeVisible()
     await expect(page.getByText(/Use it when/).first()).toBeVisible()
 
     await page.getByRole('tab', { name: /I want people to find my page/ }).click()
-    await expect(page.getByRole('heading', { name: 'OG Image Maker' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'UTM Builder' })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'Link Preview Image Maker' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'UTM Campaign Link Builder' })).toHaveCount(0)
   })
 
   test('a job can be opened from its address, and the arrow keys move between jobs', async ({
@@ -41,10 +41,10 @@ test.describe('Lab hub', () => {
       'aria-selected',
       'true'
     )
-    // The WhatsApp row shows a real link made by the generator.
+    // The WhatsApp row has a working box that builds a real link.
     await expect(
       page.getByText(
-        'https://wa.me/919876543210?text=Hi%2C%20please%20share%20your%20price%20list.%20%5Bref%3A%20diwali-poster%5D'
+        'https://wa.me/919876543210?text=Hi%2C%20please%20share%20your%20price%20list.'
       )
     ).toBeVisible()
     await page.getByRole('tab', { name: /I want to share a link/ }).focus()
@@ -58,7 +58,7 @@ test.describe('Lab hub', () => {
 
   test('the two QR codes are one tool with a Fixed / Changeable switch', async ({ page }) => {
     await page.goto('/lab?job=share')
-    await expect(page.getByRole('heading', { name: 'QR Code Generator' })).toHaveCount(1)
+    await expect(page.getByRole('heading', { name: 'QR Code Maker' })).toHaveCount(1)
     await expect(page.getByRole('link', { name: /Open fixed/ })).toHaveAttribute(
       'href',
       '/lab/qr-code-generator'
@@ -1117,6 +1117,55 @@ test.describe('My sessions', () => {
       const results = await new AxeBuilder({ page }).analyze()
       expect(results.violations.map((v) => `${v.id}: ${v.nodes[0]?.target}`)).toEqual([])
       await page.evaluate(() => window.localStorage.clear())
+    }
+  })
+})
+
+test.describe('Lab hub: search and try-it boxes', () => {
+  test('typing a goal lists matching tools from every job, and Clear brings the jobs back', async ({
+    page,
+  }) => {
+    await page.goto('/lab')
+    await page.getByLabel('Describe what you want to do').fill('whatsapp')
+    await expect(page.getByText(/tools? match/)).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'WhatsApp Link Generator' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'QR Code Maker' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Merge Duplicate Campaigns' })).toHaveCount(0)
+    await page.getByLabel('Describe what you want to do').fill('zzzz')
+    await expect(page.getByText(/Nothing matches that/)).toBeVisible()
+    await page.getByRole('button', { name: 'Clear' }).click()
+    await expect(page.getByRole('tab')).toHaveCount(4)
+  })
+
+  test('the slash key focuses the search box', async ({ page }) => {
+    await page.goto('/lab')
+    // Keys only work once the page has loaded its script, so try until it takes.
+    await expect(async () => {
+      await page.keyboard.press('/')
+      await expect(page.getByLabel('Describe what you want to do')).toBeFocused({ timeout: 500 })
+    }).toPass()
+  })
+
+  test('the UTM and event boxes work without leaving the hub', async ({ page }) => {
+    await page.goto('/lab')
+    await page.getByLabel('Campaign name').first().fill('Diwali Offer')
+    await expect(page.getByText(/utm_campaign=diwali-offer/).first()).toBeVisible()
+    await page.getByRole('tab', { name: /I run ads or campaigns/ }).click()
+    await page.getByLabel('Event name').fill('2bad name')
+    await expect(page.getByText(/must start with a letter/)).toBeVisible()
+    await page.getByLabel('Event name').fill('generate_lead')
+    await expect(page.getByText(/GA4 accepts this name/)).toBeVisible()
+  })
+
+  test('the hub with a search open has no accessibility problems, light and dark', async ({
+    page,
+  }) => {
+    for (const scheme of ['light', 'dark'] as const) {
+      await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' })
+      await page.goto('/lab')
+      await page.getByLabel('Describe what you want to do').fill('ads')
+      const results = await new AxeBuilder({ page }).analyze()
+      expect(results.violations.map((v) => `${v.id}: ${v.nodes[0]?.target}`)).toEqual([])
     }
   })
 })

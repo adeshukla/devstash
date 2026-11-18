@@ -6,7 +6,7 @@ import { OgImageMaker } from '@/components/lab/OgImageMaker'
 import { FaqSection } from '@/components/sections/FaqSection'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'OG Image Maker: Share Image and Blog Cover',
+  title: 'Link Preview Image Maker: Share Image and Cover',
   description:
     'Make a share image or blog cover in a simple view or with full control, take the colours from your site or a picture, and preview it on desktop and phone.',
   canonical: '/lab/og-image-maker',

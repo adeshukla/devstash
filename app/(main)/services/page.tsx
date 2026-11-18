@@ -45,7 +45,7 @@ const SERVICES: ServiceItem[] = [
         href: '/blog/google-ads-landing-page-checklist',
       },
       { label: 'Lessons from 200+ pages', href: '/blog/ppc-landing-page-conversion-lessons' },
-      { label: 'UTM Link Builder', href: '/lab/utm-builder/case-study' },
+      { label: 'UTM Campaign Link Builder', href: '/lab/utm-builder/case-study' },
     ],
   },
   {

@@ -1,6 +1,6 @@
 {
   "slug": "utm-link-checker",
-  "title": "UTM Link Checker",
+  "title": "Campaign Link Checker",
   "description": "Paste tagged links to see each UTM parameter, the GA4 channel it lands in, what is wrong and a cleaned link, plus a plain table of how GA4 sorts traffic into channels.",
   "longDescription": "The builder prevents mistakes in new links; the checker finds them in links that already exist. It reads each link, flags missing or misspelled parameters, capital letters, spaces, duplicates and tags placed after a #, predicts the GA4 channel, and builds a cleaned version. It runs entirely in the browser.",
   "status": "live",

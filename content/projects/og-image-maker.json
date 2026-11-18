@@ -1,6 +1,6 @@
 {
   "slug": "og-image-maker",
-  "title": "OG Image Maker",
+  "title": "Link Preview Image Maker",
   "description": "Make a share image or blog cover in a simple view or with full control. Take the colours from your site address or a picture, and preview it on desktop and phone.",
   "longDescription": "Most share images come from a design tool or a template that decides everything, and the full-control tools bury what most people need. This one opens in a simple view: pick what the image is for (computer or phone), type your words, choose a look and download, with a preview as a link card on a computer and in a chat on a phone and a one-minute guided tour. Switch to Everything for per-text fonts, sizes and colours, backgrounds, patterns, shapes, a frame and a logo. Give it your site address or a picture and it reads the main colours and builds a matching theme with readable text. The image is drawn from your device fonts, so the preview is exactly the file you download. Pictures you choose never leave your browser; a web address you type is sent to the server once to fetch its picture, and nothing is stored.",
   "status": "live",

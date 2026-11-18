@@ -7,7 +7,7 @@ import { Ga4EventBuilder } from '@/components/lab/Ga4EventBuilder'
 import { FaqSection } from '@/components/sections/FaqSection'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'GA4 Event Builder: dataLayer and gtag Code',
+  title: 'GA4 Tracking Code for Buttons and Signups',
   description:
     'Build a GA4 custom event, check its name and parameters against Google’s limits, and copy the dataLayer push for Tag Manager or the gtag.js call. Free.',
   canonical: '/lab/ga4-event-builder',

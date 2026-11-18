@@ -38,7 +38,7 @@ interface Demo {
 
 const FLAGSHIP = {
   slug: 'ai-content-pipeline',
-  name: 'AI Content Pipeline',
+  name: 'AI Blog Draft Helper',
   blurb:
     'A live 3-step LLM chain running server-side: it scaffolds an honest draft, copy-edits the AI tells out of it, then generates SEO frontmatter — showing real token usage and latency at every step.',
   steps: [
@@ -65,7 +65,7 @@ const TOOLS: Demo[] = [
   },
   {
     slug: 'meta-tag-generator',
-    name: 'Next.js SEO Kit',
+    name: 'Search & Share Preview',
     blurb:
       'Previews your title as Google, X and Facebook cards, then writes the Next.js files: metadata, FAQ schema, robots.ts, sitemap.ts and an OG image.',
     tag: 'SEO',
@@ -79,52 +79,52 @@ const TOOLS: Demo[] = [
   },
   {
     slug: 'ga4-event-builder',
-    name: 'GA4 Event Builder',
+    name: 'Button & Signup Tracking Code',
     blurb:
       'Build a GA4 event, check its name and parameters against Google’s limits, and copy the dataLayer push or gtag.js call.',
-    tag: 'Analytics',
+    tag: 'GA4',
   },
   {
     slug: 'og-image-maker',
-    name: 'OG Image Maker',
+    name: 'Link Preview Image Maker',
     blurb:
       'Pick a size, type your words, take the colours from your site address or a picture, and preview on desktop and phone. Full control one click away.',
-    tag: 'Design',
+    tag: 'OG',
   },
   {
     slug: 'utm-builder',
-    name: 'UTM Builder',
+    name: 'UTM Campaign Link Builder',
     blurb:
       'Three steps to a clean tracking link or QR code, with a GA4 channel check, team naming rules, sheet import and a QR print kit. Client-side; saved data stays on your device.',
-    tag: 'Marketing',
+    tag: 'UTM',
   },
   {
     slug: 'utm-link-checker',
-    name: 'UTM Link Checker',
+    name: 'Campaign Link Checker',
     blurb:
       'Paste links you already use: see what each tag says, which GA4 channel it lands in, what is wrong, and a cleaned link to copy. Includes a plain table of how GA4 sorts traffic.',
-    tag: 'Marketing',
+    tag: 'UTM',
   },
   {
     slug: 'qr-code-generator',
     name: 'QR Code Generator',
     blurb:
       'Static codes for a website, WhatsApp chat, UPI payment, Wi-Fi, contact card, email, phone or text. They never expire, save as PNG or SVG, and print. Nothing is uploaded.',
-    tag: 'Utility',
+    tag: 'QR',
   },
   {
     slug: 'changeable-qr',
     name: 'Changeable QR Code',
     blurb:
       'Print one QR code and change the page it opens later. Sign in with Google or email, claim a permanent name, and point it anywhere. Free. Your email and link are stored; scans are not tracked.',
-    tag: 'Utility',
+    tag: 'QR',
   },
   {
     slug: 'utm-report-cleaner',
-    name: 'GA4 Report Cleaner',
+    name: 'Merge Duplicate Campaigns',
     blurb:
       'Paste a GA4 or Looker Studio export: rows that are the same campaign written differently are merged, with totals, an original-to-clean list and a Looker Studio field.',
-    tag: 'Marketing',
+    tag: 'GA4',
   },
 ]
 
@@ -249,6 +249,65 @@ function examples(): Record<string, { input: string; output: string }> {
   }
 }
 
+/** What goes in, what comes out, and words people search for, per tool. Plain language. */
+const COPY: Record<string, { gives: string; gets: string; keywords: string }> = {
+  'meta-tag-generator': {
+    gives: 'A page title and description.',
+    gets: 'How the page looks on Google and in shared links, plus the tags to paste in.',
+    keywords: 'seo google title description meta preview crawler robots schema sitemap nextjs',
+  },
+  'og-image-maker': {
+    gives: 'Your words and a size.',
+    gets: 'The picture shown when your link is shared on WhatsApp, LinkedIn or X.',
+    keywords: 'share image og picture whatsapp linkedin preview card cover blog',
+  },
+  'utm-builder': {
+    gives: 'Your page, where you will share it, and a campaign name.',
+    gets: 'A tracking link that shows which ad or post brought visitors.',
+    keywords: 'utm campaign link ads track source tracking url google analytics',
+  },
+  'utm-link-checker': {
+    gives: 'Campaign links you already use.',
+    gets: 'What is wrong with each one, and a clean version to copy.',
+    keywords: 'utm check links wrong fix ads audit mistakes tagging',
+  },
+  'utm-report-cleaner': {
+    gives: 'A GA4 or Looker Studio report as CSV.',
+    gets: 'One total per campaign instead of several spellings.',
+    keywords: 'report ga4 clean merge duplicate campaign looker export csv spelling',
+  },
+  'ga4-event-builder': {
+    gives: 'An event name such as generate_lead, and its details.',
+    gets: 'Checked code to paste into your site or Tag Manager.',
+    keywords: 'ga4 event tracking button signup purchase datalayer gtag code analytics',
+  },
+  'qr-code-generator': {
+    gives: 'A website, chat, UPI payment, Wi-Fi or contact.',
+    gets: 'A QR code to download or print: fixed and free forever, or one you can repoint later.',
+    keywords: 'qr code whatsapp wifi upi payment contact print scan changeable dynamic menu poster',
+  },
+  'whatsapp-link-generator': {
+    gives: 'A number and a first message.',
+    gets: 'A tap-to-chat link, with a code to tell campaigns apart.',
+    keywords: 'whatsapp chat link click customers message number ads',
+  },
+  'css-shapes-playground': {
+    gives: 'A shape, colour or shadow you adjust with sliders.',
+    gets: 'The CSS to copy.',
+    keywords: 'css shapes border radius shadow animation blob gradient',
+  },
+  'illustration-generator': {
+    gives: 'A few words describing a scene.',
+    gets: 'An animated illustration as SVG.',
+    keywords: 'illustration svg animated image generator art',
+  },
+  'ai-content-pipeline': {
+    gives: 'A topic for a blog post.',
+    gets: 'A draft that marks what only you can write, then SEO fields.',
+    keywords: 'ai blog draft content writing llm seo frontmatter',
+  },
+}
+
 /** The reason a normal person would open each tool, in their words. */
 const USE_WHEN: Record<string, string> = {
   'meta-tag-generator':
@@ -338,8 +397,9 @@ export default async function LabPage() {
       const labels = slugs.length > 1 ? ['Fixed', 'Changeable'] : ['']
       return {
         id: slugs[0],
-        name: slugs.length > 1 ? 'QR Code Generator' : first.name,
+        name: slugs.length > 1 ? 'QR Code Maker' : first.name,
         tag: first.tag,
+        ...COPY[slugs[0]],
         views: slugs.map((s, i) => view(s, labels[i])),
       }
     }),
@@ -382,8 +442,8 @@ export default async function LabPage() {
             What do you want to do?
           </h2>
           <p className="text-ds-muted mt-2 mb-8 max-w-[64ch]">
-            Choose the sentence that sounds like you. The tools for that job appear with a plain
-            line on when to use each one.
+            Search for it, or choose the sentence that sounds like you. Every tool says what you
+            give it and what you get back, and most have a box you can try right here.
           </p>
           <LabIndex groups={groups} initial="measure" />
         </div>

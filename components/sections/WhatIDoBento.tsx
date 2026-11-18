@@ -43,10 +43,10 @@ const PROOF: Record<'frontend' | 'seo' | 'automation', Proof[]> = {
   seo: [
     {
       slug: 'meta-tag-generator',
-      name: 'Meta Tag Generator',
+      name: 'Search & Share Preview',
       href: '/lab/meta-tag-generator/case-study',
     },
-    { slug: 'utm-builder', name: 'UTM Link Builder', href: '/lab/utm-builder/case-study' },
+    { slug: 'utm-builder', name: 'UTM Campaign Link Builder', href: '/lab/utm-builder/case-study' },
   ],
   automation: [
     {

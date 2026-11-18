@@ -48,7 +48,7 @@ const FAQ = [
 ]
 
 export const metadata: Metadata = buildMetadata({
-  title: 'UTM Builder — Free Campaign URL Generator',
+  title: 'UTM Campaign Link Builder — Free Tracking Links',
   description:
     'Free UTM builder: team naming rules, GA4 channel check, sheet import, ad-platform values, QR codes with a print kit, CSV export. Runs in your browser.',
   canonical: '/lab/utm-builder',
