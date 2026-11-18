@@ -48,7 +48,7 @@ const SECTIONS = [
 ]
 
 export const metadata: Metadata = buildMetadata({
-  title: 'CSS Shapes & Animation Generator — Free',
+  title: 'CSS Shape, Border & Shadow Generator — Free',
   description:
     'Free CSS shape and colour customizer with animated borders, CTA button animations and box-shadow effects. Copyable CSS on every demo.',
   canonical: '/lab/css-shapes-playground',

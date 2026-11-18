@@ -38,7 +38,7 @@ const FAQ = [
 ]
 
 export const metadata: Metadata = buildMetadata({
-  title: 'AI Blog Draft Helper: Draft, Edit and SEO Fields',
+  title: 'AI Blog Draft Generator: Draft, Edit, SEO Fields',
   description:
     'A live LLM pipeline that writes marketing, service, sales and other pages honestly: draft, copy-edit, SEO fields and five designed pages, token use shown.',
   canonical: '/lab/ai-content-pipeline',
@@ -50,7 +50,7 @@ export default function AiContentPipelinePage() {
       <LabToolSchema
         slug="ai-content-pipeline"
         path="/lab/ai-content-pipeline"
-        title="AI Blog Draft Helper"
+        title="AI Blog Draft Generator"
         description="A live 3-step LLM pipeline: scaffold an honest draft that marks where you add real code and numbers, run a copy-edit pass to strip AI-tell phrases, and produce SEO frontmatter."
       />
 

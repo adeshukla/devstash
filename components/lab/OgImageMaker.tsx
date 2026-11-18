@@ -1357,7 +1357,7 @@ export function OgImageMaker() {
           <code className="text-ds-accent-strong">opengraph-image.png</code> in a route folder as
           that page&apos;s share image; the{' '}
           <Link href="/lab/meta-tag-generator" className="text-ds-accent-strong underline">
-            Search & Share Preview
+            Meta Tag Generator & SEO Preview
           </Link>{' '}
           writes the rest.
         </p>

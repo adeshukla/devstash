@@ -53,7 +53,7 @@ const FAQ = [
 ]
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Search & Share Preview: SEO Tags and Next.js Files',
+  title: 'Meta Tag Generator & SEO Preview for Next.js',
   description:
     'Next.js SEO kit: metadata, FAQ schema, robots.ts, sitemap.ts and OG image code, plus Google, X and Facebook previews. Runs in your browser.',
   canonical: '/lab/meta-tag-generator',

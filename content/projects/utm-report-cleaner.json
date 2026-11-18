@@ -1,6 +1,6 @@
 {
   "slug": "utm-report-cleaner",
-  "title": "Merge Duplicate Campaigns",
+  "title": "UTM Data Cleaner for GA4",
   "description": "Paste a GA4 or Looker Studio export and merge rows that are the same campaign written differently, with merged totals, an original-to-clean list and a Looker Studio field.",
   "longDescription": "Builders prevent bad tagging in new links, but the damage is already in old reports: one campaign split across Spring_Sale, spring-sale and SPRING-SALE. This tool reads a pasted or uploaded export, groups rows that match once capitals, spaces and separators are ignored, adds up only the columns that can be added, and hands back a clean table plus the mapping to apply it elsewhere.",
   "status": "live",

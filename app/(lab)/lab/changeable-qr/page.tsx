@@ -6,7 +6,7 @@ import { LabTour } from '@/components/lab/LabTour'
 import { ChangeableQr } from '@/components/lab/ChangeableQr'
 import { FaqSection } from '@/components/sections/FaqSection'
 
-const TITLE = 'Changeable QR Code: Update the Link Later'
+const TITLE = 'Dynamic QR Code Generator: Change the Link Later'
 const DESC =
   'Print one QR code and change where it leads later. Sign in with your email, claim a permanent address, and point it at any web page. Free, no password.'
 

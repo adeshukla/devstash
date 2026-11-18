@@ -50,7 +50,7 @@ That's the exact curve `ease-in-out` expands to. Here's what the five built-in k
 | `ease-out`     | `cubic-bezier(0, 0, 0.58, 1)`        |
 | `ease-in-out`  | `cubic-bezier(0.42, 0, 0.58, 1)`     |
 
-Reading these directly is genuinely hard — nobody looks at `0.25, 0.1, 0.25, 1` and pictures the curve. That's what a visual editor is for: drag the two control points and watch the curve (and the animation it drives) change in real time. I built one into this site's [CSS Shapes & Animation Playground](/lab/css-shapes-playground) for exactly that reason — every animated demo on that page lets you pick a preset easing or drag your own curve and see the `cubic-bezier()` output update live.
+Reading these directly is genuinely hard — nobody looks at `0.25, 0.1, 0.25, 1` and pictures the curve. That's what a visual editor is for: drag the two control points and watch the curve (and the animation it drives) change in real time. I built one into this site's [CSS Shape, Border & Shadow Generator](/lab/css-shapes-playground) for exactly that reason — every animated demo on that page lets you pick a preset easing or drag your own curve and see the `cubic-bezier()` output update live.
 
 ## The x-axis is restricted, the y-axis isn't
 
@@ -106,6 +106,6 @@ cubic-bezier(0, 0.55, 0.45, 1);
 
 The fastest way to find out whether one of these is right for your specific case is still to look at it against your actual element, at your actual duration — a curve that reads as "snappy" over 200ms can read as "abrupt" over 600ms with nothing else changed. That's the whole reason a drag-to-build editor is worth more here than a table of numbers.
 
-You can try these curves on a real element in the [CSS Shapes & Animation Playground](/projects/css-shapes-playground).
+You can try these curves on a real element in the [CSS Shape, Border & Shadow Generator](/projects/css-shapes-playground).
 
 Motion Lab shows seventeen animation techniques side by side, if you want to see easing used in context: [Motion Lab](/projects/motion-lab).

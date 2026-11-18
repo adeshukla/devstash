@@ -18,9 +18,9 @@ import { buildHtml } from '@/lib/lab/metaTags'
 import { buildWhatsAppLink } from '@/lib/lab/whatsapp'
 import { buildGtag } from '@/lib/lab/ga4Event'
 
-const title = 'Lab — Interactive Tools & Live Demos'
+const title = 'Free UTM, QR Code, OG Image and Meta Tag Tools'
 const description =
-  'Things I built and shipped live in the browser: an AI content pipeline, CSS and SVG generators, and SEO and marketing tooling.'
+  'Free browser tools: UTM link builder and checker, QR code and WhatsApp link generators, OG image and meta tag generators, GA4 events, CSS and SVG.'
 
 export const metadata: Metadata = buildMetadata({
   title,
@@ -38,7 +38,7 @@ interface Demo {
 
 const FLAGSHIP = {
   slug: 'ai-content-pipeline',
-  name: 'AI Blog Draft Helper',
+  name: 'AI Blog Draft Generator',
   blurb:
     'A live 3-step LLM chain running server-side: it scaffolds an honest draft, copy-edits the AI tells out of it, then generates SEO frontmatter — showing real token usage and latency at every step.',
   steps: [
@@ -51,21 +51,21 @@ const FLAGSHIP = {
 const TOOLS: Demo[] = [
   {
     slug: 'css-shapes-playground',
-    name: 'CSS Shapes & Animation Playground',
+    name: 'CSS Shape, Border & Shadow Generator',
     blurb:
       'Live shape, color, animated-border, and box-shadow customizers, with copyable CSS on every demo.',
     tag: 'CSS',
   },
   {
     slug: 'illustration-generator',
-    name: 'Illustration Generator',
+    name: 'SVG Illustration Generator',
     blurb:
       'Composes a unique, theme-aware animated SVG from a text description — procedural generation, not a fixed list of presets.',
     tag: 'Generative',
   },
   {
     slug: 'meta-tag-generator',
-    name: 'Search & Share Preview',
+    name: 'Meta Tag Generator & SEO Preview',
     blurb:
       'Previews your title as Google, X and Facebook cards, then writes the Next.js files: metadata, FAQ schema, robots.ts, sitemap.ts and an OG image.',
     tag: 'SEO',
@@ -79,28 +79,28 @@ const TOOLS: Demo[] = [
   },
   {
     slug: 'ga4-event-builder',
-    name: 'Button & Signup Tracking Code',
+    name: 'GA4 Event Generator',
     blurb:
       'Build a GA4 event, check its name and parameters against Google’s limits, and copy the dataLayer push or gtag.js call.',
     tag: 'GA4',
   },
   {
     slug: 'og-image-maker',
-    name: 'Link Preview Image Maker',
+    name: 'OG Image Generator',
     blurb:
       'Pick a size, type your words, take the colours from your site address or a picture, and preview on desktop and phone. Full control one click away.',
     tag: 'OG',
   },
   {
     slug: 'utm-builder',
-    name: 'UTM Campaign Link Builder',
+    name: 'UTM Link Builder',
     blurb:
       'Three steps to a clean tracking link or QR code, with a GA4 channel check, team naming rules, sheet import and a QR print kit. Client-side; saved data stays on your device.',
     tag: 'UTM',
   },
   {
     slug: 'utm-link-checker',
-    name: 'Campaign Link Checker',
+    name: 'UTM Link Checker',
     blurb:
       'Paste links you already use: see what each tag says, which GA4 channel it lands in, what is wrong, and a cleaned link to copy. Includes a plain table of how GA4 sorts traffic.',
     tag: 'UTM',
@@ -114,14 +114,14 @@ const TOOLS: Demo[] = [
   },
   {
     slug: 'changeable-qr',
-    name: 'Changeable QR Code',
+    name: 'Dynamic QR Code Generator',
     blurb:
       'Print one QR code and change the page it opens later. Sign in with Google or email, claim a permanent name, and point it anywhere. Free. Your email and link are stored; scans are not tracked.',
     tag: 'QR',
   },
   {
     slug: 'utm-report-cleaner',
-    name: 'Merge Duplicate Campaigns',
+    name: 'UTM Data Cleaner for GA4',
     blurb:
       'Paste a GA4 or Looker Studio export: rows that are the same campaign written differently are merged, with totals, an original-to-clean list and a Looker Studio field.',
     tag: 'GA4',
@@ -254,57 +254,68 @@ const COPY: Record<string, { gives: string; gets: string; keywords: string }> = 
   'meta-tag-generator': {
     gives: 'A page title and description.',
     gets: 'How the page looks on Google and in shared links, plus the tags to paste in.',
-    keywords: 'seo google title description meta preview crawler robots schema sitemap nextjs',
+    keywords:
+      'meta tag generator seo meta tags title description open graph twitter card preview serp snippet robots txt sitemap xml schema json-ld faq nextjs metadata ai crawler gptbot checker',
   },
   'og-image-maker': {
     gives: 'Your words and a size.',
     gets: 'The picture shown when your link is shared on WhatsApp, LinkedIn or X.',
-    keywords: 'share image og picture whatsapp linkedin preview card cover blog',
+    keywords:
+      'og image generator open graph image social share image twitter card linkedin facebook whatsapp link preview thumbnail blog cover 1200x630',
   },
   'utm-builder': {
     gives: 'Your page, where you will share it, and a campaign name.',
     gets: 'A tracking link that shows which ad or post brought visitors.',
-    keywords: 'utm campaign link ads track source tracking url google analytics',
+    keywords:
+      'utm builder utm link generator utm generator campaign url builder utm parameters utm_source utm_medium utm_campaign google analytics ga4 tracking link bulk utm qr code',
   },
   'utm-link-checker': {
     gives: 'Campaign links you already use.',
     gets: 'What is wrong with each one, and a clean version to copy.',
-    keywords: 'utm check links wrong fix ads audit mistakes tagging',
+    keywords:
+      'utm link checker utm validator utm checker check utm parameters utm mistakes ga4 channel grouping direct unassigned fix tracking links audit',
   },
   'utm-report-cleaner': {
     gives: 'A GA4 or Looker Studio report as CSV.',
     gets: 'One total per campaign instead of several spellings.',
-    keywords: 'report ga4 clean merge duplicate campaign looker export csv spelling',
+    keywords:
+      'utm data cleaner ga4 duplicate campaign names merge campaigns clean utm report case sensitive utm looker studio export csv normalize utm',
   },
   'ga4-event-builder': {
     gives: 'An event name such as generate_lead, and its details.',
     gets: 'Checked code to paste into your site or Tag Manager.',
-    keywords: 'ga4 event tracking button signup purchase datalayer gtag code analytics',
+    keywords:
+      'ga4 event generator ga4 event builder google analytics 4 custom event datalayer push gtag event gtm tag manager button click form submit signup purchase event name validator',
   },
   'qr-code-generator': {
     gives: 'A website, chat, UPI payment, Wi-Fi or contact.',
     gets: 'A QR code to download or print: fixed and free forever, or one you can repoint later.',
-    keywords: 'qr code whatsapp wifi upi payment contact print scan changeable dynamic menu poster',
+    keywords:
+      'qr code generator free qr code static qr whatsapp qr wifi qr upi qr vcard contact qr url qr png svg print no expiry dynamic changeable editable qr code menu poster',
   },
   'whatsapp-link-generator': {
     gives: 'A number and a first message.',
     gets: 'A tap-to-chat link, with a code to tell campaigns apart.',
-    keywords: 'whatsapp chat link click customers message number ads',
+    keywords:
+      'whatsapp link generator wa.me link click to chat link whatsapp qr code prefilled message whatsapp business link utm country code',
   },
   'css-shapes-playground': {
     gives: 'A shape, colour or shadow you adjust with sliders.',
     gets: 'The CSS to copy.',
-    keywords: 'css shapes border radius shadow animation blob gradient',
+    keywords:
+      'css shape generator border radius generator box shadow generator animated border css blob glassmorphism gradient generator cubic bezier easing button animation',
   },
   'illustration-generator': {
     gives: 'A few words describing a scene.',
     gets: 'An animated illustration as SVG.',
-    keywords: 'illustration svg animated image generator art',
+    keywords:
+      'svg illustration generator animated svg generator free svg art blog illustration hero illustration procedural svg png export',
   },
   'ai-content-pipeline': {
     gives: 'A topic for a blog post.',
     gets: 'A draft that marks what only you can write, then SEO fields.',
-    keywords: 'ai blog draft content writing llm seo frontmatter',
+    keywords:
+      'ai blog draft generator ai blog post generator llm content pipeline groq seo frontmatter blog outline todo markers',
   },
 }
 
@@ -397,7 +408,7 @@ export default async function LabPage() {
       const labels = slugs.length > 1 ? ['Fixed', 'Changeable'] : ['']
       return {
         id: slugs[0],
-        name: slugs.length > 1 ? 'QR Code Maker' : first.name,
+        name: slugs.length > 1 ? 'QR Code Generator' : first.name,
         tag: first.tag,
         ...COPY[slugs[0]],
         views: slugs.map((s, i) => view(s, labels[i])),

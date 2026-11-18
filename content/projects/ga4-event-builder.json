@@ -1,6 +1,6 @@
 {
   "slug": "ga4-event-builder",
-  "title": "Button & Signup Tracking Code",
+  "title": "GA4 Event Generator",
   "description": "Build a GA4 custom event, check its name and parameters against Google's limits and reserved names, and copy the dataLayer push for Tag Manager or the gtag.js call.",
   "longDescription": "A GA4 event that breaks one of Google's rules is not rejected loudly: it is dropped, and the gap shows up weeks later in a report. This tool checks the event name and parameters as you type against the rules in Google's own documentation (name format and 40-character limit, reserved names, 25 parameters, 100-character values, reserved prefixes), checks recommended events for their required parameters, flags values that look like an email address, and writes the code to send it, either as a dataLayer push for Google Tag Manager or as a gtag.js call.",
   "status": "live",

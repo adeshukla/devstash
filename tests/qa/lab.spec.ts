@@ -28,15 +28,13 @@ test.describe('Lab hub', () => {
     await expect(list(page).getByRole('button')).toHaveCount(11)
     // The first tool is open already, so the right side is never empty.
     await expect(
-      page.getByRole('heading', { name: 'Search & Share Preview', level: 3 })
+      page.getByRole('heading', { name: 'Meta Tag Generator & SEO Preview', level: 3 })
     ).toBeVisible()
 
     await list(page)
-      .getByRole('button', { name: /UTM Campaign Link Builder/ })
+      .getByRole('button', { name: /UTM Link Builder/ })
       .click()
-    await expect(
-      page.getByRole('heading', { name: 'UTM Campaign Link Builder', level: 3 })
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'UTM Link Builder', level: 3 })).toBeVisible()
     await expect(page.getByText('utm_campaign=spring-sale').first()).toBeVisible()
     await expect(page.getByText(/Use it when/)).toBeVisible()
     await page.getByRole('tab', { name: 'Highlights' }).click()
@@ -44,9 +42,7 @@ test.describe('Lab hub', () => {
 
     await filters.getByRole('button', { name: /^Get found/ }).click()
     await expect(list(page).getByRole('button')).toHaveCount(2)
-    await expect(list(page).getByRole('button', { name: /UTM Campaign Link Builder/ })).toHaveCount(
-      0
-    )
+    await expect(list(page).getByRole('button', { name: /UTM Link Builder/ })).toHaveCount(0)
   })
 
   test('a group can be opened from its address and the address follows the filter', async ({
@@ -75,7 +71,7 @@ test.describe('Lab hub', () => {
 
   test('the two QR codes are one tool with a Fixed / Changeable switch', async ({ page }) => {
     await page.goto('/lab?job=share')
-    await expect(list(page).getByRole('button', { name: /QR Code Maker/ })).toHaveCount(1)
+    await expect(list(page).getByRole('button', { name: /QR Code Generator/ })).toHaveCount(1)
     await expect(page.getByRole('link', { name: /Open fixed/ })).toHaveAttribute(
       'href',
       '/lab/qr-code-generator'
@@ -93,7 +89,7 @@ test.describe('Lab hub', () => {
   test('copy link puts the full tool address on the clipboard', async ({ page }) => {
     await page.goto('/lab')
     await list(page)
-      .getByRole('button', { name: /UTM Campaign Link Builder/ })
+      .getByRole('button', { name: /UTM Link Builder/ })
       .click()
     await page.getByRole('button', { name: 'Copy link' }).click()
     const text = await page.evaluate(() => navigator.clipboard.readText())
@@ -1146,8 +1142,8 @@ test.describe('Lab hub: search and try-it boxes', () => {
     await box(page).fill('whatsapp')
     await expect(page.getByText(/tools? match/)).toBeVisible()
     await expect(list(page).getByRole('button', { name: /WhatsApp Link Generator/ })).toBeVisible()
-    await expect(list(page).getByRole('button', { name: /QR Code Maker/ })).toBeVisible()
-    await expect(list(page).getByRole('button', { name: /Merge Duplicate Campaigns/ })).toHaveCount(
+    await expect(list(page).getByRole('button', { name: /QR Code Generator/ })).toBeVisible()
+    await expect(list(page).getByRole('button', { name: /UTM Data Cleaner for GA4/ })).toHaveCount(
       0
     )
     await box(page).fill('zzzz')
@@ -1168,12 +1164,12 @@ test.describe('Lab hub: search and try-it boxes', () => {
   test('the UTM and event boxes work without leaving the hub', async ({ page }) => {
     await page.goto('/lab')
     await list(page)
-      .getByRole('button', { name: /UTM Campaign Link Builder/ })
+      .getByRole('button', { name: /UTM Link Builder/ })
       .click()
     await page.getByLabel('Campaign name').fill('Diwali Offer')
     await expect(page.getByText(/utm_campaign=diwali-offer/).first()).toBeVisible()
     await list(page)
-      .getByRole('button', { name: /Button & Signup Tracking Code/ })
+      .getByRole('button', { name: /GA4 Event Generator/ })
       .click()
     await page.getByLabel('Event name').fill('2bad name')
     await expect(page.getByText(/must start with a letter/)).toBeVisible()
@@ -1193,12 +1189,10 @@ test.describe('Lab hub: search and try-it boxes', () => {
     }
     await page.setViewportSize({ width: 375, height: 812 })
     await page.goto('/lab')
-    const row = list(page).getByRole('button', { name: /UTM Campaign Link Builder/ })
+    const row = list(page).getByRole('button', { name: /UTM Link Builder/ })
     await row.click()
     // On a phone the detail opens under its row.
-    await expect(
-      page.getByRole('heading', { name: 'UTM Campaign Link Builder', level: 3 })
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'UTM Link Builder', level: 3 })).toBeVisible()
     const results = await new AxeBuilder({ page }).analyze()
     expect(results.violations.map((v) => `${v.id}: ${v.nodes[0]?.target}`)).toEqual([])
     expect(await page.evaluate(() => window.scrollX)).toBe(0)

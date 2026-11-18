@@ -145,7 +145,7 @@ export const TOURS: Record<string, TourStepData[]> = {
     {
       target: 'text:Your QR code',
       title: 'Download or print',
-      body: 'Save it as PNG for documents or SVG for print shops, or print it. This code is fixed: if you need to change where it points after printing, use the Changeable QR Code instead.',
+      body: 'Save it as PNG for documents or SVG for print shops, or print it. This code is fixed: if you need to change where it points after printing, use the Dynamic QR Code Generator instead.',
     },
   ],
   'whatsapp-link-generator': [
