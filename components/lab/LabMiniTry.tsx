@@ -40,8 +40,8 @@ function Result({ children, bad }: { children: React.ReactNode; bad?: boolean })
   return (
     <p
       aria-live="polite"
-      className={`bg-ds-surface2 min-h-10 rounded-md border px-3 py-2 font-mono text-xs [overflow-wrap:anywhere] ${
-        bad ? 'border-ds-error text-ds-text' : 'border-ds-border text-ds-text'
+      className={`text-ds-text min-h-8 border-l-2 py-0.5 pl-3 font-mono text-xs [overflow-wrap:anywhere] ${
+        bad ? 'border-ds-error' : 'border-ds-accent'
       }`}
     >
       {children}
@@ -164,8 +164,8 @@ export function LabMiniTry({ slug }: { slug: string }) {
   const Mini = MINI[slug]
   if (!Mini) return null
   return (
-    <div className="border-ds-border2 bg-ds-surface flex flex-col gap-2.5 rounded-lg border border-dashed p-3.5">
-      <p className="text-ds-accent-strong font-mono text-[11px]">Try it here. Edit the boxes.</p>
+    <div className="border-ds-border flex flex-col gap-3 border-t pt-4">
+      <p className="text-ds-muted font-mono text-[11px]">TRY IT · EDIT THE BOXES</p>
       <Mini />
     </div>
   )

@@ -442,10 +442,10 @@ export default async function LabPage() {
             What do you want to do?
           </h2>
           <p className="text-ds-muted mt-2 mb-8 max-w-[64ch]">
-            Search for it, or choose the sentence that sounds like you. Every tool says what you
-            give it and what you get back, and most have a box you can try right here.
+            Search for it, or pick a group. Every tool says what you give it and what you get back,
+            and most have a box you can try right here.
           </p>
-          <LabIndex groups={groups} initial="measure" />
+          <LabIndex groups={groups} />
         </div>
       </section>
 

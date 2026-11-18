@@ -17,43 +17,48 @@ test.describe('Lab hub', () => {
   }) => {
     await page.goto('/lab')
     await expect(page.getByRole('heading', { name: 'What do you want to do?' })).toBeVisible()
-    const jobs = page.getByRole('tab')
-    await expect(jobs).toHaveCount(4)
-    // It opens on Measure; the UTM sample is produced by the builder's own code.
-    await expect(page.getByRole('tab', { name: /I run ads or campaigns/ })).toHaveAttribute(
-      'aria-selected',
+    // Everything is shown at first, grouped by job, so nothing is hidden behind a click.
+    const filters = page.getByRole('group', { name: 'Show tools for' })
+    await expect(filters.getByRole('button')).toHaveCount(5)
+    await expect(filters.getByRole('button', { name: /^All/ })).toHaveAttribute(
+      'aria-pressed',
       'true'
     )
+    for (const name of ['Get found', 'Measure', 'Share']) {
+      await expect(page.getByRole('heading', { name, exact: true, level: 3 })).toBeVisible()
+    }
     await expect(page.getByRole('heading', { name: 'UTM Campaign Link Builder' })).toBeVisible()
     await expect(page.getByText('utm_campaign=spring-sale').first()).toBeVisible()
-    await expect(page.getByText(/Use it when/).first()).toBeVisible()
 
-    await page.getByRole('tab', { name: /I want people to find my page/ }).click()
+    // A card says when to use it once opened.
+    const utm = page.getByRole('listitem').filter({ hasText: 'UTM Campaign Link Builder' })
+    await utm.getByRole('button', { name: 'When to use it' }).click()
+    await expect(utm.getByText(/Use it when/)).toBeVisible()
+
+    await filters.getByRole('button', { name: /^Get found/ }).click()
     await expect(page.getByRole('heading', { name: 'Link Preview Image Maker' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'UTM Campaign Link Builder' })).toHaveCount(0)
   })
 
-  test('a job can be opened from its address, and the arrow keys move between jobs', async ({
+  test('a group can be opened from its address and the address follows the filter', async ({
     page,
   }) => {
     await page.goto('/lab?job=share')
-    await expect(page.getByRole('tab', { name: /I want to share a link/ })).toHaveAttribute(
-      'aria-selected',
+    await expect(page.getByRole('button', { name: /^Share/ })).toHaveAttribute(
+      'aria-pressed',
       'true'
     )
+    await expect(page.getByRole('heading', { name: 'UTM Campaign Link Builder' })).toHaveCount(0)
     // The WhatsApp row has a working box that builds a real link.
     await expect(
       page.getByText(
         'https://wa.me/919876543210?text=Hi%2C%20please%20share%20your%20price%20list.'
       )
     ).toBeVisible()
-    await page.getByRole('tab', { name: /I want to share a link/ }).focus()
-    await page.keyboard.press('ArrowDown')
-    await expect(page.getByRole('tab', { name: /I am just looking around/ })).toHaveAttribute(
-      'aria-selected',
-      'true'
-    )
+    await page.getByRole('button', { name: /^Build/ }).click()
     await expect(page).toHaveURL(/\/lab\?job=build$/)
+    await page.getByRole('button', { name: /^All/ }).click()
+    await expect(page).toHaveURL(/\/lab$/)
   })
 
   test('the two QR codes are one tool with a Fixed / Changeable switch', async ({ page }) => {
@@ -70,13 +75,17 @@ test.describe('Lab hub', () => {
     )
     await expect(page.getByText(/devstash\.me\/q\/spring-menu/)).toBeVisible()
     // There is no case study for this one, so no dead link is offered.
-    const qrRow = page.getByRole('listitem').filter({ hasText: 'QR Code Generator' })
+    const qrRow = page.getByRole('listitem').filter({ hasText: 'QR Code Maker' })
     await expect(qrRow.getByRole('link', { name: 'Case study' })).toHaveCount(0)
   })
 
   test('copy link puts the full tool address on the clipboard', async ({ page }) => {
     await page.goto('/lab')
-    await page.getByRole('button', { name: 'Copy link' }).first().click()
+    await page
+      .getByRole('listitem')
+      .filter({ hasText: 'UTM Campaign Link Builder' })
+      .getByRole('button', { name: 'Copy link' })
+      .click()
     const text = await page.evaluate(() => navigator.clipboard.readText())
     expect(text).toMatch(/^https?:\/\/[^/]+\/lab\/utm-builder$/)
   })
@@ -1134,7 +1143,7 @@ test.describe('Lab hub: search and try-it boxes', () => {
     await page.getByLabel('Describe what you want to do').fill('zzzz')
     await expect(page.getByText(/Nothing matches that/)).toBeVisible()
     await page.getByRole('button', { name: 'Clear' }).click()
-    await expect(page.getByRole('tab')).toHaveCount(4)
+    await expect(page.getByRole('heading', { name: 'Measure' })).toBeVisible()
   })
 
   test('the slash key focuses the search box', async ({ page }) => {
@@ -1150,7 +1159,6 @@ test.describe('Lab hub: search and try-it boxes', () => {
     await page.goto('/lab')
     await page.getByLabel('Campaign name').first().fill('Diwali Offer')
     await expect(page.getByText(/utm_campaign=diwali-offer/).first()).toBeVisible()
-    await page.getByRole('tab', { name: /I run ads or campaigns/ }).click()
     await page.getByLabel('Event name').fill('2bad name')
     await expect(page.getByText(/must start with a letter/)).toBeVisible()
     await page.getByLabel('Event name').fill('generate_lead')
