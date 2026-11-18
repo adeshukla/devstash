@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
+import { LabTour } from '@/components/lab/LabTour'
 import { UtmToolkitNav } from '@/components/lab/UtmToolkitNav'
 import { ReportCleaner } from '@/components/lab/ReportCleaner'
 import { FaqSection } from '@/components/sections/FaqSection'
@@ -63,6 +64,7 @@ export default function UtmReportCleanerPage() {
               differently are merged, with totals and a list you can paste back into your sheet.
               Free, and nothing leaves your browser.
             </p>
+            <LabTour slug="utm-report-cleaner" />
           </div>
         </section>
 

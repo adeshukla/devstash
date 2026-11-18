@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
+import { LabTour } from '@/components/lab/LabTour'
 import { UtmToolkitNav } from '@/components/lab/UtmToolkitNav'
 import { UtmChecker } from '@/components/lab/UtmChecker'
 import { FaqSection } from '@/components/sections/FaqSection'
@@ -87,6 +88,7 @@ export default function UtmLinkCheckerPage() {
               in, what is wrong, and a cleaned version to copy. Free, and nothing leaves your
               browser.
             </p>
+            <LabTour slug="utm-link-checker" />
           </div>
         </section>
 

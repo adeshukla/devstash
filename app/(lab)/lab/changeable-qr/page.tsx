@@ -2,6 +2,7 @@ import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
+import { LabTour } from '@/components/lab/LabTour'
 import { ChangeableQr } from '@/components/lab/ChangeableQr'
 import { FaqSection } from '@/components/sections/FaqSection'
 
@@ -62,6 +63,7 @@ export default function ChangeableQrPage() {
               just point it at the new page. Free. Sign in with Google, or with an email and
               password.
             </p>
+            <LabTour slug="changeable-qr" />
           </div>
         </section>
         <section className="px-6 py-8 sm:py-12">

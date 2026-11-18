@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import jsQR from 'jsqr'
+import { TOURS } from '../../lib/lab/tours'
 
 /**
  * Lab hub and the smaller tools: what only a browser can break. Pure logic has
@@ -892,4 +893,58 @@ test('the QR Wi-Fi and contact forms explain a missing name', async ({ page }) =
   await expect(page.getByText(/Add a name or a company/)).toBeVisible()
   await page.getByLabel('First name').fill('Adesh')
   await expect(page.getByText(/Add a name or a company/)).toHaveCount(0)
+})
+
+test.describe('Guided tours', () => {
+  for (const [slug, steps] of Object.entries(TOURS)) {
+    test(`/lab/${slug}: every step finds what it points at, and Done gives focus back`, async ({
+      page,
+    }) => {
+      await page.goto(`/lab/${slug}`)
+      const start = page.getByRole('button', { name: 'Take a 1-minute tour' })
+      await start.click()
+      const dialog = page.getByRole('dialog', { name: /Guided tour/ })
+      const label = (await dialog.getAttribute('aria-label')) ?? ''
+      const total = Number(label.match(/of (\d+)/)?.[1])
+      expect(total).toBeGreaterThanOrEqual(steps.filter((s) => !s.optional).length)
+      // Without optional steps, none may be skipped: a skipped step means its target moved.
+      if (!steps.some((s) => s.optional)) expect(total).toBe(steps.length)
+      for (let i = 0; i < total; i++) {
+        await expect(dialog).toHaveAttribute('aria-label', `Guided tour, step ${i + 1} of ${total}`)
+        const outline = page.locator('.fixed.inset-0 > div[aria-hidden="true"]')
+        await expect(outline).toBeVisible()
+        const box = await outline.boundingBox()
+        expect(box!.width).toBeGreaterThan(20)
+        expect(box!.height).toBeGreaterThan(20)
+        await dialog.getByRole('button', { name: i === total - 1 ? 'Done' : 'Next' }).click()
+      }
+      await expect(dialog).toHaveCount(0)
+      await expect(start).toBeFocused()
+    })
+  }
+
+  test('"Fill in an example" fills the link checker and Escape closes the tour', async ({
+    page,
+  }) => {
+    await page.goto('/lab/utm-link-checker')
+    await page.getByRole('button', { name: 'Take a 1-minute tour' }).click()
+    await page.getByRole('button', { name: 'Fill in an example' }).click()
+    await expect(page.locator('#utm-check')).not.toHaveValue('')
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog', { name: /Guided tour/ })).toHaveCount(0)
+  })
+
+  test('the tour card fits on a phone and the pages have no accessibility problems with it open', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 667 })
+    await page.goto('/lab/whatsapp-link-generator')
+    await page.getByRole('button', { name: 'Take a 1-minute tour' }).click()
+    const card = await page.getByRole('dialog', { name: /Guided tour/ }).boundingBox()
+    expect(card!.x).toBeGreaterThanOrEqual(0)
+    expect(card!.x + card!.width).toBeLessThanOrEqual(375)
+    expect(card!.y + card!.height).toBeLessThanOrEqual(667)
+    const results = await new AxeBuilder({ page }).analyze()
+    expect(results.violations.map((v) => `${v.id}: ${v.nodes[0]?.target}`)).toEqual([])
+  })
 })

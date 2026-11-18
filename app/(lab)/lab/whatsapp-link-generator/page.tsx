@@ -2,6 +2,7 @@ import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
+import { LabTour } from '@/components/lab/LabTour'
 import { WhatsAppLink } from '@/components/lab/WhatsAppLink'
 import { FaqSection } from '@/components/sections/FaqSection'
 
@@ -60,6 +61,7 @@ export default function WhatsAppLinkGeneratorPage() {
               to print and a snippet for your website. Add a campaign code to see which poster or ad
               each chat came from. Free, no signup, and nothing leaves your browser.
             </p>
+            <LabTour slug="whatsapp-link-generator" />
           </div>
         </section>
 

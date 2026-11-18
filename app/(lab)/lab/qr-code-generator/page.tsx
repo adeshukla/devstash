@@ -2,6 +2,7 @@ import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
+import { LabTour } from '@/components/lab/LabTour'
 import { QrGenerator } from '@/components/lab/QrGenerator'
 import { FaqSection } from '@/components/sections/FaqSection'
 
@@ -65,6 +66,7 @@ export default function QrCodeGeneratorPage() {
               email, a phone number or text. Save it as PNG or SVG, or print it. Free, no signup,
               and nothing leaves your browser.
             </p>
+            <LabTour slug="qr-code-generator" />
           </div>
         </section>
 

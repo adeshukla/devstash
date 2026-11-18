@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
+import { LabTour } from '@/components/lab/LabTour'
 import { UtmToolkitNav } from '@/components/lab/UtmToolkitNav'
 import { UtmBuilder } from '@/components/lab/UtmBuilder'
 import { UtmTemplateButton } from '@/components/lab/UtmTemplateButton'
@@ -69,6 +70,7 @@ export default function UtmBuilderPage() {
               many pages and channels at once, then export. Runs in your browser; your saved list
               stays on this device.
             </p>
+            <LabTour slug="utm-builder" />
           </div>
         </section>
 

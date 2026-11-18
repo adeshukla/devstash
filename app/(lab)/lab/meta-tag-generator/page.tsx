@@ -2,6 +2,7 @@ import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
+import { LabTour } from '@/components/lab/LabTour'
 import { MetaTagGenerator } from '@/components/lab/MetaTagGenerator'
 import { MetaAudit } from '@/components/lab/MetaAudit'
 import { SeoKit } from '@/components/lab/SeoKit'
@@ -75,6 +76,7 @@ export default function MetaTagGeneratorPage() {
               search engines actually truncate at. Copy the finished &lt;meta&gt; block when it
               looks right. Further down: the other SEO files a Next.js site needs, as code.
             </p>
+            <LabTour slug="meta-tag-generator" />
           </div>
         </section>
 

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui'
+import { resolveTarget } from './tourTarget'
 
 export interface TourStep {
   /** CSS selector of what to point at. A step whose target is not on the page is skipped. */
@@ -22,7 +23,7 @@ const GAP = 14
  */
 export function OgTour({ steps, onClose }: { steps: TourStep[]; onClose: () => void }) {
   // Opened by a click, so this only ever runs in the browser.
-  const [list] = useState(() => steps.filter((s) => document.querySelector(s.target)))
+  const [list] = useState(() => steps.filter((s) => resolveTarget(s.target)))
   const [i, setI] = useState(0)
   const [box, setBox] = useState<{ x: number; y: number; w: number; h: number; ch: number } | null>(
     null
@@ -32,7 +33,7 @@ export function OgTour({ steps, onClose }: { steps: TourStep[]; onClose: () => v
   const last = i === list.length - 1
 
   const measure = useCallback(() => {
-    const el = step && document.querySelector(step.target)
+    const el = step && resolveTarget(step.target)
     if (!el) return
     const r = el.getBoundingClientRect()
     setBox({
@@ -46,9 +47,11 @@ export function OgTour({ steps, onClose }: { steps: TourStep[]; onClose: () => v
 
   useEffect(() => {
     if (!step) return
-    const el = document.querySelector(step.target)
+    const el = resolveTarget(step.target)
     if (!el) return
-    el.closest('details')?.setAttribute('open', '')
+    // Open every collapsed section the target sits inside, outermost last.
+    for (let d = el.closest('details'); d; d = d.parentElement?.closest('details') ?? null)
+      d.setAttribute('open', '')
     const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     window.scrollTo({
       top: Math.max(0, window.scrollY + el.getBoundingClientRect().top - 90),

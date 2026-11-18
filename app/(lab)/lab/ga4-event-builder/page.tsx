@@ -2,6 +2,7 @@ import { H1_HEADLINE } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { LabToolSchema } from '@/components/lab/LabToolSchema'
+import { LabTour } from '@/components/lab/LabTour'
 import { Ga4EventBuilder } from '@/components/lab/Ga4EventBuilder'
 import { FaqSection } from '@/components/sections/FaqSection'
 
@@ -61,6 +62,7 @@ export default function Ga4EventBuilderPage() {
               checked as you type, so GA4 does not silently drop it. Free, and nothing leaves your
               browser.
             </p>
+            <LabTour slug="ga4-event-builder" />
           </div>
         </section>
 
