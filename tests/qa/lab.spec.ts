@@ -10,60 +10,66 @@ import jsQR from 'jsqr'
 test.use({ permissions: ['clipboard-read', 'clipboard-write'] })
 
 test.describe('Lab hub', () => {
-  test('leads with jobs to do, and every card shows a real result', async ({ page }) => {
+  test('starts from what the visitor wants to do, and each job shows its tools with a real result', async ({
+    page,
+  }) => {
     await page.goto('/lab')
-    await expect(page.getByRole('heading', { name: 'What do you need to do?' })).toBeVisible()
-    await expect(page.getByRole('link', { name: /Tag links for a campaign/ })).toHaveAttribute(
-      'href',
-      '/lab/utm-builder'
+    await expect(page.getByRole('heading', { name: 'What do you want to do?' })).toBeVisible()
+    const jobs = page.getByRole('tab')
+    await expect(jobs).toHaveCount(4)
+    // It opens on Measure; the UTM sample is produced by the builder's own code.
+    await expect(page.getByRole('tab', { name: /I run ads or campaigns/ })).toHaveAttribute(
+      'aria-selected',
+      'true'
     )
-    // The UTM card's sample result is produced by the builder's own code.
+    await expect(page.getByRole('heading', { name: 'UTM Builder' })).toBeVisible()
     await expect(page.getByText('utm_campaign=spring-sale').first()).toBeVisible()
-    expect(await page.getByText(/Real output ·/).count()).toBeGreaterThanOrEqual(6)
+    await expect(page.getByText(/Use it when/).first()).toBeVisible()
+
+    await page.getByRole('tab', { name: /I want people to find my page/ }).click()
+    await expect(page.getByRole('heading', { name: 'OG Image Maker' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'UTM Builder' })).toHaveCount(0)
   })
 
-  test('an odd last card spans the row instead of sitting alone', async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 900 })
-    await page.goto('/lab')
-    const cards = page.locator('section', { hasText: 'More tools' }).locator('article')
-    const count = await cards.count()
-    const first = await cards.first().boundingBox()
-    const last = await cards.last().boundingBox()
-    if (count % 2 === 1) expect(last!.width).toBeGreaterThan(first!.width * 1.8)
-    else expect(last!.width).toBeLessThan(first!.width * 1.2)
-  })
-
-  test('the toolkit is three tools; the QR generator sits under More tools with no toolkit nav', async ({
+  test('a job can be opened from its address, and the arrow keys move between jobs', async ({
     page,
   }) => {
-    await page.goto('/lab')
-    await expect(page.getByText(/Three tools that work as one/)).toBeVisible()
-    const more = page.locator('section', { hasText: 'More tools' })
-    await expect(more.getByRole('heading', { name: 'QR Code Generator' })).toBeVisible()
-    const toolkit = page.locator('section', { hasText: 'The UTM toolkit' })
-    await expect(toolkit.getByRole('heading', { name: 'QR Code Generator' })).toHaveCount(0)
-
-    await page.goto('/lab/utm-builder')
-    const nav = page.getByRole('navigation', { name: 'UTM toolkit' })
-    await expect(nav.getByRole('link')).toHaveCount(3)
-    await expect(nav.getByRole('link', { name: 'QR codes' })).toHaveCount(0)
-
-    await page.goto('/lab/qr-code-generator')
-    await expect(page.getByRole('navigation', { name: 'UTM toolkit' })).toHaveCount(0)
-  })
-
-  test('the WhatsApp link generator has a card, a job shortcut and a real example link', async ({
-    page,
-  }) => {
-    await page.goto('/lab')
-    await expect(
-      page.getByRole('link', { name: /Get customers to message me on WhatsApp/ })
-    ).toHaveAttribute('href', '/lab/whatsapp-link-generator')
+    await page.goto('/lab?job=share')
+    await expect(page.getByRole('tab', { name: /I want to share a link/ })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    )
+    // The WhatsApp row shows a real link made by the generator.
     await expect(
       page.getByText(
         'https://wa.me/919876543210?text=Hi%2C%20please%20share%20your%20price%20list.%20%5Bref%3A%20diwali-poster%5D'
       )
     ).toBeVisible()
+    await page.getByRole('tab', { name: /I want to share a link/ }).focus()
+    await page.keyboard.press('ArrowDown')
+    await expect(page.getByRole('tab', { name: /I am just looking around/ })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    )
+    await expect(page).toHaveURL(/\/lab\?job=build$/)
+  })
+
+  test('the two QR codes are one tool with a Fixed / Changeable switch', async ({ page }) => {
+    await page.goto('/lab?job=share')
+    await expect(page.getByRole('heading', { name: 'QR Code Generator' })).toHaveCount(1)
+    await expect(page.getByRole('link', { name: /Open fixed/ })).toHaveAttribute(
+      'href',
+      '/lab/qr-code-generator'
+    )
+    await page.getByRole('button', { name: 'Changeable', exact: true }).click()
+    await expect(page.getByRole('link', { name: /Open changeable/ })).toHaveAttribute(
+      'href',
+      '/lab/changeable-qr'
+    )
+    await expect(page.getByText(/devstash\.me\/q\/spring-menu/)).toBeVisible()
+    // There is no case study for this one, so no dead link is offered.
+    const qrRow = page.getByRole('listitem').filter({ hasText: 'QR Code Generator' })
+    await expect(qrRow.getByRole('link', { name: 'Case study' })).toHaveCount(0)
   })
 
   test('copy link puts the full tool address on the clipboard', async ({ page }) => {

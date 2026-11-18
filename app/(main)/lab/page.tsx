@@ -1,17 +1,15 @@
 import { H1_DISPLAY } from '@/lib/utils/typography'
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { buildMetadata } from '@/lib/seo/buildMetadata'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Breadcrumb } from '@/components/layout'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildItemListSchema } from '@/lib/schema/builders'
-import { Badge, Button, CardTilt } from '@/components/ui'
+import { Button } from '@/components/ui'
 import { PageFacts } from '@/components/ui/PageFacts'
 import { getAllProjects } from '@/lib/markdown/projects'
 import { FaqSection } from '@/components/sections/FaqSection'
-import { LabTools, type LabTool } from '@/components/lab/LabTools'
-import { LabPreview, type PreviewKind } from '@/components/lab/LabPreview'
+import { LabIndex, type IndexTool, type JobGroup, type ToolView } from '@/components/lab/LabIndex'
 import { buildUtmUrl } from '@/lib/lab/utm'
 import { analyzeLink } from '@/lib/lab/utmCheck'
 import { cleanReport } from '@/lib/lab/reportClean'
@@ -36,7 +34,6 @@ interface Demo {
   name: string
   blurb: string
   tag: string
-  preview: PreviewKind
 }
 
 const FLAGSHIP = {
@@ -58,7 +55,6 @@ const TOOLS: Demo[] = [
     blurb:
       'Live shape, color, animated-border, and box-shadow customizers, with copyable CSS on every demo.',
     tag: 'CSS',
-    preview: 'shapes',
   },
   {
     slug: 'illustration-generator',
@@ -66,7 +62,6 @@ const TOOLS: Demo[] = [
     blurb:
       'Composes a unique, theme-aware animated SVG from a text description — procedural generation, not a fixed list of presets.',
     tag: 'Generative',
-    preview: 'illustration',
   },
   {
     slug: 'meta-tag-generator',
@@ -74,7 +69,6 @@ const TOOLS: Demo[] = [
     blurb:
       'Previews your title as Google, X and Facebook cards, then writes the Next.js files: metadata, FAQ schema, robots.ts, sitemap.ts and an OG image.',
     tag: 'SEO',
-    preview: 'meta',
   },
   {
     slug: 'whatsapp-link-generator',
@@ -82,7 +76,6 @@ const TOOLS: Demo[] = [
     blurb:
       'A click-to-chat link with a country picker, a message already typed and a campaign code, plus a QR code and an HTML snippet.',
     tag: 'Marketing',
-    preview: 'chat',
   },
   {
     slug: 'ga4-event-builder',
@@ -90,7 +83,6 @@ const TOOLS: Demo[] = [
     blurb:
       'Build a GA4 event, check its name and parameters against Google’s limits, and copy the dataLayer push or gtag.js call.',
     tag: 'Analytics',
-    preview: 'event',
   },
   {
     slug: 'og-image-maker',
@@ -98,7 +90,6 @@ const TOOLS: Demo[] = [
     blurb:
       'Pick a size, type your words, take the colours from your site address or a picture, and preview on desktop and phone. Full control one click away.',
     tag: 'Design',
-    preview: 'card',
   },
   {
     slug: 'utm-builder',
@@ -106,7 +97,6 @@ const TOOLS: Demo[] = [
     blurb:
       'Three steps to a clean tracking link or QR code, with a GA4 channel check, team naming rules, sheet import and a QR print kit. Client-side; saved data stays on your device.',
     tag: 'Marketing',
-    preview: 'utm',
   },
   {
     slug: 'utm-link-checker',
@@ -114,7 +104,6 @@ const TOOLS: Demo[] = [
     blurb:
       'Paste links you already use: see what each tag says, which GA4 channel it lands in, what is wrong, and a cleaned link to copy. Includes a plain table of how GA4 sorts traffic.',
     tag: 'Marketing',
-    preview: 'check',
   },
   {
     slug: 'qr-code-generator',
@@ -122,7 +111,6 @@ const TOOLS: Demo[] = [
     blurb:
       'Static codes for a website, WhatsApp chat, UPI payment, Wi-Fi, contact card, email, phone or text. They never expire, save as PNG or SVG, and print. Nothing is uploaded.',
     tag: 'Utility',
-    preview: 'qr',
   },
   {
     slug: 'changeable-qr',
@@ -130,7 +118,6 @@ const TOOLS: Demo[] = [
     blurb:
       'Print one QR code and change the page it opens later. Sign in with Google or email, claim a permanent name, and point it anywhere. Free. Your email and link are stored; scans are not tracked.',
     tag: 'Utility',
-    preview: 'qr',
   },
   {
     slug: 'utm-report-cleaner',
@@ -138,7 +125,6 @@ const TOOLS: Demo[] = [
     blurb:
       'Paste a GA4 or Looker Studio export: rows that are the same campaign written differently are merged, with totals, an original-to-clean list and a Looker Studio field.',
     tag: 'Marketing',
-    preview: 'merge',
   },
 ]
 
@@ -149,7 +135,7 @@ const PRINCIPLES = [
   },
   {
     title: 'Real output, not mock-ups',
-    body: 'Each preview animates the shape of what the tool really produces. Open one and what you get is the actual result, ready to copy.',
+    body: 'Each tool shows a real result for a sample input, made by the tool’s own code. Open one and what you get is the actual result, ready to copy.',
   },
   {
     title: 'Honest by design',
@@ -160,7 +146,8 @@ const PRINCIPLES = [
 const FAQ = [
   {
     question: 'Do I need an account?',
-    answer: 'No. Every tool opens straight away, with no signup.',
+    answer:
+      'Not to start. Every tool opens straight away. Only the Changeable QR Code asks for a free account, because it has to remember which page your code opens.',
   },
   {
     question: 'Is what I type sent anywhere?',
@@ -262,73 +249,109 @@ function examples(): Record<string, { input: string; output: string }> {
   }
 }
 
-const JOBS = [
-  { job: 'Tag links for a campaign', tool: 'UTM Builder', href: '/lab/utm-builder' },
-  { job: 'Check links I already use', tool: 'Link Checker', href: '/lab/utm-link-checker' },
-  { job: 'Fix a report with split rows', tool: 'Report Cleaner', href: '/lab/utm-report-cleaner' },
-  { job: 'Make a QR code', tool: 'QR Code Generator', href: '/lab/qr-code-generator' },
+/** The reason a normal person would open each tool, in their words. */
+const USE_WHEN: Record<string, string> = {
+  'meta-tag-generator':
+    'you want to see how your page looks on Google and in shared links, check the tags it already has, or see which AI crawlers your robots.txt blocks.',
+  'og-image-maker':
+    'you need the picture that shows when your link is shared on WhatsApp, LinkedIn or X.',
+  'utm-builder':
+    'you are about to run an ad, email or post and want to know afterwards which one brought visitors.',
+  'utm-link-checker': 'you already have campaign links and something looks wrong in your reports.',
+  'utm-report-cleaner':
+    'your GA4 report lists the same campaign under several spellings and you want one total.',
+  'ga4-event-builder':
+    'you are adding tracking for a button, a signup or a purchase and want the code checked first.',
+  'qr-code-generator':
+    'you want a QR code for a website, a WhatsApp chat, a UPI payment, Wi-Fi or a contact card, and you never want it to expire.',
+  'changeable-qr':
+    'you will print a QR code and may need to change the page it opens later. Needs a free account.',
+  'whatsapp-link-generator':
+    'you want customers to tap a link and start a WhatsApp chat with a message already typed. The QR is an extra.',
+  'css-shapes-playground':
+    'you want a CSS shape, border or shadow and would rather see it than write it.',
+  'illustration-generator': 'you want a quick animated illustration for a page from a few words.',
+  'ai-content-pipeline':
+    'you want a blog draft that marks the parts only you can write, instead of inventing them.',
+}
+
+/** The jobs, written as what the visitor wants. Tool ids are slugs; the QR tool has two views. */
+const GROUPS: { id: string; question: string; name: string; sub: string; tools: string[][] }[] = [
   {
-    job: 'Print a QR code whose page I can change later',
-    tool: 'Changeable QR Code',
-    href: '/lab/changeable-qr',
+    id: 'found',
+    question: 'I want people to find my page',
+    name: 'Get found',
+    sub: 'Make your page look right on Google and in shared links.',
+    tools: [['meta-tag-generator'], ['og-image-maker']],
   },
   {
-    job: 'Get customers to message me on WhatsApp',
-    tool: 'WhatsApp Link Generator',
-    href: '/lab/whatsapp-link-generator',
+    id: 'measure',
+    question: 'I run ads or campaigns and want to know what works',
+    name: 'Measure',
+    sub: 'Tag your links, check the ones you have, and clean up the reports. These three share one saved workspace.',
+    tools: [['utm-builder'], ['utm-link-checker'], ['utm-report-cleaner'], ['ga4-event-builder']],
   },
   {
-    job: 'Check a GA4 event before I ship it',
-    tool: 'GA4 Event Builder',
-    href: '/lab/ga4-event-builder',
+    id: 'share',
+    question: 'I want to share a link, a number or a payment',
+    name: 'Share',
+    sub: 'QR codes and chat links that people scan or tap.',
+    tools: [['qr-code-generator', 'changeable-qr'], ['whatsapp-link-generator']],
   },
   {
-    job: 'Make a share image for a page',
-    tool: 'OG Image Maker',
-    href: '/lab/og-image-maker',
-  },
-  {
-    job: 'See how my page looks on Google',
-    tool: 'Next.js SEO Kit',
-    href: '/lab/meta-tag-generator',
+    id: 'build',
+    question: 'I am just looking around',
+    name: 'Build and experiment',
+    sub: 'CSS, illustration and an AI writing experiment.',
+    tools: [['css-shapes-playground'], ['illustration-generator'], ['ai-content-pipeline']],
   },
 ]
 
 export default async function LabPage() {
   const samples = examples()
   const projects = await getAllProjects()
-  const toolkitSlugs = ['utm-builder', 'utm-link-checker', 'utm-report-cleaner']
-  const ordered = [
-    ...toolkitSlugs.map((s) => TOOLS.find((d) => d.slug === s)!),
-    ...TOOLS.filter((d) => !toolkitSlugs.includes(d.slug)),
-  ]
-  const tools: LabTool[] = ordered.map((demo) => {
-    const project = projects.find((p) => p.slug === demo.slug)
+  const known = [...TOOLS, { ...FLAGSHIP, tag: 'AI' }]
+
+  const view = (slug: string, label: string): ToolView => {
+    const demo = known.find((d) => d.slug === slug)!
+    const project = projects.find((p) => p.slug === slug)
     return {
-      slug: demo.slug,
-      name: demo.name,
+      label,
+      slug,
       blurb: demo.blurb,
-      tag: demo.tag,
+      useWhen: USE_WHEN[slug],
+      example: samples[slug],
       highlights: project?.highlights ?? [],
       stats: project?.coverStats ?? [],
-      example: samples[demo.slug],
-      tech: project?.tech ?? [],
-      preview: <LabPreview kind={demo.preview} />,
+      caseStudy: Boolean(project),
     }
-  })
+  }
 
-  const toolkitTools = tools.filter((x) => toolkitSlugs.includes(x.slug))
-  const otherTools = tools.filter((x) => !toolkitSlugs.includes(x.slug))
+  const groups: JobGroup[] = GROUPS.map((g) => ({
+    id: g.id,
+    question: g.question,
+    name: g.name,
+    sub: g.sub,
+    tools: g.tools.map((slugs): IndexTool => {
+      const first = known.find((d) => d.slug === slugs[0])!
+      // Two slugs in one row: the same job, a fixed or a changeable version.
+      const labels = slugs.length > 1 ? ['Fixed', 'Changeable'] : ['']
+      return {
+        id: slugs[0],
+        name: slugs.length > 1 ? 'QR Code Generator' : first.name,
+        tag: first.tag,
+        views: slugs.map((s, i) => view(s, labels[i])),
+      }
+    }),
+  }))
 
   return (
     <div>
       <JsonLd
-        data={buildItemListSchema(
-          [...ordered, FLAGSHIP].map((d) => ({ name: d.name, url: `/lab/${d.slug}` }))
-        )}
+        data={buildItemListSchema(known.map((d) => ({ name: d.name, url: `/lab/${d.slug}` })))}
       />
       {/* Breadcrumb emits its own BreadcrumbList JSON-LD */}
-      <section className="border-ds-border border-b py-16">
+      <section className="border-ds-border border-b py-8 sm:py-16">
         <div className="max-w-site mx-auto px-6">
           <Breadcrumb
             items={[
@@ -336,102 +359,33 @@ export default async function LabPage() {
               { name: 'Lab', url: 'https://devstash.me/lab' },
             ]}
           />
-          <h1 className={`${H1_DISPLAY} mt-6`}>Everything here is running.</h1>
+          <h1 className={`${H1_DISPLAY} mt-6`}>Free tools that work in your browser.</h1>
           <p className="text-ds-muted mt-4 max-w-[68ch] text-lg leading-relaxed">
-            Not screenshots or case studies — working things you can use right now, in your browser,
-            with no signup. Break them, copy from them, view the source. Each card shows a real
-            result for a sample input, and the animation above it shows the shape of what the tool
-            does.
+            Tools for search, campaigns and QR codes. No signup to start. Pick what you want to do
+            below; each tool shows a real example before you open it.
           </p>
-          <PageFacts
-            items={[
-              { value: TOOLS.length + 1, label: 'live tools' },
-              { value: 1, label: 'runs server-side' },
-              { value: 0, label: 'signups needed' },
-            ]}
-          />
-        </div>
-      </section>
-
-      <section className="border-ds-border border-b py-10">
-        <div className="max-w-site mx-auto px-6">
-          <h2 className="text-ds-text text-xl font-bold tracking-tight">What do you need to do?</h2>
-          <ul className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {JOBS.map((j) => (
-              <li key={j.href}>
-                <Link
-                  href={j.href}
-                  className="border-ds-border bg-ds-surface hover:border-ds-accent focus-visible:ring-ds-accent flex h-full flex-col gap-1 rounded-xl border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                >
-                  <span className="text-ds-text text-sm font-medium">{j.job}</span>
-                  <span className="text-ds-accent-strong text-xs">{j.tool} &rarr;</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div className="hidden sm:block">
+            <PageFacts
+              items={[
+                { value: known.length, label: 'live tools' },
+                { value: 3, label: 'use a server' },
+                { value: 0, label: 'signups to start' },
+              ]}
+            />
+          </div>
         </div>
       </section>
 
       <section className="py-12 pb-16">
         <div className="max-w-site mx-auto px-6">
-          <h2 className="text-ds-text mb-2 text-2xl font-bold tracking-tight">The UTM toolkit</h2>
-          <p className="text-ds-muted mb-8 max-w-[64ch]">
-            Three tools that work as one: they share your saved links, team rules and remembered
-            clean-ups, and back up to a single file. Build links (with QR codes and a print kit),
-            check old ones, clean split reports.
+          <h2 className="text-ds-text text-2xl font-bold tracking-tight">
+            What do you want to do?
+          </h2>
+          <p className="text-ds-muted mt-2 mb-8 max-w-[64ch]">
+            Choose the sentence that sounds like you. The tools for that job appear with a plain
+            line on when to use each one.
           </p>
-          <LabTools tools={toolkitTools} />
-        </div>
-      </section>
-
-      {/* The AI pipeline is an experiment now: the UTM toolkit leads the page. */}
-      <section className="border-ds-border border-t py-16">
-        <div className="max-w-site mx-auto px-6">
-          <CardTilt>
-            <Link
-              href={`/lab/${FLAGSHIP.slug}`}
-              className="group focus-visible:ring-ds-accent focus-visible:ring-offset-ds-bg rounded-card block focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-            >
-              <article className="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-14">
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-3">
-                    <Badge variant="purple">Experiment</Badge>
-                    <span className="text-ds-muted text-xs">Runs server-side on every request</span>
-                  </div>
-                  <h2 className="text-ds-text group-hover:text-ds-accent text-2xl font-bold tracking-tight transition-colors sm:text-3xl">
-                    {FLAGSHIP.name}
-                  </h2>
-                  <p className="text-ds-muted max-w-[60ch] leading-relaxed">{FLAGSHIP.blurb}</p>
-                  <ol className="border-ds-border mt-1 flex flex-col divide-y divide-[var(--color-ds-border)] border-y">
-                    {FLAGSHIP.steps.map((step) => (
-                      <li key={step.name} className="flex items-baseline gap-3 py-2.5">
-                        <span className="text-ds-text w-24 shrink-0 text-sm font-medium">
-                          {step.name}
-                        </span>
-                        <span className="text-ds-muted text-sm">{step.detail}</span>
-                      </li>
-                    ))}
-                  </ol>
-                  <span className="text-ds-accent mt-1 text-sm font-medium">
-                    Run the pipeline &rarr;
-                  </span>
-                </div>
-                <div className="card-spotlight card-glow rounded-xl">
-                  <LabPreview kind="pipeline" />
-                </div>
-              </article>
-            </Link>
-          </CardTilt>
-        </div>
-      </section>
-
-      <section className="py-4 pb-16">
-        <div className="max-w-site mx-auto px-6">
-          <h2 className="text-ds-text mb-2 text-2xl font-bold tracking-tight">More tools</h2>
-          <p className="text-ds-muted mb-8 max-w-[60ch]">
-            Smaller builds that stand on their own. Open any card for what is inside it.
-          </p>
-          <LabTools tools={otherTools} />
+          <LabIndex groups={groups} initial="measure" />
         </div>
       </section>
 
