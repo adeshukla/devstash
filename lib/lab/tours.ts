@@ -200,3 +200,20 @@ export const TOURS: Record<string, TourStepData[]> = {
     },
   ],
 }
+
+// The sessions bar sits above these tools, so their tours end by pointing at it.
+const SESSIONS_STEP: TourStepData = {
+  target: '[data-tour=sessions]',
+  title: 'Your work is kept',
+  body: 'Close the tab and your work is still here when you come back. Open Sessions to save it under a name, start another one, copy, rename, export or delete.',
+}
+for (const slug of [
+  'utm-builder',
+  'utm-link-checker',
+  'utm-report-cleaner',
+  'ga4-event-builder',
+  'meta-tag-generator',
+  'qr-code-generator',
+  'whatsapp-link-generator',
+])
+  TOURS[slug].push(SESSIONS_STEP)

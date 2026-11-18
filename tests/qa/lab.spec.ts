@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
+import { readFile } from 'node:fs/promises'
 import AxeBuilder from '@axe-core/playwright'
 import jsQR from 'jsqr'
 import { TOURS } from '../../lib/lab/tours'
@@ -946,5 +947,176 @@ test.describe('Guided tours', () => {
     expect(card!.y + card!.height).toBeLessThanOrEqual(667)
     const results = await new AxeBuilder({ page }).analyze()
     expect(results.violations.map((v) => `${v.id}: ${v.nodes[0]?.target}`)).toEqual([])
+  })
+})
+
+test.describe('My sessions', () => {
+  // Use the plain download path so a test can catch the file.
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      delete (window as unknown as { showSaveFilePicker?: unknown }).showSaveFilePicker
+    })
+  })
+
+  const draftKey = 'devstash-draft-whatsapp-link'
+  const waitForDraft = (page: Page, key = draftKey) =>
+    expect
+      .poll(() => page.evaluate((k) => window.localStorage.getItem(k), key), { timeout: 5000 })
+      .not.toBeNull()
+
+  test('closing the tab keeps your work, and "Start fresh" clears it', async ({ page }) => {
+    await page.goto('/lab/whatsapp-link-generator')
+    await page.getByLabel('WhatsApp number').fill('98765 43210')
+    await page.getByLabel('Message ready to send').fill('नमस्ते, price list?')
+    await waitForDraft(page)
+    await page.reload()
+    await expect(page.getByLabel('WhatsApp number')).toHaveValue('98765 43210')
+    await expect(page.getByLabel('Message ready to send')).toHaveValue('नमस्ते, price list?')
+    await expect(page.getByText(/Picked up where you left off/)).toBeVisible()
+    await page.getByRole('button', { name: 'Start fresh' }).click()
+    await expect(page.getByLabel('WhatsApp number')).toHaveValue('')
+    await expect(page.getByText(/Picked up where you left off/)).toHaveCount(0)
+    await expect
+      .poll(() => page.evaluate((k) => window.localStorage.getItem(k), draftKey))
+      .toBe('null')
+    await page.reload()
+    await expect(page.getByLabel('WhatsApp number')).toHaveValue('')
+  })
+
+  test('save, update, copy, rename, reopen and delete named sessions', async ({ page }) => {
+    page.on('dialog', (d) => void d.accept())
+    await page.goto('/lab/whatsapp-link-generator')
+    await page.getByLabel('WhatsApp number').fill('98765 43210')
+    await page.getByRole('button', { name: /^Sessions \(0\)$/ }).click()
+    await page.getByLabel('Save this as a new session').fill('Diwali poster')
+    await page.getByRole('button', { name: 'Save as new' }).click()
+    await expect(page.getByText('Saved as “Diwali poster”.')).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Open Diwali poster$/ })).toBeVisible()
+
+    // A change makes it "not saved to it"; Update saves it into the same session.
+    await page.getByLabel('WhatsApp number').fill('99999 11111')
+    await expect(page.getByText(/changes that are not saved to it/)).toBeVisible()
+    await page.getByRole('button', { name: /^Update “Diwali poster”$/ }).click()
+    await expect(page.getByText('Updated “Diwali poster”.')).toBeVisible()
+
+    // A second session on the same name gets its own name; the first is untouched.
+    await page.getByLabel('Save this as a new session').fill('Diwali poster')
+    await page.getByRole('button', { name: 'Save as new' }).click()
+    await expect(page.getByRole('button', { name: 'Open Diwali poster 2' })).toBeVisible()
+
+    await page.getByRole('button', { name: 'Copy Diwali poster', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Open Diwali poster copy' })).toBeVisible()
+
+    await page.getByRole('button', { name: 'Rename Diwali poster copy' }).click()
+    await page.getByLabel('New name for Diwali poster copy').fill('Holi')
+    await page.getByRole('button', { name: 'Save', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Open Holi' })).toBeVisible()
+
+    // Reopening one puts its work back.
+    await page.getByLabel('WhatsApp number').fill('11111 22222')
+    await page.getByRole('button', { name: 'Open Holi' }).click()
+    await expect(page.getByLabel('WhatsApp number')).toHaveValue('99999 11111')
+
+    // Deleting asks twice.
+    await page.getByRole('button', { name: 'Delete Holi', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Open Holi' })).toBeVisible()
+    await page.getByRole('button', { name: 'Confirm delete Holi' }).click()
+    await expect(page.getByRole('button', { name: 'Open Holi' })).toHaveCount(0)
+  })
+
+  test('a session exports as a file and imports back; another tool file is refused', async ({
+    page,
+  }) => {
+    await page.goto('/lab/whatsapp-link-generator')
+    await page.getByLabel('WhatsApp number').fill('98765 43210')
+    await page.getByLabel('Message ready to send').fill('Hi 👋')
+    await page.getByRole('button', { name: /^Sessions/ }).click()
+    await page.getByLabel('Save this as a new session').fill('Launch')
+    await page.getByRole('button', { name: 'Save as new' }).click()
+
+    const download = page.waitForEvent('download')
+    await page.getByRole('button', { name: 'Export Launch as a file' }).click()
+    const file = await download
+    expect(file.suggestedFilename()).toBe('whatsapp-link-launch.json')
+    const path = (await file.path())!
+    const body = JSON.parse(await readFile(path, 'utf8'))
+    expect(body.app).toBe('devstash-sessions')
+    expect(body.tool).toBe('whatsapp-link')
+    expect(body.sessions[0].data.message).toBe('Hi 👋')
+
+    await page.getByRole('button', { name: 'Delete Launch', exact: true }).click()
+    await page.getByRole('button', { name: 'Confirm delete Launch' }).click()
+    await expect(page.getByRole('button', { name: 'Open Launch' })).toHaveCount(0)
+    await page.getByLabel('Import a sessions file').setInputFiles(path)
+    await expect(page.getByText('Added 1 session.')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Open Launch' })).toBeVisible()
+
+    // The same file is not accepted by a different tool.
+    await page.goto('/lab/qr-code-generator')
+    await page.getByRole('button', { name: /^Sessions/ }).click()
+    await page.getByLabel('Import a sessions file').setInputFiles(path)
+    await expect(page.getByText('That file belongs to a different tool.')).toBeVisible()
+  })
+
+  test('a Wi-Fi password is never written to browser storage', async ({ page }) => {
+    await page.goto('/lab/qr-code-generator')
+    await page.getByRole('button', { name: 'Wi-Fi', exact: true }).click()
+    await page.getByLabel('Network name').fill('Cafe Net')
+    await page.getByLabel(/^Password/).fill('correct-horse-battery-9')
+    await waitForDraft(page, 'devstash-draft-qr-code')
+    const stored = await page.evaluate(() => JSON.stringify({ ...window.localStorage }))
+    expect(stored).toContain('Cafe Net')
+    expect(stored).not.toContain('correct-horse-battery-9')
+  })
+
+  test('UTM builder: a session holds its own saved links, and Open swaps the list', async ({
+    page,
+  }) => {
+    page.on('dialog', (d) => void d.accept())
+    await page.goto('/lab/utm-builder')
+    await page.getByLabel('Landing page link').fill('https://example.com/lp')
+    await page.getByRole('button', { name: 'Google Ads', exact: true }).click()
+    await page.getByLabel('Campaign name', { exact: true }).fill('client-a')
+    await page.getByRole('button', { name: 'Save to list' }).click()
+    const rows = () =>
+      page.evaluate(
+        () => JSON.parse(window.localStorage.getItem('devstash-utm-sheet') ?? '[]').length
+      )
+    expect(await rows()).toBe(1)
+
+    await page.getByRole('button', { name: /^Sessions/ }).click()
+    await page.getByLabel('Save this as a new session').fill('Client A')
+    await page.getByRole('button', { name: 'Save as new' }).click()
+    await expect(page.getByText('Saved as “Client A”.')).toBeVisible()
+
+    await page.getByRole('button', { name: 'New blank session' }).click()
+    await expect.poll(rows).toBe(0)
+    await expect(page.getByLabel('Landing page link')).toHaveValue('')
+
+    await page.getByRole('button', { name: 'Open Client A' }).click()
+    await expect.poll(rows).toBe(1)
+    await expect(page.getByLabel('Landing page link')).toHaveValue('https://example.com/lp')
+
+    // The spreadsheet version carries the saved link.
+    const download = page.waitForEvent('download')
+    await page.getByRole('button', { name: 'Export Client A as a spreadsheet' }).click()
+    const csv = await readFile((await (await download).path())!, 'utf8')
+    expect(csv).toContain('client-a')
+  })
+
+  test('the sessions panel has no accessibility problems, open, in light and dark', async ({
+    page,
+  }) => {
+    for (const scheme of ['light', 'dark'] as const) {
+      await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' })
+      await page.goto('/lab/whatsapp-link-generator')
+      await page.getByLabel('WhatsApp number').fill('98765 43210')
+      await page.getByRole('button', { name: /^Sessions/ }).click()
+      await page.getByLabel('Save this as a new session').fill('A11y check')
+      await page.getByRole('button', { name: 'Save as new' }).click()
+      const results = await new AxeBuilder({ page }).analyze()
+      expect(results.violations.map((v) => `${v.id}: ${v.nodes[0]?.target}`)).toEqual([])
+      await page.evaluate(() => window.localStorage.clear())
+    }
   })
 })

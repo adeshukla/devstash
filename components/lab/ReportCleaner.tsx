@@ -13,7 +13,9 @@ import {
   mergedTsv,
   rememberable,
 } from '@/lib/lab/reportClean'
+import { SessionsBar } from './SessionsBar'
 import { KEYS, readStored, writeStored } from './storage'
+import { oneOf, str } from '@/lib/lab/sessions'
 import { trackLab } from './track'
 import type { Separator } from '@/lib/lab/utm'
 
@@ -114,288 +116,306 @@ export function ReportCleaner() {
     'border-ds-border text-ds-text hover:border-ds-accent hover:text-ds-accent rounded-md border px-2.5 py-1 text-xs transition-colors'
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <label htmlFor="rc-text" className="text-ds-text mb-1.5 block text-[13px] font-medium">
-          Paste your report
-        </label>
-        <textarea
-          id="rc-text"
-          rows={7}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={'Session campaign\tSessions\nspring-sale\t1200\nSpring_Sale\t300'}
-          className="border-ds-border bg-ds-surface2 text-ds-text placeholder:text-ds-muted focus:border-ds-accent w-full resize-y rounded-lg border px-4 py-3 font-mono text-xs leading-relaxed outline-none"
-        />
-        <p className="text-ds-muted mt-1.5 text-sm">
-          Copy the table from GA4 or Looker Studio, or choose the CSV you exported. It needs a
-          column named like Session campaign, Session source / medium, source, medium or campaign,
-          and may have numbers such as Sessions.
-        </p>
-        <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-2">
-          <label className="text-ds-muted max-w-full min-w-0 text-sm">
-            Or choose a file{' '}
-            <input
-              type="file"
-              accept=".csv,.tsv,.txt,text/csv,text/plain"
-              onChange={(e) => pickFile(e.target.files?.[0])}
-              className="text-ds-muted mt-1 block w-full max-w-full text-xs"
-            />
+    <>
+      <SessionsBar
+        tool="utm-report-cleaner"
+        label="report-cleaner"
+        data={{ text, sep, names }}
+        blank={{ text: '', sep: '-', names: {} }}
+        onApply={(d) => {
+          setText(str(d.text, '', 250_000))
+          setSep(oneOf(d.sep, ['-', '_'] as const, '-'))
+          const n: Record<string, string> = {}
+          if (d.names && typeof d.names === 'object')
+            for (const [k, v] of Object.entries(d.names as Record<string, unknown>))
+              if (typeof v === 'string' && k.length < 300 && v.length < 300) n[k] = v
+          setNames(n)
+        }}
+      />
+      <div className="flex flex-col gap-6">
+        <div>
+          <label htmlFor="rc-text" className="text-ds-text mb-1.5 block text-[13px] font-medium">
+            Paste your report
           </label>
-          {!text && (
-            <button
-              type="button"
-              onClick={() => setText(EXAMPLE)}
-              className="text-ds-accent-strong text-sm hover:underline"
-            >
-              Not sure? Try an example
-            </button>
-          )}
-        </div>
-      </div>
-
-      <fieldset className="min-w-0">
-        <legend className="text-ds-text mb-1.5 text-[13px] font-medium">Clean names use</legend>
-        <div className="flex flex-wrap gap-4">
-          {(['-', '_'] as const).map((s) => (
-            <label key={s} className="text-ds-text flex items-center gap-2 text-sm">
-              <input type="radio" name="rc-sep" checked={sep === s} onChange={() => setSep(s)} />
-              {s === '-' ? 'Hyphens (spring-sale)' : 'Underscores (spring_sale)'}
+          <textarea
+            id="rc-text"
+            rows={7}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={'Session campaign\tSessions\nspring-sale\t1200\nSpring_Sale\t300'}
+            className="border-ds-border bg-ds-surface2 text-ds-text placeholder:text-ds-muted focus:border-ds-accent w-full resize-y rounded-lg border px-4 py-3 font-mono text-xs leading-relaxed outline-none"
+          />
+          <p className="text-ds-muted mt-1.5 text-sm">
+            Copy the table from GA4 or Looker Studio, or choose the CSV you exported. It needs a
+            column named like Session campaign, Session source / medium, source, medium or campaign,
+            and may have numbers such as Sessions.
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-2">
+            <label className="text-ds-muted max-w-full min-w-0 text-sm">
+              Or choose a file{' '}
+              <input
+                type="file"
+                accept=".csv,.tsv,.txt,text/csv,text/plain"
+                onChange={(e) => pickFile(e.target.files?.[0])}
+                className="text-ds-muted mt-1 block w-full max-w-full text-xs"
+              />
             </label>
-          ))}
-        </div>
-      </fieldset>
-
-      {result?.error && (
-        <p className="text-ds-warning-strong text-sm" role="alert">
-          {result.error}
-        </p>
-      )}
-
-      {result && !result.error && (
-        <div className="flex flex-col gap-6" aria-live="polite">
-          <div className="border-ds-accent/30 bg-ds-surface2 rounded-xl border p-4">
-            <p className="text-ds-text font-medium">
-              {split.length
-                ? `${split.length} ${split.length === 1 ? 'thing is' : 'things are'} split into ${spellings} spellings.`
-                : 'Nothing to merge: the names already agree.'}
-            </p>
-            <p className="text-ds-muted mt-1 text-sm">
-              {result.rowCount} rows read, {result.groups.length} after merging
-              {result.metricNames.length > 0 && `. Added up: ${result.metricNames.join(', ')}.`}
-            </p>
-            {result.totalLinesIgnored > 0 && (
-              <p className="text-ds-muted mt-1 text-sm">
-                Left out {result.totalLinesIgnored} &quot;Total&quot;{' '}
-                {result.totalLinesIgnored === 1 ? 'line' : 'lines'} so{' '}
-                {result.totalLinesIgnored === 1 ? 'it is' : 'they are'} not counted as a campaign.
-              </p>
-            )}
-            {result.totalRows > result.rowCount + result.totalLinesIgnored && (
-              <p className="text-ds-warning-strong mt-1 text-sm" role="alert">
-                Only the first {result.rowCount.toLocaleString()} of{' '}
-                {result.totalRows.toLocaleString()} rows were read, so these totals are short. Split
-                the export into smaller date ranges and clean each one.
-              </p>
-            )}
-            {appliedMemory > 0 && (
-              <p className="text-ds-muted mt-1 text-sm">
-                {appliedMemory} {appliedMemory === 1 ? 'spelling was' : 'spellings were'} merged
-                using what you saved from earlier reports.
-              </p>
-            )}
-            {result.skippedMetrics.length > 0 && (
-              <p className="text-ds-muted mt-1 text-sm">
-                Left out because rates, averages and user counts cannot be added (one person can
-                appear in two rows): {result.skippedMetrics.join(', ')}.
-              </p>
+            {!text && (
+              <button
+                type="button"
+                onClick={() => setText(EXAMPLE)}
+                className="text-ds-accent-strong text-sm hover:underline"
+              >
+                Not sure? Try an example
+              </button>
             )}
           </div>
+        </div>
 
-          {split.length > 0 && (
-            <ul className="flex flex-col gap-3" aria-label="Merged groups">
-              {splitItems.slice(0, SPLIT_SHOWN).map(({ g, key }, gi) => (
-                <li key={key} className="border-ds-border bg-ds-surface2 rounded-xl border p-4">
-                  <label htmlFor={`rc-name-${gi}`} className="text-ds-muted block text-xs">
-                    Merge into (you can rename it)
-                  </label>
-                  <input
-                    id={`rc-name-${gi}`}
-                    value={names[key] ?? g.canonical}
-                    onChange={(e) => setNames((prev) => ({ ...prev, [key]: e.target.value }))}
-                    className="border-ds-border bg-ds-surface text-ds-text focus:border-ds-accent mt-1 w-full rounded-md border px-2 py-1 font-mono text-sm outline-none"
-                  />
-                  {result.metricNames.length > 0 && (
-                    <p className="text-ds-muted mt-1 text-sm">
-                      Total:{' '}
-                      {g.totals
-                        .map((t, i) => `${fmt(t)} ${result.metricNames[i].toLowerCase()}`)
-                        .join(' · ')}
-                    </p>
-                  )}
-                  <ul className="mt-2 flex flex-col gap-1 text-sm">
-                    {g.variants.map((v) => (
-                      <li
-                        key={v.raw}
-                        className="text-ds-muted flex flex-wrap justify-between gap-x-4"
-                      >
-                        <span className="font-mono break-all">
-                          {v.raw}
-                          {v.remembered && (
-                            <span className="text-ds-muted font-sans text-xs"> (remembered)</span>
-                          )}
-                        </span>
-                        <span>
-                          {v.metrics.length
-                            ? v.metrics.map((m) => fmt(m)).join(' · ')
-                            : `${v.rows} ${v.rows === 1 ? 'row' : 'rows'}`}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ul>
-          )}
-          {split.length > SPLIT_SHOWN && (
-            <p className="text-ds-muted text-sm">
-              Showing the {SPLIT_SHOWN} biggest of {fmt(split.length)} merged groups. All of them
-              are in the table, mapping and Looker field you copy below.
-            </p>
-          )}
+        <fieldset className="min-w-0">
+          <legend className="text-ds-text mb-1.5 text-[13px] font-medium">Clean names use</legend>
+          <div className="flex flex-wrap gap-4">
+            {(['-', '_'] as const).map((s) => (
+              <label key={s} className="text-ds-text flex items-center gap-2 text-sm">
+                <input type="radio" name="rc-sep" checked={sep === s} onChange={() => setSep(s)} />
+                {s === '-' ? 'Hyphens (spring-sale)' : 'Underscores (spring_sale)'}
+              </label>
+            ))}
+          </div>
+        </fieldset>
 
-          {rest.length > 0 && (
-            <details onToggle={(e) => setRestOpen(e.currentTarget.open)}>
-              <summary className="text-ds-muted hover:text-ds-accent cursor-pointer text-sm">
-                Rows with nothing to merge ({fmt(rest.length)})
-              </summary>
-              {restOpen && (
-                <>
-                  <ul className="text-ds-muted mt-2 flex flex-col gap-1 font-mono text-xs">
-                    {rest.slice(0, REST_SHOWN).map((g) => (
-                      <li key={g.canonical} className="break-all">
-                        {g.variants[0].raw}
-                        {g.totals.length > 0 && ` — ${g.totals.map((t) => fmt(t)).join(' · ')}`}
-                      </li>
-                    ))}
-                  </ul>
-                  {rest.length > REST_SHOWN && (
-                    <p className="text-ds-muted mt-2 text-xs">
-                      …and {fmt(rest.length - REST_SHOWN)} more, all included in the table you copy.
-                    </p>
-                  )}
-                </>
+        {result?.error && (
+          <p className="text-ds-warning-strong text-sm" role="alert">
+            {result.error}
+          </p>
+        )}
+
+        {result && !result.error && (
+          <div className="flex flex-col gap-6" aria-live="polite">
+            <div className="border-ds-accent/30 bg-ds-surface2 rounded-xl border p-4">
+              <p className="text-ds-text font-medium">
+                {split.length
+                  ? `${split.length} ${split.length === 1 ? 'thing is' : 'things are'} split into ${spellings} spellings.`
+                  : 'Nothing to merge: the names already agree.'}
+              </p>
+              <p className="text-ds-muted mt-1 text-sm">
+                {result.rowCount} rows read, {result.groups.length} after merging
+                {result.metricNames.length > 0 && `. Added up: ${result.metricNames.join(', ')}.`}
+              </p>
+              {result.totalLinesIgnored > 0 && (
+                <p className="text-ds-muted mt-1 text-sm">
+                  Left out {result.totalLinesIgnored} &quot;Total&quot;{' '}
+                  {result.totalLinesIgnored === 1 ? 'line' : 'lines'} so{' '}
+                  {result.totalLinesIgnored === 1 ? 'it is' : 'they are'} not counted as a campaign.
+                </p>
               )}
-            </details>
-          )}
-
-          <div className="flex flex-col gap-3">
-            <h2 className="text-ds-text text-base font-semibold">
-              Take the clean version with you
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" size="sm" onClick={() => copy(mergedTsv(result), 'merged')}>
-                {copied === 'merged' ? 'Copied ✓' : 'Copy merged table'}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => copy(mappingTsv(result), 'map')}
-              >
-                {copied === 'map' ? 'Copied ✓' : 'Copy original → clean list'}
-              </Button>
-              {looker && (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => copy(looker, 'looker')}
-                >
-                  {copied === 'looker' ? 'Copied ✓' : 'Copy Looker Studio field'}
-                </Button>
+              {result.totalRows > result.rowCount + result.totalLinesIgnored && (
+                <p className="text-ds-warning-strong mt-1 text-sm" role="alert">
+                  Only the first {result.rowCount.toLocaleString()} of{' '}
+                  {result.totalRows.toLocaleString()} rows were read, so these totals are short.
+                  Split the export into smaller date ranges and clean each one.
+                </p>
+              )}
+              {appliedMemory > 0 && (
+                <p className="text-ds-muted mt-1 text-sm">
+                  {appliedMemory} {appliedMemory === 1 ? 'spelling was' : 'spellings were'} merged
+                  using what you saved from earlier reports.
+                </p>
+              )}
+              {result.skippedMetrics.length > 0 && (
+                <p className="text-ds-muted mt-1 text-sm">
+                  Left out because rates, averages and user counts cannot be added (one person can
+                  appear in two rows): {result.skippedMetrics.join(', ')}.
+                </p>
               )}
             </div>
-            <div className="border-ds-border flex flex-col gap-2 rounded-lg border p-3">
-              <div className="flex flex-wrap items-center gap-2">
+
+            {split.length > 0 && (
+              <ul className="flex flex-col gap-3" aria-label="Merged groups">
+                {splitItems.slice(0, SPLIT_SHOWN).map(({ g, key }, gi) => (
+                  <li key={key} className="border-ds-border bg-ds-surface2 rounded-xl border p-4">
+                    <label htmlFor={`rc-name-${gi}`} className="text-ds-muted block text-xs">
+                      Merge into (you can rename it)
+                    </label>
+                    <input
+                      id={`rc-name-${gi}`}
+                      value={names[key] ?? g.canonical}
+                      onChange={(e) => setNames((prev) => ({ ...prev, [key]: e.target.value }))}
+                      className="border-ds-border bg-ds-surface text-ds-text focus:border-ds-accent mt-1 w-full rounded-md border px-2 py-1 font-mono text-sm outline-none"
+                    />
+                    {result.metricNames.length > 0 && (
+                      <p className="text-ds-muted mt-1 text-sm">
+                        Total:{' '}
+                        {g.totals
+                          .map((t, i) => `${fmt(t)} ${result.metricNames[i].toLowerCase()}`)
+                          .join(' · ')}
+                      </p>
+                    )}
+                    <ul className="mt-2 flex flex-col gap-1 text-sm">
+                      {g.variants.map((v) => (
+                        <li
+                          key={v.raw}
+                          className="text-ds-muted flex flex-wrap justify-between gap-x-4"
+                        >
+                          <span className="font-mono break-all">
+                            {v.raw}
+                            {v.remembered && (
+                              <span className="text-ds-muted font-sans text-xs"> (remembered)</span>
+                            )}
+                          </span>
+                          <span>
+                            {v.metrics.length
+                              ? v.metrics.map((m) => fmt(m)).join(' · ')
+                              : `${v.rows} ${v.rows === 1 ? 'row' : 'rows'}`}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {split.length > SPLIT_SHOWN && (
+              <p className="text-ds-muted text-sm">
+                Showing the {SPLIT_SHOWN} biggest of {fmt(split.length)} merged groups. All of them
+                are in the table, mapping and Looker field you copy below.
+              </p>
+            )}
+
+            {rest.length > 0 && (
+              <details onToggle={(e) => setRestOpen(e.currentTarget.open)}>
+                <summary className="text-ds-muted hover:text-ds-accent cursor-pointer text-sm">
+                  Rows with nothing to merge ({fmt(rest.length)})
+                </summary>
+                {restOpen && (
+                  <>
+                    <ul className="text-ds-muted mt-2 flex flex-col gap-1 font-mono text-xs">
+                      {rest.slice(0, REST_SHOWN).map((g) => (
+                        <li key={g.canonical} className="break-all">
+                          {g.variants[0].raw}
+                          {g.totals.length > 0 && ` — ${g.totals.map((t) => fmt(t)).join(' · ')}`}
+                        </li>
+                      ))}
+                    </ul>
+                    {rest.length > REST_SHOWN && (
+                      <p className="text-ds-muted mt-2 text-xs">
+                        …and {fmt(rest.length - REST_SHOWN)} more, all included in the table you
+                        copy.
+                      </p>
+                    )}
+                  </>
+                )}
+              </details>
+            )}
+
+            <div className="flex flex-col gap-3">
+              <h2 className="text-ds-text text-base font-semibold">
+                Take the clean version with you
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" size="sm" onClick={() => copy(mergedTsv(result), 'merged')}>
+                  {copied === 'merged' ? 'Copied ✓' : 'Copy merged table'}
+                </Button>
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
-                  onClick={remember}
-                  disabled={!split.length}
+                  onClick={() => copy(mappingTsv(result), 'map')}
                 >
-                  Remember these merges
+                  {copied === 'map' ? 'Copied ✓' : 'Copy original → clean list'}
                 </Button>
-                {savedCount > 0 && (
-                  <button
+                {looker && (
+                  <Button
                     type="button"
-                    onClick={forget}
-                    className="text-ds-muted hover:text-ds-error text-xs underline"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => copy(looker, 'looker')}
                   >
-                    Forget all {savedCount}
-                  </button>
+                    {copied === 'looker' ? 'Copied ✓' : 'Copy Looker Studio field'}
+                  </Button>
+                )}
+              </div>
+              <div className="border-ds-border flex flex-col gap-2 rounded-lg border p-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={remember}
+                    disabled={!split.length}
+                  >
+                    Remember these merges
+                  </Button>
+                  {savedCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={forget}
+                      className="text-ds-muted hover:text-ds-error text-xs underline"
+                    >
+                      Forget all {savedCount}
+                    </button>
+                  )}
+                </div>
+                <p className="text-ds-muted text-sm">
+                  Next month, paste a fresh report and these merges apply on their own. They stay on
+                  this device; the builder&apos;s backup includes them.
+                </p>
+                {note && (
+                  <p className="text-ds-success text-sm" role="status">
+                    {note}
+                  </p>
                 )}
               </div>
               <p className="text-ds-muted text-sm">
-                Next month, paste a fresh report and these merges apply on their own. They stay on
-                this device; the builder&apos;s backup includes them.
+                Paste the tables into Google Sheets or Excel. The Looker Studio field is a
+                calculated field that maps each spelling to the clean one.
               </p>
-              {note && (
-                <p className="text-ds-success text-sm" role="status">
-                  {note}
-                </p>
-              )}
+              <details>
+                <summary className="text-ds-muted hover:text-ds-accent cursor-pointer text-sm">
+                  Formulas that fix capitals, spaces and underscores everywhere
+                </summary>
+                <div className="mt-3 flex flex-col gap-3 text-sm">
+                  {[
+                    ['Google Sheets (label in A2)', sheetsFormula, 'sheets'],
+                    ['Looker Studio calculated field', lookerFormula, 'lformula'],
+                  ].map(([label, formula, id]) => (
+                    <div key={id}>
+                      <p className="text-ds-muted">{label}</p>
+                      <code className="bg-ds-surface2 text-ds-text mt-1 block rounded px-2 py-1 font-mono text-xs break-all">
+                        {formula}
+                      </code>
+                      <button
+                        type="button"
+                        onClick={() => copy(formula, id)}
+                        className={`${copyBtn} mt-1`}
+                      >
+                        {copied === id ? 'Copied ✓' : 'Copy'}
+                      </button>
+                    </div>
+                  ))}
+                  <p className="text-ds-muted">
+                    These handle capitals, spaces and underscores only. Short names such as fb and
+                    facebook need the original → clean list above.
+                  </p>
+                </div>
+              </details>
             </div>
-            <p className="text-ds-muted text-sm">
-              Paste the tables into Google Sheets or Excel. The Looker Studio field is a calculated
-              field that maps each spelling to the clean one.
-            </p>
-            <details>
-              <summary className="text-ds-muted hover:text-ds-accent cursor-pointer text-sm">
-                Formulas that fix capitals, spaces and underscores everywhere
-              </summary>
-              <div className="mt-3 flex flex-col gap-3 text-sm">
-                {[
-                  ['Google Sheets (label in A2)', sheetsFormula, 'sheets'],
-                  ['Looker Studio calculated field', lookerFormula, 'lformula'],
-                ].map(([label, formula, id]) => (
-                  <div key={id}>
-                    <p className="text-ds-muted">{label}</p>
-                    <code className="bg-ds-surface2 text-ds-text mt-1 block rounded px-2 py-1 font-mono text-xs break-all">
-                      {formula}
-                    </code>
-                    <button
-                      type="button"
-                      onClick={() => copy(formula, id)}
-                      className={`${copyBtn} mt-1`}
-                    >
-                      {copied === id ? 'Copied ✓' : 'Copy'}
-                    </button>
-                  </div>
-                ))}
-                <p className="text-ds-muted">
-                  These handle capitals, spaces and underscores only. Short names such as fb and
-                  facebook need the original → clean list above.
-                </p>
-              </div>
-            </details>
-          </div>
 
-          <p className="text-ds-muted text-sm">
-            GA4 keeps the original values, so this cleans your copy of the report, not GA4 itself.
-            To stop it happening, tag links the same way every time with the{' '}
-            <Link href="/lab/utm-builder" className="text-ds-accent-strong underline">
-              UTM builder
-            </Link>
-            , and check old ones in the{' '}
-            <Link href="/lab/utm-link-checker" className="text-ds-accent-strong underline">
-              link checker
-            </Link>
-            .
-          </p>
-        </div>
-      )}
-    </div>
+            <p className="text-ds-muted text-sm">
+              GA4 keeps the original values, so this cleans your copy of the report, not GA4 itself.
+              To stop it happening, tag links the same way every time with the{' '}
+              <Link href="/lab/utm-builder" className="text-ds-accent-strong underline">
+                UTM builder
+              </Link>
+              , and check old ones in the{' '}
+              <Link href="/lab/utm-link-checker" className="text-ds-accent-strong underline">
+                link checker
+              </Link>
+              .
+            </p>
+          </div>
+        )}
+      </div>
+    </>
   )
 }

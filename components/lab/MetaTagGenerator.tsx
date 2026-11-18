@@ -6,7 +6,8 @@ import { CssCodeBlock } from './CssCodeBlock'
 import { draftFromContent } from './metaDraftEngine'
 import { useUrlSync } from './useUrlSync'
 import { ShareLinkButton } from './ShareLinkButton'
-import { PresetBar } from './PresetBar'
+import { SessionsBar } from './SessionsBar'
+import { oneOf, str } from '@/lib/lab/sessions'
 import { pick } from '@/lib/lab/urlState'
 import {
   buildHtml,
@@ -213,333 +214,360 @@ export function MetaTagGenerator() {
   const descFit = fitToWidth(description, DESC_PX[device], measureDesc)
 
   return (
-    <div className="flex flex-col gap-8">
-      {/* Draft from content */}
-      <div className="border-ds-border bg-ds-surface2/50 rounded-xl border p-4">
-        <label htmlFor="mt-content" className="text-ds-text mb-1.5 block text-sm font-medium">
-          Draft from your content
-        </label>
-        <textarea
-          id="mt-content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Paste a topic sentence, an intro paragraph, or a full draft — the tool will pull a title and description out of it."
-          rows={5}
-          className="border-ds-border bg-ds-surface text-ds-text placeholder:text-ds-muted focus:border-ds-accent w-full resize-y rounded-lg border px-4 py-3 text-sm leading-relaxed transition-colors outline-none"
-        />
-        <div className="mt-2 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-ds-muted text-xs">
-            Local analysis + phrase composition, not an AI model call — drafts several options,
-            cycle them with Shuffle.
-          </p>
-          <Button
-            type="button"
-            onClick={handleDraft}
-            disabled={!content.trim()}
-            size="sm"
-            className="w-full sm:w-auto"
-          >
-            Draft title &amp; description
-          </Button>
+    <>
+      <SessionsBar
+        tool="meta-tags"
+        label="seo-kit"
+        data={{ content, title, description, url, siteName, image, twitterHandle, pageType }}
+        blank={{
+          content: '',
+          title: '',
+          description: '',
+          url: '',
+          siteName: '',
+          image: '',
+          twitterHandle: '',
+          pageType: 'website',
+        }}
+        onApply={(d) => {
+          setContent(str(d.content, '', 100_000))
+          setTitle(str(d.title, '', 500))
+          setDescription(str(d.description, '', 2000))
+          setUrl(str(d.url, '', 2048))
+          setSiteName(str(d.siteName, '', 200))
+          setImage(str(d.image, '', 2048))
+          setTwitterHandle(str(d.twitterHandle, '', 100))
+          setPageType(oneOf(d.pageType, ['website', 'article'] as const, 'website'))
+        }}
+      />
+      <div className="flex flex-col gap-8">
+        {/* Draft from content */}
+        <div className="border-ds-border bg-ds-surface2/50 rounded-xl border p-4">
+          <label htmlFor="mt-content" className="text-ds-text mb-1.5 block text-sm font-medium">
+            Draft from your content
+          </label>
+          <textarea
+            id="mt-content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Paste a topic sentence, an intro paragraph, or a full draft — the tool will pull a title and description out of it."
+            rows={5}
+            className="border-ds-border bg-ds-surface text-ds-text placeholder:text-ds-muted focus:border-ds-accent w-full resize-y rounded-lg border px-4 py-3 text-sm leading-relaxed transition-colors outline-none"
+          />
+          <div className="mt-2 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-ds-muted text-xs">
+              Local analysis + phrase composition, not an AI model call — drafts several options,
+              cycle them with Shuffle.
+            </p>
+            <Button
+              type="button"
+              onClick={handleDraft}
+              disabled={!content.trim()}
+              size="sm"
+              className="w-full sm:w-auto"
+            >
+              Draft title &amp; description
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label
+              htmlFor="mt-title"
+              className="text-ds-text mb-1.5 flex items-center justify-between text-sm font-medium"
+            >
+              Title
+              <span className="flex items-center gap-3">
+                <ShuffleControl
+                  index={titleCandidateIndex}
+                  total={titleCandidates.length}
+                  onShuffle={handleShuffleTitle}
+                />
+                <span className={`font-mono text-xs ${countClass(title.length, 50, 60)}`}>
+                  {title.length}/60
+                </span>
+                <span className="text-ds-muted font-mono text-xs">
+                  ≈{Math.round(titleFit.width)}/{TITLE_PX}px
+                </span>
+              </span>
+            </label>
+            <input
+              id="mt-title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Your page title"
+              className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent h-11 w-full rounded-lg border px-4 text-sm transition-colors outline-none"
+            />
+          </div>
+          <div>
+            <label htmlFor="mt-url" className="text-ds-text mb-1.5 block text-sm font-medium">
+              URL
+            </label>
+            <input
+              id="mt-url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://yoursite.com/page"
+              className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent h-11 w-full rounded-lg border px-4 text-sm transition-colors outline-none"
+            />
+          </div>
+        </div>
+
         <div>
           <label
-            htmlFor="mt-title"
+            htmlFor="mt-desc"
             className="text-ds-text mb-1.5 flex items-center justify-between text-sm font-medium"
           >
-            Title
+            Description
             <span className="flex items-center gap-3">
               <ShuffleControl
-                index={titleCandidateIndex}
-                total={titleCandidates.length}
-                onShuffle={handleShuffleTitle}
+                index={descCandidateIndex}
+                total={descCandidates.length}
+                onShuffle={handleShuffleDescription}
               />
-              <span className={`font-mono text-xs ${countClass(title.length, 50, 60)}`}>
-                {title.length}/60
-              </span>
-              <span className="text-ds-muted font-mono text-xs">
-                ≈{Math.round(titleFit.width)}/{TITLE_PX}px
+              <span className={`font-mono text-xs ${countClass(description.length, 130, 160)}`}>
+                {description.length}/160
               </span>
             </span>
           </label>
-          <input
-            id="mt-title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Your page title"
-            className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent h-11 w-full rounded-lg border px-4 text-sm transition-colors outline-none"
+          <textarea
+            id="mt-desc"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="What the page offers, in one or two sentences"
+            rows={5}
+            className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent w-full resize-y rounded-lg border px-4 py-3 text-sm leading-relaxed transition-colors outline-none"
           />
         </div>
-        <div>
-          <label htmlFor="mt-url" className="text-ds-text mb-1.5 block text-sm font-medium">
-            URL
-          </label>
-          <input
-            id="mt-url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://yoursite.com/page"
-            className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent h-11 w-full rounded-lg border px-4 text-sm transition-colors outline-none"
-          />
-        </div>
-      </div>
 
-      <div>
-        <label
-          htmlFor="mt-desc"
-          className="text-ds-text mb-1.5 flex items-center justify-between text-sm font-medium"
-        >
-          Description
-          <span className="flex items-center gap-3">
-            <ShuffleControl
-              index={descCandidateIndex}
-              total={descCandidates.length}
-              onShuffle={handleShuffleDescription}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div>
+            <label htmlFor="mt-site" className="text-ds-text mb-1.5 block text-sm font-medium">
+              Site name
+            </label>
+            <input
+              id="mt-site"
+              value={siteName}
+              onChange={(e) => setSiteName(e.target.value)}
+              placeholder="Your brand"
+              className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent h-11 w-full rounded-lg border px-4 text-sm transition-colors outline-none"
             />
-            <span className={`font-mono text-xs ${countClass(description.length, 130, 160)}`}>
-              {description.length}/160
-            </span>
-          </span>
-        </label>
-        <textarea
-          id="mt-desc"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="What the page offers, in one or two sentences"
-          rows={5}
-          className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent w-full resize-y rounded-lg border px-4 py-3 text-sm leading-relaxed transition-colors outline-none"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div>
-          <label htmlFor="mt-site" className="text-ds-text mb-1.5 block text-sm font-medium">
-            Site name
-          </label>
-          <input
-            id="mt-site"
-            value={siteName}
-            onChange={(e) => setSiteName(e.target.value)}
-            placeholder="Your brand"
-            className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent h-11 w-full rounded-lg border px-4 text-sm transition-colors outline-none"
-          />
-        </div>
-        <div>
-          <label htmlFor="mt-image" className="text-ds-text mb-1.5 block text-sm font-medium">
-            OG image URL <span className="text-ds-muted font-normal">(optional)</span>
-          </label>
-          <input
-            id="mt-image"
-            value={image}
-            onChange={(e) => {
-              setImage(e.target.value)
-              setImageError(false)
-            }}
-            placeholder="https://yoursite.com/og-image.jpg"
-            className="border-ds-border bg-ds-surface2 text-ds-text placeholder:text-ds-muted focus:border-ds-accent h-11 w-full rounded-lg border px-4 text-sm transition-colors outline-none"
-          />
-        </div>
-        <div>
-          <label htmlFor="mt-twitter" className="text-ds-text mb-1.5 block text-sm font-medium">
-            Twitter/X handle
-          </label>
-          <input
-            id="mt-twitter"
-            value={twitterHandle}
-            onChange={(e) => setTwitterHandle(e.target.value)}
-            placeholder="@yourhandle"
-            className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent h-11 w-full rounded-lg border px-4 text-sm transition-colors outline-none"
-          />
-        </div>
-      </div>
-
-      {/* Google SERP preview */}
-      <div>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-ds-muted font-mono text-xs tracking-wide uppercase">
-            Google search preview (approximate)
-          </p>
-          <div className="flex gap-2">
-            {(['desktop', 'mobile'] as const).map((d) => (
-              <button
-                key={d}
-                type="button"
-                aria-pressed={device === d}
-                onClick={() => setDevice(d)}
-                className={
-                  device === d
-                    ? 'bg-ds-cta rounded-lg px-3 py-1 text-xs font-medium text-white capitalize'
-                    : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1 text-xs capitalize transition-colors'
-                }
-              >
-                {d}
-              </button>
-            ))}
+          </div>
+          <div>
+            <label htmlFor="mt-image" className="text-ds-text mb-1.5 block text-sm font-medium">
+              OG image URL <span className="text-ds-muted font-normal">(optional)</span>
+            </label>
+            <input
+              id="mt-image"
+              value={image}
+              onChange={(e) => {
+                setImage(e.target.value)
+                setImageError(false)
+              }}
+              placeholder="https://yoursite.com/og-image.jpg"
+              className="border-ds-border bg-ds-surface2 text-ds-text placeholder:text-ds-muted focus:border-ds-accent h-11 w-full rounded-lg border px-4 text-sm transition-colors outline-none"
+            />
+          </div>
+          <div>
+            <label htmlFor="mt-twitter" className="text-ds-text mb-1.5 block text-sm font-medium">
+              Twitter/X handle
+            </label>
+            <input
+              id="mt-twitter"
+              value={twitterHandle}
+              onChange={(e) => setTwitterHandle(e.target.value)}
+              placeholder="@yourhandle"
+              className="border-ds-border bg-ds-surface2 text-ds-text focus:border-ds-accent h-11 w-full rounded-lg border px-4 text-sm transition-colors outline-none"
+            />
           </div>
         </div>
-        <div className={`rounded-xl bg-white p-5 ${device === 'mobile' ? 'max-w-[380px]' : ''}`}>
-          <p className="truncate text-sm text-[#4d5156]">
-            {domain} <span className="text-[#4d5156]">›</span>{' '}
-            {url
-              .replace(/^https?:\/\//, '')
-              .split('/')
-              .slice(1)
-              .join(' › ')}
-          </p>
-          <p className="mt-1 text-xl leading-snug break-words text-[#1a0dab]">
-            {title ? titleFit.text : 'Untitled page'}
-          </p>
-          <p className="mt-1 text-sm break-words text-[#4d5156]">
-            {description ? descFit.text : 'No description provided.'}
+
+        {/* Google SERP preview */}
+        <div>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-ds-muted font-mono text-xs tracking-wide uppercase">
+              Google search preview (approximate)
+            </p>
+            <div className="flex gap-2">
+              {(['desktop', 'mobile'] as const).map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  aria-pressed={device === d}
+                  onClick={() => setDevice(d)}
+                  className={
+                    device === d
+                      ? 'bg-ds-cta rounded-lg px-3 py-1 text-xs font-medium text-white capitalize'
+                      : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1 text-xs capitalize transition-colors'
+                  }
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className={`rounded-xl bg-white p-5 ${device === 'mobile' ? 'max-w-[380px]' : ''}`}>
+            <p className="truncate text-sm text-[#4d5156]">
+              {domain} <span className="text-[#4d5156]">›</span>{' '}
+              {url
+                .replace(/^https?:\/\//, '')
+                .split('/')
+                .slice(1)
+                .join(' › ')}
+            </p>
+            <p className="mt-1 text-xl leading-snug break-words text-[#1a0dab]">
+              {title ? titleFit.text : 'Untitled page'}
+            </p>
+            <p className="mt-1 text-sm break-words text-[#4d5156]">
+              {description ? descFit.text : 'No description provided.'}
+            </p>
+          </div>
+          <p className="text-ds-muted mt-2 text-xs">
+            Cut at about {TITLE_PX}px for the title and {DESC_PX[device]}px for the description
+            (measured in Arial). Google changes these without notice, so treat the cut-off as a
+            guide.
           </p>
         </div>
-        <p className="text-ds-muted mt-2 text-xs">
-          Cut at about {TITLE_PX}px for the title and {DESC_PX[device]}px for the description
-          (measured in Arial). Google changes these without notice, so treat the cut-off as a guide.
-        </p>
-      </div>
 
-      {/* Social card previews */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
-            X / Twitter card
-          </p>
-          <div className="border-ds-border overflow-hidden rounded-xl border">
-            {showImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={image}
-                alt=""
-                className="aspect-[1.91/1] w-full object-cover"
-                onError={() => setImageError(true)}
-              />
-            ) : (
-              <ImagePlaceholder label={imageError ? 'Image failed to load' : '1200×630 image'} />
-            )}
-            <div className="bg-ds-surface p-4">
-              <p className="text-ds-muted truncate text-xs">{domain}</p>
-              <p className="text-ds-text mt-1 truncate text-sm font-semibold">{title}</p>
-              <p className="text-ds-muted mt-1 line-clamp-2 text-xs">{description}</p>
+        {/* Social card previews */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
+              X / Twitter card
+            </p>
+            <div className="border-ds-border overflow-hidden rounded-xl border">
+              {showImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={image}
+                  alt=""
+                  className="aspect-[1.91/1] w-full object-cover"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <ImagePlaceholder label={imageError ? 'Image failed to load' : '1200×630 image'} />
+              )}
+              <div className="bg-ds-surface p-4">
+                <p className="text-ds-muted truncate text-xs">{domain}</p>
+                <p className="text-ds-text mt-1 truncate text-sm font-semibold">{title}</p>
+                <p className="text-ds-muted mt-1 line-clamp-2 text-xs">{description}</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
+              Facebook / OG card
+            </p>
+            <div className="border-ds-border overflow-hidden rounded-xl border">
+              {showImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={image}
+                  alt=""
+                  className="aspect-[1.91/1] w-full object-cover"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <ImagePlaceholder label={imageError ? 'Image failed to load' : '1200×630 image'} />
+              )}
+              <div className="bg-ds-surface p-4">
+                <p className="text-ds-muted truncate text-xs tracking-wide uppercase">{domain}</p>
+                <p className="text-ds-text mt-1 truncate text-sm font-semibold">{title}</p>
+                <p className="text-ds-muted mt-1 line-clamp-2 text-xs">{description}</p>
+              </div>
             </div>
           </div>
         </div>
+
         <div>
-          <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
-            Facebook / OG card
-          </p>
-          <div className="border-ds-border overflow-hidden rounded-xl border">
-            {showImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={image}
-                alt=""
-                className="aspect-[1.91/1] w-full object-cover"
-                onError={() => setImageError(true)}
-              />
-            ) : (
-              <ImagePlaceholder label={imageError ? 'Image failed to load' : '1200×630 image'} />
-            )}
-            <div className="bg-ds-surface p-4">
-              <p className="text-ds-muted truncate text-xs tracking-wide uppercase">{domain}</p>
-              <p className="text-ds-text mt-1 truncate text-sm font-semibold">{title}</p>
-              <p className="text-ds-muted mt-1 line-clamp-2 text-xs">{description}</p>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  ['html', 'HTML'],
+                  ['next', 'Next.js metadata'],
+                  ['jsonld', 'JSON-LD'],
+                ] as const
+              ).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  aria-pressed={tab === key}
+                  onClick={() => setTab(key)}
+                  className={
+                    tab === key
+                      ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
+                      : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
+                  }
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" size="sm" variant="ghost" onClick={loadExample}>
+                Load example
+              </Button>
+              <ShareLinkButton getUrl={getShareUrl} tool="meta-tags" />
             </div>
           </div>
-        </div>
-      </div>
 
-      <div>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2">
-            {(
-              [
-                ['html', 'HTML'],
-                ['next', 'Next.js metadata'],
-                ['jsonld', 'JSON-LD'],
-              ] as const
-            ).map(([key, label]) => (
-              <button
-                key={key}
-                type="button"
-                aria-pressed={tab === key}
-                onClick={() => setTab(key)}
-                className={
-                  tab === key
-                    ? 'bg-ds-cta rounded-lg px-3 py-1.5 text-sm font-medium text-white'
-                    : 'border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors'
-                }
+          {tab === 'next' && (
+            <p className="text-ds-muted mb-2 text-sm">
+              Paste into <code className="text-ds-accent">app/your-page/page.tsx</code> or a layout.
+            </p>
+          )}
+          {tab === 'jsonld' && (
+            <div className="mb-2 flex flex-wrap items-center gap-3 text-sm">
+              <label htmlFor="mt-jsonld" className="text-ds-muted">
+                Type
+              </label>
+              <select
+                id="mt-jsonld"
+                value={jsonLdType}
+                onChange={(e) => setJsonLdType(e.target.value as JsonLdType)}
+                className="border-ds-border bg-ds-surface2 text-ds-text rounded-lg border px-3 py-1.5 text-sm"
               >
-                {label}
-              </button>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" size="sm" variant="ghost" onClick={loadExample}>
-              Load example
-            </Button>
-            <ShareLinkButton getUrl={getShareUrl} tool="meta-tags" />
-          </div>
-          <PresetBar tool="meta-tags" getUrl={getShareUrl} />
+                <option value="WebPage">WebPage</option>
+                <option value="Article">Article</option>
+              </select>
+              {jsonLdType === 'Article' && (
+                <span className="text-ds-muted text-xs">
+                  Add author and datePublished yourself: they are your real details.
+                </span>
+              )}
+            </div>
+          )}
+          {tab === 'html' && (
+            <div className="mb-2 flex flex-wrap items-center gap-3 text-sm">
+              <label htmlFor="mt-type" className="text-ds-muted">
+                og:type
+              </label>
+              <select
+                id="mt-type"
+                value={pageType}
+                onChange={(e) => setPageType(e.target.value as MetaInput['type'])}
+                className="border-ds-border bg-ds-surface2 text-ds-text rounded-lg border px-3 py-1.5 text-sm"
+              >
+                <option value="website">website</option>
+                <option value="article">article</option>
+              </select>
+            </div>
+          )}
+
+          {title.trim() || description.trim() ? (
+            <CssCodeBlock
+              code={output}
+              label={tab === 'html' ? 'HTML' : tab === 'next' ? 'TypeScript' : 'JSON-LD'}
+            />
+          ) : (
+            <p className="border-ds-border text-ds-muted rounded-lg border border-dashed p-4 text-sm">
+              Add a title or description, or press Load example, to see the code.
+            </p>
+          )}
         </div>
-
-        {tab === 'next' && (
-          <p className="text-ds-muted mb-2 text-sm">
-            Paste into <code className="text-ds-accent">app/your-page/page.tsx</code> or a layout.
-          </p>
-        )}
-        {tab === 'jsonld' && (
-          <div className="mb-2 flex flex-wrap items-center gap-3 text-sm">
-            <label htmlFor="mt-jsonld" className="text-ds-muted">
-              Type
-            </label>
-            <select
-              id="mt-jsonld"
-              value={jsonLdType}
-              onChange={(e) => setJsonLdType(e.target.value as JsonLdType)}
-              className="border-ds-border bg-ds-surface2 text-ds-text rounded-lg border px-3 py-1.5 text-sm"
-            >
-              <option value="WebPage">WebPage</option>
-              <option value="Article">Article</option>
-            </select>
-            {jsonLdType === 'Article' && (
-              <span className="text-ds-muted text-xs">
-                Add author and datePublished yourself: they are your real details.
-              </span>
-            )}
-          </div>
-        )}
-        {tab === 'html' && (
-          <div className="mb-2 flex flex-wrap items-center gap-3 text-sm">
-            <label htmlFor="mt-type" className="text-ds-muted">
-              og:type
-            </label>
-            <select
-              id="mt-type"
-              value={pageType}
-              onChange={(e) => setPageType(e.target.value as MetaInput['type'])}
-              className="border-ds-border bg-ds-surface2 text-ds-text rounded-lg border px-3 py-1.5 text-sm"
-            >
-              <option value="website">website</option>
-              <option value="article">article</option>
-            </select>
-          </div>
-        )}
-
-        {title.trim() || description.trim() ? (
-          <CssCodeBlock
-            code={output}
-            label={tab === 'html' ? 'HTML' : tab === 'next' ? 'TypeScript' : 'JSON-LD'}
-          />
-        ) : (
-          <p className="border-ds-border text-ds-muted rounded-lg border border-dashed p-4 text-sm">
-            Add a title or description, or press Load example, to see the code.
-          </p>
-        )}
       </div>
-    </div>
+    </>
   )
 }

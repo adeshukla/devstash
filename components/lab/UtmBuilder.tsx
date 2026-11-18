@@ -20,6 +20,7 @@ import {
   PRESETS,
   splitUtm,
   withMonth,
+  toCsv,
   UTM_KEYS,
   type ChannelPreset,
   type SheetRow,
@@ -41,6 +42,8 @@ import { KEYS, readStored, writeStored } from './storage'
 import { trackLab } from './track'
 import { LaunchChecklist } from './LaunchChecklist'
 import { BackupReminder } from './BackupReminder'
+import { SessionsBar } from './SessionsBar'
+import { str } from '@/lib/lab/sessions'
 import { WorkspaceBackup, type RestoreSummary } from './WorkspaceBackup'
 import { buildWorkspace, mergeRows, type Workspace } from '@/lib/lab/workspace'
 import { UtmRulesPanel } from './UtmRulesPanel'
@@ -439,8 +442,69 @@ export function UtmBuilder() {
   const fullSize =
     Math.max(urls.length, 1) * Math.max(channels.length, 1) * Math.max(variants.length, 1)
 
+  const isRow = (r: unknown): r is SheetRow => {
+    const x = r as SheetRow | null
+    return Boolean(x && typeof x.id === 'string' && typeof x.url === 'string' && x.fields)
+  }
+
   return (
     <div className="flex flex-col gap-8">
+      <SessionsBar
+        tool="utm-builder"
+        label="utm-links"
+        data={{
+          fields,
+          bulk,
+          many,
+          variantsText,
+          channels: channels.map(({ label, source, medium }) => ({ label, source, medium })),
+          rows,
+        }}
+        blank={{
+          fields: INITIAL,
+          bulk: false,
+          many: '',
+          variantsText: '',
+          channels: [],
+          rows: [],
+        }}
+        draftOmit={['rows']}
+        exportCsv={(d) => {
+          const saved = Array.isArray(d.rows) ? d.rows.filter(isRow) : []
+          return saved.length ? toCsv(saved) : null
+        }}
+        onApply={(d, source) => {
+          const f = (d.fields && typeof d.fields === 'object' ? d.fields : {}) as Record<
+            string,
+            unknown
+          >
+          setFields({
+            url: str(f.url, '', 2048),
+            source: str(f.source, '', 200),
+            medium: str(f.medium, '', 200),
+            campaign: str(f.campaign, '', 200),
+            term: str(f.term, '', 200),
+            content: str(f.content, '', 200),
+          })
+          setBulk(d.bulk === true)
+          setMany(str(d.many, '', 100_000))
+          setVariantsText(str(d.variantsText, '', 2000))
+          setChannels(
+            (Array.isArray(d.channels) ? d.channels : [])
+              .slice(0, 40)
+              .map((c) => c as Record<string, unknown>)
+              .filter((c) => typeof c?.source === 'string' && typeof c?.medium === 'string')
+              .map((c) => ({
+                label: str(c.label, '', 100) || `${c.source} / ${c.medium}`,
+                source: str(c.source, '', 100),
+                medium: str(c.medium, '', 100),
+              }))
+          )
+          // The saved list outlives the page on its own, so only a chosen session replaces it.
+          if (source === 'session')
+            updateRows((Array.isArray(d.rows) ? d.rows : []).filter(isRow).slice(0, 500))
+        }}
+      />
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-start">
         <div className="flex flex-col gap-8">
           <Step n={1} title="Where does the link go?" hint="The page people land on.">
