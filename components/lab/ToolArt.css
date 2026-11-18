@@ -1,5 +1,6 @@
-/* ToolArt: colours come from the site tokens. Each picture loops on its own, like the other covers
-   (transform and opacity only). Reduced motion: it stays still, in its finished state. */
+/* ToolArt: colours come from the site tokens. Same rule as every other cover (AnimatedCover.css):
+   one pass when the cover appears, a loop on hover or focus, always a loop on touch screens.
+   Transform and opacity only. Reduced motion: it stays still, in its finished state. */
 
 .ta {
   display: block;
@@ -113,8 +114,11 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .ta [class*='k-'] {
-    animation-duration: 3.4s;
+    animation-duration: 4.4s;
     animation-timing-function: ease-in-out;
+    animation-iteration-count: 1;
+  }
+  .ac:is(:hover, :focus-within) .ta [class*='k-'] {
     animation-iteration-count: infinite;
   }
 
@@ -161,6 +165,12 @@
   }
   .ta .k-travel {
     animation-name: ta-travel;
+  }
+
+  @media (hover: none) {
+    .ta [class*='k-'] {
+      animation-iteration-count: infinite;
+    }
   }
 
   .ta .d1 {

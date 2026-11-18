@@ -4,18 +4,28 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button, Input } from '@/components/ui'
 import { QrPanel } from './QrPanel'
 import { trackLab } from './track'
+import { getRecaptchaToken } from '@/lib/security/recaptchaClient'
 
 type Me =
   | { available: false }
   | { available: true; email: null; google: boolean }
   | { available: true; email: string; google: boolean; link: { name: string; url: string } | null }
 
-async function call(body: object): Promise<{ ok: boolean; error?: string }> {
+/** Actions that anyone can send before signing in; these carry an invisible reCAPTCHA token. */
+const GUARDED = new Set(['signup', 'login', 'forgot'])
+
+async function call(body: {
+  action: string
+  [k: string]: unknown
+}): Promise<{ ok: boolean; error?: string }> {
   try {
+    const recaptchaToken = GUARDED.has(body.action)
+      ? await getRecaptchaToken('qr_account')
+      : undefined
     const res = await fetch('/api/qr', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify(recaptchaToken ? { ...body, recaptchaToken } : body),
     })
     const data = (await res.json()) as { error?: string }
     return res.ok ? { ok: true } : { ok: false, error: data.error ?? 'Something went wrong.' }
@@ -72,7 +82,7 @@ export function ChangeableQr() {
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [load])
 
-  async function run(body: object, after?: () => void) {
+  async function run(body: { action: string; [k: string]: unknown }, after?: () => void) {
     setBusy(true)
     setError('')
     setSaved(false)

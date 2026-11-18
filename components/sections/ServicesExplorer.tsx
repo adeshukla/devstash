@@ -12,6 +12,7 @@ import { Icon } from '@/components/icons/Icon'
 import type { IconName } from '@/components/icons/Icon'
 import { cn } from '@/lib/utils/cn'
 import './ProjectsExplorer.css'
+import './AnimatedCover.css'
 
 type Visual = 'landing' | 'site' | 'speed' | 'app' | 'automation'
 
@@ -276,7 +277,7 @@ function Detail({ service }: { service: ServiceItem }) {
     <div className="pe-swap flex flex-col gap-6">
       <CardTilt>
         <div className="card-spotlight card-glow rounded-xl">
-          <div className="bg-ds-surface2 relative h-48 w-full overflow-hidden rounded-xl sm:h-60">
+          <div className="cover-once bg-ds-surface2 relative h-48 w-full overflow-hidden rounded-xl sm:h-60">
             <Cover visual={service.visual} />
           </div>
         </div>

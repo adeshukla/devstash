@@ -577,3 +577,17 @@
     animation: none !important;
   }
 }
+
+/* Services covers use Tailwind's endless pulse/float classes. Same rule as every other cover:
+   one pass, a loop on hover or focus, always a loop on touch screens. */
+.cover-once :is(.animate-pulse2, .animate-float) {
+  animation-iteration-count: 1;
+}
+.cover-once:is(:hover, :focus-within) :is(.animate-pulse2, .animate-float) {
+  animation-iteration-count: infinite;
+}
+@media (hover: none) {
+  .cover-once :is(.animate-pulse2, .animate-float) {
+    animation-iteration-count: infinite;
+  }
+}

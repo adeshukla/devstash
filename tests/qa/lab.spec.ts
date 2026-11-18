@@ -1400,6 +1400,15 @@ test.describe('Lab list pictures', () => {
       .first()
       .evaluate((el) => getComputedStyle(el).animationName)
     expect(name).not.toBe('none')
+    // Same rule as the Projects and Services covers: one pass, then a loop on hover.
+    const count = () =>
+      cover
+        .locator('svg.ta [class*="k-"]')
+        .first()
+        .evaluate((el) => getComputedStyle(el).animationIterationCount)
+    expect(await count()).toBe('1')
+    await cover.hover()
+    expect(await count()).toBe('infinite')
   })
 
   test('every tool has its own picture', async ({ page }) => {

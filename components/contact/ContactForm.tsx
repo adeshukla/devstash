@@ -5,42 +5,9 @@ import { Button, Input, Select, Textarea } from '@/components/ui'
 import { DIAL_CODES } from '@/lib/utils/dialCodes'
 import { FIRST_TOUCH_KEY } from '@/components/layout/AnalyticsClicks'
 import { trackAndLog, ANALYTICS_EVENTS } from '@/lib/analytics/events'
+import { getRecaptchaToken, loadRecaptcha, recaptchaEnabled } from '@/lib/security/recaptchaClient'
 
-// reCAPTCHA v3 (invisible). The ~350 KB script is loaded on first interaction with
-// the form (or at submit time), not on page load, so it never costs LCP/TBT.
-// Resolves to undefined when no site key is configured or the script fails to
-// load — verifyRecaptcha() server-side no-ops in that case too.
-const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
 const RECAPTCHA_ACTION = 'contact_form'
-
-let recaptchaLoad: Promise<void> | undefined
-function loadRecaptcha(): Promise<void> {
-  if (!RECAPTCHA_SITE_KEY || typeof window === 'undefined') return Promise.resolve()
-  recaptchaLoad ??= new Promise((resolve) => {
-    const el = document.createElement('script')
-    el.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`
-    el.async = true
-    el.onload = () => resolve()
-    el.onerror = () => resolve()
-    document.head.appendChild(el)
-  })
-  return recaptchaLoad
-}
-
-async function getRecaptchaToken(): Promise<string | undefined> {
-  await loadRecaptcha()
-  if (!RECAPTCHA_SITE_KEY || !window.grecaptcha) {
-    return undefined
-  }
-  return new Promise((resolve) => {
-    window.grecaptcha!.ready(() => {
-      window
-        .grecaptcha!.execute(RECAPTCHA_SITE_KEY, { action: RECAPTCHA_ACTION })
-        .then(resolve)
-        .catch(() => resolve(undefined))
-    })
-  })
-}
 
 interface FormState {
   status: 'idle' | 'loading' | 'success' | 'error'
@@ -181,7 +148,7 @@ export function ContactForm() {
     setFormState({ status: 'loading', message: '' })
 
     try {
-      const recaptchaToken = await getRecaptchaToken()
+      const recaptchaToken = await getRecaptchaToken(RECAPTCHA_ACTION)
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -398,7 +365,7 @@ export function ContactForm() {
 
       {/* Required by Google's reCAPTCHA terms whenever the badge is hidden
           via CSS (see globals.css) instead of left visible. */}
-      {RECAPTCHA_SITE_KEY && (
+      {recaptchaEnabled && (
         <p className="text-ds-muted text-xs">
           This site is protected by reCAPTCHA and the Google{' '}
           <a

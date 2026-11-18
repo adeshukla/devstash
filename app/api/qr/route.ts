@@ -22,6 +22,7 @@ import {
   storeReady,
   updateUrl,
 } from '@/lib/qrlink/store'
+import { verifyRecaptcha } from '@/lib/security/recaptcha'
 import { clientKey, isSameOrigin } from '@/lib/security/requestGuard'
 
 export const runtime = 'nodejs'
@@ -44,10 +45,11 @@ export async function GET() {
 
 const email = z.email().max(254)
 const password = z.string().max(200)
+const captcha = z.string().max(4000).optional()
 const Body = z.discriminatedUnion('action', [
-  z.object({ action: z.literal('signup'), email, password }),
-  z.object({ action: z.literal('login'), email, password }),
-  z.object({ action: z.literal('forgot'), email }),
+  z.object({ action: z.literal('signup'), email, password, recaptchaToken: captcha }),
+  z.object({ action: z.literal('login'), email, password, recaptchaToken: captcha }),
+  z.object({ action: z.literal('forgot'), email, recaptchaToken: captcha }),
   z.object({ action: z.literal('confirm'), token: z.string().max(100) }),
   z.object({ action: z.literal('reset'), token: z.string().max(100), password }),
   z.object({ action: z.literal('claim'), name: z.string().max(40), url: z.string().max(2100) }),
@@ -104,6 +106,13 @@ export async function POST(request: Request) {
   if (await limited(`ip:${ip}`, 60, TEN_MIN)) return tooMany()
 
   const page = `${siteBase(request)}/lab/changeable-qr`
+
+  // Sign-up, login and password reset are open to anyone, so they get the same invisible
+  // reCAPTCHA as the contact form (a no-op until the keys are set).
+  if (body.action === 'login' || body.action === 'signup' || body.action === 'forgot') {
+    const check = await verifyRecaptcha(body.recaptchaToken, 'qr_account')
+    if (!check.ok) return json({ error: 'We could not confirm you are human. Try again.' }, 403)
+  }
 
   if (body.action === 'login') {
     const who = normEmail(body.email)
