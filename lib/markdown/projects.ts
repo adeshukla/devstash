@@ -36,9 +36,13 @@ export function getProjectBySlug(slug: string): Project | null {
 
 // ─── FILTERS ─────────────────────────────────────────────────────────
 
+/** Where a project's case study lives: Lab tools sit under their tool, the rest under /projects. */
+export const projectPath = (p: Pick<Project, 'slug' | 'labTool'>) =>
+  p.labTool ? `/lab/${p.slug}/case-study` : `/projects/${p.slug}`
+
 export function getFeaturedProjects(limit = 3): Project[] {
   return getAllProjects()
-    .filter((p) => p.featured)
+    .filter((p) => p.featured && !p.labTool)
     .slice(0, limit)
 }
 

@@ -1,4 +1,17 @@
+import fs from 'fs'
+import path from 'path'
 import type { NextConfig } from 'next'
+
+// Lab tools keep their case study under the tool: /lab/<slug>/case-study. The page itself is still
+// rendered by app/(main)/projects/[slug], so the old /projects/<slug> address redirects there.
+const labToolSlugs = fs
+  .readdirSync(path.join(process.cwd(), 'content/projects'))
+  .filter((f) => f.endsWith('.json'))
+  .filter(
+    (f) =>
+      JSON.parse(fs.readFileSync(path.join(process.cwd(), 'content/projects', f), 'utf8')).labTool
+  )
+  .map((f) => f.replace(/.json$/, ''))
 
 const nextConfig: NextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
@@ -32,8 +45,20 @@ const nextConfig: NextConfig = {
    * `permanent: true`  → 308 (use for genuine, lasting moves; passes link equity).
    * `permanent: false` → 307 (temporary).
    */
+  async rewrites() {
+    return labToolSlugs.map((slug) => ({
+      source: `/lab/${slug}/case-study`,
+      destination: `/projects/${slug}`,
+    }))
+  },
+
   async redirects() {
     return [
+      ...labToolSlugs.map((slug) => ({
+        source: `/projects/${slug}`,
+        destination: `/lab/${slug}/case-study`,
+        permanent: true,
+      })),
       // Fictional-brand landing-page samples, removed 2026-10. They were noindex
       // and out of the sitemap; anything still linking to them lands on the Lab.
       ...['marketing-lead-gen', 'real-estate-listing', 'saas-trial-signup'].map((slug) => ({

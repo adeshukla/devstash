@@ -167,12 +167,12 @@ interface ProjectSchema {
  * Defaults to the `/projects/<slug>` case-study URL.
  */
 export function buildProjectSchema(
-  project: ProjectSchema,
+  project: ProjectSchema & { labTool?: boolean },
   urlOverride?: string
 ): WithContext<SoftwareApplication | CreativeWork> {
   const url = urlOverride
     ? `${siteConfig.url}${urlOverride}`
-    : `${siteConfig.url}/projects/${project.slug}`
+    : `${siteConfig.url}${project.labTool ? `/lab/${project.slug}/case-study` : `/projects/${project.slug}`}`
 
   if (project.category === 'web-app' || project.category === 'tool') {
     return {

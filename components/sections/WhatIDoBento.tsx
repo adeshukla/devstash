@@ -44,9 +44,9 @@ const PROOF: Record<'frontend' | 'seo' | 'automation', Proof[]> = {
     {
       slug: 'meta-tag-generator',
       name: 'Meta Tag Generator',
-      href: '/projects/meta-tag-generator',
+      href: '/lab/meta-tag-generator/case-study',
     },
-    { slug: 'utm-builder', name: 'UTM Link Builder', href: '/projects/utm-builder' },
+    { slug: 'utm-builder', name: 'UTM Link Builder', href: '/lab/utm-builder/case-study' },
   ],
   automation: [
     {

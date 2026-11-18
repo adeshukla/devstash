@@ -30,5 +30,6 @@
     "outcome": "// TODO: No usage data yet. This is a self-initiated tool, not a deployed one."
   },
   "coverStats": ["no data sent", "country picker", "campaign code"],
-  "relatedPosts": []
+  "relatedPosts": [],
+  "labTool": true
 }

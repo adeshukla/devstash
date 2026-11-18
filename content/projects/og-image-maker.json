@@ -37,5 +37,6 @@
     "outcome": "// TODO: No usage data yet. This is a self-initiated tool, not a deployed one."
   },
   "coverStats": ["simple + full control", "style from a URL", "desktop + phone preview"],
-  "relatedPosts": []
+  "relatedPosts": [],
+  "labTool": true
 }

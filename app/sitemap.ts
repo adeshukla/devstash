@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next'
 import { getAllPosts, getAllCategories, getIndexableTags } from '@/lib/markdown/blog'
-import { getAllProjects } from '@/lib/markdown/projects'
+import { getAllProjects, projectPath } from '@/lib/markdown/projects'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://devstash.me'
 
@@ -85,7 +85,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }))
 
   const projectRoutes: MetadataRoute.Sitemap = getAllProjects().map((project) => ({
-    url: `${BASE_URL}/projects/${project.slug}`,
+    url: `${BASE_URL}${projectPath(project)}`,
     lastModified: new Date(project.endDate ?? project.startDate),
     changeFrequency: 'monthly',
     priority: 0.8,

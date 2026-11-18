@@ -77,7 +77,8 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   const { category } = await searchParams
   const activeCategory = category ?? 'all'
 
-  const allProjects = await getAllProjects()
+  // Lab tools are listed in the Lab, not here.
+  const allProjects = (await getAllProjects()).filter((p) => !p.labTool)
   // Derived from the actual project data rather than a hand-typed list, so
   // the filter can never drift out of sync with real ProjectCategory values
   // again — every button shown is guaranteed to match at least one project.

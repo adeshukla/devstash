@@ -30,5 +30,6 @@
     "outcome": "// TODO: No usage data yet. This is a self-initiated tool, not a deployed one."
   },
   "coverStats": ["static codes", "8 content types", "no data sent"],
-  "relatedPosts": []
+  "relatedPosts": [],
+  "labTool": true
 }

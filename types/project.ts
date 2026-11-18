@@ -22,6 +22,8 @@ export interface Project {
   longDescription: string
   status: ProjectStatus
   featured: boolean
+  /** A tool that runs at /lab/<slug>. Its case study lives at /lab/<slug>/case-study, and it is kept off the Projects list. */
+  labTool?: boolean
   order: number
   category: ProjectCategory
   tech: string[]

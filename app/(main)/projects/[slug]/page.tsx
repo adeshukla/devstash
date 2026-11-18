@@ -12,7 +12,12 @@ import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { buildProjectSchema } from '@/lib/schema/builders'
 import { Breadcrumb } from '@/components/layout'
-import { getAllProjects, getProjectBySlug, parseCaseStudyOutcome } from '@/lib/markdown/projects'
+import {
+  getAllProjects,
+  getProjectBySlug,
+  parseCaseStudyOutcome,
+  projectPath,
+} from '@/lib/markdown/projects'
 import { getPostBySlug } from '@/lib/markdown/blog'
 import { Badge, Button, ImageGallery, Reveal, MountReveal, Separator } from '@/components/ui'
 import { AnimatedCover } from '@/components/sections/AnimatedCover'
@@ -78,7 +83,7 @@ export async function generateMetadata({
   return buildMetadata({
     title: seoTitle,
     description: seoDescription,
-    canonical: `/projects/${project.slug}`,
+    canonical: projectPath(project),
     type: 'website',
     ogImage: buildOgImageUrl({
       title: project.title,
@@ -122,10 +127,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <Breadcrumb
                 items={[
                   { name: 'Home', url: 'https://devstash.me' },
-                  { name: 'Projects', url: 'https://devstash.me/projects' },
+                  project.labTool
+                    ? { name: 'Lab', url: 'https://devstash.me/lab' }
+                    : { name: 'Projects', url: 'https://devstash.me/projects' },
                   {
                     name: project.title,
-                    url: `https://devstash.me/projects/${project.slug}`,
+                    url: `https://devstash.me${projectPath(project)}`,
                   },
                 ]}
               />
@@ -341,10 +348,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         <div className="border-ds-border border-t py-8">
           <div className="mx-auto max-w-4xl px-6">
             <Link
-              href="/projects"
+              href={project.labTool ? `/lab/${project.slug}` : '/projects'}
               className="text-ds-muted hover:text-ds-accent font-mono text-sm transition-colors"
             >
-              ← All projects
+              {project.labTool ? `← Back to the ${project.title}` : '← All projects'}
             </Link>
           </div>
         </div>

@@ -16,7 +16,7 @@ export interface ToolView {
   example?: { input: string; output: string }
   highlights: string[]
   stats: string[]
-  /** True when /projects/<slug> exists. */
+  /** True when /lab/<slug>/case-study exists. */
   caseStudy: boolean
 }
 
@@ -212,7 +212,7 @@ export function LabIndex({ groups, initial }: { groups: JobGroup[]; initial: str
                       </button>
                       {v.caseStudy && (
                         <Link
-                          href={`/projects/${v.slug}`}
+                          href={`/lab/${v.slug}/case-study`}
                           className="text-ds-muted hover:text-ds-text transition-colors"
                         >
                           Case study

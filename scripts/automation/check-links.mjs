@@ -130,15 +130,18 @@ function buildRouteSet() {
   for (const file of projectFiles) {
     const abs = path.join(PROJECTS_DIR, file)
     let slug = file.replace(/\.json$/, '')
+    let lab = false
     try {
       const json = JSON.parse(fs.readFileSync(abs, 'utf8'))
+      lab = Boolean(json.labTool)
       if (typeof json.slug === 'string' && json.slug.trim()) {
         slug = json.slug.trim()
       }
     } catch {
       // Fall back to filename-derived slug if JSON is invalid.
     }
-    routes.add(`/projects/${slug}`)
+    routes.add(lab ? `/lab/${slug}/case-study` : `/projects/${slug}`)
+    if (lab) routes.add(`/projects/${slug}`) // redirects to the Lab case study
   }
 
   return { routes, posts }

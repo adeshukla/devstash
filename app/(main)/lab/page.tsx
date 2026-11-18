@@ -416,11 +416,12 @@ export default async function LabPage() {
           <div>
             <h2 className="text-ds-text text-2xl font-bold tracking-tight">Want the reasoning?</h2>
             <p className="text-ds-muted mt-2">
-              Each build has a case study: the problem and the tradeoffs.
+              Each tool has a case study: the problem and the tradeoffs. The bigger builds are on
+              the Projects page.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button href="/projects">Read the case studies &rarr;</Button>
+            <Button href="/projects">See the bigger builds &rarr;</Button>
             <Button href="/services" variant="ghost">
               Work with me
             </Button>
