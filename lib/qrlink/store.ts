@@ -57,6 +57,12 @@ function memoryKv(): Kv {
   }
 }
 
+/**
+ * Key prefix. One free Upstash database can serve every environment: only the live site uses
+ * the real `qr` keys, so staging and local test accounts and names never collide with real ones.
+ */
+const NS = process.env.VERCEL_ENV === 'production' ? 'qr' : 'qr-test'
+
 let kv: Kv | null | undefined
 /** The database, or null when it is not set up (production without the Upstash keys). */
 function db(): Kv | null {
@@ -90,7 +96,7 @@ export type TokenInfo =
 export async function makeToken(info: TokenInfo): Promise<string> {
   const token = randomBytes(32).toString('base64url')
   await need().set(
-    `qr:t:${hash(token)}`,
+    `${NS}:t:${hash(token)}`,
     { ...info, email: normEmail(info.email) },
     { ex: 60 * 60 }
   )
@@ -100,35 +106,35 @@ export async function makeToken(info: TokenInfo): Promise<string> {
 /** Use a token. Returns what it was for, once; the token is gone afterwards. */
 export async function consumeToken(token: string): Promise<TokenInfo | null> {
   if (!/^[A-Za-z0-9_-]{20,80}$/.test(token)) return null
-  return need().getdel<TokenInfo>(`qr:t:${hash(token)}`)
+  return need().getdel<TokenInfo>(`${NS}:t:${hash(token)}`)
 }
 
 /** Read a token without using it up. */
 export async function peekToken(token: string): Promise<TokenInfo | null> {
   if (!/^[A-Za-z0-9_-]{20,80}$/.test(token)) return null
-  return need().get<TokenInfo>(`qr:t:${hash(token)}`)
+  return need().get<TokenInfo>(`${NS}:t:${hash(token)}`)
 }
 
 /** Password hash for an email, or null when that email has only ever used Google. */
 export async function passwordOf(email: string): Promise<string | null> {
-  return need().get<string>(`qr:a:${normEmail(email)}`)
+  return need().get<string>(`${NS}:a:${normEmail(email)}`)
 }
 
 export async function setPassword(email: string, pw: string): Promise<void> {
-  await need().set(`qr:a:${normEmail(email)}`, pw)
+  await need().set(`${NS}:a:${normEmail(email)}`, pw)
 }
 
 export async function linkOf(email: string): Promise<{ name: string; url: string } | null> {
   const d = need()
-  const name = await d.get<string>(`qr:e:${normEmail(email)}`)
+  const name = await d.get<string>(`${NS}:e:${normEmail(email)}`)
   if (!name) return null
-  const e = await d.get<Entry>(`qr:u:${name}`)
+  const e = await d.get<Entry>(`${NS}:u:${name}`)
   return e && 'url' in e ? { name, url: e.url } : null
 }
 
 /** Where a QR address goes, or null when it is unknown or retired. */
 export async function resolve(name: string): Promise<string | null> {
-  const e = await need().get<Entry>(`qr:u:${name}`)
+  const e = await need().get<Entry>(`${NS}:u:${name}`)
   return e && 'url' in e ? e.url : null
 }
 
@@ -139,12 +145,12 @@ export async function claim(
   url: string
 ): Promise<'ok' | 'taken' | 'has-one'> {
   const d = need()
-  const key = `qr:e:${normEmail(email)}`
+  const key = `${NS}:e:${normEmail(email)}`
   if (await d.get(key)) return 'has-one'
-  const won = await d.set(`qr:u:${name}`, { url, email: normEmail(email) }, { nx: true })
+  const won = await d.set(`${NS}:u:${name}`, { url, email: normEmail(email) }, { nx: true })
   if (!won) return 'taken'
   if (!(await d.set(key, name, { nx: true }))) {
-    await d.del(`qr:u:${name}`)
+    await d.del(`${NS}:u:${name}`)
     return 'has-one'
   }
   return 'ok'
@@ -154,7 +160,7 @@ export async function claim(
 export async function updateUrl(email: string, url: string): Promise<boolean> {
   const mine = await linkOf(email)
   if (!mine) return false
-  await need().set(`qr:u:${mine.name}`, { url, email: normEmail(email) })
+  await need().set(`${NS}:u:${mine.name}`, { url, email: normEmail(email) })
   return true
 }
 
@@ -163,8 +169,8 @@ export async function retire(email: string): Promise<boolean> {
   const mine = await linkOf(email)
   if (!mine) return false
   const d = need()
-  await d.set(`qr:u:${mine.name}`, { retired: true })
-  await d.del(`qr:e:${normEmail(email)}`)
+  await d.set(`${NS}:u:${mine.name}`, { retired: true })
+  await d.del(`${NS}:e:${normEmail(email)}`)
   return true
 }
 
@@ -175,11 +181,11 @@ export async function retire(email: string): Promise<boolean> {
 export async function deleteAccount(email: string): Promise<void> {
   await retire(email)
   const d = need()
-  await d.del(`qr:a:${normEmail(email)}`)
+  await d.del(`${NS}:a:${normEmail(email)}`)
   // Other devices stay signed in until their cookie ends (30 days), so end every sign-in now and
   // let this cutoff expire with the longest cookie, rather than keeping it for good.
   await revokeSessions(email)
-  await d.expire(`qr:s:${normEmail(email)}`, 60 * 60 * 24 * 30)
+  await d.expire(`${NS}:s:${normEmail(email)}`, 60 * 60 * 24 * 30)
 }
 
 /**
@@ -188,7 +194,7 @@ export async function deleteAccount(email: string): Promise<void> {
  */
 export async function limited(key: string, max: number, windowSec: number): Promise<boolean> {
   const d = need()
-  const k = `qr:l:${key}`
+  const k = `${NS}:l:${key}`
   const n = await d.incr(k)
   if (n === 1) await d.expire(k, windowSec)
   return n > max
@@ -196,7 +202,7 @@ export async function limited(key: string, max: number, windowSec: number): Prom
 
 /** Every sign-in made before now stops working for this email (called after a password reset). */
 export async function revokeSessions(email: string): Promise<void> {
-  await need().set(`qr:s:${normEmail(email)}`, Date.now())
+  await need().set(`${NS}:s:${normEmail(email)}`, Date.now())
 }
 
 /** False when this sign-in is older than the account's last password reset. */
@@ -204,6 +210,6 @@ export async function sessionStillValid(
   email: string,
   issuedAt: number | undefined
 ): Promise<boolean> {
-  const cutoff = await need().get<number>(`qr:s:${normEmail(email)}`)
+  const cutoff = await need().get<number>(`${NS}:s:${normEmail(email)}`)
   return !cutoff || (typeof issuedAt === 'number' && issuedAt >= cutoff)
 }
