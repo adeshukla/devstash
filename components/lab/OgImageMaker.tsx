@@ -171,6 +171,7 @@ export function OgImageMaker() {
   const [swatches, setSwatches] = useState<Swatch[]>([])
   const [photoMean, setPhotoMean] = useState('')
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null)
+  const [saved, setSaved] = useState('')
   const [format, setFormat] = useState<'png' | 'jpeg'>('png')
   const [scale, setScale] = useState<'1' | '2'>('1')
   const [quality, setQuality] = useState(92)
@@ -412,15 +413,42 @@ export function OgImageMaker() {
     const canvas = await rasterize()
     const type = format === 'png' ? 'image/png' : 'image/jpeg'
     canvas.toBlob(
-      (b) =>
-        b &&
-        saveBlob(
+      (b) => {
+        if (!b) return
+        void saveBlob(
           b,
           `og-image-${w}x${h}${scale === '2' ? '@2x' : ''}.${format === 'png' ? 'png' : 'jpg'}`
-        ),
+        )
+        const kb = Math.round(b.size / 1024)
+        // Reports say WhatsApp may skip share images over roughly 600 KB; not an official limit.
+        setSaved(
+          kb > 600
+            ? `Saved ${kb} KB. That is large: WhatsApp may skip images over about 600 KB. Try JPG or the normal size.`
+            : `Saved ${kb} KB. Small enough for link previews.`
+        )
+      },
       type,
       quality / 100
     )
+  }
+
+  async function copyMeta() {
+    const { w, h } = sizeOf()
+    const ext = format === 'png' ? 'png' : 'jpg'
+    const tags = [
+      `<meta property="og:image" content="https://yoursite.com/og-image.${ext}" />`,
+      `<meta property="og:image:width" content="${w}" />`,
+      `<meta property="og:image:height" content="${h}" />`,
+      `<meta name="twitter:card" content="summary_large_image" />`,
+      `<meta name="twitter:image" content="https://yoursite.com/og-image.${ext}" />`,
+    ].join('\n')
+    try {
+      await navigator.clipboard.writeText(tags)
+      setSaved('Meta tags copied. Replace yoursite.com with the address where you upload the file.')
+    } catch {
+      setSaved('Could not copy. Your browser blocked the clipboard.')
+    }
+    trackLab('og-image', 'copy_meta')
   }
 
   function downloadSvg() {
@@ -1348,7 +1376,15 @@ export function OgImageMaker() {
           <Button type="button" size="sm" variant="ghost" onClick={downloadSvg} disabled={!svg}>
             Download SVG
           </Button>
+          <Button type="button" size="sm" variant="ghost" onClick={() => void copyMeta()}>
+            Copy meta tags
+          </Button>
         </div>
+        {saved && (
+          <p className="text-ds-muted mt-2 text-xs" role="status">
+            {saved}
+          </p>
+        )}
         <p className="text-ds-muted mt-4 text-xs leading-relaxed">
           Text is drawn with your device&apos;s own fonts, so the file looks like this preview, but
           a different device may pick a different font for the same setting. Hindi and other scripts
