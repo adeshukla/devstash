@@ -1,6 +1,5 @@
-/* ToolArt: colours come from the site tokens. At rest every picture shows its finished state. It plays
-   (transform and opacity only) while its cover is hovered or focused, and always on touch screens.
-   Reduced motion: it stays still. */
+/* ToolArt: colours come from the site tokens. Each picture loops on its own, like the other covers
+   (transform and opacity only). Reduced motion: it stays still, in its finished state. */
 
 .ta {
   display: block;
@@ -113,109 +112,55 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* Where it plays */
-  :is(.ac:hover, .ac:focus-within) .ta [class*='k-'] {
+  .ta [class*='k-'] {
     animation-duration: 3.4s;
     animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
   }
-  @media (hover: none) {
-    .ac .ta [class*='k-'] {
-      animation-duration: 3.4s;
-      animation-timing-function: ease-in-out;
-      animation-iteration-count: infinite;
-    }
-  }
 
-  :is(.ac:hover, .ac:focus-within) .ta .k-grow {
+  .ta .k-grow {
     animation-name: ta-grow;
   }
-  :is(.ac:hover, .ac:focus-within) .ta .k-growx {
+  .ta .k-growx {
     animation-name: ta-growx;
   }
-  :is(.ac:hover, .ac:focus-within) .ta .k-slide {
+  .ta .k-slide {
     animation-name: ta-slide;
   }
-  :is(.ac:hover, .ac:focus-within) .ta .k-pop {
+  .ta .k-pop {
     animation-name: ta-pop;
   }
-  :is(.ac:hover, .ac:focus-within) .ta .k-draw {
+  .ta .k-draw {
     animation-name: ta-draw;
   }
-  :is(.ac:hover, .ac:focus-within) .ta .k-scanx {
+  .ta .k-scanx {
     animation-name: ta-scanx;
   }
-  :is(.ac:hover, .ac:focus-within) .ta .k-scany {
+  .ta .k-scany {
     animation-name: ta-scany;
   }
-  :is(.ac:hover, .ac:focus-within) .ta .k-ping {
+  .ta .k-ping {
     animation-name: ta-ping;
   }
-  :is(.ac:hover, .ac:focus-within) .ta .k-float {
+  .ta .k-float {
     animation-name: ta-float;
   }
-  :is(.ac:hover, .ac:focus-within) .ta .k-bounce {
+  .ta .k-bounce {
     animation-name: ta-bounce;
     animation-duration: 1.1s;
   }
-  :is(.ac:hover, .ac:focus-within) .ta .k-sink {
+  .ta .k-sink {
     animation-name: ta-sink;
   }
-  :is(.ac:hover, .ac:focus-within) .ta .k-bad {
+  .ta .k-bad {
     animation-name: ta-bad;
     animation-duration: 1.2s;
   }
-  :is(.ac:hover, .ac:focus-within) .ta .k-morph {
+  .ta .k-morph {
     animation-name: ta-morph;
   }
-  :is(.ac:hover, .ac:focus-within) .ta .k-travel {
+  .ta .k-travel {
     animation-name: ta-travel;
-  }
-  @media (hover: none) {
-    .ac .ta .k-grow {
-      animation-name: ta-grow;
-    }
-    .ac .ta .k-growx {
-      animation-name: ta-growx;
-    }
-    .ac .ta .k-slide {
-      animation-name: ta-slide;
-    }
-    .ac .ta .k-pop {
-      animation-name: ta-pop;
-    }
-    .ac .ta .k-draw {
-      animation-name: ta-draw;
-    }
-    .ac .ta .k-scanx {
-      animation-name: ta-scanx;
-    }
-    .ac .ta .k-scany {
-      animation-name: ta-scany;
-    }
-    .ac .ta .k-ping {
-      animation-name: ta-ping;
-    }
-    .ac .ta .k-float {
-      animation-name: ta-float;
-    }
-    .ac .ta .k-bounce {
-      animation-name: ta-bounce;
-      animation-duration: 1.1s;
-    }
-    .ac .ta .k-sink {
-      animation-name: ta-sink;
-    }
-    .ac .ta .k-bad {
-      animation-name: ta-bad;
-      animation-duration: 1.2s;
-    }
-    .ac .ta .k-morph {
-      animation-name: ta-morph;
-    }
-    .ac .ta .k-travel {
-      animation-name: ta-travel;
-    }
   }
 
   .ta .d1 {

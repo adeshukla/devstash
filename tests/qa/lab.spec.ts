@@ -1392,10 +1392,9 @@ test.describe('Lab list pictures', () => {
     await expect(page.locator('.ac-art svg.ta').first()).toBeVisible()
   })
 
-  test('hovering the picture plays it', async ({ page }) => {
+  test('the picture plays by itself, with no hover', async ({ page }) => {
     await page.goto('/lab')
     const cover = page.locator('.ac').first()
-    await cover.hover()
     const name = await cover
       .locator('svg.ta [class*="k-"]')
       .first()

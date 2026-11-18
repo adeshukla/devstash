@@ -45,10 +45,11 @@ export function ConsentBanner() {
       className="border-ds-border2 bg-ds-surface fixed inset-x-3 bottom-3 z-50 rounded-lg border p-3 shadow-lg sm:right-auto sm:max-w-sm sm:p-4"
     >
       <p className="text-ds-text text-[13px] leading-snug sm:text-sm">
-        Allow analytics (Google Analytics and Clarity)? Nothing loads until you choose, and you can
-        change it in the footer.{' '}
+        Allow analytics? It records the pages you view, your device and approximate location, and
+        how you click and scroll (including screen recordings), so I can improve the site. Nothing
+        loads until you choose.{' '}
         <Link href="/privacy" className="text-ds-accent-strong underline underline-offset-4">
-          Privacy policy
+          Details
         </Link>
       </p>
       <div className="mt-2.5 flex gap-2">
