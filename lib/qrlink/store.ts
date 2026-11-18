@@ -169,6 +169,20 @@ export async function retire(email: string): Promise<boolean> {
 }
 
 /**
+ * Erase everything held about this email: the address is stopped (its name stays reserved so a
+ * printed code cannot be taken over), and the password hash and sign-in cutoff are deleted.
+ */
+export async function deleteAccount(email: string): Promise<void> {
+  await retire(email)
+  const d = need()
+  await d.del(`qr:a:${normEmail(email)}`)
+  // Other devices stay signed in until their cookie ends (30 days), so end every sign-in now and
+  // let this cutoff expire with the longest cookie, rather than keeping it for good.
+  await revokeSessions(email)
+  await d.expire(`qr:s:${normEmail(email)}`, 60 * 60 * 24 * 30)
+}
+
+/**
  * True when `key` has been used more than `max` times in the last `windowSec` seconds. The counter
  * lives in the database, so it holds across every server instance (an in-memory counter would not).
  */

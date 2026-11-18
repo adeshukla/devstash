@@ -13,7 +13,20 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['github'], ['list']] : 'list',
-  use: { baseURL, trace: 'on-first-retry' },
+  // Analytics choice is pre-set to 'denied' so the cookie banner never covers a control under test.
+  use: {
+    baseURL,
+    trace: 'on-first-retry',
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin: new URL(baseURL).origin,
+          localStorage: [{ name: 'devstash-consent', value: 'denied' }],
+        },
+      ],
+    },
+  },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: process.env.QA_BASE_URL
     ? undefined

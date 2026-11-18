@@ -1338,3 +1338,67 @@ test.describe('My sessions on the other tools', () => {
     }
   })
 })
+
+test.describe('Cookie choice', () => {
+  // These tests start with nothing saved, so the banner shows.
+  test.use({ storageState: { cookies: [], origins: [] } })
+  const choice = (page: Page) => page.getByRole('region', { name: 'Analytics choice' })
+  const stored = (page: Page) =>
+    page.evaluate(() => window.localStorage.getItem('devstash-consent'))
+
+  test('the banner asks first, Reject is remembered, and the footer reopens it', async ({
+    page,
+  }) => {
+    await page.goto('/privacy')
+    await expect(choice(page)).toBeVisible()
+    await choice(page).getByRole('button', { name: 'Reject' }).click()
+    await expect(choice(page)).toHaveCount(0)
+    expect(await stored(page)).toBe('denied')
+    await page.reload()
+    await expect(choice(page)).toHaveCount(0)
+
+    await page.getByRole('button', { name: 'Cookie settings' }).first().click()
+    await expect(choice(page)).toBeVisible()
+    await choice(page).getByRole('button', { name: 'Accept' }).click()
+    expect(await stored(page)).toBe('granted')
+  })
+
+  test('no analytics script is added to the page before a choice', async ({ page }) => {
+    await page.goto('/lab')
+    await expect(choice(page)).toBeVisible()
+    await page.waitForTimeout(2500)
+    const scripts = await page.evaluate(
+      () => [...document.scripts].filter((s) => /googletagmanager|clarity\.ms/.test(s.src)).length
+    )
+    expect(scripts).toBe(0)
+  })
+
+  test('the banner has no accessibility problems', async ({ page }) => {
+    await page.goto('/privacy')
+    await expect(choice(page)).toBeVisible()
+    const r = await new AxeBuilder({ page }).analyze()
+    expect(r.violations.map((v) => v.id)).toEqual([])
+  })
+})
+
+test.describe('Lab list pictures', () => {
+  test('every tool row has a picture, and the open tool shows a larger one', async ({ page }) => {
+    await page.goto('/lab')
+    const rows = page.getByRole('list', { name: 'Tools' }).getByRole('button')
+    const n = await rows.count()
+    expect(n).toBeGreaterThanOrEqual(10)
+    for (let i = 0; i < n; i++) expect(await rows.nth(i).locator('svg.ta').count()).toBe(1)
+    await expect(page.locator('.ac-art svg.ta').first()).toBeVisible()
+  })
+
+  test('hovering a row plays its picture', async ({ page }) => {
+    await page.goto('/lab')
+    const row = page.getByRole('list', { name: 'Tools' }).getByRole('button').nth(3)
+    await row.hover()
+    const name = await row
+      .locator('svg.ta [class*="k-"]')
+      .first()
+      .evaluate((el) => getComputedStyle(el).animationName)
+    expect(name).not.toBe('none')
+  })
+})

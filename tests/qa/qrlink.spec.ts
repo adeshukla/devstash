@@ -186,6 +186,32 @@ test.describe('changeable QR links: security', () => {
     await other.dispose()
   })
 
+  test('deleting an account erases the sign-in and keeps the printed name reserved', async ({
+    request,
+    playwright,
+    baseURL,
+  }) => {
+    const c = client(request)
+    const { email, password } = await c.account()
+    const name = `qa-${rnd()}`
+    expect((await c.post({ action: 'claim', name, url: 'https://example.com/one' })).status()).toBe(
+      200
+    )
+    expect((await c.post({ action: 'delete-account' })).status()).toBe(200)
+    expect((await c.me()).email).toBeNull()
+    // The password no longer works and the address is dead.
+    expect((await c.post({ action: 'login', email, password })).status()).not.toBe(200)
+    expect((await request.get(`/q/${name}`, { maxRedirects: 0 })).status()).toBe(404)
+    // Nobody else can take over a code that may still be printed.
+    const other = await fresh(playwright, baseURL!)
+    const o = client(other)
+    await o.account()
+    expect((await o.post({ action: 'claim', name, url: 'https://example.net' })).status()).toBe(409)
+    await other.dispose()
+    // Signed out, the delete action is refused.
+    expect((await c.post({ action: 'delete-account' })).status()).toBe(401)
+  })
+
   test('the redirect route only answers valid names and never guesses', async ({ request }) => {
     for (const bad of ['nobody-here', 'ab', 'UPPER', 'a_b', 'x'.repeat(40)]) {
       const r = await request.get(`/q/${bad}`, { maxRedirects: 0 })

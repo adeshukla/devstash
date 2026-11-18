@@ -5,6 +5,7 @@ import { LogoMark } from '@/components/ui/LogoMark'
 import { Icon } from '@/components/icons/Icon'
 import type { IconName } from '@/components/icons/Icon'
 import { FooterScene } from './FooterScene'
+import { CookieSettingsButton } from './ConsentBanner'
 
 const navLinks = [
   { label: 'Home', href: '/' },
@@ -201,6 +202,9 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <CookieSettingsButton className="link-underline text-ds-muted hover:text-ds-text font-mono text-[12px] transition-colors" />
+              </li>
             </ul>
           </nav>
         </div>

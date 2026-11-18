@@ -44,6 +44,7 @@ export function ChangeableQr() {
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
   const [confirmRetire, setConfirmRetire] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const load = useCallback(async () => {
     try {
@@ -354,6 +355,26 @@ export function ChangeableQr() {
           ) : (
             <Button variant="outline" size="sm" onClick={() => setConfirmRetire(true)}>
               Stop this code
+            </Button>
+          )}
+          {confirmDelete ? (
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() =>
+                void run({ action: 'delete-account' }, () => {
+                  setConfirmDelete(false)
+                  setUrl('')
+                  setName('')
+                  void load()
+                })
+              }
+            >
+              Yes, delete my account and email
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm" onClick={() => setConfirmDelete(true)}>
+              Delete my account
             </Button>
           )}
         </div>

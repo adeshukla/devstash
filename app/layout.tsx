@@ -4,6 +4,8 @@ import { siteConfig } from '@/content/metadata/site.config'
 import { buildOgImageUrl } from '@/lib/seo/ogImage'
 import { Analytics, ClarityLoader, GtmNoScript } from '@/components/layout/Analytics'
 import { AnalyticsClicks } from '@/components/layout/AnalyticsClicks'
+import { ConsentBanner } from '@/components/layout/ConsentBanner'
+import { ConsentGate } from '@/components/layout/ConsentGate'
 import './globals.css'
 
 // Must match components/ui/ThemeToggle.tsx's STORAGE_KEY exactly.
@@ -128,9 +130,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <GtmNoScript />
         {children}
-        <Analytics />
-        <ClarityLoader />
+        <ConsentGate>
+          <Analytics />
+          <ClarityLoader />
+        </ConsentGate>
         <AnalyticsClicks />
+        <ConsentBanner />
       </body>
     </html>
   )

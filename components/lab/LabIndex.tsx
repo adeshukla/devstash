@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState, useSyncExternalStore, type CSSPrope
 import Link from 'next/link'
 import { Badge, Button, CardTilt } from '@/components/ui'
 import { AnimatedCover } from '@/components/sections/AnimatedCover'
+import { ToolArt } from './ToolArt'
 import { projectBrand } from '@/components/icons/ProjectMark'
 import { cn } from '@/lib/utils/cn'
 import { copyText } from '@/lib/utils/clipboard'
@@ -452,6 +453,17 @@ export function LabIndex({ groups }: { groups: JobGroup[] }) {
                       )}
                     >
                       {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        'bg-ds-surface2 h-10 w-[60px] shrink-0 overflow-hidden rounded-md border p-1 transition-colors sm:h-14 sm:w-[84px]',
+                        isActive
+                          ? 'border-ds-accent'
+                          : 'border-ds-border group-hover:border-ds-border2'
+                      )}
+                    >
+                      <ToolArt slug={t.views[0].slug} />
                     </span>
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                       <span

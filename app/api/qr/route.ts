@@ -15,6 +15,7 @@ import {
   normEmail,
   passwordOf,
   peekToken,
+  deleteAccount,
   retire,
   revokeSessions,
   setPassword,
@@ -52,6 +53,7 @@ const Body = z.discriminatedUnion('action', [
   z.object({ action: z.literal('claim'), name: z.string().max(40), url: z.string().max(2100) }),
   z.object({ action: z.literal('update'), url: z.string().max(2100) }),
   z.object({ action: z.literal('retire') }),
+  z.object({ action: z.literal('delete-account') }),
   z.object({ action: z.literal('logout') }),
 ])
 
@@ -194,6 +196,12 @@ export async function POST(request: Request) {
 
   const who = await signedInEmail()
   if (!who) return json({ error: 'Sign in first.' }, 401)
+
+  if (body.action === 'delete-account') {
+    await deleteAccount(who)
+    ;(await qrSession()).destroy()
+    return json({ ok: true })
+  }
 
   if (body.action === 'retire') {
     await retire(who)

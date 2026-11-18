@@ -1,3 +1,5 @@
+import { readConsent } from '@/lib/consent'
+
 // Typed, crash-proof analytics helpers. Safe to import from server or client
 // components — no server-only imports. Event names are the single source of
 // truth; all call sites send names from ANALYTICS_EVENTS.
@@ -57,6 +59,8 @@ export function trackEvent(name: AnalyticsEvent, params?: AnalyticsParams): void
  */
 export function logVisit(name: AnalyticsEvent, params?: AnalyticsParams): void {
   if (typeof window === 'undefined') return
+  // The owner log records the visitor's approximate location, so it follows the analytics choice.
+  if (readConsent() !== 'granted') return
   try {
     const payload = JSON.stringify({
       event: name,

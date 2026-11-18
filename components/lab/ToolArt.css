@@ -1,0 +1,404 @@
+/* ToolArt: colours come from the site tokens. At rest every picture shows its finished state. It plays
+   (transform and opacity only) while a row is hovered or open, or while its cover is hovered or
+   focused, and always on touch screens inside a cover. Reduced motion: it stays still. */
+
+.ta {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.ta .card {
+  fill: var(--color-ds-surface);
+  stroke: var(--color-ds-border2);
+  stroke-width: 1.5;
+}
+.ta .fa {
+  fill: var(--color-ds-accent);
+}
+.ta .fa-soft {
+  fill: color-mix(in srgb, var(--color-ds-accent) 28%, transparent);
+}
+.ta .fa-line {
+  fill: var(--color-ds-accent);
+  opacity: 0.85;
+}
+.ta .fp {
+  fill: var(--color-ds-purple);
+}
+.ta .fs {
+  fill: var(--color-ds-success);
+}
+.ta .fs-soft {
+  fill: color-mix(in srgb, var(--color-ds-success) 24%, transparent);
+}
+.ta .fw {
+  fill: var(--color-ds-warning);
+}
+.ta .fm {
+  fill: color-mix(in srgb, var(--color-ds-text) 30%, transparent);
+}
+.ta .fl {
+  fill: #fff;
+  opacity: 0.78;
+}
+.ta .sa,
+.ta .ss,
+.ta .ssm,
+.ta .ssp,
+.ta .ring {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ta .sa {
+  stroke: var(--color-ds-accent);
+  stroke-width: 3;
+}
+.ta .ss {
+  stroke: var(--color-ds-success);
+  stroke-width: 3;
+}
+.ta .ssm {
+  stroke: color-mix(in srgb, var(--color-ds-text) 55%, transparent);
+  stroke-width: 3;
+}
+.ta .ssp {
+  stroke: var(--color-ds-purple);
+  stroke-width: 3;
+}
+.ta .ring {
+  stroke: var(--color-ds-success);
+  stroke-width: 1.5;
+  opacity: 0;
+}
+
+/* Parts that move: the box is the element's own, so scale and slide start from its edge. */
+.ta [class*='k-'] {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.ta .k-grow {
+  transform-origin: 50% 100%;
+}
+.ta .k-growx {
+  transform-origin: 0 50%;
+}
+.ta .k-draw {
+  stroke-dasharray: 100;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Where it plays */
+  :is(.group:hover, .group[aria-expanded='true'], .ac:hover, .ac:focus-within) .ta [class*='k-'] {
+    animation-duration: 3.4s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+  @media (hover: none) {
+    .ac .ta [class*='k-'] {
+      animation-duration: 3.4s;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+    }
+  }
+
+  :is(.group:hover, .group[aria-expanded='true'], .ac:hover, .ac:focus-within) .ta .k-grow {
+    animation-name: ta-grow;
+  }
+  :is(.group:hover, .group[aria-expanded='true'], .ac:hover, .ac:focus-within) .ta .k-growx {
+    animation-name: ta-growx;
+  }
+  :is(.group:hover, .group[aria-expanded='true'], .ac:hover, .ac:focus-within) .ta .k-slide {
+    animation-name: ta-slide;
+  }
+  :is(.group:hover, .group[aria-expanded='true'], .ac:hover, .ac:focus-within) .ta .k-pop {
+    animation-name: ta-pop;
+  }
+  :is(.group:hover, .group[aria-expanded='true'], .ac:hover, .ac:focus-within) .ta .k-draw {
+    animation-name: ta-draw;
+  }
+  :is(.group:hover, .group[aria-expanded='true'], .ac:hover, .ac:focus-within) .ta .k-scanx {
+    animation-name: ta-scanx;
+  }
+  :is(.group:hover, .group[aria-expanded='true'], .ac:hover, .ac:focus-within) .ta .k-scany {
+    animation-name: ta-scany;
+  }
+  :is(.group:hover, .group[aria-expanded='true'], .ac:hover, .ac:focus-within) .ta .k-ping {
+    animation-name: ta-ping;
+  }
+  :is(.group:hover, .group[aria-expanded='true'], .ac:hover, .ac:focus-within) .ta .k-float {
+    animation-name: ta-float;
+  }
+  :is(.group:hover, .group[aria-expanded='true'], .ac:hover, .ac:focus-within) .ta .k-bounce {
+    animation-name: ta-bounce;
+    animation-duration: 1.1s;
+  }
+  :is(.group:hover, .group[aria-expanded='true'], .ac:hover, .ac:focus-within) .ta .k-sink {
+    animation-name: ta-sink;
+  }
+  :is(.group:hover, .group[aria-expanded='true'], .ac:hover, .ac:focus-within) .ta .k-bad {
+    animation-name: ta-bad;
+    animation-duration: 1.2s;
+  }
+  :is(.group:hover, .group[aria-expanded='true'], .ac:hover, .ac:focus-within) .ta .k-morph {
+    animation-name: ta-morph;
+  }
+  :is(.group:hover, .group[aria-expanded='true'], .ac:hover, .ac:focus-within) .ta .k-travel {
+    animation-name: ta-travel;
+  }
+  @media (hover: none) {
+    .ac .ta .k-grow {
+      animation-name: ta-grow;
+    }
+    .ac .ta .k-growx {
+      animation-name: ta-growx;
+    }
+    .ac .ta .k-slide {
+      animation-name: ta-slide;
+    }
+    .ac .ta .k-pop {
+      animation-name: ta-pop;
+    }
+    .ac .ta .k-draw {
+      animation-name: ta-draw;
+    }
+    .ac .ta .k-scanx {
+      animation-name: ta-scanx;
+    }
+    .ac .ta .k-scany {
+      animation-name: ta-scany;
+    }
+    .ac .ta .k-ping {
+      animation-name: ta-ping;
+    }
+    .ac .ta .k-float {
+      animation-name: ta-float;
+    }
+    .ac .ta .k-bounce {
+      animation-name: ta-bounce;
+      animation-duration: 1.1s;
+    }
+    .ac .ta .k-sink {
+      animation-name: ta-sink;
+    }
+    .ac .ta .k-bad {
+      animation-name: ta-bad;
+      animation-duration: 1.2s;
+    }
+    .ac .ta .k-morph {
+      animation-name: ta-morph;
+    }
+    .ac .ta .k-travel {
+      animation-name: ta-travel;
+    }
+  }
+
+  .ta .d1 {
+    animation-delay: 0.25s !important;
+  }
+  .ta .d2 {
+    animation-delay: 0.5s !important;
+  }
+  .ta .d3 {
+    animation-delay: 0.75s !important;
+  }
+}
+
+/* Each move starts empty, settles into the finished picture, then fades so the loop can restart. */
+@keyframes ta-grow {
+  0%,
+  6% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  30%,
+  85% {
+    transform: none;
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes ta-growx {
+  0%,
+  6% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  30%,
+  85% {
+    transform: none;
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes ta-slide {
+  0%,
+  6% {
+    transform: translateX(-14px);
+    opacity: 0;
+  }
+  28%,
+  85% {
+    transform: none;
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes ta-pop {
+  0%,
+  6% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  26% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  36%,
+  85% {
+    transform: none;
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes ta-draw {
+  0%,
+  6% {
+    stroke-dashoffset: 100;
+  }
+  50%,
+  88% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+@keyframes ta-scanx {
+  0%,
+  6% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  55% {
+    transform: translateX(82px);
+    opacity: 1;
+  }
+  70%,
+  100% {
+    transform: translateX(82px);
+    opacity: 0;
+  }
+}
+@keyframes ta-scany {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(42px);
+  }
+}
+@keyframes ta-ping {
+  0%,
+  10% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  70%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+@keyframes ta-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes ta-bounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+@keyframes ta-sink {
+  0%,
+  8% {
+    transform: none;
+    opacity: 1;
+  }
+  45%,
+  70% {
+    transform: translateY(26px) scaleX(0.4);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes ta-bad {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+@keyframes ta-morph {
+  0%,
+  100% {
+    transform: rotate(0) scale(1);
+    rx: 50%;
+  }
+  35% {
+    transform: rotate(45deg) scale(0.92);
+    rx: 3px;
+  }
+  70% {
+    transform: rotate(90deg) scale(1.08);
+    rx: 40%;
+  }
+}
+@keyframes ta-travel {
+  0%,
+  8% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  80%,
+  95% {
+    transform: translateX(64px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(64px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ta [class*='k-'] {
+    animation: none !important;
+  }
+}

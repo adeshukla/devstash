@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { projectBrand } from '@/components/icons/ProjectMark'
+import { ToolArt, hasToolArt } from '@/components/lab/ToolArt'
 import './AnimatedCover.css'
 
 // The shipped brand cover (project colour tinted into the card surface, with
@@ -80,16 +81,24 @@ const SCENES: Record<string, ReactNode> = {
 
 export function AnimatedCover({ slug, stats = [] }: { slug: string; stats?: string[] }) {
   const { color, Mark } = projectBrand(slug)
+  // Lab tools show their own picture; other projects keep their brand scene and mark.
+  const art = hasToolArt(slug)
   return (
     <div
       aria-hidden="true"
       className="ac select-none"
       style={{ '--brand': color } as CSSProperties}
     >
-      {SCENES[slug]}
-      <span className="ac-big p lift">
-        <Mark />
-      </span>
+      {!art && SCENES[slug]}
+      {art ? (
+        <span className="ac-art">
+          <ToolArt slug={slug} />
+        </span>
+      ) : (
+        <span className="ac-big p lift">
+          <Mark />
+        </span>
+      )}
       {stats.length > 0 && (
         <div className="ac-stats">
           {stats.map((s) => (

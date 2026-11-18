@@ -29,6 +29,17 @@
   height: 100%;
 }
 
+/* A Lab tool's own picture, in place of the monogram */
+.ac-art {
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: min(300px, 58cqw);
+  aspect-ratio: 3 / 2;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
 /* Facts from the project file, always visible: the cover informs even at rest */
 .ac-stats {
   position: absolute;
