@@ -159,9 +159,16 @@ export const mdxComponents: MDXComponents = {
 
   // Tables
   table: ({ children }) => (
-    <div className="border-ds-border my-6 overflow-x-auto rounded-lg border">
+    <div
+      className="border-ds-border my-6 overflow-x-auto rounded-lg border"
+      // Soft edge shadows that appear only on the side with more columns to scroll to.
+      style={{
+        background:
+          'linear-gradient(to right, var(--color-ds-bg) 30%, transparent) 0 0 / 40px 100% no-repeat local, linear-gradient(to left, var(--color-ds-bg) 30%, transparent) 100% 0 / 40px 100% no-repeat local, linear-gradient(to right, rgb(0 0 0 / 0.35), transparent) 0 0 / 14px 100% no-repeat scroll, linear-gradient(to left, rgb(0 0 0 / 0.35), transparent) 100% 0 / 14px 100% no-repeat scroll',
+      }}
+    >
       {/* Only the last ROW loses its bottom border, not the last cell of every row. */}
-      <table className="w-full border-collapse text-sm [&_tbody_tr:last-child_td]:border-b-0">
+      <table className="w-full min-w-[30rem] border-collapse text-sm [&_tbody_tr:last-child_td]:border-b-0">
         {children}
       </table>
     </div>
@@ -171,12 +178,12 @@ export const mdxComponents: MDXComponents = {
   // table that already scrolls sideways it just splits ordinary words ("conte-nt") on a phone,
   // so cells keep their words whole and a narrow screen scrolls the table instead.
   th: ({ children }) => (
-    <th className="border-ds-border text-ds-text border-b px-4 py-3 text-left font-semibold [overflow-wrap:normal]">
+    <th className="border-ds-border text-ds-text border-b px-3 py-2.5 text-left font-semibold [overflow-wrap:normal] sm:px-4 sm:py-3">
       {children}
     </th>
   ),
   td: ({ children }) => (
-    <td className="border-ds-border text-ds-muted border-b px-4 py-3 [overflow-wrap:normal]">
+    <td className="border-ds-border text-ds-muted border-b px-3 py-2.5 [overflow-wrap:normal] sm:px-4 sm:py-3">
       {children}
     </td>
   ),

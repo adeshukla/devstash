@@ -188,13 +188,13 @@ export default async function BlogPostPage({ params }: Props) {
       <section className="py-16">
         <div className="mx-auto max-w-6xl px-6">
           {/* ── Content + TOC layout ── */}
-          <div className="lg:grid lg:grid-cols-[1fr_220px] lg:gap-12">
+          <div className="lg:grid lg:grid-cols-[1fr_250px] lg:gap-12">
             {/* Article body */}
             <article className="max-w-3xl min-w-0">
               {/* Mobile TOC */}
               {toc.length > 0 && (
-                <div className="border-ds-border bg-ds-surface mb-8 rounded-xl border p-5 lg:hidden">
-                  <TOC items={toc} />
+                <div className="mb-8 lg:hidden">
+                  <TOC items={toc} compact />
                 </div>
               )}
 
