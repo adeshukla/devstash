@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils/cn'
 import { copyText } from '@/lib/utils/clipboard'
 import { LabMiniTry, MINI_TOOLS } from './LabMiniTry'
 import { trackLab } from './track'
+import { SEARCH_MIN_ITEMS } from '@/lib/utils/listing'
 import '@/components/sections/ProjectsExplorer.css'
 
 /** One way of looking at a tool. Most tools have one; the QR tool has Fixed and Changeable. */
@@ -275,7 +276,7 @@ export function LabIndex({ groups }: { groups: JobGroup[] }) {
       const typing =
         el instanceof HTMLElement &&
         (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))
-      if (e.key === '/' && !typing && !e.metaKey && !e.ctrlKey) {
+      if (e.key === '/' && !typing && !e.metaKey && !e.ctrlKey && searchBox.current) {
         e.preventDefault()
         searchBox.current?.focus()
       }
@@ -352,29 +353,31 @@ export function LabIndex({ groups }: { groups: JobGroup[] }) {
             )
           })}
         </div>
-        <div className="relative w-full sm:w-72">
-          <label htmlFor="lab-search" className="sr-only">
-            Describe what you want to do
-          </label>
-          <input
-            id="lab-search"
-            ref={searchBox}
-            type="search"
-            value={q}
-            onChange={(e) => search(e.target.value)}
-            placeholder="What do you want to get done?"
-            autoComplete="off"
-            className="border-ds-border bg-ds-surface2 text-ds-text placeholder:text-ds-muted focus:border-ds-accent w-full rounded-lg border py-2 pr-9 pl-3.5 text-sm outline-none"
-          />
-          {!q && (
-            <kbd
-              aria-hidden="true"
-              className="border-ds-border2 text-ds-muted pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 rounded border px-1.5 font-mono text-xs"
-            >
-              /
-            </kbd>
-          )}
-        </div>
+        {all.length >= SEARCH_MIN_ITEMS && (
+          <div className="relative w-full sm:w-72">
+            <label htmlFor="lab-search" className="sr-only">
+              Describe what you want to do
+            </label>
+            <input
+              id="lab-search"
+              ref={searchBox}
+              type="search"
+              value={q}
+              onChange={(e) => search(e.target.value)}
+              placeholder="What do you want to get done?"
+              autoComplete="off"
+              className="border-ds-border bg-ds-surface2 text-ds-text placeholder:text-ds-muted focus:border-ds-accent w-full rounded-lg border py-2 pr-9 pl-3.5 text-sm outline-none"
+            />
+            {!q && (
+              <kbd
+                aria-hidden="true"
+                className="border-ds-border2 text-ds-muted pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 rounded border px-1.5 font-mono text-xs"
+              >
+                /
+              </kbd>
+            )}
+          </div>
+        )}
       </div>
       <p className="text-ds-muted mt-3 text-sm">
         {searching ? (

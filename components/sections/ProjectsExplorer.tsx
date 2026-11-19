@@ -9,6 +9,7 @@ import { AnimatedCover } from '@/components/sections/AnimatedCover'
 import { projectBrand } from '@/components/icons/ProjectMark'
 import { TECH_ICONS } from '@/lib/utils/techIcons'
 import { cn } from '@/lib/utils/cn'
+import { SEARCH_MIN_ITEMS } from '@/lib/utils/listing'
 import './ProjectsExplorer.css'
 
 // Only what the explorer renders crosses the server/client boundary — the
@@ -317,14 +318,16 @@ export function ProjectsExplorer({
               )
             )}
           </div>
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search projects or tech…"
-            aria-label="Search projects"
-            className="border-ds-border bg-ds-surface2 text-ds-text placeholder:text-ds-muted focus:border-ds-accent w-full rounded-lg border px-3.5 py-2 text-sm outline-none sm:w-64"
-          />
+          {projects.length >= SEARCH_MIN_ITEMS && (
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search projects or tech…"
+              aria-label="Search projects"
+              className="border-ds-border bg-ds-surface2 text-ds-text placeholder:text-ds-muted focus:border-ds-accent w-full rounded-lg border px-3.5 py-2 text-sm outline-none sm:w-64"
+            />
+          )}
         </div>
 
         {!active ? (
