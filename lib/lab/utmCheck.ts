@@ -128,7 +128,7 @@ export function analyzeLink(raw: string): Analysis {
   if (/[_]/.test(fields.campaign) && /-/.test(fields.campaign))
     issues.push({ level: 'tip', text: 'The campaign name mixes "_" and "-". Pick one separator.' })
 
-  const channel = ga4Channel(fields.source, fields.medium)
+  const channel = ga4Channel(fields.source, fields.medium, fields.campaign)
   if (channel === 'Unassigned' && fields.source && fields.medium)
     issues.push({
       level: 'problem',
@@ -145,6 +145,30 @@ export function analyzeLink(raw: string): Analysis {
     if (built.url && built.url !== input) cleaned = built.url
   }
   return { input, error: '', params, channel, issues, cleaned }
+}
+
+const csvCell = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v)
+
+/** The results as a spreadsheet: one row per link, with its channel, problems, tips and cleaned link. */
+export function resultsToCsv(results: Analysis[]): string {
+  const rows = results.map((r) => {
+    const say = (level: Issue['level']) =>
+      r.issues
+        .filter((i) => i.level === level)
+        .map((i) => i.text)
+        .join(' | ')
+    return [
+      r.input,
+      r.error || (r.issues.some((i) => i.level === 'problem') ? 'problems' : 'ok'),
+      r.channel,
+      say('problem'),
+      say('tip'),
+      r.cleaned,
+    ]
+      .map(csvCell)
+      .join(',')
+  })
+  return ['link,status,ga4_channel,problems,tips,cleaned_link', ...rows].join('\n')
 }
 
 /** Only the utm_ parameters, without the "?": what Google Ads' Final URL suffix box expects. */

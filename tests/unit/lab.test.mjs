@@ -60,7 +60,7 @@ import {
   textPayload,
   upiPayload,
 } from '../../lib/lab/qrPayload.ts'
-import { analyzeLink, adsSuffix } from '../../lib/lab/utmCheck.ts'
+import { analyzeLink, adsSuffix, resultsToCsv } from '../../lib/lab/utmCheck.ts'
 import { makeQr, qrSvg, contrastRatio, scanWarning } from '../../lib/lab/qr.ts'
 import {
   parseChannelLines,
@@ -139,9 +139,12 @@ test('lint flags unknown medium, alias source, duplicates and mixed separators',
     mk({ source: 'fb', medium: 'weird', campaign: 'a_b' }),
     mk({ source: 'fb', medium: 'weird', campaign: 'a_b' }),
     mk({ source: 'google', medium: 'cpc', campaign: 'a-b' }),
+    mk({ source: 'acme', medium: 'weird', campaign: 'c' }),
   ]
   const text = lintRows(rows).join('\n')
-  assert.match(text, /under Unassigned/)
+  // A social source is Organic Social whatever the medium (Google's rule), so only acme is Unassigned.
+  assert.match(text, /Row 4: GA4 will file source "acme" \/ medium "weird" under Unassigned/)
+  assert.doesNotMatch(text, /Row 1: GA4 will file/)
   assert.match(text, /use "facebook"/)
   assert.match(text, /same link as row 1/)
   assert.match(text, /mix/)
@@ -270,6 +273,32 @@ test('GA4 channel follows the default grouping rules', () => {
   assert.equal(ga4Channel('newsletter', 'email'), 'Email')
   assert.equal(ga4Channel('acme', 'ppc-ads'), 'Unassigned')
   assert.equal(ga4Channel('', ''), '')
+})
+
+test('link check results export as CSV with quoted cells', () => {
+  const csv = resultsToCsv([
+    analyzeLink('https://e.com/?utm_source=Google&utm_medium=cpc&utm_campaign=a'),
+    analyzeLink('nope'),
+  ])
+  const [head, row1, row2] = csv.split('\n')
+  assert.equal(head, 'link,status,ga4_channel,problems,tips,cleaned_link')
+  assert.match(row1, /,problems,Paid Search,/)
+  assert.match(row2, /^nope,"?That does not look like a full link/)
+})
+
+test('GA4 channel: organic channels match on source OR medium, as Google documents', () => {
+  assert.equal(ga4Channel('newsletter', 'social'), 'Organic Social')
+  assert.equal(ga4Channel('linkedin', 'post'), 'Organic Social')
+  assert.equal(ga4Channel('duckduckgo', 'listing'), 'Organic Search')
+  assert.equal(ga4Channel('mysite', 'organic'), 'Organic Search')
+  assert.equal(ga4Channel('youtube', 'channel'), 'Organic Video')
+  assert.equal(ga4Channel('acme', 'video'), 'Organic Video')
+  assert.equal(ga4Channel('email', 'newsletter'), 'Email')
+  assert.equal(ga4Channel('acme', 'e-mail'), 'Email')
+  assert.equal(ga4Channel('chatgpt', 'ai-assistant'), 'AI Assistant')
+  assert.equal(ga4Channel('firebase', 'x'), 'Mobile Push Notifications')
+  assert.equal(ga4Channel('(direct)', '(none)'), 'Direct')
+  assert.equal(ga4Channel('acme', 'x', 'Cross-Network Q4'), 'Cross-network')
 })
 
 test('sheet import reads headers in any order, cleans values and reports bad lines', () => {
@@ -994,7 +1023,7 @@ test('robots.ts generator: opt out of AI training adds one group and leaves sear
   assert.match(out, /rules: \[/)
   assert.match(
     out,
-    /userAgent: \["GPTBot","ClaudeBot","Google-Extended","Applebot-Extended","CCBot","meta-externalagent"\]/
+    /userAgent: \["GPTBot","ClaudeBot","Google-Extended","Applebot-Extended","CCBot"/
   )
   assert.match(out, /disallow: \["\/admin"\]/)
   assert.doesNotMatch(out, /OAI-SearchBot|PerplexityBot|Claude-SearchBot/)

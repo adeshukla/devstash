@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
 import { copyText } from '@/lib/utils/clipboard'
-import { analyzeLink, MAX_CHECK_LINKS } from '@/lib/lab/utmCheck'
+import { analyzeLink, MAX_CHECK_LINKS, resultsToCsv } from '@/lib/lab/utmCheck'
+import { saveBlob } from './saveFile'
 import { splitUtm, type SheetRow } from '@/lib/lab/utm'
 import { mergeRows } from '@/lib/lab/workspace'
 import { SessionsBar } from './SessionsBar'
@@ -130,13 +131,27 @@ export function UtmChecker() {
                 )}
               </div>
             )}
-            {results.length > 1 && cleanedAll.length > 0 && (
-              <div>
+            <div className="flex flex-wrap gap-3">
+              {results.length > 1 && cleanedAll.length > 0 && (
                 <Button type="button" size="sm" onClick={() => copy(cleanedAll.join('\n'), 'all')}>
                   {copied === 'all' ? 'Copied ✓' : `Copy all ${cleanedAll.length} cleaned links`}
                 </Button>
-              </div>
-            )}
+              )}
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  trackLab('link-checker', 'download_csv')
+                  void saveBlob(
+                    new Blob([resultsToCsv(results)], { type: 'text/csv' }),
+                    'utm-link-check.csv'
+                  )
+                }}
+              >
+                Download results as CSV
+              </Button>
+            </div>
             <ul className="flex flex-col gap-4">
               {results.map((r, i) => {
                 const problems = r.issues.filter((x) => x.level === 'problem').length

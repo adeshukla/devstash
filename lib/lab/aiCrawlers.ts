@@ -99,6 +99,56 @@ export const CRAWLERS: Crawler[] = [
     kind: 'user',
     note: 'Fetches links at a user’s request. Meta says it may bypass robots.txt.',
   },
+  // Added 2026-11-22 from widely published crawler lists, not re-read from each vendor's page.
+  // Check the vendor documentation before relying on a note.
+  {
+    token: 'Applebot',
+    owner: 'Apple',
+    kind: 'search',
+    note: 'Apple’s crawler for Siri and Spotlight search.',
+  },
+  {
+    token: 'Amazonbot',
+    owner: 'Amazon',
+    kind: 'search',
+    note: 'Amazon’s crawler, used for services such as Alexa answers.',
+  },
+  {
+    token: 'Bytespider',
+    owner: 'ByteDance',
+    kind: 'training',
+    note: 'ByteDance’s crawler, reported to collect data for its AI models. It is widely reported to ignore robots.txt.',
+  },
+  {
+    token: 'DuckAssistBot',
+    owner: 'DuckDuckGo',
+    kind: 'user',
+    note: 'Fetches pages to write DuckDuckGo AI-assisted answers.',
+  },
+  {
+    token: 'cohere-ai',
+    owner: 'Cohere',
+    kind: 'user',
+    note: 'Cohere’s agent, reported to fetch pages for its assistant.',
+  },
+  {
+    token: 'MistralAI-User',
+    owner: 'Mistral',
+    kind: 'user',
+    note: 'Visits a page when a person asks Mistral’s Le Chat to.',
+  },
+  {
+    token: 'Diffbot',
+    owner: 'Diffbot',
+    kind: 'dataset',
+    note: 'Turns web pages into structured data that other companies, including AI makers, use.',
+  },
+  {
+    token: 'FacebookBot',
+    owner: 'Meta',
+    kind: 'training',
+    note: 'Meta’s crawler, which Meta says is used to improve its speech recognition.',
+  },
 ]
 
 /** What "opt out of AI training" writes: the crawlers and tokens that are about training or archiving. */

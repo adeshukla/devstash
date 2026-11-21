@@ -1,7 +1,9 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { checkCrawlers, KIND_LABEL, type Status } from '@/lib/lab/aiCrawlers'
+import { Button } from '@/components/ui'
+import { copyText } from '@/lib/utils/clipboard'
+import { checkCrawlers, KIND_LABEL, TRAINING_TOKENS, type Status } from '@/lib/lab/aiCrawlers'
 import { str } from '@/lib/lab/sessions'
 import { SessionsBar } from './SessionsBar'
 import { trackLab } from './track'
@@ -25,11 +27,40 @@ const STATUS: Record<Status, { label: string; cls: string }> = {
 }
 
 /**
- * Paste a robots.txt and see which known AI crawlers it blocks. Reads what you paste; it does
- * not fetch your site. Runs in the browser, nothing is sent anywhere.
+ * See which known AI crawlers a robots.txt blocks. Paste it, or enter a site and the server reads
+ * its robots.txt for you (only that one file, public hosts only). The reading itself happens in
+ * the browser.
  */
 export function AiCrawlerCheck() {
   const [text, setText] = useState('')
+  const [site, setSite] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [note, setNote] = useState('')
+  const [copied, setCopied] = useState(false)
+
+  async function load() {
+    if (!site.trim() || loading) return
+    setLoading(true)
+    setNote('')
+    trackLab('seo-kit', 'ai_check_fetch')
+    try {
+      const res = await fetch('/api/lab/robots', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ url: site }),
+      })
+      const data = (await res.json()) as { text?: string; missing?: boolean; error?: string }
+      if (!res.ok) setNote(data.error ?? 'Could not read that site.')
+      else if (data.missing) {
+        setText('')
+        setNote('That site has no robots.txt, so every crawler is allowed.')
+      } else setText(data.text ?? '')
+    } catch {
+      setNote('Could not reach the checker. Paste the file instead.')
+    } finally {
+      setLoading(false)
+    }
+  }
   const results = useMemo(() => checkCrawlers(text), [text])
   const blocked = results.filter((r) => r.status === 'blocked').length
 
@@ -44,6 +75,41 @@ export function AiCrawlerCheck() {
         onApply={(d) => setText(str(d.text, '', 100_000))}
       />
       <div className="flex flex-col gap-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            void load()
+          }}
+        >
+          <label
+            htmlFor="robots-site"
+            className="text-ds-text mb-1.5 block text-[13px] font-medium"
+          >
+            Check a site
+          </label>
+          <div className="flex gap-2">
+            <input
+              id="robots-site"
+              type="text"
+              inputMode="url"
+              value={site}
+              onChange={(e) => setSite(e.target.value)}
+              placeholder="yoursite.com"
+              className="border-ds-border bg-ds-surface2 text-ds-text placeholder:text-ds-muted focus:border-ds-accent min-w-0 flex-1 rounded-lg border px-4 py-2.5 font-mono text-sm outline-none"
+            />
+            <Button type="submit" disabled={loading || !site.trim()} className="shrink-0">
+              {loading ? 'Reading…' : 'Read robots.txt'}
+            </Button>
+          </div>
+          {note && (
+            <p className="text-ds-warning-strong mt-2 text-sm" role="status">
+              {note}
+            </p>
+          )}
+          <p className="text-ds-muted mt-2 text-xs">
+            We fetch only that site’s robots.txt file. Or paste it below.
+          </p>
+        </form>
         <div>
           <label
             htmlFor="robots-check"
@@ -79,6 +145,31 @@ export function AiCrawlerCheck() {
               ? `${blocked} of ${results.length} AI crawlers blocked`
               : 'With no robots.txt, every crawler below is allowed.'}
           </p>
+          {blocked < results.length && (
+            <div>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={async () => {
+                  const lines = TRAINING_TOKENS.map((t) => `User-agent: ${t}\nDisallow: /`).join(
+                    '\n\n'
+                  )
+                  if (await copyText(lines)) {
+                    trackLab('seo-kit', 'ai_check_copy_optout')
+                    setCopied(true)
+                    setTimeout(() => setCopied(false), 2000)
+                  }
+                }}
+              >
+                {copied ? 'Copied ✓' : 'Copy lines that opt out of AI training'}
+              </Button>
+              <p className="text-ds-muted mt-1.5 text-xs">
+                Add them to your robots.txt. Search and “when a person asks” crawlers are left
+                alone.
+              </p>
+            </div>
+          )}
           <ul className="flex flex-col gap-2">
             {results.map((r) => (
               <li

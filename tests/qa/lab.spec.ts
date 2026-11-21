@@ -359,7 +359,7 @@ test.describe('AI crawler check and robots.ts opt-out', () => {
     await page.goto('/lab/meta-tag-generator')
     const section = page.locator('section', { hasText: 'Which AI crawlers can read your site?' })
     await section.getByRole('button', { name: 'Not sure? Try an example' }).click()
-    await expect(section.getByText('2 of 13 AI crawlers blocked')).toBeVisible()
+    await expect(section.getByText('2 of 21 AI crawlers blocked')).toBeVisible()
     const row = (token: string) => section.locator('li', { hasText: token }).first()
     await expect(row('GPTBot')).toContainText('Blocked')
     await expect(row('ClaudeBot')).toContainText('Blocked')

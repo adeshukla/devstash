@@ -202,25 +202,40 @@ const PAID_MEDIUM = /^(.*cp.*|ppc|retargeting|paid.*)$/
  * property defines. "Unassigned" is the usual cause of campaign traffic
  * missing from the channel report.
  */
-export function ga4Channel(source: string, medium: string): string {
+export function ga4Channel(source: string, medium: string, campaign = ''): string {
   const s = normalizeValue(source)
   const m = normalizeValue(medium)
   if (!s && !m) return ''
+  // Checked against Google's "Default channel group" page (manual traffic), 2026-11-22. For the
+  // organic channels Google accepts the source OR the medium; only the paid ones need both.
+  // normalizeValue drops the brackets, so read the raw values for Direct.
+  if (
+    source.trim().toLowerCase() === '(direct)' &&
+    /^\((not set|none)\)$/.test(medium.trim().toLowerCase())
+  )
+    return 'Direct'
+  if (normalizeValue(campaign).includes('cross-network')) return 'Cross-network'
   const paid = PAID_MEDIUM.test(m)
   if (paid && SEARCH.has(s)) return 'Paid Search'
   if (paid && SOCIAL.has(s)) return 'Paid Social'
   if (paid && VIDEO.has(s)) return 'Paid Video'
   if (/^(display|banner|expandable|interstitial|cpm)$/.test(m)) return 'Display'
   if (paid) return 'Paid Other'
-  if (SOCIAL.has(s) && /^(social|social-network|social-media|sm)$/.test(m)) return 'Organic Social'
-  if (VIDEO.has(s) && m.includes('video')) return 'Organic Video'
-  if (SEARCH.has(s) && m === 'organic') return 'Organic Search'
+  if (
+    SOCIAL.has(s) ||
+    /^(social|social-network|social-media|sm|social network|social media)$/.test(m)
+  )
+    return 'Organic Social'
+  if (VIDEO.has(s) || m.includes('video')) return 'Organic Video'
+  if (SEARCH.has(s) || m === 'organic') return 'Organic Search'
+  if (m === 'ai-assistant') return 'AI Assistant'
   if (/^(referral|app|link)$/.test(m)) return 'Referral'
-  if (/^e-?mail$/.test(m)) return 'Email'
+  if (/^(e-?mail|e_mail|e mail)$/.test(s) || /^(e-?mail|e_mail|e mail)$/.test(m)) return 'Email'
   if (m === 'affiliate') return 'Affiliates'
   if (m === 'audio') return 'Audio'
   if (s === 'sms' || m === 'sms') return 'SMS'
-  if (m.endsWith('push') || /mobile|notification/.test(m)) return 'Mobile Push Notifications'
+  if (m.endsWith('push') || /mobile|notification/.test(m) || s === 'firebase')
+    return 'Mobile Push Notifications'
   return 'Unassigned'
 }
 
