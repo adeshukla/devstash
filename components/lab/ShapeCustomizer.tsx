@@ -6,6 +6,7 @@ import { CssCodeBlock } from './CssCodeBlock'
 import { useUrlSync } from './useUrlSync'
 import { ShareLinkButton } from './ShareLinkButton'
 import { pick } from '@/lib/lab/urlState'
+import { parseShapeCss } from '@/lib/lab/cssShape'
 import {
   PolygonShapeEditor,
   DEFAULT_POLYGON,
@@ -91,6 +92,16 @@ const SHAPES = {
       clipPath: 'polygon(0% 0%, 100% 0%, 100% 75%, 25% 75%, 15% 100%, 15% 75%, 0% 75%)',
     },
     css: 'clip-path: polygon(0% 0%, 100% 0%, 100% 75%, 25% 75%, 15% 100%, 15% 75%, 0% 75%);',
+  },
+  ellipse: {
+    label: 'Ellipse',
+    style: { clipPath: 'ellipse(50% 36% at 50% 50%)' },
+    css: 'clip-path: ellipse(50% 36% at 50% 50%);',
+  },
+  inset: {
+    label: 'Inset (rounded box)',
+    style: { clipPath: 'inset(12% round 18px)' },
+    css: 'clip-path: inset(12% round 18px);',
   },
 } as const
 
@@ -204,6 +215,33 @@ export function ShapeCustomizer() {
     )
   }
   const getShareUrl = useUrlSync(urlValues, applyValues)
+
+  // Paste CSS from somewhere else and carry on editing it here.
+  const [pasted, setPasted] = useState('')
+  const [pasteNote, setPasteNote] = useState('')
+  function loadPasted() {
+    const found = parseShapeCss(
+      pasted,
+      Object.fromEntries(Object.entries(SHAPES).map(([k, s]) => [k, s.css]))
+    )
+    if (!found) {
+      setPasteNote(
+        'Could not read that. Paste a clip-path: polygon() with percentage points, a border-radius in % (1, 2 or 4 values), or a preset’s CSS.'
+      )
+      return
+    }
+    setPasteNote('Loaded. Edit it below.')
+    if (found.mode === 'preset') {
+      setMode('preset')
+      setShape(found.key as ShapeKey)
+    } else if (found.mode === 'corners') {
+      setMode('corners')
+      setCorners(found.corners)
+    } else {
+      setMode('polygon')
+      setPolygonPoints(found.points)
+    }
+  }
 
   const shapeInfo = useMemo(() => {
     if (mode === 'preset') {
@@ -346,6 +384,40 @@ export function ShapeCustomizer() {
               ))}
             </div>
           </div>
+
+          <details className="group">
+            <summary className="text-ds-accent-strong cursor-pointer text-sm hover:underline">
+              Already have CSS? Paste it to edit
+            </summary>
+            <div className="mt-3 flex flex-col gap-2">
+              <label htmlFor="shape-paste" className="sr-only">
+                CSS to load
+              </label>
+              <textarea
+                id="shape-paste"
+                rows={3}
+                value={pasted}
+                onChange={(e) => setPasted(e.target.value)}
+                placeholder="clip-path: polygon(50% 0%, 100% 100%, 0% 100%);"
+                className="border-ds-border bg-ds-surface2 text-ds-text placeholder:text-ds-muted focus:border-ds-accent w-full resize-y rounded-lg border px-3 py-2 font-mono text-xs outline-none"
+              />
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={loadPasted}
+                  disabled={!pasted.trim()}
+                  className="border-ds-border text-ds-muted hover:border-ds-accent hover:text-ds-accent rounded-lg border px-3 py-1.5 text-sm transition-colors disabled:opacity-50"
+                >
+                  Load into the editor
+                </button>
+                {pasteNote && (
+                  <p className="text-ds-muted text-xs" role="status">
+                    {pasteNote}
+                  </p>
+                )}
+              </div>
+            </div>
+          </details>
 
           {mode === 'preset' && (
             <div>

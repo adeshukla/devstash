@@ -233,6 +233,134 @@ export const TEMPLATES: Template[] = [
       { name: 'coupon', example: 'DIWALI10' },
     ],
   },
+  // Added 2026-11-22 from Google's events reference (developers.google.com/analytics/devguides/
+  // collection/ga4/reference/events). "required" follows the page's own marks, including the
+  // asterisked currency and value.
+  ...(['add_to_wishlist', 'remove_from_cart', 'view_cart'] as const).map((id): Template => ({
+    id,
+    label: id,
+    items: true,
+    params: [
+      { name: 'currency', example: 'INR', required: true },
+      { name: 'value', example: '499', required: true },
+    ],
+  })),
+  {
+    id: 'add_payment_info',
+    label: 'add_payment_info',
+    items: true,
+    params: [
+      { name: 'currency', example: 'INR', required: true },
+      { name: 'value', example: '499', required: true },
+      { name: 'payment_type', example: 'Credit Card' },
+    ],
+  },
+  {
+    id: 'add_shipping_info',
+    label: 'add_shipping_info',
+    items: true,
+    params: [
+      { name: 'currency', example: 'INR', required: true },
+      { name: 'value', example: '499', required: true },
+      { name: 'shipping_tier', example: 'Ground' },
+    ],
+  },
+  {
+    id: 'refund',
+    label: 'refund',
+    params: [
+      { name: 'transaction_id', example: 'T_12345', required: true },
+      { name: 'currency', example: 'INR', required: true },
+      { name: 'value', example: '499', required: true },
+    ],
+  },
+  {
+    id: 'select_item',
+    label: 'select_item',
+    items: true,
+    params: [
+      { name: 'item_list_id', example: 'related_products' },
+      { name: 'item_list_name', example: 'Related products' },
+    ],
+  },
+  {
+    id: 'view_item_list',
+    label: 'view_item_list',
+    items: true,
+    params: [
+      { name: 'currency', example: 'INR', required: true },
+      { name: 'item_list_name', example: 'Related products' },
+    ],
+  },
+  {
+    id: 'view_promotion',
+    label: 'view_promotion',
+    items: true,
+    params: [
+      { name: 'promotion_name', example: 'Summer sale' },
+      { name: 'creative_slot', example: 'featured_app_1' },
+    ],
+  },
+  {
+    id: 'select_promotion',
+    label: 'select_promotion',
+    params: [
+      { name: 'promotion_name', example: 'Summer sale' },
+      { name: 'creative_slot', example: 'featured_app_1' },
+    ],
+  },
+  ...(['qualify_lead', 'working_lead', 'close_unconvert_lead', 'disqualify_lead'] as const).map(
+    (id): Template => ({
+      id,
+      label: id,
+      params: [
+        { name: 'currency', example: 'INR', required: true },
+        { name: 'value', example: '500', required: true },
+      ],
+    })
+  ),
+  {
+    id: 'close_convert_lead',
+    label: 'close_convert_lead',
+    params: [
+      { name: 'currency', example: 'INR' },
+      { name: 'value', example: '500' },
+    ],
+  },
+  { id: 'join_group', label: 'join_group', params: [{ name: 'group_id', example: 'G_12345' }] },
+  { id: 'tutorial_begin', label: 'tutorial_begin', params: [] },
+  { id: 'tutorial_complete', label: 'tutorial_complete', params: [] },
+  {
+    id: 'unlock_achievement',
+    label: 'unlock_achievement',
+    params: [{ name: 'achievement_id', example: 'A_12345', required: true }],
+  },
+  {
+    id: 'post_score',
+    label: 'post_score',
+    params: [
+      { name: 'score', example: '10000', required: true },
+      { name: 'level', example: '5' },
+    ],
+  },
+  { id: 'level_up', label: 'level_up', params: [{ name: 'level', example: '5' }] },
+  {
+    id: 'earn_virtual_currency',
+    label: 'earn_virtual_currency',
+    params: [
+      { name: 'virtual_currency_name', example: 'Gems' },
+      { name: 'value', example: '5' },
+    ],
+  },
+  {
+    id: 'spend_virtual_currency',
+    label: 'spend_virtual_currency',
+    params: [
+      { name: 'value', example: '5', required: true },
+      { name: 'virtual_currency_name', example: 'Gems', required: true },
+      { name: 'item_name', example: 'Starter pack' },
+    ],
+  },
 ]
 
 const isNumber = (s: string) => /^-?(0|[1-9]\d{0,14})(\.\d+)?$/.test(s.trim())
@@ -256,7 +384,9 @@ export function validateRecommended(name: string, params: Param[], items: boolea
     out.push(
       problem('"value" must be a number, for example 499 or 499.50, without a currency symbol.')
     )
-  if (value && !get('currency'))
+  // Virtual-currency events send a plain amount, not money, so they have no currency.
+  const hasCurrency = t.params.some((p) => p.name === 'currency')
+  if (value && hasCurrency && !get('currency'))
     out.push(problem('"currency" is required if you set "value", for example INR or USD.'))
   const currency = get('currency')
   if (currency && !/^[A-Z]{3}$/.test(currency))

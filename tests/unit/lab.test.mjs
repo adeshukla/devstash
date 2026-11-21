@@ -1156,7 +1156,14 @@ test('GA4 recommended events: required parameters, value needs currency, numbers
   assert.equal(jsValue('1e5'), "'1e5'")
   assert.equal(jsValue("it's"), "'it\\'s'")
   assert.equal(jsValue('</script>'), "'\\u003c/script>'")
-  assert.equal(TEMPLATES.length, 10)
+  assert.equal(TEMPLATES.length, 33)
+  assert.equal(new Set(TEMPLATES.map((t) => t.id)).size, 33, 'template ids are unique')
+  // virtual-currency events carry a plain value with no currency
+  const spend = [
+    { name: 'value', value: '5' },
+    { name: 'virtual_currency_name', value: 'Gems' },
+  ]
+  assert.deepEqual(checkEvent('spend_virtual_currency', spend, false), [])
 })
 
 test('GA4 event code: dataLayer push and gtag call', () => {
