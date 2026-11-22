@@ -51,6 +51,25 @@ test.describe('Lab case studies', () => {
 test.describe('Lab hub', () => {
   const list = (page: Page) => page.getByRole('list', { name: 'Tools' })
 
+  test('the hub HTML links to every tool, not only the selected one', async ({ page }) => {
+    // The list selects a tool in place, so without this only one tool is a link until you click.
+    const html = await (await page.request.get('/lab')).text()
+    for (const slug of [
+      'utm-builder',
+      'utm-link-checker',
+      'utm-report-cleaner',
+      'qr-code-generator',
+      'whatsapp-link-generator',
+      'ga4-event-builder',
+      'og-image-maker',
+      'css-shapes-playground',
+      'meta-tag-generator',
+      'illustration-generator',
+      'ai-content-pipeline',
+    ])
+      expect(html, `/lab has no link to ${slug}`).toContain(`href="/lab/${slug}"`)
+  })
+
   test('a numbered list on the left, the chosen tool on the right, and chips that filter', async ({
     page,
   }) => {

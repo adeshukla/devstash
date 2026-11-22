@@ -502,6 +502,26 @@ export function LabIndex({ groups }: { groups: JobGroup[] }) {
           )}
         </div>
       )}
+
+      {/* The list above selects a tool without leaving the page. This is a plain set of links to every
+          tool, in the server HTML, for search engines, screen readers and anyone who wants to open one. */}
+      <nav aria-label="All Lab tools" className="border-ds-border mt-12 border-t pt-6">
+        <p className="text-ds-muted mb-3 font-mono text-xs tracking-wide uppercase">
+          All {all.length} tools
+        </p>
+        <ul className="grid gap-x-8 gap-y-2 sm:grid-cols-2">
+          {all.map((t) => (
+            <li key={t.id}>
+              <Link
+                href={`/lab/${t.id}`}
+                className="text-ds-text hover:text-ds-accent text-sm underline-offset-4 hover:underline"
+              >
+                {t.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </div>
   )
 }
