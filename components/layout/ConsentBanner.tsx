@@ -62,9 +62,8 @@ export function ConsentBanner() {
       className="border-ds-border2 bg-ds-surface fixed inset-x-3 bottom-3 z-50 rounded-lg border p-3 shadow-lg sm:right-auto sm:max-w-sm sm:p-4"
     >
       <p className="text-ds-text text-[13px] leading-snug sm:text-sm">
-        Allow analytics? It records the pages you view, your device and approximate location, and
-        how you click and scroll (including screen recordings), so I can improve the site. Nothing
-        loads until you choose.{' '}
+        Can I use analytics to see which pages are useful? That includes recordings of how you click
+        and scroll. Nothing loads until you choose.{' '}
         <Link href="/privacy" className="text-ds-accent-strong underline underline-offset-4">
           Details
         </Link>
