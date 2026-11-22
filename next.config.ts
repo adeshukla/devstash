@@ -2,8 +2,10 @@ import fs from 'fs'
 import path from 'path'
 import type { NextConfig } from 'next'
 
-// Lab tools keep their case study under the tool: /lab/<slug>/case-study. The page itself is still
-// rendered by app/(main)/projects/[slug], so the old /projects/<slug> address redirects there.
+// Lab tools keep their case study under the tool: /lab/<slug>/case-study, a real route
+// (app/(main)/lab/[slug]/case-study) that reuses the project page. The old /projects/<slug> address
+// redirects there. Do not turn this into a rewrite: the server HTML would then be built for
+// /projects/<slug> while the browser sees /lab/..., and the nav's active link disagrees (hydration error).
 const labToolSlugs = fs
   .readdirSync(path.join(process.cwd(), 'content/projects'))
   .filter((f) => f.endsWith('.json'))
@@ -11,7 +13,7 @@ const labToolSlugs = fs
     (f) =>
       JSON.parse(fs.readFileSync(path.join(process.cwd(), 'content/projects', f), 'utf8')).labTool
   )
-  .map((f) => f.replace(/.json$/, ''))
+  .map((f) => f.replace(/\.json$/, ''))
 
 const nextConfig: NextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
@@ -45,13 +47,6 @@ const nextConfig: NextConfig = {
    * `permanent: true`  → 308 (use for genuine, lasting moves; passes link equity).
    * `permanent: false` → 307 (temporary).
    */
-  async rewrites() {
-    return labToolSlugs.map((slug) => ({
-      source: `/lab/${slug}/case-study`,
-      destination: `/projects/${slug}`,
-    }))
-  },
-
   async redirects() {
     return [
       ...labToolSlugs.map((slug) => ({

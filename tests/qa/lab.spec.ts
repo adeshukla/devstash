@@ -11,6 +11,43 @@ import { TOURS } from '../../lib/lab/tours'
 
 test.use({ permissions: ['clipboard-read', 'clipboard-write'] })
 
+test.describe('Lab case studies', () => {
+  // These pages were once a rewrite onto /projects/<slug>; the server HTML then disagreed with the
+  // browser's path (nav active link) and React logged hydration error #418 on every one. That only
+  // shows in a production build, so run this against `next start`, not `next dev`.
+  const slugs = [
+    'utm-builder',
+    'utm-link-checker',
+    'utm-report-cleaner',
+    'qr-code-generator',
+    'whatsapp-link-generator',
+    'ga4-event-builder',
+    'og-image-maker',
+    'css-shapes-playground',
+    'meta-tag-generator',
+    'illustration-generator',
+  ]
+  for (const slug of slugs) {
+    test(`/lab/${slug}/case-study renders without a script error and marks Lab as current`, async ({
+      page,
+    }) => {
+      const errors: string[] = []
+      page.on('pageerror', (e) => errors.push(e.message))
+      const res = await page.goto(`/lab/${slug}/case-study`)
+      expect(res?.status()).toBe(200)
+      await page.waitForTimeout(600)
+      expect(errors).toEqual([])
+      await expect(page.locator('header nav a[aria-current="page"]').first()).toHaveText(/Lab/)
+    })
+  }
+
+  test('a project that is not a Lab tool has no /lab/<slug>/case-study address', async ({
+    page,
+  }) => {
+    expect((await page.request.get('/lab/pare/case-study')).status()).toBe(404)
+  })
+})
+
 test.describe('Lab hub', () => {
   const list = (page: Page) => page.getByRole('list', { name: 'Tools' })
 

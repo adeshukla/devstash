@@ -77,8 +77,8 @@ export async function generateMetadata({
       ? project.description
       : project.description
           .slice(0, 157)
-          .replace(/s+S*$/, '')
-          .replace(/[,;:—-]s*$/, '') + '…'
+          .replace(/\s+\S*$/, '')
+          .replace(/[,;:—-]\s*$/, '') + '…'
 
   return buildMetadata({
     title: seoTitle,
