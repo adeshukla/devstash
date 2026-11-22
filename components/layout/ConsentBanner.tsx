@@ -25,7 +25,24 @@ export function ConsentBanner() {
     return () => window.removeEventListener(CONSENT_OPEN_EVENT, open)
   }, [])
 
-  const show = consent === 'unset' || reopened
+  // A first-time visitor sees the banner on their first scroll, tap or key press (or after 10 s if
+  // they do nothing). Painted at once, its text can become the page's largest contentful element
+  // and so the LCP, which then waits on JavaScript. The browser stops counting LCP candidates at the
+  // first input, so a banner shown after one cannot. Nothing loads before a choice either way. The
+  // footer link (reopened) still opens it immediately.
+  const [settled, setSettled] = useState(false)
+  useEffect(() => {
+    const events = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'] as const
+    const done = () => setSettled(true)
+    for (const e of events) window.addEventListener(e, done, { once: true, passive: true })
+    const timer = window.setTimeout(done, 10_000)
+    return () => {
+      window.clearTimeout(timer)
+      for (const e of events) window.removeEventListener(e, done)
+    }
+  }, [])
+
+  const show = (consent === 'unset' && settled) || reopened
   useEffect(() => {
     if (reopened) first.current?.focus()
   }, [reopened])

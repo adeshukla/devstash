@@ -539,8 +539,9 @@ test.describe('OG image maker', () => {
 
     await open(page, 'Layout and size')
     await page.getByRole('button', { name: 'Picture on the left' }).click()
-    await expect.poll(async () => ((await previewSvg(page)).match(/<image /g) ?? []).length).toBe(1)
-    expect(await previewSvg(page)).toContain('clipPath id="pcsp"')
+    // Wait for the layout itself to change: the image count is 1 both before and after.
+    await expect.poll(() => previewSvg(page)).toContain('clipPath id="pcsp"')
+    expect((await previewSvg(page)).match(/<image /g) ?? []).toHaveLength(1)
     expect(await previewSvg(page)).not.toContain('id="pcbg"')
 
     // a swatch can be given a role by hand
@@ -1342,11 +1343,26 @@ test.describe('Cookie choice', () => {
   const choice = (page: Page) => page.getByRole('region', { name: 'Analytics choice' })
   const stored = (page: Page) =>
     page.evaluate(() => window.localStorage.getItem('devstash-consent'))
+  // The banner waits for the visitor's first input (so it can never be the page's LCP element).
+  const scroll = (page: Page) => page.mouse.wheel(0, 40)
+
+  test('the banner waits for the first scroll or tap, or ten seconds', async ({ page }) => {
+    test.setTimeout(40_000)
+    await page.goto('/privacy')
+    await page.waitForTimeout(3000)
+    await expect(choice(page)).toHaveCount(0)
+    await scroll(page)
+    await expect(choice(page)).toBeVisible()
+    await page.goto('/lab')
+    await expect(choice(page)).toHaveCount(0)
+    await expect(choice(page)).toBeVisible({ timeout: 14_000 }) // nobody touched anything
+  })
 
   test('the banner asks first, Reject is remembered, and the footer reopens it', async ({
     page,
   }) => {
     await page.goto('/privacy')
+    await scroll(page)
     await expect(choice(page)).toBeVisible()
     await choice(page).getByRole('button', { name: 'Reject' }).click()
     await expect(choice(page)).toHaveCount(0)
@@ -1362,6 +1378,7 @@ test.describe('Cookie choice', () => {
 
   test('no analytics script is added to the page before a choice', async ({ page }) => {
     await page.goto('/lab')
+    await scroll(page)
     await expect(choice(page)).toBeVisible()
     await page.waitForTimeout(2500)
     const scripts = await page.evaluate(
@@ -1372,6 +1389,7 @@ test.describe('Cookie choice', () => {
 
   test('the banner has no accessibility problems', async ({ page }) => {
     await page.goto('/privacy')
+    await scroll(page)
     await expect(choice(page)).toBeVisible()
     const r = await new AxeBuilder({ page }).analyze()
     expect(r.violations.map((v) => v.id)).toEqual([])
