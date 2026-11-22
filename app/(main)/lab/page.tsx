@@ -113,13 +113,6 @@ const TOOLS: Demo[] = [
     tag: 'QR',
   },
   {
-    slug: 'changeable-qr',
-    name: 'Dynamic QR Code Generator',
-    blurb:
-      'Print one QR code and change the page it opens later. Sign in with Google or email, claim a permanent name, and point it anywhere. Free. Your email and link are stored; scans are not tracked.',
-    tag: 'QR',
-  },
-  {
     slug: 'utm-report-cleaner',
     name: 'UTM Data Cleaner for GA4',
     blurb:
@@ -131,7 +124,7 @@ const TOOLS: Demo[] = [
 const PRINCIPLES = [
   {
     title: 'Runs where you are',
-    body: 'The CSS, SVG, SEO, UTM and QR tools run entirely in your browser; none of their code makes a network request. Only the AI pipeline, the OG maker’s "style from a web address" and the Changeable QR Code call a server.',
+    body: 'The CSS, SVG, SEO, UTM and QR tools run entirely in your browser; none of their code makes a network request. Only the AI pipeline, and the OG maker’s "style from a web address" and the AI crawler check’s "read a site’s robots.txt", call a server.',
   },
   {
     title: 'Real output, not mock-ups',
@@ -146,13 +139,12 @@ const PRINCIPLES = [
 const FAQ = [
   {
     question: 'Do I need an account?',
-    answer:
-      'Not to start. Every tool opens straight away. Only the Changeable QR Code asks for a free account, because it has to remember which page your code opens.',
+    answer: 'No. Every tool opens straight away and none asks you to sign in.',
   },
   {
     question: 'Is what I type sent anywhere?',
     answer:
-      'Not by the browser-side tools: the CSS playground, illustration generator, meta tag generator, UTM tools and QR generator make no network requests. The AI Content Pipeline sends your input to a server because that is where the model runs. The Changeable QR Code stores your email, name and link so the code keeps working, and the OG maker sends only a web address you type to fetch its picture.',
+      'Not by the browser-side tools: the CSS playground, illustration generator, meta tag generator, UTM tools and QR generator make no network requests. The AI Content Pipeline sends your input to a server because that is where the model runs. The OG maker and the AI crawler check send only a web address you type, so the server can fetch that site’s share picture or robots.txt.',
   },
   {
     question: 'What does the AI pipeline run on?',
@@ -201,10 +193,6 @@ function examples(): Record<string, { input: string; output: string }> {
     'qr-code-generator': {
       input: 'WhatsApp +91 98765 43210, message "Hello"',
       output: whatsappPayload('+91 98765 43210', 'Hello').payload,
-    },
-    'changeable-qr': {
-      input: 'Name "spring-menu", pointing at the old menu page',
-      output: 'Scanning devstash.me/q/spring-menu opens whichever page you saved last',
     },
     'meta-tag-generator': {
       input: 'A shop title with an "&" in it',
@@ -289,9 +277,9 @@ const COPY: Record<string, { gives: string; gets: string; keywords: string }> = 
   },
   'qr-code-generator': {
     gives: 'A website, chat, UPI payment, Wi-Fi or contact.',
-    gets: 'A QR code to download or print: fixed and free forever, or one you can repoint later.',
+    gets: 'A QR code to download or print. It never expires.',
     keywords:
-      'qr code generator free qr code static qr whatsapp qr wifi qr upi qr vcard contact qr url qr png svg print no expiry dynamic changeable editable qr code menu poster',
+      'qr code generator free qr code static qr whatsapp qr wifi qr upi qr vcard contact qr url qr png svg print no expiry menu poster',
   },
   'whatsapp-link-generator': {
     gives: 'A number and a first message.',
@@ -334,8 +322,6 @@ const USE_WHEN: Record<string, string> = {
     'you are adding tracking for a button, a signup or a purchase and want the code checked first.',
   'qr-code-generator':
     'you want a QR code for a website, a WhatsApp chat, a UPI payment, Wi-Fi or a contact card, and you never want it to expire.',
-  'changeable-qr':
-    'you will print a QR code and may need to change the page it opens later. Needs a free account.',
   'whatsapp-link-generator':
     'you want customers to tap a link and start a WhatsApp chat with a message already typed. The QR is an extra.',
   'css-shapes-playground':
@@ -366,7 +352,7 @@ const GROUPS: { id: string; question: string; name: string; sub: string; tools: 
     question: 'I want to share a link, a number or a payment',
     name: 'Share',
     sub: 'QR codes and chat links that people scan or tap.',
-    tools: [['qr-code-generator', 'changeable-qr'], ['whatsapp-link-generator']],
+    tools: [['qr-code-generator'], ['whatsapp-link-generator']],
   },
   {
     id: 'build',
@@ -404,14 +390,12 @@ export default async function LabPage() {
     sub: g.sub,
     tools: g.tools.map((slugs): IndexTool => {
       const first = known.find((d) => d.slug === slugs[0])!
-      // Two slugs in one row: the same job, a fixed or a changeable version.
-      const labels = slugs.length > 1 ? ['Fixed', 'Changeable'] : ['']
       return {
         id: slugs[0],
-        name: slugs.length > 1 ? 'QR Code Generator' : first.name,
+        name: first.name,
         tag: first.tag,
         ...COPY[slugs[0]],
-        views: slugs.map((s, i) => view(s, labels[i])),
+        views: slugs.map((s) => view(s, '')),
       }
     }),
   }))

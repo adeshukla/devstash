@@ -89,21 +89,14 @@ export default function PrivacyPage() {
                     Basis: your consent.
                   </li>
                   <li>
-                    <strong className={strong}>Changeable QR Code accounts</strong> — your email
-                    address (typed in, or given to us by Google if you use Google sign-in), a
-                    password (stored only as a one-way hash, never in readable form), the name you
-                    pick and the web address your code opens. We send confirmation and reset emails.
-                    We do not track who scans your code. Basis: it is needed to give you the service
-                    you signed up for.
-                  </li>
-                  <li>
                     <strong className={strong}>Lab tools</strong> — the tools run in your browser.
                     What you type stays on your device, and saved sessions and drafts are kept in
                     your browser&apos;s storage, not on our servers. Three things do reach a server:
                     the AI content pipeline sends your topic and notes to our AI providers (Groq,
                     and Cerebras if Groq is unavailable) to write the draft; the OG image
                     maker&apos;s &ldquo;style from a web address&rdquo; fetches the address you
-                    enter; and the Changeable QR Code, described above.
+                    enter; and the AI crawler check&apos;s &ldquo;Check a site&rdquo; fetches that
+                    site&apos;s robots.txt. Nothing from these is stored.
                   </li>
                   <li>
                     <strong className={strong}>Security and abuse protection</strong> — our host and
@@ -130,19 +123,14 @@ export default function PrivacyPage() {
                     performance monitoring.
                   </li>
                   <li>
-                    <strong className={strong}>Google</strong> — Analytics 4 (only if you accept)
-                    and sign-in with Google for the Changeable QR Code.
+                    <strong className={strong}>Google</strong> — Analytics 4 (only if you accept).
                   </li>
                   <li>
                     <strong className={strong}>Microsoft</strong> — Clarity (only if you accept).
                   </li>
                   <li>
-                    <strong className={strong}>Resend</strong> — contact form, notification and
-                    account emails.
-                  </li>
-                  <li>
-                    <strong className={strong}>Upstash</strong> — the database for Changeable QR
-                    Code accounts.
+                    <strong className={strong}>Resend</strong> — contact form and notification
+                    emails.
                   </li>
                   <li>
                     <strong className={strong}>Groq and Cerebras</strong> — the AI content pipeline
@@ -163,8 +151,7 @@ export default function PrivacyPage() {
                   <li>
                     <strong className={strong}>Essential:</strong> your analytics choice and theme
                     (stored in your browser), a tab-only note of the first page you opened (used
-                    only to fill in the contact form), your saved Lab sessions and drafts, and the
-                    sign-in cookie for the Changeable QR Code (30 days).
+                    only to fill in the contact form), and your saved Lab sessions and drafts.
                   </li>
                   <li>
                     <strong className={strong}>Analytics, only after you accept:</strong> Google
@@ -188,12 +175,6 @@ export default function PrivacyPage() {
                     under Microsoft&apos;s retention settings.
                   </li>
                   <li>Server logs and the interaction log: under Vercel&apos;s log retention.</li>
-                  <li>
-                    Changeable QR Code account: until you delete it with the &ldquo;Delete my
-                    account&rdquo; button in the tool. That removes your email link and password
-                    hash and ends every sign-in. The chosen name stays reserved, without any
-                    personal data, so nobody else can take over a code you have printed.
-                  </li>
                 </ul>
               </PolicySection>
 

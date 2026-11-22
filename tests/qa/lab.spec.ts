@@ -69,21 +69,18 @@ test.describe('Lab hub', () => {
     await expect(page).toHaveURL(/\/lab$/)
   })
 
-  test('the two QR codes are one tool with a Fixed / Changeable switch', async ({ page }) => {
+  test('there is one QR code generator, with no sign-in or changeable version', async ({
+    page,
+  }) => {
     await page.goto('/lab?job=share')
     await expect(list(page).getByRole('button', { name: /QR Code Generator/ })).toHaveCount(1)
-    await expect(page.getByRole('link', { name: /Open fixed/ })).toHaveAttribute(
+    await expect(page.getByRole('link', { name: /Open/ }).first()).toHaveAttribute(
       'href',
       '/lab/qr-code-generator'
     )
-    await page.getByRole('button', { name: 'Changeable', exact: true }).click()
-    await expect(page.getByRole('link', { name: /Open changeable/ })).toHaveAttribute(
-      'href',
-      '/lab/changeable-qr'
-    )
-    await expect(page.getByText(/devstash\.me\/q\/spring-menu/)).toBeVisible()
-    // There is no case study for this one, so no dead link is offered.
-    await expect(page.getByRole('link', { name: 'Case study' })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Changeable', exact: true })).toHaveCount(0)
+    expect((await page.request.get('/lab/changeable-qr')).status()).toBe(404)
+    expect((await page.request.get('/api/qr')).status()).toBe(404)
   })
 
   test('copy link puts the full tool address on the clipboard', async ({ page }) => {

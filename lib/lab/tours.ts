@@ -145,7 +145,7 @@ export const TOURS: Record<string, TourStepData[]> = {
     {
       target: 'text:Your QR code',
       title: 'Download or print',
-      body: 'Save it as PNG for documents or SVG for print shops, or print it. This code is fixed: if you need to change where it points after printing, use the Dynamic QR Code Generator instead.',
+      body: 'Save it as PNG for documents or SVG for print shops, or print it. This code is fixed: it holds the address itself, so check the link before you print.',
     },
   ],
   'whatsapp-link-generator': [
@@ -217,30 +217,6 @@ export const TOURS: Record<string, TourStepData[]> = {
       target: 'text:Download SVG',
       title: 'Download or share it',
       body: 'Save the picture as an SVG or a PNG, or copy a link that reopens this exact illustration.',
-    },
-  ],
-  'changeable-qr': [
-    {
-      target: 'text:Print once. Change the link later.',
-      title: 'How it works',
-      body: 'A normal QR code holds the page address inside it. This one holds a short address on this site, such as /q/yourname, which sends the visitor to whatever page you saved last. Change the page later and the printed code keeps working.',
-    },
-    {
-      target: 'text:Sign in',
-      title: 'Sign in',
-      body: 'Use Google, or an email and password. Your account is what lets you change the link later. After signing in you choose a permanent name and the page it opens.',
-      optional: true,
-    },
-    {
-      target: 'text:Create an account',
-      title: 'New here?',
-      body: 'Create a free account. You confirm your email by a link before the account exists.',
-      optional: true,
-    },
-    {
-      target: 'text:Changeable QR questions',
-      title: 'What is stored',
-      body: 'The questions below explain what is kept (your email, your name and your link) and what is not (who scans your code).',
     },
   ],
 }

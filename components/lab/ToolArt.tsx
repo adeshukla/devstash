@@ -41,7 +41,7 @@ const QR_MODULES: [number, number][] = [
   [44, 46],
 ]
 
-function Qr({ changeable }: { changeable: boolean }) {
+function Qr() {
   return (
     <Win title="QR code">
       {/* The code is drawn on a 44-unit grid and scaled into the window */}
@@ -75,28 +75,8 @@ function Qr({ changeable }: { changeable: boolean }) {
       <text className="tx" x="124" y="73">
         shop.example/menu
       </text>
-      <rect className={changeable ? 'card' : 'fa'} x="124" y="86" width="38" height="16" rx="8" />
-      <text
-        className={changeable ? 'tx' : 'twh'}
-        x="143"
-        y="97"
-        textAnchor="middle"
-        style={{ fontSize: 9 }}
-      >
-        Fixed
-      </text>
-      <rect className={changeable ? 'fa' : 'card'} x="166" y="86" width="62" height="16" rx="8" />
-      <text
-        className={changeable ? 'twh' : 'tx'}
-        x="197"
-        y="97"
-        textAnchor="middle"
-        style={{ fontSize: 9 }}
-      >
-        Changeable
-      </text>
-      <text className="tgr" x="124" y="122">
-        {changeable ? 'same code, new page' : 'never expires'}
+      <text className="tgr" x="124" y="98">
+        never expires
       </text>
     </Win>
   )
@@ -255,8 +235,7 @@ const ART: Record<string, ReactNode> = {
       </text>
     </Win>
   ),
-  'qr-code-generator': <Qr changeable={false} />,
-  'changeable-qr': <Qr changeable />,
+  'qr-code-generator': <Qr />,
   'whatsapp-link-generator': (
     <Win title="WhatsApp link">
       <g className="k-pop">

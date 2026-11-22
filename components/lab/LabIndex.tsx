@@ -12,7 +12,7 @@ import { trackLab } from './track'
 import { SEARCH_MIN_ITEMS } from '@/lib/utils/listing'
 import '@/components/sections/ProjectsExplorer.css'
 
-/** One way of looking at a tool. Most tools have one; the QR tool has Fixed and Changeable. */
+/** One way of looking at a tool. A row can hold several, each with its own label and link. */
 export interface ToolView {
   label: string
   slug: string
