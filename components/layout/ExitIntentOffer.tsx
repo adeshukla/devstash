@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui'
 import { trackEvent, ANALYTICS_EVENTS } from '@/lib/analytics/events'
+import { readConsent } from '@/lib/consent'
 
 const SESSION_KEY = 'devstash:exit-offer:shown'
 const SCROLL_THRESHOLD = 0.7
@@ -38,6 +39,9 @@ export function ExitIntentOffer() {
 
     function show(trigger: string) {
       if (shownRef.current) return
+      // The cookie banner sits in the same corner. While no choice is saved, wait: the listeners stay
+      // attached, so the offer can still appear on a later scroll or exit once they have chosen.
+      if (readConsent() === 'unset') return
       shownRef.current = true
       window.sessionStorage.setItem(SESSION_KEY, '1')
       setVisible(true)
