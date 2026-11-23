@@ -2,126 +2,104 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Adesh Shukla — UI / Frontend Developer</title>
+<title>Adesh Shukla — Frontend Developer</title>
 <style>
-  /* Single column, real headings, no icons/tables/graphics — Naukri and most
-     ATS parsers read the file before a human sees it, and anything that makes
-     a resume look designed is what makes it parse badly. Every link is a real
-     <a href> so Chromium writes a clickable link annotation into the PDF;
-     the visible text is the full address so it still works when printed. */
-  @page { size: A4; margin: 10mm 13mm; }
+  /* Recreates the layout of Adesh's own résumé PDF (US Letter, Arial, blue
+     letter-spaced section heads, bordered skills table). Every link is a real
+     <a href>, so Chromium writes clickable link annotations into the PDF. */
+  @page { size: Letter; margin: 0.38in 0.55in 0.35in; }
   * { box-sizing: border-box; }
-  body {
-    font-family: "Calibri", "Carlito", "Segoe UI", Arial, sans-serif;
-    font-size: 9.7pt; line-height: 1.3; color: #1a1a1a; margin: 0;
-  }
-  a { color: #1a4fa0; text-decoration: underline; text-decoration-thickness: 0.5pt; text-underline-offset: 1pt; }
-  h1 { font-size: 19pt; margin: 0 0 0.6mm; letter-spacing: -0.2pt; }
-  .role { font-size: 10.4pt; color: #333; margin: 0 0 1.4mm; font-weight: 600; }
-  .contact { font-size: 9.2pt; color: #333; margin: 0 0 2.4mm; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 9.1pt; line-height: 1.25; color: #444; margin: 0; }
+  a { color: #1a56db; text-decoration: underline; }
+  b, strong { color: #1f2937; }
+  h1 { font-size: 23pt; letter-spacing: 4pt; color: #1e1b3a; margin: 0 0 1pt; font-weight: 800; }
+  .role { color: #1a56db; font-weight: 700; font-size: 11.5pt; margin: 0 0 3pt; }
+  .contact { font-size: 9pt; margin: 0; }
+  .sep { color: #c7cbd4; margin: 0 4pt; }
   h2 {
-    font-size: 9.2pt; text-transform: uppercase; letter-spacing: 0.7pt;
-    border-bottom: 1px solid #999; padding-bottom: 0.7mm;
-    margin: 2.8mm 0 1.4mm; color: #000;
+    color: #1a56db; font-size: 10.5pt; letter-spacing: 2.6pt; text-transform: uppercase; font-weight: 700;
+    border-bottom: 1.5px solid #1a56db; padding-bottom: 3pt; margin: 8pt 0 4pt;
   }
-  p { margin: 0 0 1.4mm; }
-  ul { margin: 0 0 1.4mm; padding-left: 4.4mm; }
-  li { margin-bottom: 0.7mm; }
-  .job { margin-bottom: 2.2mm; }
-  .jobhead { display: flex; justify-content: space-between; gap: 6mm; align-items: baseline; }
-  .jobtitle { font-weight: 700; font-size: 10.3pt; }
-  .jobmeta { font-size: 8.8pt; color: #555; white-space: nowrap; }
-  .company { font-size: 9.4pt; color: #333; margin-bottom: 0.8mm; }
-  .skills p { margin: 0 0 0.9mm; }
-  .skills b { display: inline-block; min-width: 27mm; }
-  .tech { color: #555; font-size: 9pt; }
-  .small { font-size: 9.4pt; }
-  .proj li { margin-bottom: 1mm; }
+  p { margin: 0 0 3pt; }
+  table.skills { border-collapse: collapse; width: 92%; margin: 0 0 2pt; }
+  table.skills td { border: 1px solid #333; padding: 1pt 5pt; font-size: 9pt; }
+  table.skills td:first-child { font-weight: 700; color: #1f2937; width: 19%; }
+  .jobhead { display: flex; justify-content: space-between; align-items: baseline; margin-top: 2pt; }
+  .jobtitle { font-weight: 700; color: #1f2937; font-size: 10pt; }
+  .co { color: #1a56db; font-weight: 700; }
+  .date { font-style: italic; font-size: 9.2pt; padding-right: 9%; white-space: nowrap; }
+  ul { list-style: none; margin: 1pt 0 2pt; padding-left: 9pt; }
+  li { position: relative; margin-bottom: 1pt; }
+  li::before { content: "\25B8"; position: absolute; left: -9pt; font-size: 7pt; top: 1.5pt; color: #444; }
+  .proj { margin: 0 0 1pt; }
+  .tech { margin: 0 0 2.5pt; }
+  .tech b { color: #1a56db; }
+  .tech i { color: #555; }
+  .edu { display: flex; justify-content: space-between; padding-right: 9%; }
+  .edu i { font-size: 9.2pt; }
+  .foot { border-top: 1px solid #d1d5db; margin-top: 5pt; padding-top: 3pt; text-align: center; font-style: italic; font-size: 8.6pt; }
 </style>
 </head>
 <body>
 
-  <h1>Adesh Shukla</h1>
-  <p class="role">UI / Frontend Developer &middot; React &middot; Landing Pages &middot; Web Performance &middot; 6+ Years</p>
+  <h1>ADESH SHUKLA</h1>
+  <p class="role">Frontend Developer &middot; React.js &middot; 6+ Years&rsquo; Experience</p>
   <p class="contact">
-    <a href="tel:+918802345568">+91-8802345568</a> &middot;
-    <a href="mailto:shuklaadesh7@gmail.com">shuklaadesh7@gmail.com</a> &middot;
-    Ghaziabad, UP &middot; Open to relocate &middot; Available: Immediate &ndash; 30 days<br>
-    Portfolio: <a href="https://devstash.me">devstash.me</a> &middot;
-    GitHub: <a href="https://github.com/adeshukla">github.com/adeshukla</a> &middot;
-    LinkedIn: <a href="https://www.linkedin.com/in/adeshukla">linkedin.com/in/adeshukla</a>
+    <a href="tel:+918802345568">+91-8802345568</a><span class="sep">|</span><a href="mailto:shuklaadesh7@gmail.com">shuklaadesh7@gmail.com</a><span class="sep">|</span>Ghaziabad, UP &middot; Open to Relocate<span class="sep">|</span>Available: Immediate &ndash; 30 days<br>
+    Portfolio: <a href="https://devstash.me">devstash.me</a><span class="sep">|</span><a href="https://github.com/adeshukla">github.com/adeshukla</a><span class="sep">|</span><a href="https://www.linkedin.com/in/adeshukla">linkedin.com/in/adeshukla</a>
   </p>
 
-  <h2>Summary</h2>
-  <p>
-    UI developer with 6+ years building fast, fully responsive marketing front-ends. On Chetu's
-    Marketing Department web team I shipped 200+ PPC landing pages and led the team as Team Lead,
-    treating every page as a UX problem to solve rather than a mock-up to copy. Outside work I build
-    React / Next.js / TypeScript products on my portfolio site <a href="https://devstash.me">DevStash</a>,
-    using AI-assisted development that I direct, review and test.
-  </p>
+  <h2>Professional Summary</h2>
+  <p>Frontend Developer with 6+ years of experience building fast, reliable and fully responsive web interfaces for US-based clients. Team Lead on Chetu&rsquo;s Marketing web team, shipping 200+ PPC landing pages where every page had to solve a real UX problem. Builds React / Next.js / TypeScript products on <a href="https://devstash.me">DevStash</a> with AI-assisted development that I direct, review and test.</p>
 
-  <h2>Skills</h2>
-  <div class="skills">
-    <p><b>Core</b> HTML5, CSS3, SCSS/SASS, CSS Grid, Flexbox, JavaScript (ES6+), responsive &amp; cross-browser layout</p>
-    <p><b>Frameworks</b> React, Next.js (App Router), TypeScript, Tailwind CSS, Bootstrap 3/4/5, jQuery, WordPress</p>
-    <p><b>Performance</b> Core Web Vitals, PageSpeed Insights, Lighthouse, image/font/asset optimisation</p>
-    <p><b>Accessibility &amp; SEO</b> Semantic HTML, WAVE audits, contrast, meta/OG tags, structured data, sitemaps</p>
-    <p><b>AI-assisted dev</b> Claude Code, Cursor, GitHub Copilot, n8n + Groq LLM workflows, prompt engineering</p>
-    <p><b>Tooling</b> Git, GitHub Actions, Vercel, Playwright, VS Code</p>
-  </div>
+  <h2>Technical Skills</h2>
+  <table class="skills">
+    <tr><td>Core</td><td>HTML5 &middot; CSS3 &middot; SCSS/SASS &middot; CSS Grid &middot; Flexbox &middot; JavaScript (ES6+)</td></tr>
+    <tr><td>Frameworks</td><td>React.js &middot; Next.js &middot; TypeScript &middot; Redux Toolkit &middot; Tailwind CSS v4 &middot; Bootstrap 3/4/5 &middot; jQuery</td></tr>
+    <tr><td>Performance</td><td>Core Web Vitals &middot; PageSpeed Insights &middot; Lighthouse &middot; WAVE accessibility &middot; SEO meta / schema</td></tr>
+    <tr><td>Tooling</td><td>Vite &middot; React Router v7 &middot; Git &middot; GitHub Actions &middot; Playwright &middot; Vercel</td></tr>
+    <tr><td>API</td><td>REST API &middot; Fetch &middot; Axios &middot; JSON &middot; Firebase &middot; Supabase</td></tr>
+    <tr><td>AI &amp; Tools</td><td>AI-assisted development &middot; Claude Code &middot; Cursor AI &middot; GitHub Copilot &middot; n8n &middot; Groq LLM &middot; Ollama</td></tr>
+  </table>
 
   <h2>Work Experience</h2>
-
-  <div class="job">
-    <div class="jobhead">
-      <span class="jobtitle">UI Developer &middot; Team Lead</span>
-      <span class="jobmeta">Jul 2021 &ndash; Present &middot; 4.5+ yrs</span>
-    </div>
-    <p class="company">Chetu India Pvt. Ltd. (<a href="https://www.chetu.com">www.chetu.com</a>) &mdash; Web Team, Marketing Department, Noida</p>
-    <ul>
-      <li>Built and shipped <b>200+ PPC landing pages</b> and marketing UIs (HTML5, CSS3, SCSS, Bootstrap, jQuery) to live campaign deadlines.</li>
-      <li>Took part in marketing decisions on page UX &mdash; reworking pages so they <b>solved problems already visible on the live site</b>, while staying fast, reliable and fully responsive.</li>
-      <li>Owned the company website and its subdomain landing sites end to end &mdash; build, updates and post-launch fixes.</li>
-      <li>Improved <b>Core Web Vitals</b> (PageSpeed Insights) and fixed <b>WAVE</b> accessibility issues &mdash; semantic structure, contrast, alt text, asset weight.</li>
-      <li>Promoted to <b>Team Lead</b>: reviewed the team's work, kept a long-lived Bootstrap 3 codebase regression-free, and worked directly with overseas stakeholders.</li>
-    </ul>
+  <div class="jobhead">
+    <span class="jobtitle">UI Developer &middot; Team Lead &middot; <span class="co">Chetu India Pvt. Ltd.</span> &middot; <a href="https://www.chetu.com">www.chetu.com</a></span>
+    <span class="date">July 2021 &ndash; Present &middot; 4.5+ Years</span>
   </div>
-
-  <div class="job">
-    <div class="jobhead">
-      <span class="jobtitle">Frontend Developer</span>
-      <span class="jobmeta">Feb 2020 &ndash; Jul 2021 &middot; 1.5 yrs</span>
-    </div>
-    <p class="company">IS Software Solutions Pvt. Ltd.</p>
-    <ul>
-      <li>Built responsive pages and <b>admin panel UIs</b> (HTML5, CSS3, JavaScript, Bootstrap) and maintained <b>WordPress</b> sites; joined as an intern, retained full-time.</li>
-    </ul>
-    <p class="small">
-      <b>Live client sites:</b>
-      <a href="https://benhams.com">benhams.com</a> &middot;
-      <a href="https://instyledirect.com">instyledirect.com</a> &middot;
-      <a href="https://london-propertymanagement.com">london-propertymanagement.com</a> &middot;
-      <a href="https://retailfurnishing.com">retailfurnishing.com</a>
-    </p>
+  <ul>
+    <li>Web Team, Marketing Department &mdash; built and maintained <b>200+ PPC landing pages</b> and marketing UIs with HTML5, CSS3, SCSS, Bootstrap and JavaScript for US-based campaigns.</li>
+    <li>Took part in marketing decisions on page UX &mdash; reworking pages to <b>solve problems already present</b> on the live site, while keeping them fast, reliable and fully responsive.</li>
+    <li>Improved Core Web Vitals and accessibility (PageSpeed Insights, WAVE); owned the company site and its subdomain landing sites end to end.</li>
+    <li>Promoted to <b>Team Lead</b> &mdash; reviewed the team&rsquo;s work and handled deadline-driven delivery with US time-zone stakeholders.</li>
+  </ul>
+  <div class="jobhead">
+    <span class="jobtitle">Frontend Developer &middot; <span class="co">IS Software Solutions Pvt. Ltd.</span></span>
+    <span class="date">Feb 2020 &ndash; July 2021 &middot; 1.5 Years</span>
   </div>
-
-  <h2>Projects &mdash; DevStash Portfolio (<a href="https://devstash.me">devstash.me</a>)</h2>
-
-  <ul class="proj">
-    <li><b>Pare</b> &mdash; <a href="https://pare.devstash.me">pare.devstash.me</a> &middot; <a href="https://github.com/adeshukla/pare">GitHub</a><br>Browser-only optimiser for images, fonts and code: MozJPEG, AVIF/WebP, HarfBuzz, Lightning CSS, Terser and SVGO compiled to <b>WebAssembly</b> in a worker pool &mdash; no upload, works offline. <span class="tech">React &middot; TypeScript &middot; Vite &middot; Web Workers</span></li>
-    <li><b>Build Components</b> &mdash; <a href="https://build-components.devstash.me">build-components.devstash.me</a><br><b>125 accessible UI components</b> configured visually and exported as React + Tailwind v4 or plain HTML/CSS/JS, zero runtime dependencies, shadcn-compatible registry. <span class="tech">Next.js &middot; TypeScript &middot; Playwright &middot; axe-core</span></li>
-    <li><b>Praxis</b> &mdash; <a href="https://praxis.devstash.me">praxis.devstash.me</a><br>Frontend interview-prep platform: <b>755 lessons across 19 tracks</b>, reasoning-first quizzes, an AI mock interviewer and SM-2 spaced repetition. <span class="tech">Next.js &middot; React &middot; TypeScript &middot; Supabase</span></li>
-    <li><b>Motion Lab</b> &mdash; <a href="https://showcase.devstash.me">showcase.devstash.me</a><br><b>17 animated landing pages</b> (GSAP, Three.js, scroll-driven WebGL), each held to a per-route <b>mobile performance budget</b> with a reduced-motion fallback. <span class="tech">Next.js &middot; GSAP &middot; Motion &middot; Three.js</span></li>
-    <li><b>DevStash Lab</b> &mdash; <a href="https://devstash.me/lab">devstash.me/lab</a><br>Free browser tools for marketers &mdash; <a href="https://devstash.me/lab/utm-builder">UTM Link Builder</a>, <a href="https://devstash.me/lab/meta-tag-generator">Meta Tag Generator &amp; SEO Preview</a>, GA4 event builder, QR generator; nothing is sent to a server.</li>
+  <ul>
+    <li>Developed responsive web pages and admin panel UIs using HTML5, CSS3, JavaScript, Bootstrap &mdash; mobile-first, cross-device compatible.</li>
   </ul>
 
-  <h2>Education &amp; Learning</h2>
-  <p>
-    <b>B.Com</b> &mdash; CCS University &middot; 2017 &nbsp;|&nbsp;
-    <b>CA Intermediate</b> &mdash; ICAI &middot; 2011&ndash;2019 &middot; moved from accounts into frontend development<br>
-    <b>Namaste React</b> &mdash; Akshay Saini &middot; React fundamentals, hooks, routing, Redux Toolkit, performance
-  </p>
+  <h2>Projects &amp; Portfolio</h2>
+  <p class="proj"><b>DevStash &mdash;</b> Portfolio website &middot; <a href="https://devstash.me">devstash.me</a> &mdash; developer ecosystem with a technical blog and free <a href="https://devstash.me/lab">marketing tools</a>.</p>
+  <p class="tech"><b>Tech:</b> <i>Next.js &middot; React &middot; TypeScript &middot; Tailwind CSS v4 &middot; MDX &middot; Vercel</i></p>
+  <p class="proj"><b>Pare &mdash;</b> Browser-only optimiser for images, fonts and code; real codecs compiled to WebAssembly, no upload, works offline. &middot; <a href="https://pare.devstash.me">Live Demo</a> &middot; <a href="https://github.com/adeshukla/pare">GitHub</a></p>
+  <p class="tech"><b>Tech:</b> <i>React.js &middot; TypeScript &middot; Vite &middot; WebAssembly &middot; Web Workers</i></p>
+  <p class="proj"><b>Build Components &mdash;</b> 125 accessible UI components, exported as React + Tailwind or plain HTML/CSS/JS with zero runtime dependencies. &middot; <a href="https://build-components.devstash.me">Live Demo</a></p>
+  <p class="tech"><b>Tech:</b> <i>Next.js &middot; React.js &middot; TypeScript &middot; Tailwind CSS v4 &middot; Playwright &middot; axe-core</i></p>
+  <p class="proj"><b>Praxis &mdash;</b> Frontend interview-prep platform: 755 lessons, 19 tracks, AI mock interviewer, spaced repetition. &middot; <a href="https://praxis.devstash.me">Live Demo</a></p>
+  <p class="tech"><b>Tech:</b> <i>Next.js &middot; React.js &middot; TypeScript &middot; Supabase &middot; PostgreSQL</i></p>
+  <p class="proj"><b>Cold Email Automation &mdash;</b> n8n workflow &mdash; Groq LLM for personalized emails, Google Sheets as HR database, Gmail API batch sending with rate-limiting.</p>
+  <p class="tech"><b>Tech:</b> <i>n8n &middot; Groq API &middot; Google Sheets API &middot; Gmail API &middot; Prompt Engineering</i></p>
+  <p class="proj"><b>Client work:</b> <a href="https://instyledirect.com">instyledirect.com</a> &middot; <a href="https://benhams.com">benhams.com</a> &middot; <a href="https://london-propertymanagement.com">london-propertymanagement.com</a> &middot; <a href="https://retailfurnishing.com">retailfurnishing.com</a></p>
+
+  <h2>Education</h2>
+  <div class="edu"><b>B. Com &middot; CCS University</b><i>Passed 2017</i></div>
+  <div class="edu"><b>CA Intermediate &middot; ICAI</b><i>2011 &ndash; 2019 &middot; Transitioned to Frontend Development</i></div>
+  <div class="edu"><b>Namaste React &middot; Akshay Saini</b><i>React.js course</i></div>
+
+  <p class="foot">Open to onsite &middot; hybrid &middot; remote &middot; Pan India &middot; Immediate to 30-day joining</p>
 
 </body>
 </html>
