@@ -43,4 +43,11 @@ test('mobile: cookie banner and exit offer never show together', async ({ page }
     await nudge()
     await expect(offer).toBeVisible({ timeout: 500 })
   }).toPass({ timeout: 10_000 })
+
+  // Reopening the banner from the footer closes the offer instead of stacking on it.
+  await page
+    .getByRole('button', { name: 'Cookie settings' })
+    .evaluate((b) => (b as HTMLElement).click())
+  await expect(banner).toBeVisible()
+  await expect(offer).toHaveCount(0)
 })

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui'
 import { trackEvent, ANALYTICS_EVENTS } from '@/lib/analytics/events'
-import { readConsent } from '@/lib/consent'
+import { CONSENT_OPEN_EVENT, readConsent } from '@/lib/consent'
 
 const SESSION_KEY = 'devstash:exit-offer:shown'
 const SCROLL_THRESHOLD = 0.7
@@ -24,6 +24,13 @@ export function ExitIntentOffer() {
   const pathname = usePathname()
   const [visible, setVisible] = useState(false)
   const shownRef = useRef(false)
+
+  // The footer's "Cookie settings" link reopens the banner in the same corner: close the offer then.
+  useEffect(() => {
+    const close = () => setVisible(false)
+    window.addEventListener(CONSENT_OPEN_EVENT, close)
+    return () => window.removeEventListener(CONSENT_OPEN_EVENT, close)
+  }, [])
 
   const isExcluded = pathname ? EXCLUDED_PATHS.has(pathname) : false
   const isBlogPost = Boolean(pathname?.startsWith('/blog/') && pathname !== '/blog')
