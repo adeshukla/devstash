@@ -1,5 +1,15 @@
 [
   {
+    "id": "namaste-react",
+    "title": "Namaste React — Akshay Saini",
+    "description": "The course I learned React from: components, hooks, routing, Redux Toolkit and performance, built up from first principles.",
+    "url": "https://namastedev.com/learn/namaste-react",
+    "category": "course",
+    "tags": ["react", "redux", "course"],
+    "free": false,
+    "brand": "#F7B500"
+  },
+  {
     "id": "nextjs-docs",
     "title": "Next.js Documentation",
     "description": "The official Next.js docs. App Router, RSC, caching — the definitive reference.",
@@ -32,7 +42,7 @@
   {
     "id": "n8n-docs",
     "title": "n8n Documentation",
-    "description": "Self-hosted workflow automation with 400+ integrations.",
+    "description": "Self-hosted workflow automation. The reference behind my job-application workflow with Google Sheets, Groq and Gmail.",
     "url": "https://docs.n8n.io",
     "category": "docs",
     "tags": ["automation", "n8n", "no-code"],
@@ -142,5 +152,165 @@
     "category": "tool",
     "tags": ["regex", "debugging"],
     "free": true
+  },
+  {
+    "id": "react-docs",
+    "title": "React Docs",
+    "description": "The official React reference. Hooks, Server Components and the rules behind them.",
+    "url": "https://react.dev",
+    "category": "docs",
+    "tags": ["react", "hooks", "rsc"],
+    "free": true,
+    "brand": "#58C4DC"
+  },
+  {
+    "id": "vite-docs",
+    "title": "Vite Docs",
+    "description": "Build tool behind Pare, my browser-only asset optimiser: dev server, workers and WebAssembly imports.",
+    "url": "https://vite.dev",
+    "category": "docs",
+    "tags": ["vite", "build", "wasm"],
+    "free": true,
+    "brand": "#646CFF"
+  },
+  {
+    "id": "supabase-docs",
+    "title": "Supabase Docs",
+    "description": "Postgres, auth and row-level security. The backend reference for Praxis.",
+    "url": "https://supabase.com/docs",
+    "category": "docs",
+    "tags": ["database", "postgres", "auth"],
+    "free": true,
+    "brand": "#3ECF8E"
+  },
+  {
+    "id": "playwright-docs",
+    "title": "Playwright Docs",
+    "description": "How DevStash and Build Components are tested: responsive runs, accessibility checks and post-deploy smoke tests.",
+    "url": "https://playwright.dev/docs/intro",
+    "category": "docs",
+    "tags": ["testing", "qa", "e2e"],
+    "free": true,
+    "brand": "#2EAD33"
+  },
+  {
+    "id": "gsap-docs",
+    "title": "GSAP Docs",
+    "description": "Animation timelines and scroll triggers. Part of the Motion Lab stack.",
+    "url": "https://gsap.com/docs/v3/",
+    "category": "docs",
+    "tags": ["animation", "scroll", "gsap"],
+    "free": true,
+    "brand": "#0AE448"
+  },
+  {
+    "id": "threejs-docs",
+    "title": "Three.js Docs",
+    "description": "The WebGL reference behind Motion Lab's scroll-driven 3D page.",
+    "url": "https://threejs.org/docs/",
+    "category": "docs",
+    "tags": ["webgl", "3d", "three.js"],
+    "free": true,
+    "brand": "mono"
+  },
+  {
+    "id": "motion-docs",
+    "title": "Motion Docs",
+    "description": "React animation library used in Motion Lab, with reduced-motion handling built in.",
+    "url": "https://motion.dev/docs",
+    "category": "docs",
+    "tags": ["animation", "react", "motion"],
+    "free": true,
+    "brand": "#FFF312"
+  },
+  {
+    "id": "groq-docs",
+    "title": "Groq API Docs",
+    "description": "Models, structured output and rate limits for the LLM calls in my n8n workflows and the DevStash AI pipeline.",
+    "url": "https://console.groq.com/docs/overview",
+    "category": "docs",
+    "tags": ["llm", "api", "groq"],
+    "free": true,
+    "brand": "#F55036"
+  },
+  {
+    "id": "ga4-docs",
+    "title": "GA4 Developer Docs",
+    "description": "Event names, parameters and limits. The source for the GA4 event builder and UTM tools in DevStash Lab.",
+    "url": "https://developers.google.com/analytics/devguides/collection/ga4",
+    "category": "docs",
+    "tags": ["analytics", "ga4", "tracking"],
+    "free": true,
+    "brand": "#E37400"
+  },
+  {
+    "id": "search-central",
+    "title": "Google Search Central",
+    "description": "Google's own SEO documentation: crawling, structured data, sitemaps. The SEO layer on DevStash follows it.",
+    "url": "https://developers.google.com/search/docs",
+    "category": "docs",
+    "tags": ["seo", "structured-data", "sitemaps"],
+    "free": true,
+    "brand": "#4285F4"
+  },
+  {
+    "id": "wcag-quickref",
+    "title": "WCAG 2.2 Quick Reference",
+    "description": "The accessibility success criteria, filterable by level. What Build Components and the WAVE fixes are checked against.",
+    "url": "https://www.w3.org/WAI/WCAG22/quickref/",
+    "category": "docs",
+    "tags": ["accessibility", "wcag", "a11y"],
+    "free": true,
+    "brand": "#005A9C"
+  },
+  {
+    "id": "schema-org",
+    "title": "Schema.org",
+    "description": "The vocabulary for JSON-LD structured data: Person, BlogPosting, FAQPage, BreadcrumbList.",
+    "url": "https://schema.org",
+    "category": "docs",
+    "tags": ["seo", "json-ld", "structured-data"],
+    "free": true,
+    "brand": "#C02B2B"
+  },
+  {
+    "id": "ogp",
+    "title": "The Open Graph Protocol",
+    "description": "The og: tags behind every link preview. The spec the Meta Tag Generator follows.",
+    "url": "https://ogp.me",
+    "category": "docs",
+    "tags": ["seo", "open-graph", "social"],
+    "free": true,
+    "brand": "mono"
+  },
+  {
+    "id": "axe-core",
+    "title": "axe-core",
+    "description": "Deque's accessibility engine. Runs in the test suites for Build Components and DevStash.",
+    "url": "https://github.com/dequelabs/axe-core",
+    "category": "repo",
+    "tags": ["accessibility", "testing", "a11y"],
+    "free": true,
+    "brand": "mono"
+  },
+  {
+    "id": "svgo",
+    "title": "SVGO",
+    "description": "SVG optimiser. One of the code optimisers Pare runs in the browser.",
+    "url": "https://github.com/svg/svgo",
+    "category": "repo",
+    "tags": ["svg", "optimization"],
+    "free": true,
+    "brand": "mono"
+  },
+  {
+    "id": "lightningcss",
+    "title": "Lightning CSS",
+    "description": "Fast CSS parser and minifier, compiled to WebAssembly in Pare.",
+    "url": "https://lightningcss.dev",
+    "category": "tool",
+    "tags": ["css", "minify", "wasm"],
+    "free": true,
+    "brand": "#F7DF1E"
   }
 ]
