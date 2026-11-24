@@ -1,4 +1,5 @@
 // lib/markdown/blog.ts
+import { isLiveOn } from './schedule'
 import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
@@ -80,7 +81,7 @@ export function getAllPosts(includeDrafts = false): BlogPost[] {
     .filter((f) => f.endsWith('.mdx') || f.endsWith('.md'))
     .map((f) => parsePost(f))
     .filter((post): post is BlogPost => post !== null)
-    .filter((post) => includeDrafts || !post.draft)
+    .filter((post) => includeDrafts || (!post.draft && isLiveOn(post.createdAt)))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 }
 

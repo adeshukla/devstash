@@ -19,6 +19,7 @@ import {
   projectPath,
 } from '@/lib/markdown/projects'
 import { getPostBySlug } from '@/lib/markdown/blog'
+import { isLiveOn } from '@/lib/markdown/schedule'
 import { Badge, Button, ImageGallery, Reveal, MountReveal, Separator } from '@/components/ui'
 import { AnimatedCover } from '@/components/sections/AnimatedCover'
 import { CtaBand } from '@/components/sections/CtaBand'
@@ -105,7 +106,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   if (!project) notFound()
 
-  const relatedPosts = (project.relatedPosts ?? []).flatMap((s) => getPostBySlug(s) ?? [])
+  const relatedPosts = (project.relatedPosts ?? [])
+    .flatMap((s) => getPostBySlug(s) ?? [])
+    .filter((p) => !p.draft && isLiveOn(p.createdAt))
 
   const statusConfig = {
     live: { variant: 'green' as const, label: 'Live' },
@@ -359,3 +362,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     </>
   )
 }
+
+// Re-render hourly so a post scheduled for today (future createdAt, see
+// lib/markdown/schedule.ts) appears without a redeploy.
+export const revalidate = 3600

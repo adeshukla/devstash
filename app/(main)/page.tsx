@@ -171,3 +171,7 @@ export default function HomePage() {
     </>
   )
 }
+
+// Re-render hourly so a post scheduled for today (future createdAt, see
+// lib/markdown/schedule.ts) appears without a redeploy.
+export const revalidate = 3600

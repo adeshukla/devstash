@@ -23,6 +23,7 @@ import { ReadTracker } from '@/components/blog/ReadTracker'
 import { ReadingProgress } from '@/components/blog/ReadingProgress'
 import { mdxComponents } from '@/components/blog/MDXComponents'
 import { getAllPosts, getPostBySlug, getRelatedPosts } from '@/lib/markdown/blog'
+import { isLiveOn } from '@/lib/markdown/schedule'
 import { extractTOC } from '@/lib/utils/toc'
 import { formatDate } from '@/lib/automation/utils'
 
@@ -84,7 +85,7 @@ export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params
   const post = getPostBySlug(slug)
 
-  if (!post || post.draft) notFound()
+  if (!post || post.draft || !isLiveOn(post.createdAt)) notFound()
 
   const toc = extractTOC(post.content)
   const relatedPosts = getRelatedPosts(post.slug)
@@ -270,3 +271,7 @@ export default async function BlogPostPage({ params }: Props) {
     </>
   )
 }
+
+// Re-render hourly so a post scheduled for today (future createdAt, see
+// lib/markdown/schedule.ts) appears without a redeploy.
+export const revalidate = 3600
