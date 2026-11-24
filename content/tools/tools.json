@@ -1,48 +1,98 @@
 [
   {
+    "id": "vscode",
+    "name": "VS Code",
+    "description": "Editor for hand-written HTML, SCSS and JavaScript, and for reading through diffs.",
+    "url": "https://code.visualstudio.com",
+    "category": "editor",
+    "tags": ["editor", "extensions"],
+    "free": true,
+    "brand": "#007ACC"
+  },
+  {
     "id": "cursor",
     "name": "Cursor",
-    "description": "AI-powered VS Code fork. My primary daily driver for coding. Best Copilot++ experience available.",
-    "url": "https://cursor.sh",
+    "description": "AI-first fork of VS Code, part of my daily AI toolkit. My larger builds run through Claude Code instead.",
+    "url": "https://cursor.com",
     "category": "editor",
     "tags": ["ai", "editor", "vscode"],
     "free": false,
     "brand": "mono"
   },
   {
-    "id": "claude",
-    "name": "Claude by Anthropic",
-    "description": "Best LLM for coding, planning, and architecture discussions. Sonnet 4 is the sweet spot.",
-    "url": "https://claude.ai",
+    "id": "claude-code",
+    "name": "Claude Code",
+    "description": "The agent I build DevStash with. I set the direction and specs, it writes the code, and I review and test every change.",
+    "url": "https://claude.com/claude-code",
     "category": "ai",
-    "tags": ["ai", "llm", "coding"],
+    "tags": ["ai", "agent", "coding", "terminal"],
     "free": false,
     "brand": "#D97757"
   },
   {
+    "id": "claude",
+    "name": "Claude",
+    "description": "Planning, architecture questions and writing feedback, before any code gets written.",
+    "url": "https://claude.ai",
+    "category": "ai",
+    "tags": ["ai", "llm", "planning"],
+    "free": false,
+    "brand": "#D97757"
+  },
+  {
+    "id": "github-copilot",
+    "name": "GitHub Copilot",
+    "description": "Inline AI suggestions inside the editor, part of my daily workflow.",
+    "url": "https://github.com/features/copilot",
+    "category": "ai",
+    "tags": ["ai", "autocomplete", "editor"],
+    "free": true,
+    "brand": "mono"
+  },
+  {
+    "id": "chatgpt",
+    "name": "ChatGPT",
+    "description": "General-purpose AI assistant in my daily toolkit.",
+    "url": "https://chatgpt.com",
+    "category": "ai",
+    "tags": ["ai", "llm"],
+    "free": true,
+    "brand": "#10A37F"
+  },
+  {
+    "id": "perplexity",
+    "name": "Perplexity",
+    "description": "AI search that cites its sources, so every answer comes with pages I can check.",
+    "url": "https://www.perplexity.ai",
+    "category": "ai",
+    "tags": ["ai", "search", "research"],
+    "free": true,
+    "brand": "#20808D"
+  },
+  {
+    "id": "groq",
+    "name": "Groq",
+    "description": "Fast LLM API behind my n8n workflows and the DevStash AI content pipeline. Chained calls, structured output, and a close eye on per-minute rate limits.",
+    "url": "https://groq.com",
+    "category": "ai",
+    "tags": ["llm", "api", "automation"],
+    "free": true,
+    "brand": "#F55036"
+  },
+  {
     "id": "ollama",
     "name": "Ollama",
-    "description": "Run LLMs locally. I use qwen2.5:7b for offline AI assistance. Zero cost, full privacy.",
-    "url": "https://ollama.ai",
+    "description": "Runs open-weight models locally for offline experiments, with nothing leaving the machine.",
+    "url": "https://ollama.com",
     "category": "ai",
     "tags": ["llm", "local", "ai", "offline"],
     "free": true,
     "brand": "mono"
   },
   {
-    "id": "n8n",
-    "name": "n8n",
-    "description": "Self-hosted workflow automation. Replaced Zapier for everything. 400+ integrations.",
-    "url": "https://n8n.io",
-    "category": "devtools",
-    "tags": ["automation", "no-code", "workflows"],
-    "free": true,
-    "brand": "#EA4B71"
-  },
-  {
     "id": "git-bash",
     "name": "Git Bash (Windows Terminal)",
-    "description": "Git Bash inside Windows Terminal — best shell setup for Windows devs who want Unix-ish tooling.",
+    "description": "Git Bash inside Windows Terminal: Unix-style tooling on a Windows machine.",
     "url": "https://git-scm.com",
     "category": "terminal",
     "tags": ["shell", "git", "windows"],
@@ -52,17 +102,67 @@
   {
     "id": "figma",
     "name": "Figma",
-    "description": "Design tool of choice. UX is what pulled me toward the web, and Figma is where I start every project.",
+    "description": "UX is what pulled me toward the web, and Figma is where I tried designing before ending up on the front-end side.",
     "url": "https://figma.com",
     "category": "design",
-    "tags": ["design", "ui", "ux", "prototyping"],
+    "tags": ["design", "ui", "ux"],
     "free": false,
     "brand": "#A259FF"
   },
   {
+    "id": "pagespeed-insights",
+    "name": "PageSpeed Insights",
+    "description": "The first thing I open for a slow landing page: real-user Core Web Vitals plus a Lighthouse run. I used it to fix LCP and CLS on PPC pages at Chetu.",
+    "url": "https://pagespeed.web.dev",
+    "category": "browser",
+    "tags": ["performance", "core-web-vitals", "lighthouse"],
+    "free": true,
+    "brand": "#4285F4"
+  },
+  {
+    "id": "wave",
+    "name": "WAVE",
+    "description": "Accessibility checker I ran on Chetu's marketing pages to catch contrast, alt-text and structure problems before they shipped.",
+    "url": "https://wave.webaim.org",
+    "category": "browser",
+    "tags": ["accessibility", "audit", "wcag"],
+    "free": true,
+    "brand": "#5A3E85"
+  },
+  {
+    "id": "n8n",
+    "name": "n8n",
+    "description": "Self-hosted workflow automation. Runs my job-application workflow: Google Sheets as the contact list, Groq for personalised emails, Gmail for sending.",
+    "url": "https://n8n.io",
+    "category": "devtools",
+    "tags": ["automation", "workflows", "self-hosted"],
+    "free": true,
+    "brand": "#EA4B71"
+  },
+  {
+    "id": "github",
+    "name": "GitHub & Actions",
+    "description": "Every project's repo. Actions runs type checks, lint, unit tests and the responsive QA suite before anything reaches production.",
+    "url": "https://github.com",
+    "category": "devtools",
+    "tags": ["git", "ci", "automation"],
+    "free": true,
+    "brand": "mono"
+  },
+  {
+    "id": "playwright",
+    "name": "Playwright",
+    "description": "Browser tests for DevStash: a responsive suite from 200px to 1440px, accessibility checks with axe, and smoke tests against production after each deploy.",
+    "url": "https://playwright.dev",
+    "category": "devtools",
+    "tags": ["testing", "qa", "accessibility"],
+    "free": true,
+    "brand": "#2EAD33"
+  },
+  {
     "id": "vercel",
     "name": "Vercel",
-    "description": "Deploy Next.js apps. Zero config, edge functions, preview deployments. Unbeatable DX.",
+    "description": "Hosts devstash.me. Every push to the dev branch gets a staging deploy I review before anything goes live.",
     "url": "https://vercel.com",
     "category": "devtools",
     "tags": ["hosting", "deployment", "next.js"],
@@ -70,22 +170,32 @@
     "brand": "mono"
   },
   {
+    "id": "supabase",
+    "name": "Supabase",
+    "description": "Postgres database and auth behind Praxis, my frontend interview-prep platform.",
+    "url": "https://supabase.com",
+    "category": "devtools",
+    "tags": ["database", "postgres", "auth"],
+    "free": true,
+    "brand": "#3ECF8E"
+  },
+  {
     "id": "cloudflare",
     "name": "Cloudflare",
-    "description": "DNS, domain registration, and DDoS protection. Grey cloud mode with Vercel for full compatibility.",
+    "description": "DNS for devstash.me, set to DNS-only (grey cloud) so Vercel serves the site directly.",
     "url": "https://cloudflare.com",
     "category": "devtools",
-    "tags": ["dns", "security", "cdn"],
+    "tags": ["dns", "domains"],
     "free": true,
     "brand": "#F38020"
   },
   {
     "id": "pnpm",
     "name": "pnpm",
-    "description": "Faster, disk-efficient npm alternative. Content-addressable store. Required for Vercel lockfile.",
+    "description": "Package manager on every project: fast installs from one shared store, and strict about undeclared dependencies.",
     "url": "https://pnpm.io",
     "category": "devtools",
-    "tags": ["package-manager", "node", "performance"],
+    "tags": ["package-manager", "node"],
     "free": true,
     "brand": "#F69220"
   }
