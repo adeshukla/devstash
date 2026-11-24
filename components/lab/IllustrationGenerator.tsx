@@ -139,6 +139,13 @@ const SCENE_LABELS: Record<Scene, string> = {
   'split-rows': 'Split Rows',
   'naming-rules': 'Naming Rules',
   'easing-curve': 'Easing Curve',
+  'qr-static': 'Static QR Code',
+  'app-router-tree': 'App Router Tree',
+  'web-vitals-trio': 'Web Vitals Trio',
+  'sheet-to-inbox': 'Sheet to Inbox',
+  'prompt-chain': 'Prompt Chain',
+  'solo-hats': 'Solo Product Team',
+  'devstash-stack': 'DevStash Stack',
 }
 
 const DENSITY_LABELS: Record<Density, string> = { 1: 'Minimal', 2: 'Balanced', 3: 'Rich' }

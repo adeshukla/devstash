@@ -53,6 +53,13 @@ export type Scene =
   | 'split-rows'
   | 'naming-rules'
   | 'easing-curve'
+  | 'qr-static'
+  | 'app-router-tree'
+  | 'web-vitals-trio'
+  | 'sheet-to-inbox'
+  | 'prompt-chain'
+  | 'solo-hats'
+  | 'devstash-stack'
 
 const BLOG_SCENE: Record<BlogCategory, Scene> = {
   frontend: 'frontend',
@@ -89,10 +96,8 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   // These four all share the 'frontend'/'automation' category bucket with at
   // least one other post, so without an override they'd render the exact
   // same scene as something else on the same /blog grid.
-  'building-devstash-with-nextjs': 'devtools',
   'figma-to-production-handoff-workflow': 'design',
   'ppc-landing-page-conversion-lessons': 'megaphone',
-  'n8n-groq-workflow-patterns': 'ai-workflows',
   // Five of the new AI-trend posts all share the 'ai-workflows' bucket —
   // without overrides they'd all render the identical node-graph scene on
   // the /blog grid, the exact problem this map exists to solve.
@@ -148,6 +153,15 @@ const SLUG_SCENE_OVERRIDES: Record<string, Scene> = {
   'ga4-campaign-names-split-by-capital-letters': 'split-rows',
   'utm-naming-convention-for-teams': 'naming-rules',
   'understanding-css-cubic-bezier-easing': 'easing-curve',
+  // These seven fell back to generic category art (open book, gears, gauge,
+  // node graph, rocket, terminal) that said nothing about the post itself.
+  'qr-codes-that-never-expire-static-vs-dynamic': 'qr-static',
+  'nextjs-16-app-router-patterns': 'app-router-tree',
+  'core-web-vitals-high-traffic-landing-pages': 'web-vitals-trio',
+  'n8n-job-application-automation-groq-google-sheets': 'sheet-to-inbox',
+  'n8n-groq-workflow-patterns': 'prompt-chain',
+  'one-person-product-team-vibe-coding': 'solo-hats',
+  'building-devstash-with-nextjs': 'devstash-stack',
 }
 
 interface CategoryIllustrationProps {
@@ -308,6 +322,20 @@ export function SceneContent({ scene }: { scene: Scene }) {
       return <NamingRulesScene />
     case 'easing-curve':
       return <EasingCurveScene />
+    case 'qr-static':
+      return <QrStaticScene />
+    case 'app-router-tree':
+      return <AppRouterTreeScene />
+    case 'web-vitals-trio':
+      return <WebVitalsTrioScene />
+    case 'sheet-to-inbox':
+      return <SheetToInboxScene />
+    case 'prompt-chain':
+      return <PromptChainScene />
+    case 'solo-hats':
+      return <SoloHatsScene />
+    case 'devstash-stack':
+      return <DevstashStackScene />
   }
 }
 
@@ -358,6 +386,13 @@ export const ALL_SCENES: Scene[] = [
   'split-rows',
   'naming-rules',
   'easing-curve',
+  'qr-static',
+  'app-router-tree',
+  'web-vitals-trio',
+  'sheet-to-inbox',
+  'prompt-chain',
+  'solo-hats',
+  'devstash-stack',
 ]
 
 // Keyword index — maps a scene to the words a topic string is checked
@@ -503,6 +538,19 @@ export const SCENE_KEYWORDS: Record<Scene, string[]> = {
     'shadcn',
     'registry',
   ],
+  'qr-static': ['qr code', 'static qr', 'never expires', 'print', 'scan'],
+  'app-router-tree': [
+    'app router',
+    'file routing',
+    'generateStaticParams',
+    'server components',
+    'nextjs',
+  ],
+  'web-vitals-trio': ['core web vitals', 'lcp', 'cls', 'inp', 'landing page speed'],
+  'sheet-to-inbox': ['google sheets', 'gmail', 'cold email', 'job applications', 'n8n'],
+  'prompt-chain': ['prompt chaining', 'structured output', 'rate limit', 'llm workflow', 'groq'],
+  'solo-hats': ['solo developer', 'one-person team', 'vibe coding', 'roles', 'career'],
+  'devstash-stack': ['devstash', 'site build', 'tech stack', 'tailwind tokens', 'seo layer'],
 }
 
 // ── Frontend — browser window + a cursor click ripple ──────────────────────
@@ -2735,6 +2783,715 @@ function EasingCurveScene() {
       </text>
       <text x="248" y="84" className="fill-ds-muted/70 font-mono" fontSize="9">
         0.25, 0.1, 0.25, 1
+      </text>
+    </g>
+  )
+}
+
+// ── QR static — a real-looking QR code, scan line, and why it never expires ─
+// The module grid is deterministic (seeded per cell) so the server and the
+// client draw the same code, and the three finder squares sit where a real
+// QR code puts them.
+function QrStaticScene() {
+  const N = 21
+  const cell = 5.6
+  const ox = 66
+  const oy = 52
+  const inFinder = (r: number, c: number) =>
+    (r < 8 && c < 8) || (r < 8 && c >= N - 8) || (r >= N - 8 && c < 8)
+  const modules: [number, number][] = []
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      if (inFinder(r, c)) continue
+      if (r === 6 || c === 6) {
+        if ((r + c) % 2 === 0) modules.push([r, c])
+        continue
+      }
+      let h = Math.imul(r * 374761393 + c * 668265263, 1274126177)
+      h = Math.imul(h ^ (h >>> 13), 1274126177)
+      if ((h >>> 0) % 100 < 46) modules.push([r, c])
+    }
+  }
+  const finder = (r: number, c: number) => (
+    <g key={`${r}-${c}`}>
+      <rect
+        x={ox + c * cell}
+        y={oy + r * cell}
+        width={cell * 7}
+        height={cell * 7}
+        rx="3"
+        className="fill-ds-text"
+      />
+      <rect
+        x={ox + (c + 1) * cell}
+        y={oy + (r + 1) * cell}
+        width={cell * 5}
+        height={cell * 5}
+        rx="2"
+        className="fill-ds-surface"
+      />
+      <rect
+        x={ox + (c + 2) * cell}
+        y={oy + (r + 2) * cell}
+        width={cell * 3}
+        height={cell * 3}
+        rx="1.5"
+        className="fill-ds-accent"
+      />
+    </g>
+  )
+  const size = N * cell
+  return (
+    <g>
+      <rect
+        x={ox - 10}
+        y={oy - 10}
+        width={size + 20}
+        height={size + 20}
+        rx="10"
+        className="fill-ds-surface stroke-ds-border2"
+        strokeWidth="1.5"
+      />
+      {modules.map(([r, c]) => (
+        <rect
+          key={`${r}-${c}`}
+          x={ox + c * cell + 0.4}
+          y={oy + r * cell + 0.4}
+          width={cell - 0.8}
+          height={cell - 0.8}
+          rx="1"
+          className="fill-ds-text/85"
+        />
+      ))}
+      {finder(0, 0)}
+      {finder(0, N - 7)}
+      {finder(N - 7, 0)}
+      <g className="animate-float">
+        <rect
+          x={ox - 14}
+          y={oy + size / 2 - 1.5}
+          width={size + 28}
+          height="3"
+          rx="1.5"
+          className="fill-ds-accent/80"
+        />
+      </g>
+      {/* Dynamic: the code points at a redirect server; when that lapses, it dies */}
+      <g>
+        <text x="216" y="66" className="fill-ds-muted font-mono" fontSize="9">
+          dynamic
+        </text>
+        <rect
+          x="216"
+          y="72"
+          width="62"
+          height="20"
+          rx="6"
+          className="fill-ds-surface2 stroke-ds-border2"
+          strokeWidth="1.2"
+        />
+        <text x="247" y="86" textAnchor="middle" className="fill-ds-muted font-mono" fontSize="9">
+          redirect
+        </text>
+        <path d="M282 82h12" className="stroke-ds-error" strokeWidth="1.6" strokeDasharray="3 3" />
+        <rect
+          x="298"
+          y="72"
+          width="44"
+          height="20"
+          rx="6"
+          className="fill-ds-error/15 stroke-ds-error/70"
+          strokeWidth="1.2"
+        />
+        <text x="320" y="86" textAnchor="middle" className="fill-ds-error font-mono" fontSize="9">
+          404
+        </text>
+      </g>
+      {/* Static: the data lives in the pattern itself */}
+      <g>
+        <text x="216" y="122" className="fill-ds-muted font-mono" fontSize="9">
+          static
+        </text>
+        <rect
+          x="216"
+          y="128"
+          width="126"
+          height="30"
+          rx="8"
+          className="fill-ds-accent/10 stroke-ds-accent"
+          strokeWidth="1.5"
+        />
+        <text x="230" y="149" className="fill-ds-accent" fontSize="18" fontWeight="700">
+          ∞
+        </text>
+        <text x="250" y="147" className="fill-ds-text font-mono" fontSize="10" fontWeight="600">
+          never expires
+        </text>
+        {['PNG', 'SVG'].map((t, i) => (
+          <g key={t}>
+            <rect
+              x={216 + i * 46}
+              y="168"
+              width="40"
+              height="18"
+              rx="9"
+              className="fill-ds-surface2 stroke-ds-border2"
+              strokeWidth="1.2"
+            />
+            <text
+              x={236 + i * 46}
+              y="180.5"
+              textAnchor="middle"
+              className="fill-ds-muted font-mono"
+              fontSize="9"
+            >
+              {t}
+            </text>
+          </g>
+        ))}
+      </g>
+    </g>
+  )
+}
+
+// ── App Router tree — app/blog/[slug]/page.tsx prerendering static pages ────
+function AppRouterTreeScene() {
+  const rows = [
+    { d: 0, t: 'app/', cls: 'fill-ds-muted' },
+    { d: 1, t: 'blog/', cls: 'fill-ds-muted' },
+    { d: 2, t: '[slug]/', cls: 'fill-ds-purple' },
+    { d: 3, t: 'page.tsx', cls: 'fill-ds-text' },
+    { d: 3, t: 'loading.tsx', cls: 'fill-ds-muted/70' },
+    { d: 1, t: 'layout.tsx', cls: 'fill-ds-muted/70' },
+  ]
+  return (
+    <g>
+      <rect
+        x="60"
+        y="40"
+        width="150"
+        height="148"
+        rx="10"
+        className="fill-ds-surface stroke-ds-border2"
+        strokeWidth="1.5"
+      />
+      {rows.map((r, i) => {
+        const x = 74 + r.d * 14
+        const y = 64 + i * 21
+        return (
+          <g key={i}>
+            {r.d > 0 && (
+              <path
+                d={`M${x - 8} ${y - 14}v10h5`}
+                className="stroke-ds-border2"
+                strokeWidth="1.2"
+                fill="none"
+              />
+            )}
+            {i === 3 && (
+              <rect
+                x={x - 4}
+                y={y - 12}
+                width="76"
+                height="17"
+                rx="5"
+                className="fill-ds-accent/15 animate-pulse2"
+              />
+            )}
+            <text x={x} y={y} className={`${r.cls} font-mono`} fontSize="10">
+              {r.t}
+            </text>
+          </g>
+        )
+      })}
+      <text x="222" y="58" className="fill-ds-muted font-mono" fontSize="9">
+        generateStaticParams()
+      </text>
+      <path
+        d="M182 123C206 123 206 100 228 100"
+        className="stroke-ds-accent/70"
+        strokeWidth="1.6"
+        fill="none"
+        strokeDasharray="4 3"
+      />
+      {[0, 1, 2].map((i) => (
+        <g key={i} className={i === 2 ? 'animate-float' : undefined}>
+          <rect
+            x={232 + i * 12}
+            y={72 + i * 14}
+            width="78"
+            height="92"
+            rx="7"
+            className="fill-ds-surface2 stroke-ds-border2"
+            strokeWidth="1.3"
+          />
+          <rect
+            x={242 + i * 12}
+            y={84 + i * 14}
+            width="40"
+            height="5"
+            rx="2.5"
+            className="fill-ds-text/70"
+          />
+          <rect
+            x={242 + i * 12}
+            y={96 + i * 14}
+            width="56"
+            height="4"
+            rx="2"
+            className="fill-ds-muted/30"
+          />
+          <rect
+            x={242 + i * 12}
+            y={105 + i * 14}
+            width="48"
+            height="4"
+            rx="2"
+            className="fill-ds-muted/30"
+          />
+        </g>
+      ))}
+      <rect x="268" y="176" width="44" height="16" rx="8" className="fill-ds-success/15" />
+      <text
+        x="290"
+        y="187.5"
+        textAnchor="middle"
+        className="fill-ds-success font-mono"
+        fontSize="9"
+        fontWeight="600"
+      >
+        RSC
+      </text>
+    </g>
+  )
+}
+
+// ── Web vitals trio — LCP hero, a shifting form, three thresholds ───────────
+function WebVitalsTrioScene() {
+  const bars = [
+    { k: 'LCP', v: '2.5s', w: 62, cls: 'fill-ds-success' },
+    { k: 'CLS', v: '0.1', w: 40, cls: 'fill-ds-warning' },
+    { k: 'INP', v: '200ms', w: 54, cls: 'fill-ds-accent' },
+  ]
+  return (
+    <g>
+      <rect
+        x="58"
+        y="38"
+        width="150"
+        height="152"
+        rx="10"
+        className="fill-ds-surface stroke-ds-border2"
+        strokeWidth="1.5"
+      />
+      <rect x="70" y="50" width="126" height="60" rx="6" className="fill-ds-accent/15" />
+      <rect
+        x="66"
+        y="46"
+        width="134"
+        height="68"
+        rx="8"
+        className="stroke-ds-accent animate-pulse2"
+        strokeWidth="1.6"
+        strokeDasharray="5 4"
+        fill="none"
+      />
+      <path
+        d="M86 98l22-22 16 14 14-10 22 18"
+        className="stroke-ds-accent/70"
+        strokeWidth="2"
+        fill="none"
+        strokeLinejoin="round"
+      />
+      <circle cx="170" cy="66" r="6" className="fill-ds-accent/60" />
+      <g className="animate-float">
+        <rect
+          x="70"
+          y="124"
+          width="126"
+          height="16"
+          rx="5"
+          className="fill-ds-surface2 stroke-ds-border2"
+          strokeWidth="1.2"
+        />
+        <rect
+          x="70"
+          y="146"
+          width="126"
+          height="16"
+          rx="5"
+          className="fill-ds-surface2 stroke-ds-border2"
+          strokeWidth="1.2"
+        />
+        <rect x="70" y="168" width="64" height="14" rx="5" className="fill-ds-cta" />
+      </g>
+      {bars.map((b, i) => (
+        <g key={b.k}>
+          <text
+            x="232"
+            y={72 + i * 40}
+            className="fill-ds-text font-mono"
+            fontSize="11"
+            fontWeight="700"
+          >
+            {b.k}
+          </text>
+          <text
+            x="340"
+            y={72 + i * 40}
+            textAnchor="end"
+            className="fill-ds-muted font-mono"
+            fontSize="9"
+          >
+            {`≤ ${b.v}`}
+          </text>
+          <rect
+            x="232"
+            y={80 + i * 40}
+            width="108"
+            height="7"
+            rx="3.5"
+            className="fill-ds-border2"
+          />
+          <rect x="232" y={80 + i * 40} width={b.w} height="7" rx="3.5" className={b.cls} />
+          <rect x="302" y={77 + i * 40} width="2" height="13" rx="1" className="fill-ds-muted/60" />
+        </g>
+      ))}
+    </g>
+  )
+}
+
+// ── Sheet to inbox — HR sheet row → Groq → email with the résumé attached ───
+function SheetToInboxScene() {
+  return (
+    <g>
+      <rect
+        x="54"
+        y="52"
+        width="104"
+        height="120"
+        rx="8"
+        className="fill-ds-surface stroke-ds-border2"
+        strokeWidth="1.5"
+      />
+      <rect x="54" y="52" width="104" height="18" rx="8" className="fill-ds-success/25" />
+      {[0, 1, 2, 3, 4].map((r) => (
+        <g key={r}>
+          <rect
+            x="62"
+            y={78 + r * 18}
+            width="34"
+            height="10"
+            rx="2"
+            className={r === 2 ? 'fill-ds-success/60' : 'fill-ds-muted/25'}
+          />
+          <rect
+            x="102"
+            y={78 + r * 18}
+            width="48"
+            height="10"
+            rx="2"
+            className={r === 2 ? 'fill-ds-success/40' : 'fill-ds-muted/15'}
+          />
+        </g>
+      ))}
+      <rect
+        x="58"
+        y="111"
+        width="96"
+        height="16"
+        rx="4"
+        className="stroke-ds-success animate-pulse2"
+        strokeWidth="1.5"
+        fill="none"
+      />
+      <path
+        d="M162 119h32"
+        className="stroke-ds-muted/60"
+        strokeWidth="1.6"
+        strokeDasharray="4 3"
+      />
+      <rect
+        x="196"
+        y="100"
+        width="46"
+        height="38"
+        rx="10"
+        className="fill-ds-purple/20 stroke-ds-purple"
+        strokeWidth="1.5"
+      />
+      <text
+        x="219"
+        y="123"
+        textAnchor="middle"
+        className="fill-ds-text font-mono"
+        fontSize="10"
+        fontWeight="700"
+      >
+        groq
+      </text>
+      <path d="M246 119h8" className="stroke-ds-muted/60" strokeWidth="1.6" strokeDasharray="4 3" />
+      <g className="animate-float">
+        <rect
+          x="258"
+          y="94"
+          width="76"
+          height="52"
+          rx="7"
+          className="fill-ds-surface2 stroke-ds-accent"
+          strokeWidth="1.6"
+        />
+        <path
+          d="M258 101l38 24 38-24"
+          className="stroke-ds-accent"
+          strokeWidth="1.6"
+          fill="none"
+          strokeLinejoin="round"
+        />
+        <rect
+          x="302"
+          y="128"
+          width="40"
+          height="24"
+          rx="4"
+          className="fill-ds-surface stroke-ds-error/70"
+          strokeWidth="1.3"
+        />
+        <text
+          x="322"
+          y="144"
+          textAnchor="middle"
+          className="fill-ds-error font-mono"
+          fontSize="9"
+          fontWeight="700"
+        >
+          PDF
+        </text>
+      </g>
+      <text x="62" y="190" className="fill-ds-muted font-mono" fontSize="9">
+        HR sheet
+      </text>
+      <text x="258" y="174" className="fill-ds-muted font-mono" fontSize="9">
+        personalised
+      </text>
+    </g>
+  )
+}
+
+// ── Prompt chain — draft → validate → JSON, under a per-minute rate limit ───
+function PromptChainScene() {
+  const steps = [
+    { t: 'draft', x: 58 },
+    { t: 'validate', x: 152 },
+    { t: '{ json }', x: 246 },
+  ]
+  return (
+    <g>
+      {steps.map((s, i) => (
+        <g key={s.t}>
+          <rect
+            x={s.x}
+            y="74"
+            width="84"
+            height="46"
+            rx="10"
+            className={
+              i === 1 ? 'fill-ds-purple/15 stroke-ds-purple' : 'fill-ds-surface stroke-ds-border2'
+            }
+            strokeWidth="1.6"
+          />
+          <text
+            x={s.x + 42}
+            y="101"
+            textAnchor="middle"
+            className="fill-ds-text font-mono"
+            fontSize="11"
+            fontWeight="600"
+          >
+            {s.t}
+          </text>
+          <text
+            x={s.x + 42}
+            y="66"
+            textAnchor="middle"
+            className="fill-ds-muted/70 font-mono"
+            fontSize="9"
+          >
+            {`step ${i + 1}`}
+          </text>
+          {i < 2 && (
+            <g>
+              <path d={`M${s.x + 86} 97h8`} className="stroke-ds-muted" strokeWidth="1.6" />
+              <path
+                d={`M${s.x + 91} 93l4 4-4 4`}
+                className="stroke-ds-muted"
+                strokeWidth="1.6"
+                fill="none"
+              />
+            </g>
+          )}
+        </g>
+      ))}
+      <circle
+        cx="194"
+        cy="97"
+        r="30"
+        className="stroke-ds-purple/40 animate-pulse2"
+        strokeWidth="1.5"
+        fill="none"
+      />
+      <text x="58" y="150" className="fill-ds-muted font-mono" fontSize="9">
+        rate limit · 30 req / min
+      </text>
+      <rect x="58" y="158" width="272" height="10" rx="5" className="fill-ds-border2" />
+      {Array.from({ length: 12 }, (_, i) => (
+        <rect
+          key={i}
+          x={60 + i * 22.5}
+          y="160"
+          width="18"
+          height="6"
+          rx="3"
+          className={
+            i < 8
+              ? i === 7
+                ? 'fill-ds-warning animate-pulse2'
+                : 'fill-ds-accent/80'
+              : 'fill-ds-muted/20'
+          }
+        />
+      ))}
+      <text x="58" y="190" className="fill-ds-muted/70 font-mono" fontSize="9">
+        log raw response
+      </text>
+      <rect x="150" y="182" width="6" height="10" className="fill-ds-accent animate-blink" />
+    </g>
+  )
+}
+
+// ── Solo hats — one developer at the centre of four roles ───────────────────
+function SoloHatsScene() {
+  const roles = [
+    { t: 'product', x: 100, y: 62, cls: 'stroke-ds-accent fill-ds-accent/15' },
+    { t: 'design', x: 300, y: 62, cls: 'stroke-ds-purple fill-ds-purple/15' },
+    { t: 'frontend', x: 100, y: 166, cls: 'stroke-ds-success fill-ds-success/15' },
+    { t: 'content', x: 300, y: 166, cls: 'stroke-ds-warning fill-ds-warning/15' },
+  ]
+  return (
+    <g>
+      {roles.map((r) => (
+        <path
+          key={`l-${r.t}`}
+          d={`M200 114L${r.x} ${r.y}`}
+          className="stroke-ds-border2"
+          strokeWidth="1.5"
+          strokeDasharray="4 4"
+        />
+      ))}
+      <circle
+        cx="200"
+        cy="114"
+        r="40"
+        className="stroke-ds-accent/30 animate-pulse2"
+        strokeWidth="1.5"
+        fill="none"
+      />
+      <circle
+        cx="200"
+        cy="114"
+        r="28"
+        className="fill-ds-surface stroke-ds-accent"
+        strokeWidth="2"
+      />
+      <circle cx="200" cy="106" r="8" className="fill-ds-text/85" />
+      <path d="M186 128c3-9 25-9 28 0z" className="fill-ds-text/85" />
+      {roles.map((r, i) => (
+        <g key={r.t} className={i % 2 === 0 ? 'animate-float' : undefined}>
+          <rect
+            x={r.x - 40}
+            y={r.y - 13}
+            width="80"
+            height="26"
+            rx="13"
+            className={r.cls}
+            strokeWidth="1.6"
+          />
+          <text
+            x={r.x}
+            y={r.y + 4}
+            textAnchor="middle"
+            className="fill-ds-text font-mono"
+            fontSize="10"
+            fontWeight="600"
+          >
+            {r.t}
+          </text>
+        </g>
+      ))}
+      <rect x="166" y="172" width="68" height="18" rx="9" className="fill-ds-purple/20" />
+      <text
+        x="200"
+        y="184.5"
+        textAnchor="middle"
+        className="fill-ds-purple font-mono"
+        fontSize="9"
+        fontWeight="600"
+      >
+        + AI pair
+      </text>
+    </g>
+  )
+}
+
+// ── DevStash stack — the >_ mark on the layers the build post walks through ─
+function DevstashStackScene() {
+  const layers = [
+    { t: 'automation', cls: 'fill-ds-warning/15 stroke-ds-warning/70' },
+    { t: 'SEO layer', cls: 'fill-ds-success/15 stroke-ds-success/70' },
+    { t: 'Tailwind tokens', cls: 'fill-ds-purple/15 stroke-ds-purple/70' },
+    { t: 'Next.js 16 · RSC', cls: 'fill-ds-accent/15 stroke-ds-accent/80' },
+  ]
+  return (
+    <g>
+      {layers.map((l, i) => {
+        const y = 182 - i * 24
+        return (
+          <g key={l.t}>
+            <path d={`M70 ${y}l80-12 80 12-80 12z`} className={l.cls} strokeWidth="1.4" />
+            <text x="242" y={y + 4} className="fill-ds-muted font-mono" fontSize="9.5">
+              {l.t}
+            </text>
+          </g>
+        )
+      })}
+      <path
+        d="M150 100v14"
+        className="stroke-ds-muted/50"
+        strokeWidth="1.5"
+        strokeDasharray="3 3"
+      />
+      <g className="animate-float">
+        <rect
+          x="122"
+          y="40"
+          width="56"
+          height="56"
+          rx="13"
+          className="fill-ds-bg stroke-ds-border2"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M135 59l13 9-13 9"
+          className="stroke-ds-accent"
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+        <rect x="152" y="74" width="15" height="4" rx="2" className="fill-ds-purple" />
+      </g>
+      <text x="196" y="64" className="fill-ds-muted/70 font-mono" fontSize="9">
+        devstash.me
       </text>
     </g>
   )
