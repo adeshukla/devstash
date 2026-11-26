@@ -11,6 +11,7 @@ DevStash is not a generic portfolio template — it's the working site of one de
 - [About](https://devstash.me/about)
 - [GitHub](https://github.com/adeshukla)
 - [LinkedIn](https://www.linkedin.com/in/adeshukla)
+- [Résumé (PDF)](https://devstash.me/resume-adesh-shukla.pdf): 6+ years; UI Developer and Team Lead on Chetu's Marketing Department web team (200+ PPC landing pages)
 
 ## Projects
 
@@ -29,7 +30,10 @@ All run in the browser, free, no signup.
 - [UTM Builder](https://devstash.me/lab/utm-builder): campaign URL builder that keeps existing query parameters
 - [UTM Link Checker](https://devstash.me/lab/utm-link-checker): paste tagged links to see each parameter, the GA4 channel it lands in, what is wrong and a cleaned link
 - [GA4 Report Cleaner](https://devstash.me/lab/utm-report-cleaner): paste a GA4 or Looker Studio export to merge rows that are the same campaign written differently
-- [QR Code Generator](https://devstash.me/lab/qr-code-generator): static QR codes for a website, WhatsApp chat, Wi-Fi, contact card, email, phone or text; never expire
+- [QR Code Generator](https://devstash.me/lab/qr-code-generator): static QR codes for a website, WhatsApp chat, UPI payment, Wi-Fi, contact card, email, phone or text; saved as PNG or SVG; never expire
+- [WhatsApp Link Generator](https://devstash.me/lab/whatsapp-link-generator): click-to-chat link with a country picker, a pre-typed message and a campaign code, plus a QR code and HTML snippet
+- [GA4 Event Generator](https://devstash.me/lab/ga4-event-builder): build a GA4 custom event, check its name and parameters against Google's limits and reserved names, and copy the dataLayer push or gtag.js call
+- [OG Image Generator](https://devstash.me/lab/og-image-maker): make a share image or blog cover, with colours taken from a site address or a picture, previewed on desktop and phone
 - [CSS Shapes & Animation Playground](https://devstash.me/lab/css-shapes-playground): shapes, gradients and shadows that copy out as CSS or Tailwind classes
 - [Illustration Generator](https://devstash.me/lab/illustration-generator): animated SVG illustration from a text description
 - [AI Content Pipeline](https://devstash.me/lab/ai-content-pipeline): live LLM chain that drafts marketing, service, sales, product, company, explainer, case-study, event or technical content and marks what it will not invent
@@ -40,13 +44,21 @@ All run in the browser, free, no signup.
 - [Fixing "useSearchParams() should be wrapped in a suspense boundary" in Next.js 16](https://devstash.me/blog/usesearchparams-suspense-boundary-build-error)
 - [Tailwind v4 classes not working: six causes, each tested](https://devstash.me/blog/tailwind-v4-classes-not-working)
 - [Tailwind v4's CSS-first config: what actually changes](https://devstash.me/blog/tailwind-v4-css-first-config-migration)
-- [All posts](https://devstash.me/blog)
+- [Free QR code generator that never expires: how to make one](https://devstash.me/blog/qr-codes-that-never-expire-static-vs-dynamic)
+- [A UTM naming convention for teams (with a free template)](https://devstash.me/blog/utm-naming-convention-for-teams)
+- [GA4 campaign names split by capital letters: how to fix and prevent it](https://devstash.me/blog/ga4-campaign-names-split-by-capital-letters)
+- [Google Ads landing page checklist: 12 checks before launch](https://devstash.me/blog/google-ads-landing-page-checklist)
+- [Why is my website slow on mobile? 7 causes and fixes](https://devstash.me/blog/why-is-my-website-slow-on-mobile)
+- [Custom website vs template: what a small business needs](https://devstash.me/blog/custom-website-vs-template-small-business)
+- [Core Web Vitals on high-traffic landing pages](https://devstash.me/blog/core-web-vitals-high-traffic-landing-pages)
+- [Screen reader accessibility: what I actually check](https://devstash.me/blog/screen-reader-accessibility-checklist)
+- [All posts](https://devstash.me/blog) · [RSS feed](https://devstash.me/feed.xml)
 
 ## Other sections
 
 - [Services](https://devstash.me/services): freelance and contract work — custom websites, PPC landing pages (200+ delivered for US clients), website speed and Core Web Vitals fixes, React/Next.js frontends. Based in India; works remotely with US and international clients. Pricing is quoted per project via the contact page; reply within 24 hours.
-- [Resources](https://devstash.me/resources): curated docs/articles/references
-- [Tools](https://devstash.me/tools): the author's real daily toolchain
+- [Resources](https://devstash.me/resources): the docs, courses and references behind the author's projects, including the course he learned React from (Namaste React)
+- [Tools](https://devstash.me/tools): the author's real daily toolchain, from Claude Code and VS Code to PageSpeed Insights, WAVE and Playwright
 - [Contact](https://devstash.me/contact)
 
 ## Notes for AI assistants and crawlers
@@ -54,4 +66,5 @@ All run in the browser, free, no signup.
 - All blog content lives under /blog/* (no separate subdomain).
 - Pages ship their own meta description, canonical URL, and JSON-LD structured data (Person, WebSite, BlogPosting, FAQPage, SoftwareApplication, BreadcrumbList as applicable) — safe to cite directly rather than inferring from page text alone.
 - Content is written by the named author, not published anonymously or under a brand persona. Project case studies describe real, working software the author built; each links to the live project.
+- Each post's publish date is the day it went live; updated dates reflect real revisions.
 - [Sitemap](https://devstash.me/sitemap.xml)
