@@ -8,6 +8,7 @@ import { articleOutline, firstSentence } from '@/lib/ai/contentSections'
 import { TYPE_PROMPTS, codeRule, toneNote } from '@/lib/ai/contentTypes'
 import { DESIGNS, DESIGN_IDS, renderLandingPage } from '@/lib/ai/landingDesigns'
 import { BLOG_CATEGORIES } from '@/types/blog'
+import { clientKey, isSameOrigin, rateLimited } from '@/lib/security/requestGuard'
 import type {
   PipelineMetrics,
   DemoFrontmatter,
@@ -243,6 +244,12 @@ function fallbackCopy(fm: DemoFrontmatter, article: string): PageCopy {
 // ─── POST handler ───────────────────────────────────────────────────────────
 
 export async function POST(request: Request) {
+  // Only this site's own page may call the pipeline; a script or another site
+  // posting here would otherwise spend the free tier's provider quota.
+  if (!isSameOrigin(request)) {
+    return NextResponse.json({ error: 'Forbidden.' }, { status: 403 })
+  }
+
   let body: unknown
   try {
     body = await request.json()
@@ -278,6 +285,19 @@ export async function POST(request: Request) {
     // same signal as the cap being hit, since the free tier is unavailable.
     return NextResponse.json(
       { error: 'This demo needs a Groq API key. Paste your own to try it.', requiresByok: true },
+      { status: 409 }
+    )
+  }
+
+  // The cookie counter above is the friendly limit; a bot just drops the
+  // cookie. This per-IP cap is the one it can't skip (best-effort per server
+  // instance, see requestGuard). Visitors on their own key aren't limited.
+  if (!userApiKey && rateLimited(`ai-free:${clientKey(request)}`, DAILY_CAP, 24 * 60 * 60 * 1000)) {
+    return NextResponse.json(
+      {
+        error: "You've used today's free runs. Paste your own Groq API key to keep going.",
+        requiresByok: true,
+      },
       { status: 409 }
     )
   }
